@@ -21,6 +21,7 @@ class KhalimaScreen extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
    
     return Scaffold(
+      // backgroundColor: Theme.of(context).sec,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text(
@@ -64,7 +65,7 @@ class KhalimaScreen extends StatelessWidget {
                       Container(
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: primayColor,
+                          color: Theme.of(context).primaryColor,
                           boxShadow: kElevationToShadow[4],
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -93,22 +94,22 @@ class KhalimaScreen extends StatelessWidget {
                         ),
                       ),
                       CustomBorders(
-                        image: "smallTL.png",
+                        image: "ktopleft.png",
                         top: 10,
                         left: 10,
                       ),
                       CustomBorders(
-                        image: "smallTR.png",
+                        image: "ktopright.png",
                         top: 10,
                         right: 10,
                       ),
                       CustomBorders(
-                        image: "smallBL.png",
+                        image: "kbottomleft.png",
                         bottom: 10,
                         left: 10,
                       ),
                       CustomBorders(
-                        image: "smallBR.png",
+                        image: "kbottomright.png",
                         bottom: 10,
                         right: 10,
                       ),

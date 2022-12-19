@@ -12,6 +12,6 @@ class CustomBorders extends StatelessWidget {
         left: left?.toDouble(),
         right: right?.toDouble(),
         bottom: bottom?.toDouble(),
-        child: Image.asset("assets/images/${image.toString()}",color: Colors.white,height: 20,));
+        child: Image.asset("assets/images/${image.toString()}",color: Colors.white,width: 70,));
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iqra/Screens/MainPage/Dua/dua_view.dart';
+import 'package:iqra/Utils/constants.dart';
 import 'package:iqra/Utils/dua_data.dart';
 
 class DuaScreen extends StatelessWidget {
@@ -9,6 +10,7 @@ class DuaScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.secondary,
       appBar: AppBar(
         title: Text("Dua"),
         centerTitle: true,
@@ -36,7 +38,7 @@ class DuaScreen extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     
-                    color: Colors.white,
+                    color: Theme.of(context).primaryColor,
                     boxShadow: [
                       BoxShadow(color: Colors.grey,blurRadius: 5)
                     ],
@@ -47,11 +49,11 @@ class DuaScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                    Icon(Icons.chevron_left_outlined,size: 30,),
+                    Icon(Icons.chevron_left_outlined,size: 30,color: whiteColor,),
                     Container(
                       alignment: Alignment.centerRight,                      
                       width: size.width *0.75,
-                      child: Text('${duaData[index]['title']}', textDirection: TextDirection.rtl,style: TextStyle(fontSize: 20),)),
+                      child: Text('${duaData[index]['title']}', textDirection: TextDirection.rtl,style: TextStyle(fontSize: 20,color: whiteColor),)),
                   ],),
                 ),
               );

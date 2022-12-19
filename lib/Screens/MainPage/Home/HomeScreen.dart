@@ -175,7 +175,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
-                        color: primayColor,
+                        color: Theme.of(context).primaryColor,
                       ),
                     )
                   ],
@@ -203,7 +203,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
-                        color: primayColor,
+                        color: Theme.of(context).primaryColor,
                       ),
                     )
                   ],
@@ -228,7 +228,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
-                        color: primayColor,
+                        color: Theme.of(context).primaryColor,
                       ),
                     )
                   ],
@@ -253,7 +253,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
-                        color: primayColor,
+                        color: Theme.of(context).primaryColor,
                       ),
                     )
                   ],
@@ -284,9 +284,9 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
               height: size.height * 0.06,
               width: size.width * 0.42,
               decoration: BoxDecoration(
-                  color: primayColor,
+                  color: Theme.of(context).primaryColor,
                   border: Border.all(
-                    color: primayColor,
+                    color: Theme.of(context).primaryColor,
                     width: 2,
                   ),
                   borderRadius: BorderRadius.circular(30)),
@@ -337,10 +337,10 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
               height: size.height * 0.06,
               width: size.width * 0.42,
               decoration: BoxDecoration(
-                  color: primayColor,
+                  color: Theme.of(context).primaryColor,
                   // color: Colors.white,
                   border: Border.all(
-                    color: primayColor,
+                    color: Theme.of(context).primaryColor,
                     width: 2,
                   ),
                   borderRadius: BorderRadius.circular(30)),
@@ -413,7 +413,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
               Text(
                 "QURAN",
                 style: TextStyle(
-                    color: primayColor,
+                    color: Theme.of(context).primaryColor,
                     fontSize: 15,
                     fontWeight: FontWeight.w700),
               ),
@@ -469,7 +469,7 @@ We have provided for them.   [2:1,2,3]''',
           Container(
             height: 50,
             decoration: BoxDecoration(
-                color: primayColor,
+                color: Theme.of(context).primaryColor,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(30),
                   topRight: Radius.circular(30),
@@ -506,7 +506,7 @@ We have provided for them.   [2:1,2,3]''',
               child: Text(
                 "COMING SOON",
                 style: TextStyle(
-                    color: primayColor,
+                    color: Theme.of(context).primaryColor,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     height: 1.3,
@@ -539,7 +539,7 @@ We have provided for them.   [2:1,2,3]''',
               width: size.width * 0.43,
               height: 50,
               decoration: BoxDecoration(
-                color: primayColor,
+                color: Theme.of(context).primaryColor,
                 borderRadius: BorderRadius.circular(45),
               ),
               child: const Center(
@@ -572,7 +572,7 @@ We have provided for them.   [2:1,2,3]''',
               width: size.width * 0.43,
               height: 50,
               decoration: BoxDecoration(
-                color: primayColor,
+                color: Theme.of(context).primaryColor,
                 borderRadius: BorderRadius.circular(45),
               ),
               child: FittedBox(
@@ -674,7 +674,7 @@ class SearchInQuaran extends StatelessWidget {
                             Text(
                               "Date",
                               style: TextStyle(
-                                color: primayColor,
+                                color: Theme.of(context).primaryColor,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -697,7 +697,7 @@ class SearchInQuaran extends StatelessWidget {
                               DateFormat('EEEE, d MMM, yyyy')
                                   .format(DateTime.now()),
                               style: TextStyle(
-                                color: primayColor,
+                                color: Theme.of(context).primaryColor,
                                 fontWeight: FontWeight.normal,
                                 // fontStyle: FontStyle.italic
                               ),
@@ -720,7 +720,7 @@ class SearchInQuaran extends StatelessWidget {
                             Text(
                               today!.toFormat("dd MMMM yyyy"),
                               style: TextStyle(
-                                color: primayColor,
+                                color: Theme.of(context).primaryColor,
                                 fontWeight: FontWeight.normal,
                                 // fontStyle: FontStyle.italic
                               ),
@@ -732,7 +732,7 @@ class SearchInQuaran extends StatelessWidget {
                     /////////////////////////////////////
                     Container(
                       margin: EdgeInsets.only(left: 10),
-                      color:primayColor,
+                      color:Theme.of(context).primaryColor,
                       height: size!.height / 8,
                       width: 2,
                     ),
@@ -761,7 +761,7 @@ class SearchInQuaran extends StatelessWidget {
                               Text(
                                 "Previous",
                                 style: TextStyle(
-                                  color: primayColor,
+                                  color: Theme.of(context).primaryColor,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -783,7 +783,7 @@ class SearchInQuaran extends StatelessWidget {
                               Text(
                                 "Fajar",
                                 style: TextStyle(
-                                  color: primayColor,
+                                  color: Theme.of(context).primaryColor,
                                   fontWeight: FontWeight.normal,
                                   // fontStyle: FontStyle.italic
                                 ),
@@ -811,7 +811,7 @@ class SearchInQuaran extends StatelessWidget {
                               Text(
                                 "Next",
                                 style: TextStyle(
-                                  color: primayColor,
+                                  color: Theme.of(context).primaryColor,
                                   fontWeight: FontWeight.w600,
                                   // fontStyle: FontStyle.italic
                                 ),
@@ -834,7 +834,7 @@ class SearchInQuaran extends StatelessWidget {
                               Text(
                                 "Duhar",
                                 style: TextStyle(
-                                  color: primayColor,
+                                  color: Theme.of(context).primaryColor,
                                   fontWeight: FontWeight.normal,
                                   // fontStyle: FontStyle.italic
                                 ),

@@ -140,7 +140,7 @@ class _FavoriteState extends State<Favorite> {
                             ),
                             leading: CircleAvatar(
                               radius: 15,
-                              backgroundColor: primayColor,
+                              backgroundColor: Theme.of(context).primaryColor,
                               child: Center(
                                   child: Text(
                                 (index +1).toString(),

@@ -126,11 +126,11 @@ class _NameofAllahState extends State<NameofAllah> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(      
-      backgroundColor: secondaryColor,
+      backgroundColor: Theme.of(context).colorScheme.secondary,
       appBar: AppBar(
         title: Text("Name of Allah"),
         centerTitle: true,
-        backgroundColor: primayColor,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
       body: names == null
           ? Center(
@@ -163,7 +163,7 @@ class _NameofAllahState extends State<NameofAllah> {
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: primayColor,
+              color: Theme.of(context).primaryColor,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

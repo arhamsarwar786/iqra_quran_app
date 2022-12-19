@@ -23,7 +23,7 @@ class _ContactusState extends State<Contactus> {
           Text(
             "COMING SOON",
             style: TextStyle(
-                color: primayColor,
+                color: Theme.of(context).primaryColor,
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 height: 1.3,

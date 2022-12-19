@@ -117,12 +117,12 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
           Container(
             width: double.infinity,
             child: DrawerHeader(
-                decoration: BoxDecoration(color: primayColor),
+                decoration: BoxDecoration(color: Theme.of(context).primaryColor),
                 child: Container(
                   height: MediaQuery.of(context).size.height * 0.20,
                   width: MediaQuery.of(context).size.width * 0.60,
                   decoration: BoxDecoration(
-                    color: primayColor,
+                    color: Theme.of(context).primaryColor,
                     image:const DecorationImage(
                       image: AssetImage("assets/images/Quran Logo.png"),
                       fit: BoxFit.contain,

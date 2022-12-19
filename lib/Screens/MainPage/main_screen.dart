@@ -57,7 +57,7 @@ class _MainScreenState extends State<MainScreen> {
                   }
                 },
                 child: MaterialButton(
-                    color: primayColor,
+                    color: Theme.of(context).primaryColor,
                     onPressed: () {},
                     child:const Text(
                       'Yes',

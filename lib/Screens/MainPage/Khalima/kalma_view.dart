@@ -12,7 +12,7 @@ class KhalimaView extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       extendBodyBehindAppBar: true,
-      // backgroundColor: Colors.transparent,
+      backgroundColor: Theme.of(context).colorScheme.secondary,
       extendBody: true,
       appBar: AppBar(
         title: Text(
@@ -44,7 +44,7 @@ class KhalimaView extends StatelessWidget {
                             padding: EdgeInsets.all(10),
                             // constraints:,
                             decoration: BoxDecoration(
-                              color: primayColor,
+                              color: Theme.of(context).primaryColor,
                               boxShadow: kElevationToShadow[4],
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -84,26 +84,26 @@ class KhalimaView extends StatelessWidget {
                               ],
                             ),
                           ),
-                          CustomBorders(
-                            image: "topLeft.png",
-                            top: 10,
-                            left: 10,
-                          ),
-                          CustomBorders(
-                            image: "topRight.png",
-                            top: 10,
-                            right: 10,
-                          ),
-                          CustomBorders(
-                            image: "bottomLeft.png",
-                            bottom: 10,
-                            left: 10,
-                          ),
-                          CustomBorders(
-                            image: "bottomRight.png",
-                            bottom: 10,
-                            right: 10,
-                          ),
+                            CustomBorders(
+                        image: "ktopleft.png",
+                        top: 10,
+                        left: 10,
+                      ),
+                      CustomBorders(
+                        image: "ktopright.png",
+                        top: 10,
+                        right: 10,
+                      ),
+                      CustomBorders(
+                        image: "kbottomleft.png",
+                        bottom: 10,
+                        left: 10,
+                      ),
+                      CustomBorders(
+                        image: "kbottomright.png",
+                        bottom: 10,
+                        right: 10,
+                      ),
                         ],
                       ),
                     ),

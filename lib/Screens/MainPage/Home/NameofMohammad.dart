@@ -123,7 +123,7 @@ class _NameofMohammadState extends State<NameofMohammad> {
             height: size.height,
             width: size.width,
             decoration: BoxDecoration(
-                color: primayColor, borderRadius: BorderRadius.circular(20)),
+                color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(20)),
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: gridNames(context, size),
@@ -151,7 +151,7 @@ class _NameofMohammadState extends State<NameofMohammad> {
             Navigator.pop(context);
           },
           iconSize: 20,
-          color: primayColor,
+          color: Theme.of(context).primaryColor,
           icon: const Icon(Icons.arrow_back),
         ),
         centerTitle: true,
@@ -160,7 +160,7 @@ class _NameofMohammadState extends State<NameofMohammad> {
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w800,
-            color: primayColor,
+            color: Theme.of(context).primaryColor,
           ),
         ),
       );

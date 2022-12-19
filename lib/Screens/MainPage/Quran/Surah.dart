@@ -198,7 +198,7 @@ class _SurahState extends State<Surah> {
                     )
                   : Center(
                       child: CircularProgressIndicator(
-                        color: primayColor,
+                        color: Theme.of(context).primaryColor,
                       ),
                     );
             }));

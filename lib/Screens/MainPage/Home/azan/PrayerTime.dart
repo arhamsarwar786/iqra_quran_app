@@ -88,7 +88,7 @@ class _PrayerTimeState extends State<PrayerTime> {
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
-                color: primayColor,
+                color: Theme.of(context).primaryColor,
                 borderRadius: const BorderRadius.only(
                   topRight: Radius.circular(40),
                   topLeft: Radius.circular(40),
@@ -151,13 +151,13 @@ class _PrayerTimeState extends State<PrayerTime> {
                                                   children: [
                                                     Icon(
                                                       Icons.volume_up,
-                                                      color: primayColor,
+                                                      color: Theme.of(context).primaryColor,
                                                     ),
                                                     SizedBox(width: 10),
                                                     Text(
                                                       _name[index],
                                                       style: TextStyle(
-                                                        color: primayColor,
+                                                        color: Theme.of(context).primaryColor,
                                                       ),
                                                     ),
                                                   ],
@@ -167,13 +167,13 @@ class _PrayerTimeState extends State<PrayerTime> {
                                                     Text(
                                                       '${snapshot.data![index]}',
                                                       style: TextStyle(
-                                                        color: primayColor,
+                                                        color: Theme.of(context).primaryColor,
                                                       ),
                                                     ),
                                                     SizedBox(width: 10),
                                                     Icon(
                                                       Icons.settings,
-                                                      color: primayColor,
+                                                      color: Theme.of(context).primaryColor,
                                                     ),
                                                   ],
                                                 ),

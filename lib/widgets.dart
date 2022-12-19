@@ -37,7 +37,7 @@ customAppBar(BuildContext context, String title) {
         Navigator.pop(context);
       },
       iconSize: 20,
-      color: primayColor,
+      color: Theme.of(context).primaryColor,
       icon: const Icon(Icons.arrow_back),
     ),
     centerTitle: true,
@@ -46,7 +46,7 @@ customAppBar(BuildContext context, String title) {
       style: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w800,
-        color: primayColor,
+        color: Theme.of(context).primaryColor,
       ),
     ),
   );
@@ -69,7 +69,7 @@ customRouteAppBar(BuildContext context, String title, Widget route) {
         pushUntil(context, MainScreen());
       },
       iconSize: 20,
-      color: primayColor,
+      color: Theme.of(context).primaryColor,
       icon: const Icon(Icons.arrow_back),
     ),
     centerTitle: true,
@@ -78,7 +78,7 @@ customRouteAppBar(BuildContext context, String title, Widget route) {
       style: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w800,
-        color: primayColor,
+        color: Theme.of(context).primaryColor,
       ),
     ),
   );
@@ -101,7 +101,7 @@ mainScreenAppBarPush(BuildContext context, String title) {
         Navigator.pop(context);
       },
       iconSize: 20,
-      color: primayColor,
+      color: Theme.of(context).primaryColor,
       icon: const Icon(Icons.arrow_back),
     ),
     centerTitle: true,
@@ -110,7 +110,7 @@ mainScreenAppBarPush(BuildContext context, String title) {
       style: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w800,
-        color: primayColor,
+        color: Theme.of(context).primaryColor,
       ),
     ),
   );
@@ -152,11 +152,30 @@ floatinButton(context){
         );
 }
 void snackBar(BuildContext context,String text) {                                                                               
-  final snackBar =  SnackBar(content:  Text(text,),                                                         
-  backgroundColor: primayColor);                                                                                      
-
+ final _snackBar2 = SnackBar(
+        content: Text(text),
+        // backgroundColor: Theme.of(context).primaryColor,
+        duration: const Duration(seconds: 10),
+        // action: SnackBarAction(
+        //   label:'Click',
+        //   onPressed: () {
+        //     print('Action is clicked');
+        //   },
+        //   textColor: Colors.white,
+        //   disabledTextColor: Colors.grey,
+        // ),
+          onVisible: () {
+            print('Snackbar is visible');
+          },
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.symmetric(horizontal: 30,vertical: 10),
+        padding: EdgeInsets.all(15.0),
+      );
   // Find the Scaffold in the Widget tree and use it to show a SnackBar!                                            
-  Scaffold.of(context).showSnackBar(snackBar); }
+  ScaffoldMessenger.of(context).showSnackBar(_snackBar2);
+  
+   }
 // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         // floatingActionButton: FloatingActionButton(
         //   onPressed: () {

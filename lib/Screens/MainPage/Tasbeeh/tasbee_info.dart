@@ -35,7 +35,7 @@ var tasbihProvider= Provider.of<TasbeeCount>(context,listen: false);
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor:  primayColor,
+        backgroundColor:  Theme.of(context).primaryColor,
         centerTitle: true,
         leading: IconButton(
             onPressed: () {
@@ -87,7 +87,7 @@ var tasbihProvider= Provider.of<TasbeeCount>(context,listen: false);
                           onPressed: () {
                             objectbox.deletetUser(user.id);
                           
-                          }, icon: const Icon(Icons.delete),color:  primayColor,),
+                          }, icon: const Icon(Icons.delete),color:  Theme.of(context).primaryColor,),
                       tileColor: Colors.white,
                       title:  Text(user.virdh.toString(),
                         //

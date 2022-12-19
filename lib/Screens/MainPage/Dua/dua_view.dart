@@ -9,6 +9,7 @@ class DuaView extends StatelessWidget {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.secondary,
       appBar: AppBar(
         title: Text("Dua"),
         centerTitle: true,      
@@ -26,7 +27,7 @@ class DuaView extends StatelessWidget {
                 padding: EdgeInsets.all(20),
                 margin: EdgeInsets.all(10),
                  decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).primaryColor,
                           boxShadow: [
                             BoxShadow(color: greyColor,blurRadius: 5)
                           ],
@@ -38,8 +39,8 @@ class DuaView extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                  Text(arabic, textDirection: TextDirection.rtl,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30,locale: Locale('ur') ,),),
-                  Text(urdu,style: TextStyle(fontWeight: FontWeight.w400,fontSize: 20), textDirection: TextDirection.rtl,),
+                  Text(arabic, textDirection: TextDirection.rtl,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30,locale: Locale('ur') ,color: whiteColor,),),
+                  Text(urdu,style: TextStyle(fontWeight: FontWeight.w400,fontSize: 20,color: whiteColor), textDirection: TextDirection.rtl,),
                 ],),
               ),
             ],

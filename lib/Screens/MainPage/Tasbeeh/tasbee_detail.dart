@@ -32,7 +32,7 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: primayColor,
+        backgroundColor: Theme.of(context).primaryColor,
         centerTitle: true,
         leading: IconButton(
             onPressed: () {
@@ -58,7 +58,7 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
              Divider(
-              color: primayColor,
+              color: Theme.of(context).primaryColor,
             ),
             const SizedBox(
               height: 20,
@@ -86,19 +86,19 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide:  BorderSide(color: primayColor),
+                    borderSide:  BorderSide(color: Theme.of(context).primaryColor),
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                   disabledBorder: OutlineInputBorder(
-                    borderSide:  BorderSide(color: primayColor),
+                    borderSide:  BorderSide(color: Theme.of(context).primaryColor),
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                   border: OutlineInputBorder(
-                    borderSide:  BorderSide(color: primayColor),
+                    borderSide:  BorderSide(color: Theme.of(context).primaryColor),
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderSide:  BorderSide(color:primayColor),
+                    borderSide:  BorderSide(color:Theme.of(context).primaryColor),
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                 ),
@@ -135,19 +135,19 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide:  BorderSide(color: primayColor),
+                        borderSide:  BorderSide(color: Theme.of(context).primaryColor),
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       disabledBorder: OutlineInputBorder(
-                        borderSide:  BorderSide(color: primayColor),
+                        borderSide:  BorderSide(color: Theme.of(context).primaryColor),
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       border: OutlineInputBorder(
-                        borderSide:  BorderSide(color: primayColor),
+                        borderSide:  BorderSide(color: Theme.of(context).primaryColor),
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide:  BorderSide(color: primayColor),
+                        borderSide:  BorderSide(color: Theme.of(context).primaryColor),
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                     ),
@@ -166,7 +166,7 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
                 builder: (context, value,child) {
                     return CupertinoButton(
                         minSize: size.width,
-                        color: primayColor,
+                        color: Theme.of(context).primaryColor,
                         onPressed: () {
                         
                             if(countController.text.isEmpty){
