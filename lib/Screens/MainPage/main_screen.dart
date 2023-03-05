@@ -28,10 +28,8 @@ class _MainScreenState extends State<MainScreen> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        
         body: Consumer<MyProvider>(builder: (context, provider, child) {
-          return Home();
-    
+          return const Home();
         }),
       ),
     );
@@ -59,7 +57,7 @@ class _MainScreenState extends State<MainScreen> {
                 child: MaterialButton(
                     color: Theme.of(context).primaryColor,
                     onPressed: () {},
-                    child:const Text(
+                    child: const Text(
                       'Yes',
                       style: TextStyle(color: Colors.white),
                     )),
@@ -69,8 +67,6 @@ class _MainScreenState extends State<MainScreen> {
         )) ??
         false;
   }
-
-
 }
 
 ////BottomApp Bar created by Abdul Wahab//////
@@ -84,7 +80,7 @@ class BottomBarApp extends StatelessWidget {
       shape: const CircularNotchedRectangle(),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 50),
-        height: 60,
+        height: 45,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -105,12 +101,12 @@ class BottomBarApp extends StatelessWidget {
                             image: AssetImage("assets/images/Book1.png"),
                             fit: BoxFit.fill)),
                   ),
-                   Text(
+                  Text(
                     "Quran",
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
-                      color: greyColor,
+                      color: MyColors.greyColor,
                     ),
                   )
                 ],
@@ -129,14 +125,15 @@ class BottomBarApp extends StatelessWidget {
                     decoration: const BoxDecoration(
                         image: DecorationImage(
                             image: AssetImage("assets/images/hadees.png"),
-                            fit: BoxFit.fill)),
+                            fit: BoxFit.fill),
+                            ),
                   ),
-                   Text(
+                  Text(
                     " Hadees",
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
-                      color: greyColor,
+                      color: MyColors.greyColor,
                     ),
                   )
                 ],

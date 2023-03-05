@@ -75,7 +75,7 @@ class KhalimaScreen extends StatelessWidget {
                             Text(
                               khalima.title!,
                               style: TextStyle(
-                                color: whiteColor,
+                                color:MyColors. whiteColor,
                                 // fontSize: 20,
 
                                 fontWeight: FontWeight.w900,
@@ -84,7 +84,7 @@ class KhalimaScreen extends StatelessWidget {
                             Text(
                               khalima.meaning!,
                               style: TextStyle(
-                                color: whiteColor,
+                                color:MyColors. whiteColor,
                                 // fontSize: 20,
 
                                 fontWeight: FontWeight.normal,

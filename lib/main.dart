@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: ((context) => FormValidate())),
         ChangeNotifierProvider(create: ((context) => ThemeProvider())),
       ],
-      child: MaterialScreen(),
+      child: const MaterialScreen(),
     );
   }
 }

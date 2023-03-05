@@ -29,7 +29,7 @@ class DuaView extends StatelessWidget {
                  decoration: BoxDecoration(
                           color: Theme.of(context).primaryColor,
                           boxShadow: [
-                            BoxShadow(color: greyColor,blurRadius: 5)
+                            BoxShadow(color: MyColors.greyColor,blurRadius: 5)
                           ],
                           // border: Border.all(color: Colors.red),
                           borderRadius: BorderRadius.circular(10)
@@ -39,8 +39,8 @@ class DuaView extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                  Text(arabic, textDirection: TextDirection.rtl,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30,locale: Locale('ur') ,color: whiteColor,),),
-                  Text(urdu,style: TextStyle(fontWeight: FontWeight.w400,fontSize: 20,color: whiteColor), textDirection: TextDirection.rtl,),
+                  Text(arabic, textDirection: TextDirection.rtl,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30,locale: Locale('ur') ,color: MyColors.whiteColor,),),
+                  Text(urdu,style: TextStyle(fontWeight: FontWeight.w400,fontSize: 20,color: MyColors.whiteColor), textDirection: TextDirection.rtl,),
                 ],),
               ),
             ],

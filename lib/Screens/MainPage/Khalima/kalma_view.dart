@@ -59,7 +59,7 @@ class KhalimaView extends StatelessWidget {
                                   khalima.arabic!,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: whiteColor,
+                                    color: MyColors.whiteColor,
                                     fontSize: 20,
                                     fontWeight: FontWeight.w900,
                                   ),
@@ -72,7 +72,7 @@ class KhalimaView extends StatelessWidget {
                                   textAlign: TextAlign.center,
                                   // maxLines: 3,
                                   style: TextStyle(
-                                    color: whiteColor,
+                                    color:MyColors. whiteColor,
                                     // fontSize: 20,
               
                                     fontWeight: FontWeight.normal,

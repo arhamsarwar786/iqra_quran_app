@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Screens/MainPage/Dua/dua_screen.dart';
 import 'package:iqra/Screens/MainPage/Home/azan/PrayerTime.dart';
 import 'package:iqra/Screens/MainPage/Home/qibal/qibla.dart';
@@ -17,10 +18,10 @@ import '../main_screen.dart';
 import 'NameofAllah.dart';
 import 'NameofMohammad.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import"package:timezone/data/latest.dart"as tz;
+import "package:timezone/data/latest.dart" as tz;
 
 class Home extends StatefulWidget {
-const Home({Key? key}) : super(key: key);
+  const Home({Key? key}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
@@ -37,7 +38,7 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-   tz.initializeTimeZones();
+    tz.initializeTimeZones();
     super.initState();
   }
 
@@ -52,90 +53,101 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return SafeArea(
-      child: Scaffold(
-floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        floatingActionButton:floatinButton(context),
-        bottomNavigationBar: BottomBarApp(),
-          extendBodyBehindAppBar: true,
-          // backgroundColor: Colors.red,
-          key: _scaffoldKey,
-          drawer: Darwerr(),
-          resizeToAvoidBottomInset: false,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: IconButton(
-                onPressed: () => _scaffoldKey.currentState!.openDrawer(),
-                icon: const Icon(Icons.menu)),
-            actions: [
-              GestureDetector(
-                onTap: () {},
-                child: Image.asset("assets/images/infoIcon.png"),
-              ),
-              // IconButton(onPressed: (){
-         
-              // }, icon:const Icon(Icons.notifications)),
-            ],
-          ),
-          body: Stack(
-            children: [
-              CarouselSlider.builder(
-                itemCount: imageName.length,
-                options: CarouselOptions(
-                  viewportFraction: 1.01,
-                  scrollDirection: Axis.horizontal,
-                  autoPlay: true,
-                  enlargeStrategy: CenterPageEnlargeStrategy.height,
-                ),
-                itemBuilder: (context, index, pageViewIndex) {
-                  return Image(
-                    image: AssetImage("assets/images/${imageName[index]}"),
-                    width: size.width,
-                    fit: BoxFit.fill,
-                    height: 250,
-                  );
-                },
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0, right: 8.0,),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      
-                        SizedBox(height: size.height*0.16,),
-                      SearchInQuaran(
-                        today: _today,
-                        size: size,
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      prayerQiblaList(context, size),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      screensList(context, size),
-                      // prayerQiblaList
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      // hadeesDailyVerse
-                      quranDailyVerse(context, size),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                     
-                      namesAllahProphet(context, size),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                    ],
+    return Builder(
+      builder: (context) {
+                  var bloc = context.watch<ThemeProvider>();
+        return SafeArea(
+          child: Scaffold(
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.centerDocked,
+              floatingActionButton: floatinButton(context),
+              bottomNavigationBar: const BottomBarApp(),
+              extendBodyBehindAppBar: true,
+              // backgroundColor: Colors.red,
+              key: _scaffoldKey,
+              drawer: Darwerr(),
+              resizeToAvoidBottomInset: false,
+              appBar: AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                leading: IconButton(
+                    onPressed: () => _scaffoldKey.currentState!.openDrawer(),
+                    icon: const Icon(Icons.menu)),
+                actions: [
+                  GestureDetector(
+                    onTap: () {},
+                    child: Image.asset("assets/images/infoIcon.png"),
                   ),
-                ),
+                  // IconButton(onPressed: (){
+
+                  // }, icon:const Icon(Icons.notifications)),
+                ],
               ),
-            ],
-          )),
+              body: Stack(
+                children: [
+                  CarouselSlider.builder(
+                    itemCount: imageName.length,
+                    options: CarouselOptions(
+                      viewportFraction: 1.01,
+                      scrollDirection: Axis.horizontal,
+                      autoPlay: true,
+                      enlargeStrategy: CenterPageEnlargeStrategy.height,
+                    ),
+                    itemBuilder: (context, index, pageViewIndex) {
+                      return Image(
+                        image: AssetImage("assets/images/${imageName[index]}"),
+                        width: size.width,
+                        fit: BoxFit.fill,
+                        height: 250,
+                      );
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 8.0,
+                      right: 8.0,
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            height: size.height * 0.16,
+                          ),
+                          SearchInQuaran(
+                            today: _today,
+                            size: size,
+                            bloc:bloc
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          prayerQiblaList(context, size),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          screensList(context, size),
+                          // prayerQiblaList
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          // hadeesDailyVerse
+                          quranDailyVerse(context, size,bloc),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          namesAllahProphet(context, size),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              )),
+        );
+      }
     );
   }
 
@@ -167,7 +179,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
                       width: 17,
                       decoration: const BoxDecoration(
                           image: DecorationImage(
-                              image: AssetImage("assets/images/namaz.png"),
+                              image: AssetImage("assets/images/namaz1.png"),
                               fit: BoxFit.fill)),
                     ),
                     Text(
@@ -194,7 +206,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
                       width: 24,
                       decoration: const BoxDecoration(
                           image: DecorationImage(
-                        image: AssetImage("assets/images/kalma.png"),
+                        image: AssetImage("assets/images/kalma1.png"),
                         // fit: BoxFit.fill
                       )),
                     ),
@@ -211,7 +223,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
               ),
               InkWell(
                 onTap: () {
-                  push(context, TasbeeDetail() );
+                  push(context, TasbeeDetail());
                 },
                 child: Column(
                   children: [
@@ -220,7 +232,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
                       width: 18,
                       decoration: const BoxDecoration(
                           image: DecorationImage(
-                              image: AssetImage("assets/images/Tasbi.png"),
+                              image: AssetImage("assets/images/Tasbi1.png"),
                               fit: BoxFit.fill)),
                     ),
                     Text(
@@ -236,7 +248,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
               ),
               InkWell(
                 onTap: () {
-                  push(context,const DuaScreen());
+                  push(context, const DuaScreen());
                 },
                 child: Column(
                   children: [
@@ -245,7 +257,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
                       width: 30,
                       decoration: const BoxDecoration(
                           image: DecorationImage(
-                              image: AssetImage("assets/images/Dua.png"),
+                              image: AssetImage("assets/images/Dua1.png"),
                               fit: BoxFit.fill)),
                     ),
                     Text(
@@ -267,6 +279,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
   }
 
   // PrayerQiblaList //
+
   Widget prayerQiblaList(BuildContext context, Size size) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -278,7 +291,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
           ),
           child: InkWell(
             onTap: () {
-            push(context, DirectionTOQiblah());
+              push(context, DirectionTOQiblah());
             },
             child: Container(
               height: size.height * 0.06,
@@ -326,7 +339,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
         ),
         InkWell(
           onTap: () {
-            push(context,PrayerTime() );
+            push(context, PrayerTime());
           },
           child: Card(
             elevation: 10,
@@ -351,19 +364,17 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                     
                       width: 22,
                       height: 22,
                       decoration: const BoxDecoration(
                           image: DecorationImage(
-                        image: AssetImage("assets/images/prayerTime.png"),
-                        fit: BoxFit.cover
-                      )),
+                              image: AssetImage("assets/images/prayerTime.png"),
+                              fit: BoxFit.cover)),
                     ),
                     const SizedBox(
                       width: 10,
                     ),
-                 const   Center(
+                    const Center(
                       child: Text(
                         "PRAYER TIME",
                         style: TextStyle(
@@ -384,7 +395,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
   }
 
   // quranDailyVerse //
-  Widget quranDailyVerse(BuildContext context, Size size) {
+  Widget quranDailyVerse(BuildContext context, Size size,ThemeProvider bloc) {
     return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -392,7 +403,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
         padding: const EdgeInsets.only(left: 20.0, top: 20, bottom: 20),
         width: size.width,
         decoration: BoxDecoration(
-          color: Color(0xffF2FCFF),
+          color: bloc.selectedSecondary,
           borderRadius: BorderRadius.circular(30),
         ),
         child: Column(children: [
@@ -404,7 +415,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
                 decoration: const BoxDecoration(
                     // color: Colors.red,
                     image: DecorationImage(
-                        image: AssetImage("assets/images/quran.png"),
+                        image: AssetImage("assets/images/quran1.png"),
                         fit: BoxFit.fill)),
               ),
               const SizedBox(
@@ -425,7 +436,6 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,        
           Row(
             children: [
               Container(
-                
                 height: 20,
                 width: 40,
               ),
@@ -514,7 +524,6 @@ We have provided for them.   [2:1,2,3]''',
               ),
             ),
           ),
-         
         ]),
       ),
     );
@@ -613,9 +622,10 @@ We have provided for them.   [2:1,2,3]''',
 }
 
 class SearchInQuaran extends StatelessWidget {
-  SearchInQuaran({Key? key, this.today, this.size}) : super(key: key);
+  SearchInQuaran({Key? key, this.today, this.size,this.bloc}) : super(key: key);
   HijriCalendar? today;
   Size? size;
+  ThemeProvider? bloc;
 
   @override
   Widget build(BuildContext context) {
@@ -623,239 +633,220 @@ class SearchInQuaran extends StatelessWidget {
       padding: const EdgeInsets.only(left: 0, right: 0, top: 10),
       // margin: EdgeInsets.symmetric(horizontal: 10),
 
-      child: Card(
-        elevation: 5,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        color: Color(0xffF2FCFF),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 10.0, left: 20, right: 20),
-          child: Column(
-            children: [
-              CupertinoSearchTextField(
-                borderRadius: BorderRadius.circular(20.0),
-                backgroundColor: Colors.white,
-                placeholder: "Search in Quran",
-                prefixIcon: Image.asset(
-                  "assets/images/searchIcon.png",
-                  fit: BoxFit.cover,
-                  // height: 20,
-                  // width: 20,
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              FittedBox(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
+      child: Builder(
+        builder: (context) {
+          return Card(
+            elevation: 5,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            color: bloc!.selectedSecondary,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 10.0, left: 20, right: 20),
+              child: Column(
+                children: [
+                  CupertinoSearchTextField(
+                    borderRadius: BorderRadius.circular(20.0),
+                    backgroundColor: Colors.white,
+                    placeholder: "Search in Quran",
+                    prefixIcon: Image.asset(
+                      "assets/images/searchIcon.png",
+                      fit: BoxFit.cover,
+                      // height: 20,
+                      // width: 20,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  FittedBox(
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Container(
-                              height: 20,
-                              width: 20,
-                              decoration: const BoxDecoration(
-                                  image: DecorationImage(
-                                      image: AssetImage(
-                                          "assets/images/calender.png"),
-                                      fit: BoxFit.fill)),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(Icons.calendar_month,color: bloc!.selectedTheme,),
+                                const SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  "Date",
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(
-                              width: 5,
+                            SizedBox(
+                              height: size!.height / 96,
                             ),
-                            Text(
-                              "Date",
-                              style: TextStyle(
-                                color: Theme.of(context).primaryColor,
-                                fontWeight: FontWeight.w600,
-                              ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  height: 20,
+                                  width: 20,
+                                ),
+                                const SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  DateFormat('EEEE, d MMM, yyyy')
+                                      .format(DateTime.now()),
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontWeight: FontWeight.normal,
+                                    // fontStyle: FontStyle.italic
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: size!.height / 96,
+                            ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  height: 20,
+                                  width: 20,
+                                ),
+                                const SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  today!.toFormat("dd MMMM yyyy"),
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontWeight: FontWeight.normal,
+                                    // fontStyle: FontStyle.italic
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
+                        ),
+                        /////////////////////////////////////
+                        Container(
+                          margin: EdgeInsets.only(left: 10),
+                          color: Theme.of(context).primaryColor,
+                          height: size!.height / 8,
+                          width: 2,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.arrow_left_sharp,color: bloc!.selectedTheme,size: 30,),
+                                  const SizedBox(
+                                    width: 2,
+                                  ),
+                                  Text(
+                                    "Previous",
+                                    style: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: size!.height / 96,
+                              ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    height: 12,
+                                    width: 12,
+                                  ),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(
+                                    "Fajar",
+                                    style: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                      fontWeight: FontWeight.normal,
+                                      // fontStyle: FontStyle.italic
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: size!.height / 96,
+                              ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                                                  Icon(Icons.arrow_right_sharp,color: bloc!.selectedTheme,size: 30,),
+
+                                  const SizedBox(
+                                    width: 2,
+                                  ),
+                                  Text(
+                                    "Next",
+                                    style: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                      fontWeight: FontWeight.w600,
+                                      // fontStyle: FontStyle.italic
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: size!.height / 96,
+                              ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    height: 12,
+                                    width: 12,
+                                  ),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(
+                                    "Duhar",
+                                    style: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                      fontWeight: FontWeight.normal,
+                                      // fontStyle: FontStyle.italic
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                         SizedBox(
-                          height: size!.height / 96,
-                        ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              height: 20,
-                              width: 20,
-                            ),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              DateFormat('EEEE, d MMM, yyyy')
-                                  .format(DateTime.now()),
-                              style: TextStyle(
-                                color: Theme.of(context).primaryColor,
-                                fontWeight: FontWeight.normal,
-                                // fontStyle: FontStyle.italic
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: size!.height / 96,
-                        ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              height: 20,
-                              width: 20,
-                            ),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              today!.toFormat("dd MMMM yyyy"),
-                              style: TextStyle(
-                                color: Theme.of(context).primaryColor,
-                                fontWeight: FontWeight.normal,
-                                // fontStyle: FontStyle.italic
-                              ),
-                            ),
-                          ],
+                          width: 20,
                         ),
                       ],
                     ),
-                    /////////////////////////////////////
-                    Container(
-                      margin: EdgeInsets.only(left: 10),
-                      color:Theme.of(context).primaryColor,
-                      height: size!.height / 8,
-                      width: 2,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                height: 12,
-                                width: 12,
-                                decoration: const BoxDecoration(
-                                    image: DecorationImage(
-                                        image: AssetImage(
-                                            "assets/images/leftPlay.png"),
-                                        fit: BoxFit.fill)),
-                              ),
-                              const SizedBox(
-                                width: 5,
-                              ),
-                              Text(
-                                "Previous",
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: size!.height / 96,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                height: 12,
-                                width: 12,
-                              ),
-                              const SizedBox(
-                                width: 5,
-                              ),
-                              Text(
-                                "Fajar",
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.normal,
-                                  // fontStyle: FontStyle.italic
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: size!.height / 96,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                height: 12,
-                                width: 12,
-                                decoration: const BoxDecoration(
-                                    image: DecorationImage(
-                                        image: AssetImage(
-                                            "assets/images/rightPlay.png"),
-                                        fit: BoxFit.fill)),
-                              ),
-                              const SizedBox(
-                                width: 5,
-                              ),
-                              Text(
-                                "Next",
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.w600,
-                                  // fontStyle: FontStyle.italic
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: size!.height / 96,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                height: 12,
-                                width: 12,
-                              ),
-                              const SizedBox(
-                                width: 5,
-                              ),
-                              Text(
-                                "Duhar",
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.normal,
-                                  // fontStyle: FontStyle.italic
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                  ],
-                ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                ],
               ),
-              SizedBox(
-                height: 10,
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        }
       ),
     );
   }

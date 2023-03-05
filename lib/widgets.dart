@@ -127,29 +127,37 @@ Widget bgImage(BuildContext context, Size size) {
   );
 }
 floatinButton(context){
-  return  FloatingActionButton(
-          onPressed: () {
-            // provider.screenIndex=0 ;
-            pushUntil(context, MainScreen());
-          },
-          backgroundColor: const Color(0xff1B637E),
-          child:
-               FittedBox(
-                  child: Column(
-                    children: const [
-                      Icon(Icons.home),
-                      Text(
-                        "Quran",
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      )
-                    ],
-                  ),
-                )
-        );
+  return  Container(
+    height: 70,
+    width: 70,
+    decoration: BoxDecoration(
+    color: Theme.of(context).primaryColor,
+      borderRadius: BorderRadius.circular(100)
+    ),
+    child: FloatingActionButton(      
+            onPressed: () {
+              // provider.screenIndex=0 ;
+              pushUntil(context, MainScreen());
+            },
+            backgroundColor: Theme.of(context).primaryColor,
+            child:
+                 FittedBox(
+                    child: Column(
+                      children: const [
+                        Icon(Icons.home,size: 20,),
+                        Text(
+                          "Quran",
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+          ),
+  );
 }
 void snackBar(BuildContext context,String text) {                                                                               
  final _snackBar2 = SnackBar(

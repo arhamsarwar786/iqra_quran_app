@@ -53,7 +53,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 var theme = ThemeModel.fromJson(newValue!);
                 ThemeProvider themeProvider =
                     Provider.of<ThemeProvider>(context, listen: false);
-                themeProvider.changeTheme(theme.primary);
+                themeProvider.changeTheme(theme.toJson());
                  snackBar(context, 'Theme Changed');
                 setState(() {});
               },
