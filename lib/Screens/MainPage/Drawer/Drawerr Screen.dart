@@ -4,7 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Screens/MainPage/Drawer/setting_screen.dart';
+import 'package:provider/provider.dart';
 import '../../../Utils/constants.dart';
 import '../../../widgets.dart';
 import '../Dua/dua_screen.dart';
@@ -35,15 +37,15 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
     'Share',
   ];
   static const _icons = [
-    'assets/images/Favourite.png',
-    'assets/images/book.png',
-    'assets/images/kalma.png',
-    'assets/images/Dua.png',
-    'assets/images/Tasbi.png',
-    'assets/images/Contact us.png',
-    'assets/images/About us.png',
-    'assets/images/About us.png',
-    'assets/images/Share.png',
+    Icons.favorite,
+    Icons.menu_book,
+    Icons.list,
+    Icons.handshake,
+    Icons.ads_click,
+    Icons.contacts_sharp,
+    Icons.info_outline_rounded,
+    Icons.settings,
+    Icons.share    
   ];
   List _navigationSc = [
     Favorite(),
@@ -103,92 +105,92 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    return Container(
-      width: size.width * 0.7,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          bottomRight: Radius.circular(30),
-          topRight: Radius.circular(30),
-        ),
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            child: DrawerHeader(
-                decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+    return Builder(
+      builder: (context) {
+        var bloc = context.read<ThemeProvider>();
+        return Container(
+          width: size.width * 0.7,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              bottomRight: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: double.infinity,
                 child: Container(
-                  height: MediaQuery.of(context).size.height * 0.20,
-                  width: MediaQuery.of(context).size.width * 0.60,
+                  height: 200,
+                  // width: MediaQuery.of(context).size.width * 0.60,
                   decoration: BoxDecoration(
                     color: Theme.of(context).primaryColor,
                     image:const DecorationImage(
-                      image: AssetImage("assets/images/Quran Logo.png"),
-                      fit: BoxFit.contain,
+                      image: AssetImage("assets/images/logo.png",),
+                      fit: BoxFit.fill,
                     ),
                   ),
-                )),
-          ),
-          ListView.builder(
-              shrinkWrap: true,
-              itemCount: _menuTitles.length,
-              itemBuilder: (context, i) {
-                return SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      AnimatedBuilder(
-                        animation: _staggeredController,
-                        builder: (context, child) {
-                          final animationPercent = Curves.easeOut.transform(
-                            _itemSlideIntervals[i]
-                                .transform(_staggeredController.value),
-                          );
-                          final opacity = animationPercent;
-                          final slideDistance = (1 - animationPercent) * 150;
+                ),
+              ),
+              ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _menuTitles.length,
+                  itemBuilder: (context, i) {
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          AnimatedBuilder(
+                            animation: _staggeredController,
+                            builder: (context, child) {
+                              final animationPercent = Curves.easeOut.transform(
+                                _itemSlideIntervals[i]
+                                    .transform(_staggeredController.value),
+                              );
+                              final opacity = animationPercent;
+                              final slideDistance = (1 - animationPercent) * 150;
 
-                          return Opacity(
-                            opacity: opacity,
-                            child: Transform.translate(
-                              offset: Offset(slideDistance, 0),
-                              child: child,
-                            ),
-                          );
-                        },
-                        child: Card(
-                          elevation: 3,
-                          child: ListTile(
-                            dense: true,
-                            leading: Container(
-                              height: 30,
-                              width: 30,
-                              decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                      image: AssetImage(_icons[i]),
-                                      fit: BoxFit.fill)),
-                            ),
-                            selectedTileColor:const Color(0xff00164C),
-                            onTap: () {
-                           push(context, _navigationSc[i]);
+                              return Opacity(
+                                opacity: opacity,
+                                child: Transform.translate(
+                                  offset: Offset(slideDistance, 0),
+                                  child: child,
+                                ),
+                              );
                             },
-                            title: Text(
-                              _menuTitles[i],
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: Color(0xff00164C),
-                                fontWeight: FontWeight.bold,
+                            child: Card(
+                              elevation: 3,
+                              child: ListTile(
+                                dense: true,
+                                leading: Container(
+                                  height: 30,
+                                  width: 30,
+                                 child: Icon(_icons[i],color: bloc.selectedTheme,),
+                                ),
+                                selectedTileColor:const Color(0xff00164C),
+                                onTap: () {
+                               push(context, _navigationSc[i]);
+                                },
+                                title: Text(
+                                  _menuTitles[i],
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: Color(0xff00164C),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              }),
-        ],
-      ),
+                    );
+                  }),
+            ],
+          ),
+        );
+      }
     );
   }
 }

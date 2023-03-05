@@ -36,8 +36,8 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
         centerTitle: true,
         leading: IconButton(
             onPressed: () {
-              // Navigator.pop(context)
-              push(context, Home());
+              Navigator.pop(context);
+              // push(context, Home());
             },
             icon: const Icon(Icons.arrow_back_outlined)),
         title: const Text(

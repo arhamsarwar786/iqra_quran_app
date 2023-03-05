@@ -144,9 +144,9 @@ floatinButton(context){
                  FittedBox(
                     child: Column(
                       children: const [
-                        Icon(Icons.home,size: 20,),
+                        Icon(Icons.home,size: 30,),
                         Text(
-                          "Quran",
+                          "HOME",
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,

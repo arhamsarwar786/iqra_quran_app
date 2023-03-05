@@ -47,26 +47,26 @@ class _MyWidgetState extends State<Tasbih> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          widget.value != null
-              ? Expanded(
-                  flex: 1,
-                  child: Center(
-                    child: Text(
-                      widget.value.toString(),
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        shadows: const [
-                          Shadow(
-                              offset: Offset(0.4, 0.4),
-                              // blurRadius: 2,
-                              color: Colors.white12),
-                        ],
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                )
-              : const Expanded(flex: 0, child: Text('')),
+          // widget.value != null
+          //     ? Expanded(
+          //         flex: 1,
+          //         child: Center(
+          //           child: Text(
+          //             widget.value.toString(),
+          //             style: TextStyle(
+          //               color: Theme.of(context).primaryColor,
+          //               shadows: const [
+          //                 Shadow(
+          //                     offset: Offset(0.4, 0.4),
+          //                     // blurRadius: 2,
+          //                     color: Colors.white12),
+          //               ],
+          //               fontWeight: FontWeight.bold,
+          //             ),
+          //           ),
+          //         ),
+          //       )
+          //     : const Expanded(flex: 0, child: Text('')),
           Expanded(
             flex: 7,
             child: Center(

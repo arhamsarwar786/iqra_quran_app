@@ -1,50 +1,110 @@
 import 'package:flutter/material.dart';
 import 'package:iqra/Utils/constants.dart';
+import '../../../Models/khalimas_model.dart';
+import '../../../Provider/theme_provider.dart';
+import '../Khalima/widgets.dart';
 
 class DuaView extends StatelessWidget {
-  final arabic , urdu;
-  DuaView({this.arabic,this.urdu});
+  final arabic,urdu;
+  ThemeProvider? bloc;
+  DuaView({this.arabic, this.urdu,this.bloc});
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.secondary,
+      backgroundColor: bloc!.selectedSecondary,
+      extendBody: true,
       appBar: AppBar(
-        title: Text("Dua"),
-        centerTitle: true,      
+        backgroundColor: bloc!.selectedTheme,
+        title: Text(
+          "Dua",
+          style:
+              const TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(Icons.arrow_back)),
       ),
-      body: SingleChildScrollView(
-        child: Container(
-            alignment: Alignment.center,
-                      width: size.width,
-                      height: size.height - 50,
-          child: Stack(
-                alignment: Alignment.center,
-            children: [
-              Container(
-                // alignment: Alignment.center,
-                padding: EdgeInsets.all(20),
-                margin: EdgeInsets.all(10),
-                 decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          boxShadow: [
-                            BoxShadow(color: MyColors.greyColor,blurRadius: 5)
-                          ],
-                          // border: Border.all(color: Colors.red),
-                          borderRadius: BorderRadius.circular(10)
-                        ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                  Text(arabic, textDirection: TextDirection.rtl,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30,locale: Locale('ur') ,color: MyColors.whiteColor,),),
-                  Text(urdu,style: TextStyle(fontWeight: FontWeight.w400,fontSize: 20,color: MyColors.whiteColor), textDirection: TextDirection.rtl,),
-                ],),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: size.width,
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                boxShadow: kElevationToShadow[4],
+                borderRadius: BorderRadius.circular(20),
               ),
-            ],
-          ),
+              child: SingleChildScrollView(
+                child: SizedBox(
+                  height: size.height,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                     const SizedBox(
+                        height: 30,
+                      ),
+                      Text(
+                        arabic,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: MyColors.whiteColor,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                       urdu,
+                        textAlign: TextAlign.center,
+                        // maxLines: 3,
+                        style: TextStyle(
+                          color: MyColors.whiteColor,
+                          // fontSize: 20,
+
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            CustomBorders(
+              image: "ktopleft.png",
+              top: 10,
+              left: 10,
+            ),
+            CustomBorders(
+              image: "ktopright.png",
+              top: 10,
+              right: 10,
+            ),
+            CustomBorders(
+              image: "kbottomleft.png",
+              bottom: 10,
+              left: 10,
+            ),
+            CustomBorders(
+              image: "kbottomright.png",
+              bottom: 10,
+              right: 10,
+            ),
+          ],
         ),
       ),
     );

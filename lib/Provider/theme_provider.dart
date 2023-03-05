@@ -18,6 +18,7 @@ class ThemeProvider extends ChangeNotifier{
     selectedTheme = finded.primary.toString().toColor();
     selectedSecondary = finded.secondary.toString().toColor();
     iconNumber = finded.iconNumber!;
+    // print(theme.toString() + "0--------------------");
     // selectedBackground = finded.theme.toString().toColor();
     notifyListeners();
    }

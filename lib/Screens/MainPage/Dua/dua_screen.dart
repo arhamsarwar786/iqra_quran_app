@@ -13,7 +13,7 @@ class DuaScreen extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
     return Builder(
       builder: (context) {
-        var bloc = context.watch<ThemeProvider>();
+        var bloc = context.read<ThemeProvider>();
         return Scaffold(
           backgroundColor: bloc.selectedSecondary,
           appBar: AppBar(
@@ -33,24 +33,18 @@ class DuaScreen extends StatelessWidget {
                 itemBuilder: (context,index){
                   return InkWell(
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (_)=> DuaView(arabic: duaData[index]['arabic'],urdu: duaData[index]['urdu'] ,) ));
+                      Navigator.push(context, MaterialPageRoute(builder: (_)=> DuaView(arabic: duaData[index]['arabic'],urdu: duaData[index]['urdu'],bloc:bloc) ));
                     },
                     child: Container(
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(left: 10,right: 10,bottom: 10),
-                      alignment: Alignment.center,
-                      constraints: BoxConstraints(
-                        minHeight: 60
-                      ),
-                      decoration: BoxDecoration(
-                        
-                        color: Theme.of(context).primaryColor,
-                        boxShadow: [
-                          BoxShadow(color: Colors.grey,blurRadius: 5)
-                        ],
-                        // border: Border.all(color: Colors.red),
-                        borderRadius: BorderRadius.circular(10)
-                      ),
+                       margin: EdgeInsets.only(left: 10, right: 10, top: 10),
+            padding: EdgeInsets.all(15),
+            constraints: BoxConstraints(
+              minHeight: 80
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Theme.of(context).primaryColor,
+            ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,

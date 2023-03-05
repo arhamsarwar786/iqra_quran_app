@@ -277,7 +277,7 @@ class _LandingPageState extends State<LandingPage> {
                 ListView.builder(
                   shrinkWrap: true,
                   itemCount: _sub.length,
-                  physics: NeverScrollableScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     return Padding(
                         padding: const EdgeInsets.only(
@@ -293,7 +293,7 @@ class _LandingPageState extends State<LandingPage> {
                                 width: MediaQuery.of(context).size.width,
                                 decoration: BoxDecoration(
                                     image: DecorationImage(
-                                  colorFilter: new ColorFilter.mode(
+                                  colorFilter:  ColorFilter.mode(
                                       Colors.black54.withOpacity(0.2),
                                       BlendMode.exclusion),
                                   image: AssetImage(_img[index]),

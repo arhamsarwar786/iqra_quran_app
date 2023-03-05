@@ -2,6 +2,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:iqra/Provider/theme_provider.dart';
+import 'package:provider/provider.dart';
 // import 'package:intl/intl.dart';
 
 import '../../../Utils/constants.dart';
@@ -125,18 +127,23 @@ class _NameofAllahState extends State<NameofAllah> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return Scaffold(      
-      backgroundColor: Theme.of(context).colorScheme.secondary,
-      appBar: AppBar(
-        title: Text("Name of Allah"),
-        centerTitle: true,
-        backgroundColor: Theme.of(context).primaryColor,
-      ),
-      body: names == null
-          ? Center(
-              child: CircularProgressIndicator.adaptive(),
-            )
-          : gridNames(size),
+    return Builder(
+      builder: (context) {
+        var bloc = context.read<ThemeProvider>();
+        return Scaffold(      
+          backgroundColor: bloc.selectedSecondary,
+          appBar: AppBar(
+            title: const Text("Name of Allah"),
+            centerTitle: true,
+            backgroundColor: Theme.of(context).primaryColor,
+          ),
+          body: names == null
+              ? const Center(
+                  child: CircularProgressIndicator.adaptive(),
+                )
+              : gridNames(size),
+        );
+      }
     );
   }
 

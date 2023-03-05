@@ -10,7 +10,6 @@ import '../../../Provider/theme_provider.dart';
 import '../../../controller/methods.dart';
 import '../../../Models/theme_model.dart';
 
-var myColor = Color(0xff227C9E);
 
 class SettingScreen extends StatefulWidget {
   @override

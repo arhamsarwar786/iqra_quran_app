@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../Provider/main_provider.dart';
+import '../../Provider/theme_provider.dart';
 import '../../Utils/constants.dart';
 import '../../widgets.dart';
 import 'Dua/dua_screen.dart';
@@ -71,7 +72,8 @@ class _MainScreenState extends State<MainScreen> {
 
 ////BottomApp Bar created by Abdul Wahab//////
 class BottomBarApp extends StatelessWidget {
-  const BottomBarApp({Key? key}) : super(key: key);
+  final ThemeProvider? bloc;
+  const BottomBarApp(this.bloc);
 
   @override
   Widget build(BuildContext context) {
@@ -95,10 +97,10 @@ class BottomBarApp extends StatelessWidget {
                   Container(
                     height: 24,
                     width: 18,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                         // color: Colors.red,
                         image: DecorationImage(
-                            image: AssetImage("assets/images/Book1.png"),
+                            image: AssetImage("assets/images/Tasbi${bloc!.iconNumber}.png"),
                             fit: BoxFit.fill)),
                   ),
                   Text(

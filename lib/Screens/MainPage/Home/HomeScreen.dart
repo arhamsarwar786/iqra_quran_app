@@ -61,7 +61,7 @@ class _HomeState extends State<Home> {
               floatingActionButtonLocation:
                   FloatingActionButtonLocation.centerDocked,
               floatingActionButton: floatinButton(context),
-              bottomNavigationBar: const BottomBarApp(),
+              bottomNavigationBar:  BottomBarApp(bloc),
               extendBodyBehindAppBar: true,
               // backgroundColor: Colors.red,
               key: _scaffoldKey,
@@ -122,11 +122,11 @@ class _HomeState extends State<Home> {
                           const SizedBox(
                             height: 10,
                           ),
-                          prayerQiblaList(context, size),
+                          prayerQiblaList(context, size,bloc),
                           const SizedBox(
                             height: 10,
                           ),
-                          screensList(context, size),
+                          screensList(context, size, bloc),
                           // prayerQiblaList
                           const SizedBox(
                             height: 10,
@@ -136,7 +136,7 @@ class _HomeState extends State<Home> {
                           const SizedBox(
                             height: 10,
                           ),
-                          namesAllahProphet(context, size),
+                          namesAllahProphet(context, size,bloc),
                           const SizedBox(
                             height: 20,
                           ),
@@ -152,7 +152,7 @@ class _HomeState extends State<Home> {
   }
 
   // ScreenList //
-  Widget screensList(BuildContext context, Size size) {
+  Widget screensList(BuildContext context, Size size,ThemeProvider bloc) {
     MyProvider provider = Provider.of<MyProvider>(context, listen: false);
     return Card(
       elevation: 5,
@@ -169,7 +169,7 @@ class _HomeState extends State<Home> {
             children: [
               InkWell(
                 onTap: () {
-                  push(context, PrayerTime());
+                  push(context,const PrayerTime());
                   // push(context, TabBarDemo());
                 },
                 child: Column(
@@ -177,9 +177,9 @@ class _HomeState extends State<Home> {
                     Container(
                       height: 24,
                       width: 17,
-                      decoration: const BoxDecoration(
+                      decoration:  BoxDecoration(
                           image: DecorationImage(
-                              image: AssetImage("assets/images/namaz1.png"),
+                              image: AssetImage("assets/images/namaz${int.parse(bloc.iconNumber)}.png"),
                               fit: BoxFit.fill)),
                     ),
                     Text(
@@ -204,9 +204,9 @@ class _HomeState extends State<Home> {
                     Container(
                       height: 25,
                       width: 24,
-                      decoration: const BoxDecoration(
+                      decoration:  BoxDecoration(
                           image: DecorationImage(
-                        image: AssetImage("assets/images/kalma1.png"),
+                        image: AssetImage("assets/images/kalma${int.parse(bloc.iconNumber)}.png"),
                         // fit: BoxFit.fill
                       )),
                     ),
@@ -230,9 +230,9 @@ class _HomeState extends State<Home> {
                     Container(
                       height: 25,
                       width: 18,
-                      decoration: const BoxDecoration(
+                      decoration:  BoxDecoration(
                           image: DecorationImage(
-                              image: AssetImage("assets/images/Tasbi1.png"),
+                              image: AssetImage("assets/images/Tasbi${int.parse(bloc.iconNumber)}.png"),
                               fit: BoxFit.fill)),
                     ),
                     Text(
@@ -255,9 +255,9 @@ class _HomeState extends State<Home> {
                     Container(
                       height: 30,
                       width: 30,
-                      decoration: const BoxDecoration(
+                      decoration:  BoxDecoration(
                           image: DecorationImage(
-                              image: AssetImage("assets/images/Dua1.png"),
+                              image: AssetImage("assets/images/Dua${int.parse(bloc.iconNumber)}.png"),
                               fit: BoxFit.fill)),
                     ),
                     Text(
@@ -280,7 +280,7 @@ class _HomeState extends State<Home> {
 
   // PrayerQiblaList //
 
-  Widget prayerQiblaList(BuildContext context, Size size) {
+  Widget prayerQiblaList(BuildContext context, Size size, ThemeProvider bloc) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -412,10 +412,9 @@ class _HomeState extends State<Home> {
               Container(
                 height: 26,
                 width: 18,
-                decoration: const BoxDecoration(
-                    // color: Colors.red,
+                decoration:  BoxDecoration(
                     image: DecorationImage(
-                        image: AssetImage("assets/images/quran1.png"),
+                        image: AssetImage("assets/images/quran${bloc.iconNumber}.png"),
                         fit: BoxFit.fill)),
               ),
               const SizedBox(
@@ -463,74 +462,74 @@ We have provided for them.   [2:1,2,3]''',
     );
   }
 
-  // hadeesDailyVerse //
-  Widget hadeesDailyVerse(BuildContext context, Size size) {
-    return Card(
-      elevation: 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-      child: Container(
-        // height: size.height * 0.27,
-        width: size.width,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Column(children: [
-          Container(
-            height: 50,
-            decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                )),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 15.0, top: 2, bottom: 2),
-              child: Row(
-                children: [
-                  Container(
-                    height: 35,
-                    width: 35,
-                    decoration: const BoxDecoration(
-                        image: DecorationImage(
-                            image: AssetImage("assets/images/Hadees1.png"),
-                            fit: BoxFit.fill)),
-                  ),
-                  const SizedBox(
-                    width: 5,
-                  ),
-                  const Text(
-                    "HADEES",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700),
-                  )
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 50),
-            child: Center(
-              child: Text(
-                "COMING SOON",
-                style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    height: 1.3,
-                    decorationThickness: 2.0),
-              ),
-            ),
-          ),
-        ]),
-      ),
-    );
-  }
+  // // hadeesDailyVerse //
+  // Widget hadeesDailyVerse(BuildContext context, Size size,ThemeProvider bloc) {
+  //   return Card(
+  //     elevation: 5,
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+  //     child: Container(
+  //       // height: size.height * 0.27,
+  //       width: size.width,
+  //       decoration: BoxDecoration(
+  //         color: Colors.white,
+  //         borderRadius: BorderRadius.circular(30),
+  //       ),
+  //       child: Column(children: [
+  //         Container(
+  //           height: 50,
+  //           decoration: BoxDecoration(
+  //               color: Theme.of(context).primaryColor,
+  //               borderRadius: const BorderRadius.only(
+  //                 topLeft: Radius.circular(30),
+  //                 topRight: Radius.circular(30),
+  //               )),
+  //           child: Padding(
+  //             padding: const EdgeInsets.only(left: 15.0, top: 2, bottom: 2),
+  //             child: Row(
+  //               children: [
+  //                 Container(
+  //                   height: 35,
+  //                   width: 35,
+  //                   decoration: const BoxDecoration(
+  //                       image: DecorationImage(
+  //                           image: AssetImage("assets/images/Hadees1.png"),
+  //                           fit: BoxFit.fill)),
+  //                 ),
+  //                 const SizedBox(
+  //                   width: 5,
+  //                 ),
+  //                 const Text(
+  //                   "HADEES",
+  //                   style: TextStyle(
+  //                       color: Colors.white,
+  //                       fontSize: 15,
+  //                       fontWeight: FontWeight.w700),
+  //                 )
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //         Padding(
+  //           padding: const EdgeInsets.symmetric(vertical: 50),
+  //           child: Center(
+  //             child: Text(
+  //               "COMING SOON",
+  //               style: TextStyle(
+  //                   color: Theme.of(context).primaryColor,
+  //                   fontSize: 15,
+  //                   fontWeight: FontWeight.w600,
+  //                   height: 1.3,
+  //                   decorationThickness: 2.0),
+  //             ),
+  //           ),
+  //         ),
+  //       ]),
+  //     ),
+  //   );
+  // }
 
   // namesAllahProphet //
-  Widget namesAllahProphet(BuildContext context, Size size) {
+  Widget namesAllahProphet(BuildContext context, Size size,ThemeProvider bloc) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

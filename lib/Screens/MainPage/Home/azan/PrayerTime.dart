@@ -76,9 +76,7 @@ class _PrayerTimeState extends State<PrayerTime> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    // mainp();
-    // locationPosition();
+  Widget build(BuildContext context) {   
     return Scaffold(
       appBar: customAppBar(context, "PRAYER TIME"),
       resizeToAvoidBottomInset: false,
