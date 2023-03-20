@@ -9,26 +9,33 @@ import 'package:provider/provider.dart';
 import '../../../Provider/tasbih_count.dart';
 
 class TasbeeDetail extends StatefulWidget {
-
   @override
   State<TasbeeDetail> createState() => _TasbeeDetailState();
 }
 
 class _TasbeeDetailState extends State<TasbeeDetail> {
-    var countController = TextEditingController();
+  var countController = TextEditingController();
 
-    var nameController = TextEditingController();
-@override
+  var nameController = TextEditingController();
+  @override
   void dispose() {
     super.dispose();
     countController.dispose();
     nameController.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     var tasbihProvider = Provider.of<TasbeeCount>(context, listen: false);
     var size = MediaQuery.of(context).size;
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Theme.of(context).primaryColor,
+      isExtended: true,
+      child: Icon(Icons.add),
+        onPressed: (){
+          
+      }),
       backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
@@ -41,7 +48,7 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
             },
             icon: const Icon(Icons.arrow_back_outlined)),
         title: const Text(
-          "Tasbih Input",
+          "Tasbih",
           style: TextStyle(
             color: Colors.white,
           ),
@@ -57,7 +64,7 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
               "Time to count tasbih",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-             Divider(
+            Divider(
               color: Theme.of(context).primaryColor,
             ),
             const SizedBox(
@@ -75,10 +82,8 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
               child: TextField(
                 controller: nameController,
                 keyboardType: TextInputType.text,
-                cursorColor: const Color(0xff005d66),
+                cursorColor: Theme.of(context).primaryColor,
                 autofocus: false,
-              
-              
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.only(left: 10),
                   errorBorder: OutlineInputBorder(
@@ -86,19 +91,23 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide:  BorderSide(color: Theme.of(context).primaryColor),
+                    borderSide:
+                        BorderSide(color: Theme.of(context).primaryColor),
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                   disabledBorder: OutlineInputBorder(
-                    borderSide:  BorderSide(color: Theme.of(context).primaryColor),
+                    borderSide:
+                        BorderSide(color: Theme.of(context).primaryColor),
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                   border: OutlineInputBorder(
-                    borderSide:  BorderSide(color: Theme.of(context).primaryColor),
+                    borderSide:
+                        BorderSide(color: Theme.of(context).primaryColor),
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderSide:  BorderSide(color:Theme.of(context).primaryColor),
+                    borderSide:
+                        BorderSide(color: Theme.of(context).primaryColor),
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                 ),
@@ -116,44 +125,46 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
               color: Colors.white,
               elevation: 10.0,
               borderRadius: BorderRadius.circular(10),
-              child: Consumer<FormValidate>(
-                builder: (context, value,child) {
-                  return TextField(
-                    controller: countController,
-                    keyboardType: TextInputType.number,
-                    cursorColor: const Color(0xff005d66),
-                   
-                    autofocus: false,
-                   
-                    decoration: InputDecoration(
-                      errorText:value.validateValue==true?"Enter correct value":null ,
-                      contentPadding: const EdgeInsets.only(left: 10.0),
-                      fillColor: Colors.white,
-                      filled: true,
-                      errorBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.red),
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide:  BorderSide(color: Theme.of(context).primaryColor),
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      disabledBorder: OutlineInputBorder(
-                        borderSide:  BorderSide(color: Theme.of(context).primaryColor),
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      border: OutlineInputBorder(
-                        borderSide:  BorderSide(color: Theme.of(context).primaryColor),
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide:  BorderSide(color: Theme.of(context).primaryColor),
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
+              child: Consumer<FormValidate>(builder: (context, value, child) {
+                return TextField(
+                  controller: countController,
+                  keyboardType: TextInputType.number,
+                  cursorColor: Theme.of(context).primaryColor,
+                  autofocus: false,
+                  decoration: InputDecoration(
+                    errorText: value.validateValue == true
+                        ? "Enter correct value"
+                        : null,
+                    contentPadding: const EdgeInsets.only(left: 10.0),
+                    fillColor: Colors.white,
+                    filled: true,
+                    errorBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.red),
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
-                  );
-                }
-              ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Theme.of(context).primaryColor),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    disabledBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Theme.of(context).primaryColor),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    border: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Theme.of(context).primaryColor),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Theme.of(context).primaryColor),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                );
+              }),
             ),
             const SizedBox(
               height: 20,
@@ -162,32 +173,34 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
               height: 50,
               child: Align(
                 alignment: Alignment.center,
-                child:  Consumer<FormValidate>(
-                builder: (context, value,child) {
-                    return CupertinoButton(
-                        minSize: size.width,
-                        color: Theme.of(context).primaryColor,
-                        onPressed: () {
-                        
-                            if(countController.text.isEmpty){
-                            value.checkValidate(true);
-                          }
-                          else{
-                            value.checkValidate(false);
-                            tasbihProvider.setValue(int.parse(countController.text));
-                            push(context,Tasbih(value:nameController.text ,), );
-                          }
-                      
-                          },
-                        child: const Text(
-                          "Go to next",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
+                child: Consumer<FormValidate>(builder: (context, value, child) {
+                  return CupertinoButton(
+                    minSize: size.width,
+                    color: Theme.of(context).primaryColor,
+                    onPressed: () {
+                      if (countController.text.isEmpty) {
+                        value.checkValidate(true);
+                      } else {
+                        value.checkValidate(false);
+                        tasbihProvider
+                            .setValue(int.parse(countController.text));
+                        push(
+                          context,
+                          Tasbih(
+                            value: nameController.text,
                           ),
-                        ),);
-                  }
-                ),
+                        );
+                      }
+                    },
+                    child: const Text(
+                      "Start",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  );
+                }),
               ),
             )
           ],

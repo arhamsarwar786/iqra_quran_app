@@ -20,3 +20,31 @@
 //     secondaryColor = theme['secondary'].toString().toColor();
 //   }
 // }
+
+
+
+
+import 'package:flutter/material.dart';
+
+class MyTextStyle{
+
+  static TextStyle heading1 = TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 25,
+  );
+
+  static TextStyle heading2 = TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 20,
+  );
+
+  static TextStyle heading3 = TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 15,
+  );
+
+  static TextStyle heading4 = TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 12,
+  );
+}

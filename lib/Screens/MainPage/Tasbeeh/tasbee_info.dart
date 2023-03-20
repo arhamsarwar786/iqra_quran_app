@@ -39,10 +39,10 @@ var tasbihProvider= Provider.of<TasbeeCount>(context,listen: false);
         centerTitle: true,
         leading: IconButton(
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (contex){
-              return TasbeeDetail();
-              }));
-              // Navigator.pop(context);
+              // Navigator.of(context).push(MaterialPageRoute(builder: (contex){
+              // return TasbeeDetail();
+              // }));
+              pop(context);
             },
             icon: const Icon(Icons.arrow_back_outlined)),
         title: const Text(

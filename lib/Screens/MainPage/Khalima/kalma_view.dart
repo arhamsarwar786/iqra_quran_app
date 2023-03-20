@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iqra/Utils/constants.dart';
+import 'package:iqra/widgets.dart';
 import '../../../Models/khalimas_model.dart';
 import '../../../Provider/theme_provider.dart';
 import 'widgets.dart';
@@ -26,7 +27,7 @@ class KhalimaView extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
             onPressed: () {
-              Navigator.pop(context);
+              pop(context);
             },
             icon: const Icon(Icons.arrow_back)),
       ),
@@ -37,7 +38,9 @@ class KhalimaView extends StatelessWidget {
           children: [
             Container(
               width: size.width,
-              padding: EdgeInsets.all(10),
+              // height: size.height,
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(vertical: 20,horizontal: 10),
               decoration: BoxDecoration(
                 color: Theme.of(context).primaryColor,
                 boxShadow: kElevationToShadow[4],
@@ -45,7 +48,7 @@ class KhalimaView extends StatelessWidget {
               ),
               child: SingleChildScrollView(
                 child: SizedBox(
-                  height: size.height,
+                  // height: size.height,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.max,
@@ -57,8 +60,9 @@ class KhalimaView extends StatelessWidget {
                         khalima.arabic!,
                         textAlign: TextAlign.center,
                         style: TextStyle(
+                          fontFamily: bloc.arabicFontFamily,
                           color: MyColors.whiteColor,
-                          fontSize: 20,
+                          fontSize: bloc.arabicFontSize,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
@@ -70,14 +74,15 @@ class KhalimaView extends StatelessWidget {
                         textAlign: TextAlign.center,
                         // maxLines: 3,
                         style: TextStyle(
+                          fontFamily: bloc.urduFontFamily,
                           color: MyColors.whiteColor,
-                          // fontSize: 20,
+                          fontSize: bloc.urduFontSize,
 
                           fontWeight: FontWeight.normal,
                         ),
                       ),
                       const SizedBox(
-                        height: 30,
+                        height: 20,
                       ),
                     ],
                   ),

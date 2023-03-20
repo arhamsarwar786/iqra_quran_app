@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,7 +14,7 @@ pushUntil(context, screen) {
 }
 
 push(context, screen) {
-  return Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+  return Navigator.push(context, CupertinoPageRoute(builder: (_) => screen));
 }
 
 pop(context) {

@@ -119,19 +119,18 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
           ),
           child: Column(
             children: [
-              Container(
-                width: double.infinity,
-                child: Container(
-                  height: 200,
-                  // width: MediaQuery.of(context).size.width * 0.60,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
-                    image:const DecorationImage(
-                      image: AssetImage("assets/images/logo.png",),
-                      fit: BoxFit.fill,
+              Consumer<ThemeProvider>(
+                builder: (context,provider,child) {
+                  return SizedBox(
+                    width: double.infinity,
+                    child: Container(
+                      height: 200,
+                      padding: EdgeInsets.all(20),
+                      // width: MediaQuery.of(context).size.width * 0.60,
+                     child: Image.asset("assets/images/iqra${provider.iconNumber}.png",fit: BoxFit.fitHeight,),
                     ),
-                  ),
-                ),
+                  );
+                }
               ),
               ListView.builder(
                   shrinkWrap: true,

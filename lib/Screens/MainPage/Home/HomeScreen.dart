@@ -53,106 +53,100 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return Builder(
-      builder: (context) {
-                  var bloc = context.watch<ThemeProvider>();
-        return SafeArea(
-          child: Scaffold(
-              floatingActionButtonLocation:
-                  FloatingActionButtonLocation.centerDocked,
-              floatingActionButton: floatinButton(context),
-              bottomNavigationBar:  BottomBarApp(bloc),
-              extendBodyBehindAppBar: true,
-              // backgroundColor: Colors.red,
-              key: _scaffoldKey,
-              drawer: Darwerr(),
-              resizeToAvoidBottomInset: false,
-              appBar: AppBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                leading: IconButton(
-                    onPressed: () => _scaffoldKey.currentState!.openDrawer(),
-                    icon: const Icon(Icons.menu)),
-                actions: [
-                  GestureDetector(
-                    onTap: () {},
-                    child: Image.asset("assets/images/infoIcon.png"),
-                  ),
-                  // IconButton(onPressed: (){
+    return Builder(builder: (context) {
+      var bloc = context.watch<ThemeProvider>();
+      return SafeArea(
+        child: Scaffold(
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
+            floatingActionButton: floatinButton(context),
+            bottomNavigationBar: BottomBarApp(bloc),
+            extendBodyBehindAppBar: true,
+            // backgroundColor: Colors.red,
+            key: _scaffoldKey,
+            drawer: Darwerr(),
+            resizeToAvoidBottomInset: false,
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                  onPressed: () => _scaffoldKey.currentState!.openDrawer(),
+                  icon: const Icon(Icons.menu)),
+              actions: [
+                GestureDetector(
+                  onTap: () {},
+                  child: Image.asset("assets/images/infoIcon.png"),
+                ),
+                // IconButton(onPressed: (){
 
-                  // }, icon:const Icon(Icons.notifications)),
-                ],
-              ),
-              body: Stack(
-                children: [
-                  CarouselSlider.builder(
-                    itemCount: imageName.length,
-                    options: CarouselOptions(
-                      viewportFraction: 1.01,
-                      scrollDirection: Axis.horizontal,
-                      autoPlay: true,
-                      enlargeStrategy: CenterPageEnlargeStrategy.height,
-                    ),
-                    itemBuilder: (context, index, pageViewIndex) {
-                      return Image(
-                        image: AssetImage("assets/images/${imageName[index]}"),
-                        width: size.width,
-                        fit: BoxFit.fill,
-                        height: 250,
-                      );
-                    },
+                // }, icon:const Icon(Icons.notifications)),
+              ],
+            ),
+            body: Stack(
+              children: [
+                CarouselSlider.builder(
+                  itemCount: imageName.length,
+                  options: CarouselOptions(
+                    viewportFraction: 1.01,
+                    scrollDirection: Axis.horizontal,
+                    autoPlay: true,
+                    enlargeStrategy: CenterPageEnlargeStrategy.height,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: 8.0,
-                      right: 8.0,
-                    ),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            height: size.height * 0.16,
-                          ),
-                          SearchInQuaran(
-                            today: _today,
-                            size: size,
-                            bloc:bloc
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          prayerQiblaList(context, size,bloc),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          screensList(context, size, bloc),
-                          // prayerQiblaList
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          // hadeesDailyVerse
-                          quranDailyVerse(context, size,bloc),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          namesAllahProphet(context, size,bloc),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                        ],
-                      ),
+                  itemBuilder: (context, index, pageViewIndex) {
+                    return Image(
+                      image: AssetImage("assets/images/${imageName[index]}"),
+                      width: size.width,
+                      fit: BoxFit.fill,
+                      height: 250,
+                    );
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 8.0,
+                    right: 8.0,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          height: size.height * 0.16,
+                        ),
+                        SearchInQuaran(today: _today, size: size, bloc: bloc),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        prayerQiblaList(context, size, bloc),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        screensList(context, size, bloc),
+                        // prayerQiblaList
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        // hadeesDailyVerse
+                        quranDailyVerse(context, size, bloc),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        namesAllahProphet(context, size, bloc),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              )),
-        );
-      }
-    );
+                ),
+              ],
+            )),
+      );
+    });
   }
 
   // ScreenList //
-  Widget screensList(BuildContext context, Size size,ThemeProvider bloc) {
+  Widget screensList(BuildContext context, Size size, ThemeProvider bloc) {
     MyProvider provider = Provider.of<MyProvider>(context, listen: false);
     return Card(
       elevation: 5,
@@ -169,7 +163,7 @@ class _HomeState extends State<Home> {
             children: [
               InkWell(
                 onTap: () {
-                  push(context,const PrayerTime());
+                  push(context, const PrayerTime());
                   // push(context, TabBarDemo());
                 },
                 child: Column(
@@ -177,9 +171,10 @@ class _HomeState extends State<Home> {
                     Container(
                       height: 24,
                       width: 17,
-                      decoration:  BoxDecoration(
+                      decoration: BoxDecoration(
                           image: DecorationImage(
-                              image: AssetImage("assets/images/namaz${int.parse(bloc.iconNumber)}.png"),
+                              image: AssetImage(
+                                  "assets/images/namaz${int.parse(bloc.iconNumber)}.png"),
                               fit: BoxFit.fill)),
                     ),
                     Text(
@@ -204,9 +199,10 @@ class _HomeState extends State<Home> {
                     Container(
                       height: 25,
                       width: 24,
-                      decoration:  BoxDecoration(
+                      decoration: BoxDecoration(
                           image: DecorationImage(
-                        image: AssetImage("assets/images/kalma${int.parse(bloc.iconNumber)}.png"),
+                        image: AssetImage(
+                            "assets/images/kalma${int.parse(bloc.iconNumber)}.png"),
                         // fit: BoxFit.fill
                       )),
                     ),
@@ -230,9 +226,10 @@ class _HomeState extends State<Home> {
                     Container(
                       height: 25,
                       width: 18,
-                      decoration:  BoxDecoration(
+                      decoration: BoxDecoration(
                           image: DecorationImage(
-                              image: AssetImage("assets/images/Tasbi${int.parse(bloc.iconNumber)}.png"),
+                              image: AssetImage(
+                                  "assets/images/Tasbi${int.parse(bloc.iconNumber)}.png"),
                               fit: BoxFit.fill)),
                     ),
                     Text(
@@ -255,9 +252,10 @@ class _HomeState extends State<Home> {
                     Container(
                       height: 30,
                       width: 30,
-                      decoration:  BoxDecoration(
+                      decoration: BoxDecoration(
                           image: DecorationImage(
-                              image: AssetImage("assets/images/Dua${int.parse(bloc.iconNumber)}.png"),
+                              image: AssetImage(
+                                  "assets/images/Dua${int.parse(bloc.iconNumber)}.png"),
                               fit: BoxFit.fill)),
                     ),
                     Text(
@@ -395,7 +393,7 @@ class _HomeState extends State<Home> {
   }
 
   // quranDailyVerse //
-  Widget quranDailyVerse(BuildContext context, Size size,ThemeProvider bloc) {
+  Widget quranDailyVerse(BuildContext context, Size size, ThemeProvider bloc) {
     return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -412,9 +410,10 @@ class _HomeState extends State<Home> {
               Container(
                 height: 26,
                 width: 18,
-                decoration:  BoxDecoration(
+                decoration: BoxDecoration(
                     image: DecorationImage(
-                        image: AssetImage("assets/images/quran${bloc.iconNumber}.png"),
+                        image: AssetImage(
+                            "assets/images/quran${bloc.iconNumber}.png"),
                         fit: BoxFit.fill)),
               ),
               const SizedBox(
@@ -529,7 +528,8 @@ We have provided for them.   [2:1,2,3]''',
   // }
 
   // namesAllahProphet //
-  Widget namesAllahProphet(BuildContext context, Size size,ThemeProvider bloc) {
+  Widget namesAllahProphet(
+      BuildContext context, Size size, ThemeProvider bloc) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -621,7 +621,8 @@ We have provided for them.   [2:1,2,3]''',
 }
 
 class SearchInQuaran extends StatelessWidget {
-  SearchInQuaran({Key? key, this.today, this.size,this.bloc}) : super(key: key);
+  SearchInQuaran({Key? key, this.today, this.size, this.bloc})
+      : super(key: key);
   HijriCalendar? today;
   Size? size;
   ThemeProvider? bloc;
@@ -632,50 +633,135 @@ class SearchInQuaran extends StatelessWidget {
       padding: const EdgeInsets.only(left: 0, right: 0, top: 10),
       // margin: EdgeInsets.symmetric(horizontal: 10),
 
-      child: Builder(
-        builder: (context) {
-          return Card(
-            elevation: 5,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            color: bloc!.selectedSecondary,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 10.0, left: 20, right: 20),
-              child: Column(
-                children: [
-                  CupertinoSearchTextField(
-                    borderRadius: BorderRadius.circular(20.0),
-                    backgroundColor: Colors.white,
-                    placeholder: "Search in Quran",
-                    prefixIcon: Image.asset(
-                      "assets/images/searchIcon.png",
-                      fit: BoxFit.cover,
-                      // height: 20,
-                      // width: 20,
-                    ),
+      child: Builder(builder: (context) {
+        return Card(
+          elevation: 5,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          color: bloc!.selectedSecondary,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 10.0, left: 20, right: 20),
+            child: Column(
+              children: [
+                CupertinoSearchTextField(
+                  borderRadius: BorderRadius.circular(20.0),
+                  backgroundColor: Colors.white,
+                  placeholder: "Search in Quran",
+                  prefixIcon: Image.asset(
+                    "assets/images/searchIcon.png",
+                    fit: BoxFit.cover,
+                    // height: 20,
+                    // width: 20,
                   ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  FittedBox(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                FittedBox(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.calendar_month,
+                                color: bloc!.selectedTheme,
+                              ),
+                              const SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                "Date",
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: size!.height / 96,
+                          ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                height: 20,
+                                width: 20,
+                              ),
+                              const SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                DateFormat('EEEE, d MMM, yyyy')
+                                    .format(DateTime.now()),
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.normal,
+                                  // fontStyle: FontStyle.italic
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: size!.height / 96,
+                          ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                height: 20,
+                                width: 20,
+                              ),
+                              const SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                today!.toFormat("dd MMMM yyyy"),
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.normal,
+                                  // fontStyle: FontStyle.italic
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      /////////////////////////////////////
+                      Container(
+                        margin: EdgeInsets.only(left: 10),
+                        color: Theme.of(context).primaryColor,
+                        height: size!.height / 8,
+                        width: 2,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.calendar_month,color: bloc!.selectedTheme,),
+                                Icon(
+                                  Icons.arrow_left_sharp,
+                                  color: bloc!.selectedTheme,
+                                  size: 30,
+                                ),
                                 const SizedBox(
-                                  width: 5,
+                                  width: 2,
                                 ),
                                 Text(
-                                  "Date",
+                                  "Previous",
                                   style: TextStyle(
                                     color: Theme.of(context).primaryColor,
                                     fontWeight: FontWeight.w600,
@@ -690,15 +776,14 @@ class SearchInQuaran extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Container(
-                                  height: 20,
-                                  width: 20,
+                                  height: 12,
+                                  width: 12,
                                 ),
                                 const SizedBox(
                                   width: 5,
                                 ),
                                 Text(
-                                  DateFormat('EEEE, d MMM, yyyy')
-                                      .format(DateTime.now()),
+                                  "Fajar",
                                   style: TextStyle(
                                     color: Theme.of(context).primaryColor,
                                     fontWeight: FontWeight.normal,
@@ -713,15 +798,39 @@ class SearchInQuaran extends StatelessWidget {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
+                                Icon(
+                                  Icons.arrow_right_sharp,
+                                  color: bloc!.selectedTheme,
+                                  size: 30,
+                                ),
+                                const SizedBox(
+                                  width: 2,
+                                ),
+                                Text(
+                                  "Next",
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontWeight: FontWeight.w600,
+                                    // fontStyle: FontStyle.italic
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: size!.height / 96,
+                            ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
                                 Container(
-                                  height: 20,
-                                  width: 20,
+                                  height: 12,
+                                  width: 12,
                                 ),
                                 const SizedBox(
                                   width: 5,
                                 ),
                                 Text(
-                                  today!.toFormat("dd MMMM yyyy"),
+                                  "Duhar",
                                   style: TextStyle(
                                     color: Theme.of(context).primaryColor,
                                     fontWeight: FontWeight.normal,
@@ -732,121 +841,21 @@ class SearchInQuaran extends StatelessWidget {
                             ),
                           ],
                         ),
-                        /////////////////////////////////////
-                        Container(
-                          margin: EdgeInsets.only(left: 10),
-                          color: Theme.of(context).primaryColor,
-                          height: size!.height / 8,
-                          width: 2,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.arrow_left_sharp,color: bloc!.selectedTheme,size: 30,),
-                                  const SizedBox(
-                                    width: 2,
-                                  ),
-                                  Text(
-                                    "Previous",
-                                    style: TextStyle(
-                                      color: Theme.of(context).primaryColor,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: size!.height / 96,
-                              ),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: 12,
-                                    width: 12,
-                                  ),
-                                  const SizedBox(
-                                    width: 5,
-                                  ),
-                                  Text(
-                                    "Fajar",
-                                    style: TextStyle(
-                                      color: Theme.of(context).primaryColor,
-                                      fontWeight: FontWeight.normal,
-                                      // fontStyle: FontStyle.italic
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: size!.height / 96,
-                              ),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                                                  Icon(Icons.arrow_right_sharp,color: bloc!.selectedTheme,size: 30,),
-
-                                  const SizedBox(
-                                    width: 2,
-                                  ),
-                                  Text(
-                                    "Next",
-                                    style: TextStyle(
-                                      color: Theme.of(context).primaryColor,
-                                      fontWeight: FontWeight.w600,
-                                      // fontStyle: FontStyle.italic
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: size!.height / 96,
-                              ),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: 12,
-                                    width: 12,
-                                  ),
-                                  const SizedBox(
-                                    width: 5,
-                                  ),
-                                  Text(
-                                    "Duhar",
-                                    style: TextStyle(
-                                      color: Theme.of(context).primaryColor,
-                                      fontWeight: FontWeight.normal,
-                                      // fontStyle: FontStyle.italic
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          width: 20,
-                        ),
-                      ],
-                    ),
+                      ),
+                      SizedBox(
+                        width: 20,
+                      ),
+                    ],
                   ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                ],
-              ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+              ],
             ),
-          );
-        }
-      ),
+          ),
+        );
+      }),
     );
   }
 }

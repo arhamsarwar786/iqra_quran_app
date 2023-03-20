@@ -175,70 +175,92 @@ class _QuranViewState extends State<QuranView> {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: customAppBar(context, "${widget.surahName}"),
-        body: FutureBuilder(
-            future: DefaultAssetBundle.of(context)
-                .loadString("assets/quran_kareem/urdu_translation/quran.json"),
-            builder: (context, snapshot) {
-              var quran = json.decode(snapshot.data.toString());
-
-              if (snapshot.hasData) {
-                var a = 0;
-                for (int i = 0; i <= 113; i++) {
-                  dataSura.add(quran["quran"]["sura"][i]["name"]);
-                  a = a + widget.ayatInSura![i];
-
-                  for (int j = 1; j <= widget.ayatInSura![i]; j++) {
-                    data.add(
-                      quran["quran"]["sura"][i]["aya"][j - 1]["text"],
-                    );
+        body: NestedScrollView(
+           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          return <Widget>[
+            SliverAppBar(
+              expandedHeight: 200.0,
+              floating: false,
+              pinned: true,
+              flexibleSpace: FlexibleSpaceBar(
+                  centerTitle: true,
+                  title: Text("Collapsing Toolbar",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.0,
+                      )),
+                  background: Image.network(
+                    "https://images.pexels.com/photos/396547/pexels-photo-396547.jpeg?auto=compress&cs=tinysrgb&h=350",
+                    fit: BoxFit.cover,
+                  )),
+            ),
+          ];
+        },
+          body: FutureBuilder(
+              future: DefaultAssetBundle.of(context)
+                  .loadString("assets/quran_kareem/urdu_translation/quran.json"),
+              builder: (context, snapshot) {
+                var quran = json.decode(snapshot.data.toString());
+        
+                if (snapshot.hasData) {
+                  var a = 0;
+                  for (int i = 0; i <= 113; i++) {
+                    dataSura.add(quran["quran"]["sura"][i]["name"]);
+                    a = a + widget.ayatInSura![i];
+        
+                    for (int j = 1; j <= widget.ayatInSura![i]; j++) {
+                      data.add(
+                        quran["quran"]["sura"][i]["aya"][j - 1]["text"],
+                      );
+                    }
                   }
                 }
-              }
-
-              return Container(
-                  // height: size.height / 1.75,
-                  child: (snapshot.hasData)
-                      ? ListView.builder(
-                          itemCount: int.parse(widget.ayatCount.toString()),
-                          itemBuilder: (context, index) {
-                            return Card(
-                              elevation: 3,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: ListTile(
-                                  subtitle: Text(
-                                    // "Ali",
-                                    quran["sura"][int.parse(
-                                            widget.surahCount.toString()) -
-                                        1]["aya"][index]["text"],
-                                    textAlign: TextAlign.right,
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w400),
-                                  ),
-                                  title: Text(
-                                    quran["quran"]["sura"][int.parse(
-                                                widget.surahCount.toString()) -
-                                            1]["aya"][index]["text"] +
-                                        " (" +
-                                        arabicNumber.convert(index) +
-                                        ")",
-                                    textAlign: TextAlign.right,
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 30,
-                                        fontWeight: FontWeight.w600),
+        
+                return Container(
+                    // height: size.height / 1.75,
+                    child: (snapshot.hasData)
+                        ? ListView.builder(
+                            itemCount: int.parse(widget.ayatCount.toString()),
+                            itemBuilder: (context, index) {
+                              return Card(
+                                elevation: 3,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: ListTile(
+                                    subtitle: Text(
+                                      // "Ali",
+                                      quran["sura"][int.parse(
+                                              widget.surahCount.toString()) -
+                                          1]["aya"][index]["text"],
+                                      textAlign: TextAlign.right,
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w400),
+                                    ),
+                                    title: Text(
+                                      quran["quran"]["sura"][int.parse(
+                                                  widget.surahCount.toString()) -
+                                              1]["aya"][index]["text"] +
+                                          " (" +
+                                          arabicNumber.convert(index) +
+                                          ")",
+                                      textAlign: TextAlign.right,
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 30,
+                                          fontWeight: FontWeight.w600),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          })
-                      : Center(
-                          child: CircularProgressIndicator(
-                          color: Color.fromRGBO(255, 255, 255, 1),
-                        )));
-            }));
+                              );
+                            })
+                        : Center(
+                            child: CircularProgressIndicator(
+                            color: Color.fromRGBO(255, 255, 255, 1),
+                          )));
+              }),
+        ));
   }
 }

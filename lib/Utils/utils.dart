@@ -15,3 +15,21 @@ const themeList = [
   {"primary": "#9B2226", "secondary": "#FFF0F1","theme":"light","iconNumber":"5"},
   {"primary": "#5F0F40", "secondary": "#FFF3FA","theme":"light","iconNumber":"6"}
 ];
+
+var arabicFontSize = [
+  
+];
+
+var arabicFontFamily = [
+  "notoNash",
+  "droid",
+  "lateef",
+  "kfg",
+  "alQalam"
+];
+
+var urduFontFamily = [
+  "mehr",
+  "nastaleeq",
+  "pdmsSaleem"
+];

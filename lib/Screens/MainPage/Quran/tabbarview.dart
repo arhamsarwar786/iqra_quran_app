@@ -32,7 +32,7 @@ class TabBarDemo extends StatelessWidget {
               Container(
                 constraints: BoxConstraints(maxHeight: 170.0),
                 child: Material(
-                  color: Color(0xff005d66),
+                  color: Theme.of(context).primaryColor,
                         // color: Color(0xffCC7180),
                   child: TabBar(
                     indicatorColor: Colors.white,
@@ -63,7 +63,7 @@ class TabBarDemo extends StatelessWidget {
                       height: MediaQuery.of(context).size.height,
                       width: MediaQuery.of(context).size.width,
                       decoration: BoxDecoration(
-                        color: Color(0xff005d66),
+                        color: Theme.of(context).primaryColor,
                         // color: Color(0xffCC7180),
                         // borderRadius: BorderRadius.only(
                         //   topRight: Radius.circular(40),

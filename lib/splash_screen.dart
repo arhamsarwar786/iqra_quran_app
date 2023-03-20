@@ -78,7 +78,7 @@ class _SplashScreenState extends State<SplashScreen>
               children:[
                 Text("Developed By: ",style: TextStyle(fontWeight: FontWeight.bold ,color: Colors.white),),
                 Text("Dev'sinn Technologies",style: TextStyle(color: Colors.white),),
-                SizedBox(height: 10,)
+                SizedBox(height: 30,)
               ]
               ),
             ),
