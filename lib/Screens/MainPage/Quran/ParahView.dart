@@ -20,10 +20,7 @@ class PQuranView extends StatefulWidget {
 }
 
 class _PQuranViewState extends State<PQuranView> {
-  // Stream pQuran() async* {
-  //   String quranmeta =
-  //       await DefaultAssetBundle.of(context).loadString("assets/quran_kareem/urdu_translation/quran.json");
-  // }
+
   List<int> num = [
     0,
     148 + 2,
@@ -59,7 +56,6 @@ class _PQuranViewState extends State<PQuranView> {
   ];
   List<String> data = [];
   List<int> prevriousSuraIndex = [];
-
   List<String> urdudata = [];
   @override
   Widget build(BuildContext context) {
@@ -71,21 +67,11 @@ class _PQuranViewState extends State<PQuranView> {
                 .loadString("assets/quran_kareem/urdu_translation/quran.json"),
             builder: (context, snapshot) {
               var quran = json.decode(snapshot.data.toString());
-              if (snapshot.hasData) {
-                // for (int i = 1; i < 3; i++) {
-                //   for (int j = 0; j <= count[i] - 1; j++) {
-                //     // print("${i}+object+$j");
-                //     data.add(
-                //       quran["quran"]["sura"][i - 1]["aya"][j]["text"],
-                //     );
-                //   }
-                // }
+              if (snapshot.hasData) {                
                 var a = 0;
                 for (int i = 0; i < num.length; i++) {
                   a = a + num[i];
                   prevriousSuraIndex.add(a);
-
-                  // print();
                 }
                 for (int i = 0; i <= 113; i++) {
                   data.add(

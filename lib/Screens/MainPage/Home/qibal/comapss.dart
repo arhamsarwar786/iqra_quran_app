@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:math' show pi;
-
 import 'package:flutter/material.dart';
 import 'flutter_qiblah.dart';
-
 import 'package:geolocator/geolocator.dart';
 
 class QiblahCompass extends StatefulWidget {

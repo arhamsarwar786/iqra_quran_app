@@ -19,7 +19,7 @@ class DuaScreen extends StatelessWidget {
           backgroundColor: bloc.selectedTheme,
           title: Text("Dua"),
           centerTitle: true,
-          actions: [IconButton(onPressed: () {}, icon: Icon(Icons.search))],
+          // actions: [IconButton(onPressed: () {}, icon: Icon(Icons.search))],
         ),
         body: Padding(
           padding: const EdgeInsets.only(top: 10),
@@ -59,7 +59,9 @@ class DuaScreen extends StatelessWidget {
                             child: Text(
                               '${duaData[index]['title']}',
                               textDirection: TextDirection.rtl,
+                              
                               style: TextStyle(
+                                fontFamily: bloc.urduFontFamily,
                                   fontSize: 20, color: MyColors.whiteColor),
                             )),
                       ],

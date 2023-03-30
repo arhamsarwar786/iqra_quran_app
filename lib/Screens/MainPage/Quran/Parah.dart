@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Screens/MainPage/Quran/ParahView.dart';
+import 'package:iqra/Screens/MainPage/Quran/translation/parah_translation_screen.dart';
+import 'package:iqra/widgets.dart';
 import 'package:provider/provider.dart';
 // import 'ParahView.dart';
 
@@ -117,16 +119,17 @@ class _ParahState extends State<Parah> {
                       itemBuilder: (context, index) {
                         return InkWell(
                           onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => PQuranView(
-                                          ayatInSura: numberofayat,
+                            push(context, ParahTranslationScreen(ayatInSura: numberofayat,
                                           parahCount: (index + 1).toString(),
-                                          parahname: parah[index].toString(),
-                                          // ayaCount: parahData["quran"]["suras"]
-                                          //     ["sura"][index]["ayas"],
-                                        )));
+                                          parahname: parah[index].toString(),));
+                            // Navigator.push(
+                            //     context,
+                            //     MaterialPageRoute(
+                            //         builder: (context) => PQuranView(
+                            //               ayatInSura: numberofayat,
+                            //               parahCount: (index + 1).toString(),
+                            //               parahname: parah[index].toString(),                                         
+                            //             )));
                           },
                           child: Card(
                             elevation: 5,
@@ -169,12 +172,15 @@ class _ParahState extends State<Parah> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
-                                      Text(
-                                        parah[index],
-                                        style:const TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w700),
+                                      FittedBox(
+                                        child: Text(
+                                          parah[index],
+                                          style: TextStyle(
+                                            fontFamily: bloc.urduFontFamily,
+                                              color: Colors.black,
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.w500),
+                                        ),
                                       )
                                     ],
                                   ),

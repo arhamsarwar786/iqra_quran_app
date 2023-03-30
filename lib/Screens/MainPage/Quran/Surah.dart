@@ -92,6 +92,7 @@ class _SurahState extends State<Surah> {
                                           ["tname"],
                                       // "Ali",
                                       style: const TextStyle(
+
                                         color: Colors.black,
                                         fontSize: 17,
                                         fontWeight: FontWeight.w700,
@@ -131,7 +132,8 @@ class _SurahState extends State<Surah> {
                                           Text(
                                             qdata["quran"]["suras"]["sura"][index]
                                                 ["name"],
-                                            style: const TextStyle(
+                                            style:  TextStyle(
+                                              fontFamily: bloc.urduFontFamily,
                                               color: Colors.black,
                                               fontSize: 17,
                                               fontWeight: FontWeight.w700,
