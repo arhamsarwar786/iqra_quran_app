@@ -75,7 +75,7 @@ class _ParahTranslationScreenState extends State<ParahTranslationScreen> {
                     width: double.infinity,
                     alignment: Alignment.center,
                     child: Text(
-                      "PARA NAME",
+                      "${widget.parahname}",
                       style: MyTextStyle.heading3
                           .copyWith(color: MyColors.whiteColor),
                     ),

@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:iqra/Utils/constants.dart';
 import 'package:iqra/Utils/customThemes.dart';
+import 'package:iqra/Utils/share_data.dart';
 
 import '../Provider/theme_provider.dart';
 import '../Screens/MainPage/Khalima/widgets.dart';
@@ -49,7 +50,9 @@ class TranlationCardSection extends StatelessWidget {
           Positioned(
             top: 5,
             left: 5,
-            child: IconButton(onPressed: (){}, icon: Icon(Icons.share,size: 30,color: provider!.selectedTheme,),)),
+            child: IconButton(onPressed: (){
+              myShare(text: "$arabic\n\n$urdu" );
+            }, icon: Icon(Icons.share,size: 30,color: provider!.selectedTheme,),)),
         ]),
       ),
     );

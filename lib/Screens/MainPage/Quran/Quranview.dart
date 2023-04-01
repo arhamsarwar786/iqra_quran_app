@@ -9,6 +9,7 @@ import 'package:arabic_numbers/arabic_numbers.dart';
 import 'package:flutter/rendering.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Screens/MainPage/Quran/translation/parah_translation_screen.dart';
+import 'package:iqra/Screens/MainPage/Quran/translation/surah_translation_screen.dart';
 import 'package:iqra/Utils/customThemes.dart';
 import 'package:provider/provider.dart';
 // import 'arabic';
@@ -249,7 +250,12 @@ class _QuranViewState extends State<QuranView> {
             items: [
               BottomNavigationBarItem(icon: InkWell(
                 onTap: (){
-                  push(context, ParahTranslationScreen());
+                  push(context, SurahTranslationScreen(
+                     ayatInSura: widget.ayatInSura,
+                                                ayatCount:widget.ayatCount,
+                                                surahCount: widget.surahCount,
+                                                surahName: widget.surahName,
+                  ));
                 },
                 child: Icon(Icons.book)),label: "Translation"),
               BottomNavigationBarItem(
@@ -301,20 +307,36 @@ class _QuranViewState extends State<QuranView> {
                             children: [
                               Expanded(
                                 child: Image.asset(
-                                    "assets/images/borderLeft${int.parse(bloc.iconNumber) + 2}.png"),
+                                    "assets/images/borderLeft1.png",color: Color.fromARGB(255, 255, 109, 109),),
                               ),
                               Expanded(
                                 child: Image.asset(
-                                    "assets/images/borderRight${int.parse(bloc.iconNumber) + 2}.png"),
+                                    "assets/images/borderRight1.png",color: Colors.white,),
                               ),
                             ],
                           ),
+                          SizedBox(height: 5,),
                           Text(
                             "بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ",
                             style: MyTextStyle.heading2.copyWith(
                                 color: Colors.white,
+                                fontSize: 10,
                                 fontFamily: bloc.arabicFontFamily),
-                          )
+                          ),
+                          SizedBox(height: 5,),
+
+                             Row(
+                            children: [
+                              Expanded(
+                                child: Image.asset(
+                                    "assets/images/borderLeft1.png",color: Colors.white,),
+                              ),
+                              Expanded(
+                                child: Image.asset(
+                                    "assets/images/borderRight1.png",color: Color.fromARGB(255, 255, 109, 109),),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -384,7 +406,6 @@ class _QuranViewState extends State<QuranView> {
                         }
                         totalSurah.add(ayaForRuko);
                       } else {
-                        print(widget.ayatCount);
                         var ayaForRuko = "";
                         for (var index = 0;
                             index < int.parse(widget.ayatCount.toString());
@@ -548,9 +569,9 @@ class _QuranViewState extends State<QuranView> {
                           //             ),
                           //             Text(
                           //               // "Ali",
-                          //               quran["sura"][int.parse(
-                          //                       widget.surahCount.toString()) -
-                          //                   1]["aya"][index]["text"],
+                                        // quran["sura"][int.parse(
+                                        //         widget.surahCount.toString()) -
+                                        //     1]["aya"][index]["text"],
                           //               textAlign: TextAlign.right,
                           //               style: TextStyle(
                           //                 fontFamily: bloc.urduFontFamily,
