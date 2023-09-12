@@ -25,7 +25,7 @@ class _PrayerTimeState extends State<PrayerTime> {
     '04:01 AM',
   ];
   static const _name = [
-    '"Fajar',
+    'Fajar',
     'Dhuhar',
     'Asr',
     'Maghrib',
@@ -37,7 +37,7 @@ class _PrayerTimeState extends State<PrayerTime> {
   String? asar;
   String? magrrib;
   String? isa;
-  @override
+
   Future<List<String>> locationPosition() async {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
@@ -47,15 +47,33 @@ class _PrayerTimeState extends State<PrayerTime> {
     print('Montreal is in the $tza time zone.');
     tz.initializeTimeZones();
     final location = tz.getLocation(tza);
-
     // Definitions
     DateTime date = tz.TZDateTime.from(DateTime.now(), location);
     Coordinates coordinates =
         Coordinates(position.latitude, position.longitude);
 
     CalculationParameters params = CalculationMethod.MuslimWorldLeague();
+  
+    List<String> prayerstiming = [];
     params.madhab = Madhab.Hanafi;
-    PrayerTimes prayerTimes =
+   var namazTimeHanafi = await namazTimeCollector(coordinates, date, params,location,"Hanafi");
+
+   params.madhab = Madhab.Shafi;
+   var namazTimeShafi = await namazTimeCollector(coordinates, date, params,location,"Shafi",namazTimeHanafi);
+
+   
+    Qibla Direction;
+    // var qiblaDirection = Qibla.qibla(coordinates);
+  print(namazTimeHanafi.toString() + "arham" + namazTimeShafi.toString());
+   
+    // print(qiblaDirection);
+    return prayerstiming;
+  }
+
+  namazTimeCollector(coordinates, date, params,location,fika,[timings]){
+    List<Map> prayerstiming = [];
+
+     PrayerTimes prayerTimes =
         PrayerTimes(coordinates, date, params, precision: true);
     DateTime fajrTime = tz.TZDateTime.from(prayerTimes.fajr!, location);
     DateTime sunriseTime = tz.TZDateTime.from(prayerTimes.sunrise!, location);
@@ -63,15 +81,28 @@ class _PrayerTimeState extends State<PrayerTime> {
     DateTime asrTime = tz.TZDateTime.from(prayerTimes.asr!, location);
     DateTime maghribTime = tz.TZDateTime.from(prayerTimes.maghrib!, location);
     DateTime ishaTime = tz.TZDateTime.from(prayerTimes.isha!, location);
-    Qibla Direction;
-    List<String> prayerstiming = [];
-    var qiblaDirection = Qibla.qibla(coordinates);
-    prayerstiming.add(DateFormat("h:mma").format(fajrTime));
-    prayerstiming.add(DateFormat("h:mma").format(dhuhrTime));
-    prayerstiming.add(DateFormat("h:mma").format(asrTime));
-    prayerstiming.add(DateFormat("h:mma").format(maghribTime));
-    prayerstiming.add(DateFormat("h:mma").format(ishaTime));
-    print(qiblaDirection);
+
+    String fajer = DateFormat("h:mma").format(fajrTime);
+    String dhuhr = DateFormat("h:mma").format(dhuhrTime);
+    String asr = DateFormat("h:mma").format(asrTime);
+    String maghrib = DateFormat("h:mma").format(maghribTime);
+    String isha = DateFormat("h:mma").format(ishaTime);
+
+    if (timings != null) {
+        for (var time in timings) {
+          if (time["time"]) {
+            
+          }
+        }        
+    }
+
+    //  prayerstiming.add({"fika":"${fika}","time":});
+    prayerstiming.add({"fika":"${fika}","time":DateFormat("h:mma").format(dhuhrTime)});
+    prayerstiming.add({"fika":"${fika}","time":DateFormat("h:mma").format(asrTime)});
+    prayerstiming.add({"fika":"${fika}","time":DateFormat("h:mma").format(maghribTime)});
+    prayerstiming.add({"fika":"${fika}","time":DateFormat("h:mma").format(ishaTime)});
+
+
     return prayerstiming;
   }
 

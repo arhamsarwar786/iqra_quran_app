@@ -34,7 +34,7 @@ class DuaScreen extends StatelessWidget {
                             builder: (_) => DuaView(
                                 arabic: duaData[index]['arabic'],
                                 urdu: duaData[index]['urdu'],
-                                bloc: bloc)));
+                                )));
                   },
                   child: Container(
                     margin: EdgeInsets.only(left: 10, right: 10, top: 10),

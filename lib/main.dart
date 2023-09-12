@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:iqra/Provider/form_validate.dart';
 import 'package:iqra/Provider/tasbih_count.dart';
 import 'package:iqra/Provider/theme_provider.dart';
+import 'package:iqra/demo.dart';
 import 'package:iqra/material_screen.dart';
 import 'package:provider/provider.dart';
 import 'Helper/tasbih_helper.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: ((context) => FormValidate())),
         ChangeNotifierProvider(create: ((context) => ThemeProvider())),
       ],
+      // child: const Demo(),
       child: const MaterialScreen(),
     );
   }

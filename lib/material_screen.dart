@@ -3,6 +3,7 @@ import 'package:iqra/splash_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'Provider/theme_provider.dart';
+import 'demo.dart';
 
 class MaterialScreen extends StatefulWidget {
   const MaterialScreen({super.key});
@@ -35,7 +36,8 @@ class _MaterialScreenState extends State<MaterialScreen> {
           fontFamily: 'kgf',
         ),
         // onGenerateRoute: _appRoutes.onGeneratedRoute,
-        home: SplashScreen(),
+        // home: SplashScreen(),
+        home: const Demo(),
       );
   }
 }

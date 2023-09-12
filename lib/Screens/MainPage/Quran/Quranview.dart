@@ -478,12 +478,14 @@ class _QuranViewState extends State<QuranView> {
                                               // ")",
                                               textAlign: TextAlign.right,
                                               style: TextStyle(
+                                                fontSize: bloc.arabicFontSize,fontFamily: bloc.arabicFontFamily
                                                   // letterSpacing: 2,
-                                                  fontFamily:
-                                                      bloc.arabicFontFamily,
-                                                  color: Colors.black,
-                                                  fontSize: 30,
-                                                  fontWeight: FontWeight.w600),
+                                                  // fontFamily:
+                                                  //     bloc.arabicFontFamily,
+                                                  // color: Colors.black,
+                                                  // fontSize: 30,
+                                                  // fontWeight: FontWeight.w600
+                                                  ),
                                             ),
                                             Row(
                                               // mainAxisAlignment: MainAxisAlignment.center,

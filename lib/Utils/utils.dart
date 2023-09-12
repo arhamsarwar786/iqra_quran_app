@@ -25,7 +25,8 @@ var arabicFontFamily = [
   "droid",
   "lateef",
   "kfg",
-  "alQalam"
+  "alQalam",
+  "Muhammdi"
 ];
 
 var urduFontFamily = [

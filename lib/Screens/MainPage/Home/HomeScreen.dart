@@ -57,13 +57,14 @@ class _HomeState extends State<Home> {
       var bloc = context.watch<ThemeProvider>();
       return SafeArea(
         child: Scaffold(
+          // backgroundColor: bloc.selectedSecondary,
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerDocked,
             floatingActionButton: floatinButton(context),
-            bottomNavigationBar: BottomBarApp(bloc),
+            bottomNavigationBar: BottomBarApp(bloc:bloc),
             extendBodyBehindAppBar: true,
             // backgroundColor: Colors.red,
-            key: _scaffoldKey,
+            // key: _scaffoldKey,
             drawer: Darwerr(),
             resizeToAvoidBottomInset: false,
             appBar: AppBar(
@@ -82,41 +83,46 @@ class _HomeState extends State<Home> {
                 // }, icon:const Icon(Icons.notifications)),
               ],
             ),
-            body: Stack(
+            body: Column(
               children: [
-                CarouselSlider.builder(
-                  itemCount: imageName.length,
-                  options: CarouselOptions(
-                    viewportFraction: 1.01,
-                    scrollDirection: Axis.horizontal,
-                    autoPlay: true,
-                    enlargeStrategy: CenterPageEnlargeStrategy.height,
+                SizedBox(
+                  // color: Colors.yellow,
+                  height: 330,
+                  child: Stack(
+                    children: [
+                      CarouselSlider.builder(
+                        itemCount: imageName.length,
+                        options: CarouselOptions(
+                          height: 200,
+                          viewportFraction: 1.01,
+                          scrollDirection: Axis.horizontal,
+                          autoPlay: true,
+                          // enlargeStrategy: CenterPageEnlargeStrategy.height,
+                        ),
+                        itemBuilder: (context, index, pageViewIndex) {
+                          return Image(
+                            image:
+                                AssetImage("assets/images/${imageName[index]}"),
+                            width: size.width,
+                            fit: BoxFit.fitWidth,
+                            // height: 30,
+                          );
+                        },
+                      ),
+                      Positioned(
+                          bottom: 0,
+                          child: SearchInQuaran(
+                              today: _today, size: size, bloc: bloc)),
+                    ],
                   ),
-                  itemBuilder: (context, index, pageViewIndex) {
-                    return Image(
-                      image: AssetImage("assets/images/${imageName[index]}"),
-                      width: size.width,
-                      fit: BoxFit.fill,
-                      height: 250,
-                    );
-                  },
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    left: 8.0,
-                    right: 8.0,
-                  ),
+                // Container(height: 50,color: Colors.transparent,),
+                Expanded(
                   child: SingleChildScrollView(
+                    clipBehavior: Clip.antiAlias,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          height: size.height * 0.16,
-                        ),
-                        SearchInQuaran(today: _today, size: size, bloc: bloc),
-                        const SizedBox(
-                          height: 10,
-                        ),
                         prayerQiblaList(context, size, bloc),
                         const SizedBox(
                           height: 10,
@@ -148,128 +154,131 @@ class _HomeState extends State<Home> {
   // ScreenList //
   Widget screensList(BuildContext context, Size size, ThemeProvider bloc) {
     MyProvider provider = Provider.of<MyProvider>(context, listen: false);
-    return Card(
-      elevation: 5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: Container(
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(30)),
-        child: Padding(
-          padding:
-              const EdgeInsets.only(left: 15.0, right: 15.0, top: 7, bottom: 7),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              InkWell(
-                onTap: () {
-                  push(context, const PrayerTime());
-                  // push(context, TabBarDemo());
-                },
-                child: Column(
-                  children: [
-                    Container(
-                      height: 24,
-                      width: 17,
-                      decoration: BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage(
-                                  "assets/images/namaz${int.parse(bloc.iconNumber)}.png"),
-                              fit: BoxFit.fill)),
-                    ),
-                    Text(
-                      " Namaz",
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).primaryColor,
+    return Padding(
+padding: const EdgeInsets.only(left: 8.0,
+                      right: 8.0,),      child: Card(
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Container(
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(30)),
+          child: Padding(
+            padding:
+                const EdgeInsets.only(left: 15.0, right: 15.0, top: 7, bottom: 7),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                InkWell(
+                  onTap: () {
+                    push(context, const PrayerTime());
+                    // push(context, TabBarDemo());
+                  },
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 24,
+                        width: 17,
+                        decoration: BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage(
+                                    "assets/images/namaz${int.parse(bloc.iconNumber)}.png"),
+                                fit: BoxFit.fill)),
                       ),
-                    )
-                  ],
+                      Text(
+                        " Namaz",
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      )
+                    ],
+                  ),
                 ),
-              ),
-              InkWell(
-                onTap: () {
-                  // provider.screenIndex = 2;
-                  // pushUntil(context, MainScreen());
-                  push(context, KhalimaScreen());
-                },
-                child: Column(
-                  children: [
-                    Container(
-                      height: 25,
-                      width: 24,
-                      decoration: BoxDecoration(
-                          image: DecorationImage(
-                        image: AssetImage(
-                            "assets/images/kalma${int.parse(bloc.iconNumber)}.png"),
-                        // fit: BoxFit.fill
-                      )),
-                    ),
-                    Text(
-                      "KHALIMA",
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).primaryColor,
+                InkWell(
+                  onTap: () {
+                    // provider.screenIndex = 2;
+                    // pushUntil(context, MainScreen());
+                    push(context, KhalimaScreen());
+                  },
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 25,
+                        width: 24,
+                        decoration: BoxDecoration(
+                            image: DecorationImage(
+                          image: AssetImage(
+                              "assets/images/kalma${int.parse(bloc.iconNumber)}.png"),
+                          // fit: BoxFit.fill
+                        )),
                       ),
-                    )
-                  ],
+                      Text(
+                        "KHALIMA",
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      )
+                    ],
+                  ),
                 ),
-              ),
-              InkWell(
-                onTap: () {
-                  push(context, TasbeeDetail());
-                },
-                child: Column(
-                  children: [
-                    Container(
-                      height: 25,
-                      width: 18,
-                      decoration: BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage(
-                                  "assets/images/Tasbi${int.parse(bloc.iconNumber)}.png"),
-                              fit: BoxFit.fill)),
-                    ),
-                    Text(
-                      "TASBEEH",
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).primaryColor,
+                InkWell(
+                  onTap: () {
+                    push(context, TasbeeDetail());
+                  },
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 25,
+                        width: 18,
+                        decoration: BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage(
+                                    "assets/images/Tasbi${int.parse(bloc.iconNumber)}.png"),
+                                fit: BoxFit.fill)),
                       ),
-                    )
-                  ],
+                      Text(
+                        "TASBEEH",
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      )
+                    ],
+                  ),
                 ),
-              ),
-              InkWell(
-                onTap: () {
-                  push(context, const DuaScreen());
-                },
-                child: Column(
-                  children: [
-                    Container(
-                      height: 30,
-                      width: 30,
-                      decoration: BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage(
-                                  "assets/images/Dua${int.parse(bloc.iconNumber)}.png"),
-                              fit: BoxFit.fill)),
-                    ),
-                    Text(
-                      "DUA",
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).primaryColor,
+                InkWell(
+                  onTap: () {
+                    push(context, const DuaScreen());
+                  },
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 30,
+                        width: 30,
+                        decoration: BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage(
+                                    "assets/images/Dua${int.parse(bloc.iconNumber)}.png"),
+                                fit: BoxFit.fill)),
                       ),
-                    )
-                  ],
+                      Text(
+                        "DUA",
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      )
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -279,116 +288,120 @@ class _HomeState extends State<Home> {
   // PrayerQiblaList //
 
   Widget prayerQiblaList(BuildContext context, Size size, ThemeProvider bloc) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Card(
-          elevation: 10,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: InkWell(
-            onTap: () {
-              push(context, DirectionTOQiblah());
-            },
-            child: Container(
-              height: size.height * 0.06,
-              width: size.width * 0.42,
-              decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  border: Border.all(
-                    color: Theme.of(context).primaryColor,
-                    width: 2,
-                  ),
-                  borderRadius: BorderRadius.circular(30)),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      // padding: EdgeInsets.only(left: 10),
-                      // height: size.height * 0.04,
-                      // width: size.width * 0.06,
-                      width: 20,
-                      height: 20,
-                      decoration: const BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage("assets/images/compass.png"),
-                              fit: BoxFit.fill)),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    const Text(
-                      "QIBLA DIRECTION",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        InkWell(
-          onTap: () {
-            push(context, PrayerTime());
-          },
-          child: Card(
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0,
+                      right: 8.0,),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Card(
             elevation: 10,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
             ),
-            child: Container(
-              height: size.height * 0.06,
-              width: size.width * 0.42,
-              decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  // color: Colors.white,
-                  border: Border.all(
+            child: InkWell(
+              onTap: () {
+                push(context, DirectionTOQiblah());
+              },
+              child: Container(
+                height: size.height * 0.06,
+                width: size.width * 0.42,
+                decoration: BoxDecoration(
                     color: Theme.of(context).primaryColor,
-                    width: 2,
-                  ),
-                  borderRadius: BorderRadius.circular(30)),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 22,
-                      height: 22,
-                      decoration: const BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage("assets/images/prayerTime.png"),
-                              fit: BoxFit.cover)),
+                    border: Border.all(
+                      color: Theme.of(context).primaryColor,
+                      width: 2,
                     ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    const Center(
-                      child: Text(
-                        "PRAYER TIME",
+                    borderRadius: BorderRadius.circular(30)),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        // padding: EdgeInsets.only(left: 10),
+                        // height: size.height * 0.04,
+                        // width: size.width * 0.06,
+                        width: 20,
+                        height: 20,
+                        decoration: const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage("assets/images/compass.png"),
+                                fit: BoxFit.fill)),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      const Text(
+                        "QIBLA DIRECTION",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+          InkWell(
+            onTap: () {
+              push(context, PrayerTime());
+            },
+            child: Card(
+              elevation: 10,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Container(
+                height: size.height * 0.06,
+                width: size.width * 0.42,
+                decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                    // color: Colors.white,
+                    border: Border.all(
+                      color: Theme.of(context).primaryColor,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(30)),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 22,
+                        height: 22,
+                        decoration: const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage("assets/images/prayerTime.png"),
+                                fit: BoxFit.cover)),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      const Center(
+                        child: Text(
+                          "PRAYER TIME",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -398,7 +411,8 @@ class _HomeState extends State<Home> {
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
-        padding: const EdgeInsets.only(left: 20.0, top: 20, bottom: 20),
+        padding:
+            const EdgeInsets.only(top: 20, left: 10, right: 10, bottom: 20),
         width: size.width,
         decoration: BoxDecoration(
           color: bloc.selectedSecondary,
@@ -423,35 +437,61 @@ class _HomeState extends State<Home> {
                 "QURAN",
                 style: TextStyle(
                     color: Theme.of(context).primaryColor,
-                    fontSize: 15,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700),
+              ),
+              Spacer(),
+              Text(
+                "البقرة",
+                style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontSize: 20,
+                    fontFamily: bloc.arabicFontFamily,
+                    fontWeight: FontWeight.w700),
+              ),
+              SizedBox(width: 10,),
+              Text(
+                "1-23",
+                style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontSize: 17,
                     fontWeight: FontWeight.w700),
               ),
             ],
           ),
           const SizedBox(
-            height: 10,
+            height: 20,
           ),
           Row(
             children: [
-              Container(
-                height: 20,
-                width: 40,
-              ),
               // const SizedBox(
               //   width: 20,
               // ),
               Expanded(
-                child: const Text(
-                  '''Alif, Lam, Meem.
-This is the Book in which there is no doubt,
-a guide for the righteous.
-Those who believe in the unseen, and
-perform the prayers, and give from what 
-We have provided for them.   [2:1,2,3]''',
-                  style: TextStyle(
-                      color: Colors.black,
-                      // fontSize: 15,
-                      fontWeight: FontWeight.normal),
+                child: Column(
+                  children: [
+                    Text(
+                      " ذٰلِكَ الۡڪِتٰبُ لَا رَيۡبَ ۛۚ  ۖ فِيۡهِ ۛۚ هُدًى لِّلۡمُتَّقِيۡنَۙ‏",
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 30,
+                          fontFamily: bloc.arabicFontFamily,
+                          fontWeight: FontWeight.w500),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "یہ اللہ کی کتاب ہے، اس میں کوئی شک نہیں ہدایت ہے اُن پرہیز گار لوگوں کے لیے",
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 20,
+                        fontFamily: bloc.urduFontFamily,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -530,92 +570,96 @@ We have provided for them.   [2:1,2,3]''',
   // namesAllahProphet //
   Widget namesAllahProphet(
       BuildContext context, Size size, ThemeProvider bloc) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        InkWell(
-          onTap: () {
-            push(context, const NameofAllah());
-          },
-          child: Card(
-            elevation: 10,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(45),
-            ),
-            child: Container(
-              // height: size.height * 0.06,
-              width: size.width * 0.43,
-              height: 50,
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0,
+                      right: 8.0,),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          InkWell(
+            onTap: () {
+              push(context, const NameofAllah());
+            },
+            child: Card(
+              elevation: 10,
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(45),
               ),
-              child: const Center(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    "NAME OF ALLAH",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+              child: Container(
+                // height: size.height * 0.06,
+                width: size.width * 0.43,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(45),
+                ),
+                child: const Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      "NAME OF ALLAH",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-        InkWell(
-          onTap: () {
-            push(context, const NameofMohammad());
-          },
-          child: Card(
-            elevation: 10,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(45),
-            ),
-            child: Container(
-              // height: size.height * 0.07,
-              width: size.width * 0.43,
-              height: 50,
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
+          InkWell(
+            onTap: () {
+              push(context, const NameofMohammad());
+            },
+            child: Card(
+              elevation: 10,
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(45),
               ),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    // ignore: prefer_const_literals_to_create_immutables
-                    children: <Widget>[
-                      const Text(
-                        "NAME OF MUHAMMAD",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+              child: Container(
+                // height: size.height * 0.07,
+                width: size.width * 0.43,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(45),
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      // ignore: prefer_const_literals_to_create_immutables
+                      children: <Widget>[
+                        const Text(
+                          "NAME OF MUHAMMAD",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const Text(
-                        "(PBUH)",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
+                        const Text(
+                          "(PBUH)",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -629,10 +673,10 @@ class SearchInQuaran extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 0, right: 0, top: 10),
-      // margin: EdgeInsets.symmetric(horizontal: 10),
-
+    return Container(
+      width: size!.width,
+      // padding: EdgeInsets.symmetric(horizontal: 10),
+      // color: Colors.red,
       child: Builder(builder: (context) {
         return Card(
           elevation: 5,
@@ -641,20 +685,21 @@ class SearchInQuaran extends StatelessWidget {
           ),
           color: bloc!.selectedSecondary,
           child: Padding(
-            padding: const EdgeInsets.only(top: 10.0, left: 20, right: 20),
+            padding: const EdgeInsets.only(left: 20, right: 20),
             child: Column(
               children: [
-                CupertinoSearchTextField(
-                  borderRadius: BorderRadius.circular(20.0),
-                  backgroundColor: Colors.white,
-                  placeholder: "Search in Quran",
-                  prefixIcon: Image.asset(
-                    "assets/images/searchIcon.png",
-                    fit: BoxFit.cover,
-                    // height: 20,
-                    // width: 20,
-                  ),
-                ),
+                // CupertinoSearchTextField(
+                //   borderRadius: BorderRadius.circular(20.0),
+                //   backgroundColor: Colors.white,
+                //   placeholder: "Search in Quran",
+                //   prefixIcon: Image.asset(
+                //     "assets/images/searchIcon.png",
+                //     fit: BoxFit.cover,
+                //     // height: 20,
+                //     // width: 20,
+                //   ),
+                // ),
+
                 const SizedBox(
                   height: 10,
                 ),

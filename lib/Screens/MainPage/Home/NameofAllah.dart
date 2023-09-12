@@ -157,6 +157,7 @@ class _NameofAllahState extends State<NameofAllah> {
   }
 
   Widget gridNames(size) {
+    var bloc = context.read<ThemeProvider>();
     return ListView.builder(
         shrinkWrap: true,
         itemCount: names.length,
@@ -188,8 +189,8 @@ class _NameofAllahState extends State<NameofAllah> {
                   child: Text(
                     name['name'],
                      textDirection: TextDirection.rtl,
-                    style: const TextStyle(
-                      fontFamily:"alQalam",
+                    style:  TextStyle(
+                      fontFamily:bloc.arabicFontFamily,
                         color: Colors.white,
                         fontSize: 40,
                         // letterSpacing: 1,

@@ -27,7 +27,12 @@ class KhalimaScreen extends StatelessWidget {
         var bloc = context.read<ThemeProvider>();
         return Scaffold(
           backgroundColor: bloc.selectedSecondary,
-          extendBodyBehindAppBar: true,
+                      floatingActionButton: floatinButton(context),
+ floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
+                 bottomNavigationBar: BottomBarApp(bloc:bloc,isShow: false,),
+            extendBodyBehindAppBar: true,
+                      // bottomNavigationBar: BottomBarApp(bloc),
           appBar: AppBar(
             backgroundColor: bloc.selectedTheme,
             title: const Text(
@@ -61,7 +66,7 @@ class KhalimaScreen extends StatelessWidget {
                     KhalimasModel khalima = khalimaList![index];
                     return GestureDetector(
                       onTap: () {
-                        push(context, KhalimaView(khalima,bloc));
+                        push(context, KhalimaView(khalima));
                       },
                       child: Stack(
                         children: [

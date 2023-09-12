@@ -164,7 +164,7 @@ void snackBar(BuildContext context,String text) {
  final _snackBar2 = SnackBar(
         content: Text(text),
         // backgroundColor: Theme.of(context).primaryColor,
-        duration: const Duration(seconds: 10),
+        duration: const Duration(seconds: 1),
         // action: SnackBarAction(
         //   label:'Click',
         //   onPressed: () {

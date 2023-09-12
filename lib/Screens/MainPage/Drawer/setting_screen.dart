@@ -118,7 +118,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 ),
                 Card(
                   child: Container(
-                    height: 240,
+                    // height: 240,
                     width: size.width,
                     padding: const EdgeInsets.all(10),
                     child: Column(
@@ -222,7 +222,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         ),
                         FittedBox(
                           child: Text(
-                            "لآ اِلَهَ اِلّا اللّهُ مُحَمَّدٌ رَسُوُل اللّهِ",
+                            " ذٰلِكَ الۡڪِتٰبُ لَا رَيۡبَ ۛۚ  ۖ فِيۡهِ ۛۚ هُدًى لِّلۡمُتَّقِيۡنَۙ‏",
                             style: TextStyle(fontSize: bloc.arabicFontSize,fontFamily: bloc.arabicFontFamily),
                           ),
                         )
@@ -234,7 +234,7 @@ class _SettingScreenState extends State<SettingScreen> {
   ///////////////////////////////// URDU BLOCK 
                 Card(
                   child: Container(
-                    height: 240,
+                    // height: 240,
                     width: size.width,
                     padding: const EdgeInsets.all(10),
                     child: Column(
@@ -311,7 +311,7 @@ class _SettingScreenState extends State<SettingScreen> {
                                 child: DropdownButton(
                                    hint: Padding(
                                     padding: const EdgeInsets.only(left: 5),
-                                    child: Text("${bloc.arabicFontSize.toInt()}"),
+                                    child: Text("${bloc.urduFontSize.toInt()}"),
                                   ),   
                                   icon: const Icon(Icons.keyboard_arrow_down),
                                   items: arabicFontSize.map((items) {

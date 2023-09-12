@@ -92,7 +92,7 @@ class _SurahState extends State<Surah> {
                                           ["tname"],
                                       // "Ali",
                                       style: const TextStyle(
-
+                                        
                                         color: Colors.black,
                                         fontSize: 17,
                                         fontWeight: FontWeight.w700,
@@ -120,7 +120,7 @@ class _SurahState extends State<Surah> {
                                         qdata["quran"]["suras"]["sura"][index]
                                             ["index"],
                                         // "5",
-                                        style: TextStyle(color: Colors.white),
+                                        style: TextStyle(color: Colors.white,),
                                       )),
                                     ),
                                     trailing: FittedBox(

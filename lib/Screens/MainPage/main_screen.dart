@@ -73,17 +73,20 @@ class _MainScreenState extends State<MainScreen> {
 ////BottomApp Bar created by Abdul Wahab//////
 class BottomBarApp extends StatelessWidget {
   final ThemeProvider? bloc;
-  const BottomBarApp(this.bloc);
+  final isShow;
+  const BottomBarApp({this.bloc,this.isShow = true});
 
   @override
   Widget build(BuildContext context) {
     MyProvider provider = Provider.of<MyProvider>(context, listen: false);
     return BottomAppBar(
+    
       shape: const CircularNotchedRectangle(),
       child: Container(
+        color: bloc!.selectedSecondary,
         padding: const EdgeInsets.symmetric(horizontal: 50),
-        height: 45,
-        child: Row(
+        height: 60,
+        child: !isShow ? Container() : Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
