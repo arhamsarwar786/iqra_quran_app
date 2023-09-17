@@ -36,8 +36,8 @@ class _MaterialScreenState extends State<MaterialScreen> {
           fontFamily: 'kgf',
         ),
         // onGenerateRoute: _appRoutes.onGeneratedRoute,
-        // home: SplashScreen(),
-        home: const Demo(),
+        home: SplashScreen(),
+        // home: const Demo(),
       );
   }
 }

@@ -44,13 +44,13 @@ dependencies:
   lat_lng_to_timezone: any
   flutter_compass: any 
   stream_transform: any
-  vector_math: ^2.1.1
-  carousel_slider: ^4.1.1
-  objectbox: ^1.6.0
+  vector_math:
+  carousel_slider: 
+  objectbox: 
   objectbox_flutter_libs:
-  shared_preferences: ^2.0.15
-  just_audio: ^0.9.31
-  share_plus: ^6.3.1
+  shared_preferences: 
+  just_audio: 
+  share_plus: 
 
 dev_dependencies:
   flutter_test:
@@ -84,6 +84,7 @@ flutter:
     - assets/sound/beep.wav
     - assets/json_data/
     - assets/quran_kareem/urdu_translation/quran.json
+    - assets/extraction/quran.json
     - assets/quran_kareem/urdu_translation/quranmetadata.json
     - assets/quran_kareem/urdu_translation/final_quran.json
   #   - images/a_dot_ham.jpeg

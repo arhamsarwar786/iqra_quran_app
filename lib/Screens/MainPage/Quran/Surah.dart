@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:iqra/Helper/favourite.dart';
 import 'package:iqra/Models/quaran_favorate.dart';
@@ -33,182 +32,163 @@ class _SurahState extends State<Surah> {
             padding: const EdgeInsets.all(12.0),
             child: FutureBuilder(
                 future: DefaultAssetBundle.of(context).loadString(
-                    "assets/quran_kareem/urdu_translation/quranmetadata.json"),
+                    "assets/extraction/quran.json"),
                 builder: (context, snapshot) {
-                  var qdata = json.decode(snapshot.data.toString());
-                  if (snapshot.hasData) {
-                    for (int i = 0; i < 114; i++) {
-                      numberofayat.add(int.parse(
-                        qdata["quran"]["suras"]["sura"][i]["ayas"],
-                      ));
-                    }
-                  }
+                  // var qdata = json.decode(snapshot.data.toString());
+                  // if (snapshot.hasData) {
+                    // for (int i = 0; i < 114; i++) {
+                    //   numberofayat.add(int.parse(
+                    //     qdata["quran"]["suras"]["sura"][i]["ayas"],
+                    //   ));
+                    // }
+                  // }
 
-                  return (snapshot.hasData)
-                      ? ListView.builder(
-                          itemCount: 114,
+                  if (snapshot.hasData && snapshot.data != null){
+                    var data = jsonDecode(snapshot.data.toString());
+                    print(data!["sura"].length);
+                     return  ListView.builder(
+                          itemCount: data!["sura"].length,
                           itemBuilder: (context, index) {
                             return Card(
                               elevation: 5,
                               child: Container(
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(12)),
-                                child: InkWell(
+                                child: ListTile(
                                   onTap: () {
-                                    // Navigator.push(
-                                    //     context,
-                                    //     MaterialPageRoute(
-                                    //         builder: (context) => QuranView(
-                                    //               ayatInSura: numberofayat,
-                                    //               ayatCount: qdata["quran"]["suras"]
-                                    //                   ["sura"][index]["ayas"],
-                                    //               surahCount: qdata["quran"]
-                                    //                       ["suras"]["sura"][index]
-                                    //                   ["index"],
-                                    //               surahName: qdata["quran"]["suras"]
-                                    //                   ["sura"][index]["name"],
-                                    //             )));
+                                          print("click");
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => QuranView(
+                                              ayat: data["sura"][index]["aya"],
+                                                  // ayatInSura: data["sura"][index]["aya"].length,
+                                                  // ayatCount: data["sura"][index]["aya"].length,
+                                                  // surahCount: (index + 1).toString(),
+                                                  // surahName: data["sura"][index]["name"].length,
+                                                )));
                                   },
-                                  child: ListTile(
-                                    onTap: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => QuranView(
-                                                    ayatInSura: numberofayat,
-                                                    ayatCount: qdata["quran"]
-                                                            ["suras"]["sura"][index]
-                                                        ["ayas"],
-                                                    surahCount: qdata["quran"]
-                                                            ["suras"]["sura"][index]
-                                                        ["index"],
-                                                    surahName: qdata["quran"]
-                                                            ["suras"]["sura"][index]
-                                                        ["name"],
-                                                  )));
-                                    },
-                                    title: Text(
-                                      qdata["quran"]["suras"]["sura"][index]
-                                          ["tname"],
-                                      // "Ali",
-                                      style: const TextStyle(
-                                        
-                                        color: Colors.black,
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w700,
-                                      ),
+                                  title: Text(
+                                   data!["sura"][index]["name"],
+                                    // "Ali",
+                                    style: const TextStyle(
+                                      
+                                      color: Colors.black,
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w700,
                                     ),
-                                    subtitle: qdata["quran"]["suras"]["sura"][index]["type"] == "Meccan" ?  Row(
-                                      children: [
-                                        Image.asset("assets/images/kabla${bloc.iconNumber}.png",height: 20,),
-                                        SizedBox(width: 10,),
-                                        Text(qdata["quran"]["suras"]["sura"][index]["ayas"])
-                                      ],
-                                    ) : Row(
-                                      children: [
-                                        Image.asset("assets/images/masjid${bloc.iconNumber}.png",height: 20,),
-                                        SizedBox(width: 10,),
+                                  ),
+                                  // subtitle: qdata["quran"]["suras"]["sura"][index]["type"] == "Meccan" ?  Row(
+                                  //   children: [
+                                  //     Image.asset("assets/images/kabla${bloc.iconNumber}.png",height: 20,),
+                                  //     SizedBox(width: 10,),
+                                  //     Text(qdata["quran"]["suras"]["sura"][index]["ayas"])
+                                  //   ],
+                                  // ) : Row(
+                                  //   children: [
+                                  //     Image.asset("assets/images/masjid${bloc.iconNumber}.png",height: 20,),
+                                  //     SizedBox(width: 10,),
 
-                                        Text(qdata["quran"]["suras"]["sura"][index]["ayas"])
-                                      ],
-                                    ),
-                                    leading: CircleAvatar(
-                                      radius: 15,
-                                      backgroundColor: bloc.selectedTheme,
-                                      child: Center(
-                                          child: Text(
-                                        qdata["quran"]["suras"]["sura"][index]
-                                            ["index"],
-                                        // "5",
-                                        style: TextStyle(color: Colors.white,),
-                                      )),
-                                    ),
-                                    trailing: FittedBox(
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            qdata["quran"]["suras"]["sura"][index]
-                                                ["name"],
-                                            style:  TextStyle(
-                                              fontFamily: bloc.urduFontFamily,
-                                              color: Colors.black,
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.w700,
-                                            ),
+                                  //     Text(qdata["quran"]["suras"]["sura"][index]["ayas"])
+                                  //   ],
+                                  // ),
+                                  leading: CircleAvatar(
+                                    radius: 15,
+                                    backgroundColor: bloc.selectedTheme,
+                                    child: Center(
+                                        child: Text(
+                                      (index+1).toString() ,
+                                      // "5",
+                                      style: TextStyle(color: Colors.white,),
+                                    )),
+                                  ),
+                                  trailing: FittedBox(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          data["sura"][index]
+                                              ["name"],
+                                          style:  TextStyle(
+                                            fontFamily: bloc.urduFontFamily,
+                                            color: Colors.black,
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.w700,
                                           ),
-                                          IconButton(
-                                            onPressed: () async {
-                                              // print(numberofayat);
-                                              quranFavorite = QuranFavorite(
-                                                suratName: qdata["quran"]["suras"]
-                                                    ["sura"][index]["tname"],
-                                                urduSuratName: qdata["quran"]
-                                                        ["suras"]["sura"][index]
-                                                    ["name"],
-                                                suraVerses: qdata["quran"]["suras"]
-                                                    ["sura"][index]["ayas"],
-                                                // ayatInSura: numberofayat,
-                                                surahCount: qdata["quran"]["suras"]
-                                                    ["sura"][index]["index"],
-                                              );
-                                              var list = QuranFavorite.fromJson(
-                                                  quranFavorite.toJson());
-                                              int isFound = 0;
-                                              List<QuranFavorite> fav = [];
+                                        ),
+                                        IconButton(
+                                          onPressed: () async {
+                                            // print(numberofayat);
+                                            // quranFavorite = QuranFavorite(
+                                            //   suratName: qdata["quran"]["suras"]
+                                            //       ["sura"][index]["tname"],
+                                            //   urduSuratName: qdata["quran"]
+                                            //           ["suras"]["sura"][index]
+                                            //       ["name"],
+                                            //   suraVerses: qdata["quran"]["suras"]
+                                            //       ["sura"][index]["ayas"],
+                                            //   // ayatInSura: numberofayat,
+                                            //   surahCount: qdata["quran"]["suras"]
+                                            //       ["sura"][index]["index"],
+                                            // );
+                                            // var list = QuranFavorite.fromJson(
+                                            //     quranFavorite.toJson());
+                                            // int isFound = 0;
+                                            // List<QuranFavorite> fav = [];
 
-                                              var getFav =
-                                                  await SavedPreferences.getFav()
-                                                      .then((value) {
-                                                return value;
-                                                // fav=  quranFavoriteFromJson(
-                                                //     jsonEncode(value));
-                                              });
-                                              if (getFav != null) {
-                                                fav = quranFavoriteFromJson(
-                                                    jsonEncode(getFav));
-                                                for (var items in fav) {
-                                                  if (items.suratName ==
-                                                      list.suratName) {
-                                                    isFound = 1;
-                                                    print("enter loop $isFound");
-                                                  }
-                                                }
-                                                if (isFound == 0) {
-                                                  fav.add(list);
-                                                  SavedPreferences.setFav(fav);
-                                                  snackBar(context,
-                                                      "Addes to Favourite successfully");
-                                                } else {
-                                                  snackBar(context,
-                                                      "Already added in favourite");
-                                                }
-                                              } else {
-                                                List<QuranFavorite> addFav = [];
-                                                print("new addes");
-                                                addFav.add(list);
-                                                SavedPreferences.setFav(addFav);
-                                                snackBar(
-                                                    context, "Successfully added");
-                                              }
-                                            },
-                                            icon: const Icon(
-                                              Icons.star_border_outlined,
-                                              color: Colors.grey,
-                                            ),
+                                            // var getFav =
+                                            //     await SavedPreferences.getFav()
+                                            //         .then((value) {
+                                            //   return value;
+                                            //   // fav=  quranFavoriteFromJson(
+                                            //   //     jsonEncode(value));
+                                            // });
+                                            // if (getFav != null) {
+                                            //   fav = quranFavoriteFromJson(
+                                            //       jsonEncode(getFav));
+                                            //   for (var items in fav) {
+                                            //     if (items.suratName ==
+                                            //         list.suratName) {
+                                            //       isFound = 1;
+                                            //       print("enter loop $isFound");
+                                            //     }
+                                            //   }
+                                            //   if (isFound == 0) {
+                                            //     fav.add(list);
+                                            //     SavedPreferences.setFav(fav);
+                                            //     snackBar(context,
+                                            //         "Addes to Favourite successfully");
+                                            //   } else {
+                                            //     snackBar(context,
+                                            //         "Already added in favourite");
+                                            //   }
+                                            // } else {
+                                            //   List<QuranFavorite> addFav = [];
+                                            //   print("new addes");
+                                            //   addFav.add(list);
+                                            //   SavedPreferences.setFav(addFav);
+                                            //   snackBar(
+                                            //       context, "Successfully added");
+                                            // }
+                                          },
+                                          icon: const Icon(
+                                            Icons.star_border_outlined,
+                                            color: Colors.grey,
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
                               ),
                             );
                           },
-                        )
-                      : Center(
+                        );
+                      }
+                      
+                      return Center(
                           child: CircularProgressIndicator(
                             color: Theme.of(context).primaryColor,
                           ),

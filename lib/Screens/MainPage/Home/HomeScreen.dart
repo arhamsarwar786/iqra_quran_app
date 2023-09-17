@@ -64,7 +64,7 @@ class _HomeState extends State<Home> {
             bottomNavigationBar: BottomBarApp(bloc:bloc),
             extendBodyBehindAppBar: true,
             // backgroundColor: Colors.red,
-            // key: _scaffoldKey,
+            key: _scaffoldKey,
             drawer: Darwerr(),
             resizeToAvoidBottomInset: false,
             appBar: AppBar(

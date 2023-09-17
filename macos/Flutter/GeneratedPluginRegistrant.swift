@@ -9,9 +9,9 @@ import audio_session
 import geolocator_apple
 import just_audio
 import objectbox_flutter_libs
-import path_provider_macos
+import path_provider_foundation
 import share_plus
-import shared_preferences_macos
+import shared_preferences_foundation
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   AudioSessionPlugin.register(with: registry.registrar(forPlugin: "AudioSessionPlugin"))
