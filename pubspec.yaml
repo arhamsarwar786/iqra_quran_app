@@ -130,9 +130,14 @@ flutter:
         - asset: assets/fonts/nastaleeq.ttf 
     - family: pdmsSaleem
       fonts:
-        - asset: assets/fonts/pdmsSaleem.ttf 
+        - asset: assets/fonts/pdmsSaleem.ttf
     - family: Muhammdi
       fonts:
         - asset: assets/fonts/Muhammdi.ttf
+
+
+    - family: AlQalamQuranMajeed
+      fonts:
+        - asset: assets/fonts/AlQalamQuranMajeedWeb2_D.otf
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
