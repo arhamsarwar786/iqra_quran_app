@@ -112,15 +112,15 @@ class _FavoriteState extends State<Favorite> {
                               borderRadius: BorderRadius.circular(12)),
                           child: ListTile(
                             onTap: (){
-                              Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => QuranView(
-                                                ayatInSura: numberofayat,
-                                                ayatCount:data.suraVerses,
-                                                surahCount: data.surahCount,
-                                                surahName: data.urduSuratName,
-                                              ),),);
+                              // Navigator.push(
+                              //         context,
+                              //         MaterialPageRoute(
+                              //             builder: (context) => QuranView(
+                              //                   ayatInSura: numberofayat,
+                              //                   ayatCount:data.suraVerses,
+                              //                   surahCount: data.surahCount,
+                              //                   surahName: data.urduSuratName,
+                              //                 ),),);
                             },
                             title: Text(
                               data.suratName.toString(),

@@ -51,6 +51,7 @@ dependencies:
   shared_preferences: 
   just_audio: 
   share_plus: 
+  flutter_localization: ^0.1.14
 
 dev_dependencies:
   flutter_test:
@@ -85,6 +86,9 @@ flutter:
     - assets/json_data/
     - assets/quran_kareem/urdu_translation/quran.json
     - assets/extraction/quran.json
+    - assets/extraction/ruko.json
+    - assets/extraction/sajda.json
+    - assets/extraction/quran-devsinn.json
     - assets/quran_kareem/urdu_translation/quranmetadata.json
     - assets/quran_kareem/urdu_translation/final_quran.json
   #   - images/a_dot_ham.jpeg

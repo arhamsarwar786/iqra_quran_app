@@ -166,7 +166,7 @@ class _SettingScreenState extends State<SettingScreen> {
                                   onChanged: (newValue) async {
                                     
                                     bloc.changeArabicFamily(newValue);
-                                    snackBar(context, 'Arabic Family Changed!');
+                                    snackBar(context, '$newValue Arabic Family Changed!');
                                     setState(() {});
                                   },
                                 ),

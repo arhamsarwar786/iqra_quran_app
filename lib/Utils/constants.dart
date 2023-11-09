@@ -11,5 +11,6 @@ Color secondaryColor = themeList[0]['secondary']?.toColor();
 class MyColors {
 static Color greyColor = const Color(0xff9D9C9C);
 static Color whiteColor = const Color(0xffFFFFFF);
+static Color greenColor = Colors.green;
 
 }

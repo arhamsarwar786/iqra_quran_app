@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  flutter_localization
   objectbox_flutter_libs
   url_launcher_linux
 )

@@ -14,11 +14,11 @@ class ThemeProvider extends ChangeNotifier {
 
   ////  FONT STYLES  ////
   // Arabic
-  String arabicFontFamily = "kgf";
-  var arabicFontSize = 15.0;
+  String arabicFontFamily = "AlQalamQuranMajeed";
+  var arabicFontSize = 30.0;
   // Urdu
   String urduFontFamily = "nastaleeq";
-  var urduFontSize = 12.0;
+var urduFontSize = 25.0;
 
   getSelectedTheme() async {
     var theme = await SavedPrefernces.getTheme();

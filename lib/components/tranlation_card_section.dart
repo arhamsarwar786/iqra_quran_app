@@ -28,6 +28,7 @@ class TranlationCardSection extends StatelessWidget {
             child: Column(
               children: [
                 Text("${arabic}",style: MyTextStyle.heading3.copyWith(fontSize: provider!.arabicFontSize,fontFamily: provider!.arabicFontFamily),textDirection: TextDirection.rtl,),
+                  Text("ترجمہ: کنزالایمان"),
                 Text("${urdu}",style: MyTextStyle.heading3.copyWith(fontSize: provider!.urduFontSize,fontFamily: provider!.urduFontFamily),textDirection: TextDirection.rtl),
               ],
             ),
