@@ -120,6 +120,20 @@ class _QuranViewState extends State<QuranView> {
     });
   }
 
+  //   String arabicText = "";
+
+
+  // getArabic(){
+  //   for(int index = 0; index < int.parse(widget.ayatCount.toString()); index++){
+  //     RukoModel rukoModel =  isRuku(index);
+  //   arabicText += "${widget.ayat![index].arabic}".trim() + "${index == 0 ? '\n' : " "}" + "${rukoModel == null  ? "" : ""}";
+  //   }
+  //   setState(() {
+      
+  //   });
+  // }
+
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -259,137 +273,139 @@ class _QuranViewState extends State<QuranView> {
                               controller: _scrollViewController,
                               child: Column(
                                 children: [
-//              ListView.builder(
-//                  // controller: _scrollViewController,
-//                  physics:
-//                      const NeverScrollableScrollPhysics(),
-//                  shrinkWrap: true,
-//                  itemCount: widget.ayat!.length,
-//                  itemBuilder: (context, index) {
-//                   RukoModel? rukoModel =  isRuku(index);
-//                   SajdaModel? sajdaModel =  isSajda(index);
-//                    return Column(
-//                      children: [
-//                       Divider(),
-//                        Divider(),
-//                        Divider(),
-//                        Text(
-//                          widget.ayat![index].arabic.toString(),
-//                          // " (" +
-//                          // arabicNumber.convert(index) +
-//                          // ")",
-//                          textAlign: TextAlign.right,
-//                          style: TextStyle(
-//                            fontSize: bloc.arabicFontSize,fontFamily: bloc.arabicFontFamily,
-//                           fontWeight: FontWeight.bold
-//                              ),
-//                        ),
-//                        Divider(),
-//                        Divider(),
-//                        Divider(),
-//                        Text("ترجمہ: کنزالایمان"),
-//                         Text(
-//                          widget.ayat![index].translation1.toString(),
-//                          // " (" +
-//                          // arabicNumber.convert(index) +
-//                          // ")",
-//                          textAlign: TextAlign.right,
-//                          style: TextStyle(
-//                            fontSize: bloc.urduFontSize,fontFamily: bloc.urduFontFamily,
-//                           fontWeight: FontWeight.w500
-//                              ),
-//                        ),
-//                        Divider(),
-//                        Divider(),
-//                        Divider(),
-//                         Text(
-//                          widget.ayat![index].translation2.toString(),
-//                          // " (" +
-//                          // arabicNumber.convert(index) +
-//                          // ")",
-//                          textAlign: TextAlign.right,
-//                          style: TextStyle(
-//                            fontSize: bloc.urduFontSize,fontFamily: bloc.urduFontFamily,
-//                           fontWeight: FontWeight.w500
-//                              ),
-//                        ),
-// Row(
-// mainAxisSize: MainAxisSize.max,
-// mainAxisAlignment: MainAxisAlignment.center,
-//   children: [
-//                        if(rukoModel != null )
-//                        Row(
-//                          // mainAxisAlignment: MainAxisAlignment.center,
-//                          crossAxisAlignment:
-//                              CrossAxisAlignment.center,
-//                          children: [
-//                           //  Expanded(
-//                           //      child: Image.asset(
-//                           //          "assets/images/borderLeft${bloc.iconNumber}.png")),
-//                            Stack(
-//                             alignment: Alignment.center,
-//                              children: [
-//                                Text(
-//                                  "ع",
-//                                  style: MyTextStyle.heading1
-//                                      .copyWith(
-//                                          fontSize: 70,
-//                                          fontFamily: bloc
-//                                              .arabicFontFamily),
-//                                ),
-//                                Positioned(
-//                                 bottom: 30,
-//                                 child: Text(rukoModel.diff)),
-//                                 Positioned(
-//                                 top: 20,
-//                                 child: Text(rukoModel.rakuNumber))
-//                              ],
-//                            ),
-                          
-                          
-//                           //  Expanded(
-//                               //  child: Image.asset(
-//                               //      "assets/images/borderRight${bloc.iconNumber}.png")),
-//                          ],
-//                        )
-//                      ,
-//                      if(sajdaModel != null )
-//                      Row(
-//                       mainAxisAlignment: MainAxisAlignment.center,
-//                        children: [
-//                                                  if(sajdaModel.serial != null)
-//                           Text(" (${sajdaModel.serial}) ", style: MyTextStyle.heading1
-//                                          .copyWith(
-//                                              fontSize: 20,
-//                                              color: MyColors.greenColor,
-//                                              fontFamily: bloc
-//                                                  .arabicFontFamily),),
-//                          Text(" ${sajdaModel.place} ", style: MyTextStyle.heading1
-//                                          .copyWith(
-//                                              fontSize: 20,
-//                                              color: MyColors.greenColor,
-//                                              fontFamily: bloc
-//                                                  .arabicFontFamily),),
-                                               
-//                        ],
-//                      )
+             ListView.builder(
+                 // controller: _scrollViewController,
+                 physics:
+                     const NeverScrollableScrollPhysics(),
+                 shrinkWrap: true,
+                 itemCount: widget.ayat!.length,
+                 itemBuilder: (context, index) {
+                  RukoModel? rukoModel =  isRuku(index);
+                  SajdaModel? sajdaModel =  isSajda(index);
+                   return Column(
+                     children: [
+                      // Divider(),
+                      //  Divider(),
+                      //  Divider(),
+                       Text(
+                         widget.ayat![index].arabic.toString(),
+                         // " (" +
+                         // arabicNumber.convert(index) +
+                         // ")",
+                         textAlign: TextAlign.right,
+                         style: TextStyle(
+                           fontSize: bloc.arabicFontSize,fontFamily: bloc.arabicFontFamily,
+                          fontWeight: FontWeight.bold
+                             ),
+                       ),
+                      //  Divider(),
+                      //  Divider(),
+                      //  Divider(),
+                      //  Text("ترجمہ: کنزالایمان"),
+                      //   Text(
+                      //    widget.ayat![index].translation1.toString(),
+                      //    // " (" +
+                      //    // arabicNumber.convert(index) +
+                      //    // ")",
+                      //    textAlign: TextAlign.right,
+                      //    style: TextStyle(
+                      //      fontSize: bloc.urduFontSize,fontFamily: bloc.urduFontFamily,
+                      //     fontWeight: FontWeight.w500
+                      //        ),
+                      //  ),
+                      //  Divider(),
+                      //  Divider(),
+                      //  Divider(),
+                      //   Text(
+                      //    widget.ayat![index].translation2.toString(),
+                      //    // " (" +
+                      //    // arabicNumber.convert(index) +
+                      //    // ")",
+                      //    textAlign: TextAlign.right,
+                      //    style: TextStyle(
+                      //      fontSize: bloc.urduFontSize,fontFamily: bloc.urduFontFamily,
+                      //     fontWeight: FontWeight.w500
+                      //        ),
+                      //  ),
 
-// ],)
-//                      ],
-//                    );
-//                  },                                 
-//                  ),
+
+Row(
+mainAxisSize: MainAxisSize.max,
+mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+                       if(rukoModel != null )
+                       Row(
+                         // mainAxisAlignment: MainAxisAlignment.center,
+                         crossAxisAlignment:
+                             CrossAxisAlignment.center,
+                         children: [
+                          //  Expanded(
+                          //      child: Image.asset(
+                          //          "assets/images/borderLeft${bloc.iconNumber}.png")),
+                           Stack(
+                            alignment: Alignment.center,
+                             children: [
+                               Text(
+                                 "ع",
+                                 style: MyTextStyle.heading1
+                                     .copyWith(
+                                         fontSize: 70,
+                                         fontFamily: bloc
+                                             .arabicFontFamily),
+                               ),
+                               Positioned(
+                                bottom: 30,
+                                child: Text(rukoModel.diff)),
+                                Positioned(
+                                top: 20,
+                                child: Text(rukoModel.rakuNumber))
+                             ],
+                           ),
+                          
+                          
+                          //  Expanded(
+                              //  child: Image.asset(
+                              //      "assets/images/borderRight${bloc.iconNumber}.png")),
+                         ],
+                       )
+                     ,
+                     if(sajdaModel != null )
+                     Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                       children: [
+                                                 if(sajdaModel.serial != null)
+                          Text(" (${sajdaModel.serial}) ", style: MyTextStyle.heading1
+                                         .copyWith(
+                                             fontSize: 20,
+                                             color: MyColors.greenColor,
+                                             fontFamily: bloc
+                                                 .arabicFontFamily),),
+                         Text(" ${sajdaModel.place} ", style: MyTextStyle.heading1
+                                         .copyWith(
+                                             fontSize: 20,
+                                             color: MyColors.greenColor,
+                                             fontFamily: bloc
+                                                 .arabicFontFamily),),
+                                               
+                       ],
+                     )
+
+],)
+                     ],
+                   );
+                 },                                 
+                 ),
 
 //                Wrap(
 //                  children: [
              
                    
 // // bloc.arabicFontSize
-                   Text(                     
-                     arabicText,
-                     textAlign: TextAlign.right,
-                     style: MyTextStyle.heading3.copyWith(fontSize: bloc.arabicFontSize,fontFamily: bloc.arabicFontFamily),textDirection: TextDirection.rtl,
-                   ),
+                  //  Text(                     
+                  //    arabicText,
+                  //    textAlign: TextAlign.right,
+                  //    style: MyTextStyle.heading3.copyWith(fontSize: bloc.arabicFontSize,fontFamily: bloc.arabicFontFamily),textDirection: TextDirection.rtl,
+                  //  ),
               //    ],
               //  )
                                 ],
