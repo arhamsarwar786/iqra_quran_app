@@ -52,6 +52,7 @@ dependencies:
   just_audio: 
   share_plus: 
   flutter_localization: ^0.1.14
+  easy_localization: ^3.0.3
 
 dev_dependencies:
   flutter_test:

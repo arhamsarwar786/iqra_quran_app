@@ -35,3 +35,6 @@ var urduFontFamily = [
   "nastaleeq",
   "pdmsSaleem"
 ];
+
+
+const bismillaArabic = "بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِیْمِ";

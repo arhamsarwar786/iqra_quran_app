@@ -30,7 +30,7 @@ class MyTextStyle{
 
   static TextStyle heading1 = TextStyle(
     fontWeight: FontWeight.bold,
-    fontSize: 25,
+    fontSize: 25,    
   );
 
   static TextStyle heading2 = TextStyle(
