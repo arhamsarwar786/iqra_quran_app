@@ -6,13 +6,15 @@ import 'package:iqra/Utils/constants.dart';
 import 'package:iqra/Utils/customThemes.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../Models/para_model.dart';
 import '../../../../components/tranlation_card_section.dart';
 
 class ParahTranslationScreen extends StatefulWidget {
   ParahTranslationScreen(
-      {super.key, this.ayatInSura, this.parahCount, this.parahname});
+      {super.key,this.para, this.ayatInPara, this.parahCount, this.parahname});
   final String? parahCount;
-  List<int>? ayatInSura;
+  int? ayatInPara;
+  Para? para;
   final String? parahname;
 
   @override
@@ -99,16 +101,16 @@ class _ParahTranslationScreenState extends State<ParahTranslationScreen> {
                       quran["quran"]["sura"][i]["name"],
                     );
                     urdudata.add(" ");
-                    a = a + widget.ayatInSura![i];
+                    // a = a + widget.ayatInSura![i];
 
-                    for (int j = 1; j <= widget.ayatInSura![i]; j++) {
-                      data.add(
-                        quran["quran"]["sura"][i]["aya"][j - 1]["text"],
-                      );
-                      urdudata.add(
-                        quran["sura"][i]["aya"][j - 1]["text"],
-                      );
-                    }
+                    // for (int j = 1; j <= widget!.ayatInPara![i]; j++) {
+                    //   data.add(
+                    //     quran["quran"]["sura"][i]["aya"][j - 1]["text"],
+                    //   );
+                    //   urdudata.add(
+                    //     quran["sura"][i]["aya"][j - 1]["text"],
+                    //   );
+                    // }
                   }
                 }
                 return ListView.builder(

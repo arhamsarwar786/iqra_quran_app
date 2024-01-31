@@ -90,6 +90,7 @@ flutter:
     - assets/extraction/ruko.json
     - assets/extraction/sajda.json
     - assets/extraction/quran-devsinn.json
+    - assets/extraction/quran-devsinn-para.json
     - assets/quran_kareem/urdu_translation/quranmetadata.json
     - assets/quran_kareem/urdu_translation/final_quran.json
   #   - images/a_dot_ham.jpeg

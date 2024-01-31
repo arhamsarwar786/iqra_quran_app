@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:iqra/Helper/preference/saved_preferences.dart';
 import 'package:iqra/Models/theme_model.dart';

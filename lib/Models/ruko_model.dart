@@ -9,13 +9,14 @@ List<RukoModel> rukoModelFromJson(String str) => List<RukoModel>.from(json.decod
 String rukoModelToJson(List<RukoModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class RukoModel {
-    String serial;
-    String surat;
-    String rakuNumber;
-    String ayaAfterRako;
+    int serial;
+    int surat;
+    int rakuNumber;
+    int ayaAfterRako;
     String place;
-    String ayaBeforeRako;
-    String diff;
+    int ayaBeforeRako;
+    int diff;
+    int bottomNumber;
 
     RukoModel({
         required this.serial,
@@ -25,6 +26,7 @@ class RukoModel {
         required this.place,
         required this.ayaBeforeRako,
         required this.diff,
+        required this.bottomNumber
     });
 
     factory RukoModel.fromJson(Map<String, dynamic> json) => RukoModel(
@@ -35,6 +37,7 @@ class RukoModel {
         place: json["Place"],
         ayaBeforeRako: json["ayaBeforeRako"],
         diff: json["Diff"],
+        bottomNumber: json["bottomNumber"]
     );
 
     Map<String, dynamic> toJson() => {
@@ -45,5 +48,6 @@ class RukoModel {
         "Place": place,
         "ayaBeforeRako": ayaBeforeRako,
         "Diff": diff,
+        "bottomNumber": bottomNumber
     };
 }

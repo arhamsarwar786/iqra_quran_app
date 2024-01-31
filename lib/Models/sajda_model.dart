@@ -12,6 +12,7 @@ class SajdaModel {
     String? serial;
     String surat;
     String? rukuNumber;
+    String? sajdaNumber;
     String ayaBeforeSajda;
     String? place;
 
@@ -21,6 +22,7 @@ class SajdaModel {
         required this.rukuNumber,
         required this.ayaBeforeSajda,
         required this.place,
+        required this.sajdaNumber
     });
 
     factory SajdaModel.fromJson(Map<String, dynamic> json) => SajdaModel(
@@ -29,6 +31,7 @@ class SajdaModel {
         rukuNumber: json["rukuNumber"],
         ayaBeforeSajda: json["ayaBeforeSajda"],
         place: json["Place"]!,
+        sajdaNumber: json["sajdaNumber"]
     );
 
     Map<String, dynamic> toJson() => {
@@ -37,5 +40,6 @@ class SajdaModel {
         "rukuNumber": rukuNumber,
         "ayaBeforeSajda": ayaBeforeSajda,
         "Place": place,
+        "sajdaNumber":sajdaNumber
     };
 }
