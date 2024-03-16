@@ -418,10 +418,10 @@ class _QuranViewState extends State<QuranView> {
     return SafeArea(child: Builder(builder: (context) {
       var bloc = context.read<ThemeProvider>();
       return Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          child: Text(widget.ayat!.length.toString()),
-        ),
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: () {},
+        //   child: Text(widget.ayat!.length.toString()),
+        // ),
         bottomNavigationBar: isScrollingDown
             ? SizedBox()
             : BottomNavigationBar(
@@ -571,15 +571,21 @@ class _QuranViewState extends State<QuranView> {
               //     ? CircularProgressIndicator()
               //     :
               Container(
-                  padding: EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  image: DecorationImage(image: AssetImage("assets/images/border.png",),fit: BoxFit.fill, alignment: Alignment.topCenter)
+                ),
                   // height: size.height / 1.75,
-
+ padding: const EdgeInsets.only(left: 0, right: 0, top: 20, bottom: 20),
                   child: Directionality(
                     textDirection: TextDirection.rtl,
                     child: SingleChildScrollView(
                       controller: _scrollViewController,
-                      child: Column(
-                        children: quranViewWidget,
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 23, right: 30, top: 30, bottom: 30),
+                        child: Column(
+                          children: quranViewWidget,
+                        ),
                       ),
                       // child: RichText(
                       //   text: TextSpan(
