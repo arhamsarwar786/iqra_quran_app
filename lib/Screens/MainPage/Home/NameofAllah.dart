@@ -1,7 +1,9 @@
 
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:iqra/Models/name_of_Allah_model.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:provider/provider.dart';
 // import 'package:intl/intl.dart';
@@ -16,107 +18,6 @@ class NameofAllah extends StatefulWidget {
 }
 
 class _NameofAllahState extends State<NameofAllah> {
-  static const _nameofAllah = [
-    'الرَّحْمَنُ',
-    'الرَّحِيمُ',
-    'الْمَلِكُ',
-    'الْقُدُّوسُ',
-    'السَّلاَمُ',
-    'الْمُؤْمِنُ',
-    'الْمُهَيْمِنُ',
-    'الْعَزِيزُ',
-    'الْجَبَّارُ',
-    'الْمُتَكَبِّر',
-    'الْخَالِقُ',
-    'الْبَارِئُ',
-    'الْمُصَوِّرُ',
-    'الْغَفَّارُ',
-    'الْقَهَّارُ',
-    'الْوَهَّابُ',
-    'الرَّزَّاقُ',
-    'الْفَتَّاحُ',
-    'اَلْعَلِيْمُ',
-    'الْقَابِضُ',
-    'الْبَاسِطُ',
-    'الْخَافِضُ',
-    'الرَّافِعُ',
-    'الْمُعِزُّ',
-    'ٱلْمُذِلُّ',
-    'السَّمِيعُ',
-    'الْبَصِيرُ',
-    'الْحَكَمُ',
-    'الْعَدْلُ',
-    'اللَّطِيفُ',
-    'الْخَبِيرُ',
-    'الْحَلِيمُ',
-    'الْعَظِيمُ',
-    'الْغَفُور',
-    'الشَّكُورُ',
-    'الْعَلِيُّ',
-    'الْكَبِيرُ',
-    'الْحَفِيظُ',
-    'المُقيِت',
-    'الْحسِيبُ',
-    'الْجَلِيلُ',
-    'الْكَرِيمُ',
-    'الرَّقِيبُ',
-    'ٱلْمُجِيبُ',
-    'الْوَاسِعُ',
-    'الْحَكِيمُ',
-    'الْوَدُودُ',
-    'الْمَجِيدُ',
-    'الْبَاعِثُ',
-    'الشَّهِيدُ',
-    'الْحَقُ',
-    'الْوَكِيلُ',
-    'الْقَوِيُ',
-    'الْمَتِينُ',
-    'الْوَلِيُّ',
-    'الْحَمِيدُ',
-    'الْمُحْصِي',
-    'الْمُبْدِئُ',
-    'ٱلْمُعِيدُ',
-    'الْمُحْيِي',
-    'اَلْمُمِيتُ',
-    'الْحَيُّ',
-    'الْقَيُّومُ',
-    'الْوَاجِدُ',
-    'الْمَاجِدُ',
-    'الْواحِدُ',
-    'اَلاَحَدُ',
-    'الصَّمَدُ',
-    'الْقَادِرُ',
-    'الْمُقْتَدِرُ',
-    'الْمُقَدِّمُ',
-    'الْمُؤَخِّرُ	',
-    'الأوَّلُ',
-    'الآخِرُ',
-    'الظَّاهِرُ',
-    'الْبَاطِنُ',
-    'الْوَالِي',
-    'الْمُتَعَالِي',
-    'الْبَرُّ',
-    'التَّوَابُ',
-    'الْمُنْتَقِمُ',
-    'العَفُوُ',
-    'الرَّؤُوفُ',
-    'َمَالِكُ ٱلْمُلْكُ',
-    'ذُوالْجَلاَلِ وَالإكْرَامِ',
-    'الْمُقْسِطُ',
-    'الْجَامِعُ',
-    'ٱلْغَنيُّ',
-    'ٱلْمُغْنِيُّ',
-    'اَلْمَانِعُ',
-    'الضَّارَ',
-    'النَّافِعُ',
-    'النُّورُ',
-    'الْهَادِي',
-    'الْبَدِيعُ',
-    'اَلْبَاقِي',
-    'الْوَارِثُ',
-    'الرَّشِيدُ',
-    'الصَّبُورُ',
-  ];
 
   @override
   void initState() {
@@ -147,11 +48,14 @@ class _NameofAllahState extends State<NameofAllah> {
     );
   }
 
-  var names;
+  List<NameOfAllahModel>? names;
   loadNamesOfAllah() async {
     var data = await DefaultAssetBundle.of(context)
-        .loadString("assets/json_data/names_of_Allah.json");
-    names = jsonDecode(data);
+        .loadString("assets/json_data/name_of_Allah.json");
+    // names = jsonDecode(data);
+    print(data);
+    debugger();
+    names = nameOfAllahModelFromJson(data);
     print(names);
     setState(() {});
   }
@@ -160,9 +64,9 @@ class _NameofAllahState extends State<NameofAllah> {
     var bloc = context.read<ThemeProvider>();
     return ListView.builder(
         shrinkWrap: true,
-        itemCount: names.length,
+        itemCount: names!.length,
         itemBuilder: (context, index) {
-          var name = names[index];
+          var name = names![index];
           return Container(
             margin: EdgeInsets.only(left: 10, right: 10, top: 10),
             padding: EdgeInsets.all(15),
@@ -179,7 +83,7 @@ class _NameofAllahState extends State<NameofAllah> {
                 Container(
                   width: size.width * 0.40,
                   child: Text(
-                    name["transliteration"],
+                    name.namesOfAllahInUrdu!,
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
@@ -187,7 +91,7 @@ class _NameofAllahState extends State<NameofAllah> {
                   width: size.width * 0.45,
 
                   child: Text(
-                    name['name'],
+                    name.namesOfAllahInArabic!,
                      textDirection: TextDirection.rtl,
                     style:  TextStyle(
                       fontFamily:bloc.arabicFontFamily,

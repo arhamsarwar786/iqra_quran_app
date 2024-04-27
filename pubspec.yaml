@@ -85,6 +85,8 @@ flutter:
     - assets/images/
     - assets/sound/beep.wav
     - assets/json_data/
+    - assets/json_data/name_of_Allah.json
+    - assets/json_data/name_of_Muh.json
     - assets/quran_kareem/urdu_translation/quran.json
     - assets/extraction/quran.json
     - assets/extraction/ruko.json

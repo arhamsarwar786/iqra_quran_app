@@ -1,0 +1,794 @@
+[
+ {
+  "No": 1,
+  "Transliteration": "Muhammed",
+  "Muhammad (SAW) Names in Urdu": "محمد",
+  "Muhammad (SAW) Names in Arabic": "مُحَمَّد",
+  "Meanings in Urdu": "زیادہ تعریف کیا گیا۔ تعریف والا",
+  "Meanings in English": "Highly praised"
+ },
+ {
+  "No": 2,
+  "Transliteration": "Ahmad, Ahmed",
+  "Muhammad (SAW) Names in Urdu": "احمد",
+  "Muhammad (SAW) Names in Arabic": "اَحمَد",
+  "Meanings in Urdu": "سب سے ذیادہ حمد کرنے والا",
+  "Meanings in English": "Highly commendable"
+ },
+ {
+  "No": 3,
+  "Transliteration": "Hamid",
+  "Muhammad (SAW) Names in Urdu": "حامد",
+  "Muhammad (SAW) Names in Arabic": "حَامِد",
+  "Meanings in Urdu": "بہت تعریف کرنےوالا، سراہنے والا",
+  "Meanings in English": "Praising, One who Praise"
+ },
+ {
+  "No": 4,
+  "Transliteration": "Mehmood",
+  "Muhammad (SAW) Names in Urdu": "محمود",
+  "Muhammad (SAW) Names in Arabic": "محمُود",
+  "Meanings in Urdu": "بہت تعریف کیا گیا، سراہا گیا",
+  "Meanings in English": "Praised"
+ },
+ {
+  "No": 5,
+  "Transliteration": "Qasim",
+  "Muhammad (SAW) Names in Urdu": "قاسم",
+  "Muhammad (SAW) Names in Arabic": "قَاسِم",
+  "Meanings in Urdu": "بانٹنے والا، تقسیم کرنے والا",
+  "Meanings in English": "Distributer"
+ },
+ {
+  "No": 6,
+  "Transliteration": "Aqib",
+  "Muhammad (SAW) Names in Urdu": "عاقب",
+  "Muhammad (SAW) Names in Arabic": "عَاقِب",
+  "Meanings in Urdu": "پیچھے آنے والا، آخری",
+  "Meanings in English": "Latest, Last"
+ },
+ {
+  "No": 7,
+  "Transliteration": "Fateh",
+  "Muhammad (SAW) Names in Urdu": "فاتح",
+  "Muhammad (SAW) Names in Arabic": "فَاتِح",
+  "Meanings in Urdu": "فاتح، کھولنے والا",
+  "Meanings in English": "victor, conqueror, opener"
+ },
+ {
+  "No": 8,
+  "Transliteration": "Shahid",
+  "Muhammad (SAW) Names in Urdu": "شاہد",
+  "Muhammad (SAW) Names in Arabic": "شَاھِد",
+  "Meanings in Urdu": "گواہ",
+  "Meanings in English": "witness"
+ },
+ {
+  "No": 9,
+  "Transliteration": "Hashir",
+  "Muhammad (SAW) Names in Urdu": "حاشر",
+  "Muhammad (SAW) Names in Arabic": "حَاشِر",
+  "Meanings in Urdu": "جگانے والا، اکٹھا کرنے والا",
+  "Meanings in English": "One who gather people, awakener"
+ },
+ {
+  "No": 10,
+  "Transliteration": "Rasheed",
+  "Muhammad (SAW) Names in Urdu": "رشید",
+  "Muhammad (SAW) Names in Arabic": "رَشِید",
+  "Meanings in Urdu": "ہدایت یافتہ، شریف، نیک",
+  "Meanings in English": "well guided"
+ },
+ {
+  "No": 11,
+  "Transliteration": "Mashhood",
+  "Muhammad (SAW) Names in Urdu": "مشہود",
+  "Muhammad (SAW) Names in Arabic": "مَشھُود",
+  "Meanings in Urdu": "گواہی دیا گیا",
+  "Meanings in English": "witnessed"
+ },
+ {
+  "No": 12,
+  "Transliteration": "Basheer",
+  "Muhammad (SAW) Names in Urdu": "بشیر",
+  "Muhammad (SAW) Names in Arabic": "بَشِیر",
+  "Meanings in Urdu": "خوشخبری\/ بشارت دینے والا",
+  "Meanings in English": "Bringer of good news"
+ },
+ {
+  "No": 13,
+  "Transliteration": "Nazeer",
+  "Muhammad (SAW) Names in Urdu": "نذیر",
+  "Muhammad (SAW) Names in Arabic": "نَذیِر",
+  "Meanings in Urdu": "ڈرانے والا",
+  "Meanings in English": "warner"
+ },
+ {
+  "No": 14,
+  "Transliteration": "Da’i",
+  "Muhammad (SAW) Names in Urdu": "داعی",
+  "Muhammad (SAW) Names in Arabic": "دَاعٍ",
+  "Meanings in Urdu": "بلانے والا",
+  "Meanings in English": "caller"
+ },
+ {
+  "No": 15,
+  "Transliteration": "Shafi, Shafeeh",
+  "Muhammad (SAW) Names in Urdu": "شافی،شفیع",
+  "Muhammad (SAW) Names in Arabic": "شَافٍ",
+  "Meanings in Urdu": "شفاء دینے والا، شفاعت کرنے والا",
+  "Meanings in English": "healer"
+ },
+ {
+  "No": 16,
+  "Transliteration": "Haadi",
+  "Muhammad (SAW) Names in Urdu": "ہادی",
+  "Muhammad (SAW) Names in Arabic": "ھَادٍ",
+  "Meanings in Urdu": "سیدھی راہ دکھانے والا",
+  "Meanings in English": "One who guides right"
+ },
+ {
+  "No": 17,
+  "Transliteration": "Mahdi",
+  "Muhammad (SAW) Names in Urdu": "مہدی",
+  "Muhammad (SAW) Names in Arabic": "مَھدٍ",
+  "Meanings in Urdu": "ہداہت والا",
+  "Meanings in English": "One who is well guided"
+ },
+ {
+  "No": 18,
+  "Transliteration": "Mahi",
+  "Muhammad (SAW) Names in Urdu": "ماہی",
+  "Muhammad (SAW) Names in Arabic": "مَاحٍ",
+  "Meanings in Urdu": "(کفرکو)مٹا دینے والا۔ محو کرنے والا",
+  "Meanings in English": "one who wipes out(Infidelity)"
+ },
+ {
+  "No": 19,
+  "Transliteration": "Munji",
+  "Muhammad (SAW) Names in Urdu": "منجی",
+  "Muhammad (SAW) Names in Arabic": "مُنجٍ",
+  "Meanings in Urdu": "نجات والا",
+  "Meanings in English": "one who saves delivers"
+ },
+ {
+  "No": 20,
+  "Transliteration": "Nahi",
+  "Muhammad (SAW) Names in Urdu": "ناہی",
+  "Muhammad (SAW) Names in Arabic": "نَاہٍ",
+  "Meanings in Urdu": "منع کرنے والا",
+  "Meanings in English": "safe"
+ },
+ {
+  "No": 21,
+  "Transliteration": "Rasool",
+  "Muhammad (SAW) Names in Urdu": "رسول",
+  "Muhammad (SAW) Names in Arabic": "رَسُول",
+  "Meanings in Urdu": "پیغمبر، پیغام پہنچانے والا، رسالت لانے والا",
+  "Meanings in English": "Messenger"
+ },
+ {
+  "No": 22,
+  "Transliteration": "Nabi",
+  "Muhammad (SAW) Names in Urdu": "نبی",
+  "Muhammad (SAW) Names in Arabic": "نَبِی",
+  "Meanings in Urdu": "نبی۔ نبوت لانے والا",
+  "Meanings in English": "Prophet"
+ },
+ {
+  "No": 23,
+  "Transliteration": "Ummi",
+  "Muhammad (SAW) Names in Urdu": "امی",
+  "Muhammad (SAW) Names in Arabic": "اُمّی",
+  "Meanings in Urdu": "جو کسی مکتب سے پڑھا ہوا نہ ہو",
+  "Meanings in English": "Unlettered"
+ },
+ {
+  "No": 24,
+  "Transliteration": "Tihami",
+  "Muhammad (SAW) Names in Urdu": "تہامی",
+  "Muhammad (SAW) Names in Arabic": "تِھَامِی",
+  "Meanings in Urdu": "حجاز والا",
+  "Meanings in English": "From the Tihama"
+ },
+ {
+  "No": 25,
+  "Transliteration": "Hashmi",
+  "Muhammad (SAW) Names in Urdu": "ہاشمی",
+  "Muhammad (SAW) Names in Arabic": "ھَاشَمِی",
+  "Meanings in Urdu": "ہاشمی خاندان سے",
+  "Meanings in English": "Family of Hashim"
+ },
+ {
+  "No": 26,
+  "Transliteration": "Abtahi",
+  "Muhammad (SAW) Names in Urdu": "ابطحی",
+  "Muhammad (SAW) Names in Arabic": "اَبطَحِی",
+  "Meanings in Urdu": "بطحیٰ والا",
+  "Meanings in English": "Belonging to al-Batha"
+ },
+ {
+  "No": 27,
+  "Transliteration": "Azeez",
+  "Muhammad (SAW) Names in Urdu": "عزیز",
+  "Muhammad (SAW) Names in Arabic": "عَزِیز",
+  "Meanings in Urdu": "قریبی، شریف، غالب",
+  "Meanings in English": "Noble,Dear"
+ },
+ {
+  "No": 28,
+  "Transliteration": "Harees Alaikum",
+  "Muhammad (SAW) Names in Urdu": "حریص",
+  "Muhammad (SAW) Names in Arabic": "حَرِیص",
+  "Meanings in Urdu": "آپ کے خیر خواہ، لوگوں کے ایمان کی حرص کرنے والا",
+  "Meanings in English": "Full of concern for you"
+ },
+ {
+  "No": 29,
+  "Transliteration": "Rauf",
+  "Muhammad (SAW) Names in Urdu": "رؤف",
+  "Muhammad (SAW) Names in Arabic": "رَؤُف",
+  "Meanings in Urdu": "ہلکا، دھیما، انکساری، نرم دل",
+  "Meanings in English": "Mild"
+ },
+ {
+  "No": 30,
+  "Transliteration": "Raheem",
+  "Muhammad (SAW) Names in Urdu": "رحیم",
+  "Muhammad (SAW) Names in Arabic": "رَحِیم",
+  "Meanings in Urdu": "رحم کرنے والا",
+  "Meanings in English": "Merciful"
+ },
+ {
+  "No": 31,
+  "Transliteration": "Taha",
+  "Muhammad (SAW) Names in Urdu": "طہٰ",
+  "Muhammad (SAW) Names in Arabic": "طٰہٰ",
+  "Meanings in Urdu": "قران کی 20 ویں سورۃ کا آغاز",
+  "Meanings in English": "Beginning of Sura 20:1"
+ },
+ {
+  "No": 32,
+  "Transliteration": "Mujtaba",
+  "Muhammad (SAW) Names in Urdu": "مجتبیٰ",
+  "Muhammad (SAW) Names in Arabic": "مُجتَبیٰ",
+  "Meanings in Urdu": "چنا ہوا",
+  "Meanings in English": "Elect"
+ },
+ {
+  "No": 33,
+  "Transliteration": "Tasin",
+  "Muhammad (SAW) Names in Urdu": "طٰس",
+  "Muhammad (SAW) Names in Arabic": "طٰس",
+  "Meanings in Urdu": "قران کی 27 ویں سورۃ کا آغاز",
+  "Meanings in English": "Beginning of Sura 27:1)"
+ },
+ {
+  "No": 34,
+  "Transliteration": "Murtaza",
+  "Muhammad (SAW) Names in Urdu": "مرتضیٰ",
+  "Muhammad (SAW) Names in Arabic": "مُرتَظٰیٰ",
+  "Meanings in Urdu": "پسندیدہ، برگزیدہ",
+  "Meanings in English": "Content, worthier"
+ },
+ {
+  "No": 35,
+  "Transliteration": "Ha Meem",
+  "Muhammad (SAW) Names in Urdu": "حٰم",
+  "Muhammad (SAW) Names in Arabic": "حٰم",
+  "Meanings in Urdu": "قران کی 40 ویں مصد 46 ویں سورۃ کا آغاز",
+  "Meanings in English": "Beginning of surah 40 & 46"
+ },
+ {
+  "No": 36,
+  "Transliteration": "Mustafa",
+  "Muhammad (SAW) Names in Urdu": "مصطفٰی",
+  "Muhammad (SAW) Names in Arabic": "مُصطَفٰی",
+  "Meanings in Urdu": "چنا ہوا",
+  "Meanings in English": "Chosen"
+ },
+ {
+  "No": 37,
+  "Transliteration": "Yaseen",
+  "Muhammad (SAW) Names in Urdu": "یٰس",
+  "Muhammad (SAW) Names in Arabic": "یٰس",
+  "Meanings in Urdu": "قران کی 36 ویں سورۃ کا آغاز",
+  "Meanings in English": "Beginning of Sura 36:1"
+ },
+ {
+  "No": 38,
+  "Transliteration": "Aula",
+  "Muhammad (SAW) Names in Urdu": "اولیٰ",
+  "Muhammad (SAW) Names in Arabic": "اَولیٰ",
+  "Meanings in Urdu": "سب سے اعلیٰ",
+  "Meanings in English": "Worthier,Most Worthy"
+ },
+ {
+  "No": 39,
+  "Transliteration": "Muzammil",
+  "Muhammad (SAW) Names in Urdu": "مزمل",
+  "Muhammad (SAW) Names in Arabic": "مُزَمِل",
+  "Meanings in Urdu": "کپڑا اوڑہنے والا، کملی والا",
+  "Meanings in English": "Wrapped"
+ },
+ {
+  "No": 40,
+  "Transliteration": "Wali",
+  "Muhammad (SAW) Names in Urdu": "ولی",
+  "Muhammad (SAW) Names in Arabic": "وَلِی",
+  "Meanings in Urdu": "دوست",
+  "Meanings in English": "Friend"
+ },
+ {
+  "No": 41,
+  "Transliteration": "Mudassir",
+  "Muhammad (SAW) Names in Urdu": "مدثر",
+  "Muhammad (SAW) Names in Arabic": "مُدَّثّر",
+  "Meanings in Urdu": "چادر اوڑہنے والا",
+  "Meanings in English": "Covered"
+ },
+ {
+  "No": 42,
+  "Transliteration": "Mateen",
+  "Muhammad (SAW) Names in Urdu": "متین",
+  "Muhammad (SAW) Names in Arabic": "مَتِین",
+  "Meanings in Urdu": "مضبوط",
+  "Meanings in English": "Firm"
+ },
+ {
+  "No": 43,
+  "Transliteration": "Musaddiq",
+  "Muhammad (SAW) Names in Urdu": "مصدق",
+  "Muhammad (SAW) Names in Arabic": "مُصَدِّق",
+  "Meanings in Urdu": "سچ کی تصدیق کرنے والا",
+  "Meanings in English": "Who Declares for True"
+ },
+ {
+  "No": 44,
+  "Transliteration": "Tayyab",
+  "Muhammad (SAW) Names in Urdu": "طیب",
+  "Muhammad (SAW) Names in Arabic": "طُیَّب",
+  "Meanings in Urdu": "پاک",
+  "Meanings in English": "Good, Pure"
+ },
+ {
+  "No": 45,
+  "Transliteration": "Nasir",
+  "Muhammad (SAW) Names in Urdu": "ناصر",
+  "Muhammad (SAW) Names in Arabic": "نَاصِر",
+  "Meanings in Urdu": "مدد کرنےوالا",
+  "Meanings in English": "Helper"
+ },
+ {
+  "No": 46,
+  "Transliteration": "Mansoor",
+  "Muhammad (SAW) Names in Urdu": "منصور",
+  "Muhammad (SAW) Names in Arabic": "مَنصُور",
+  "Meanings in Urdu": "مدد دیا گیا",
+  "Meanings in English": "Helped (by Allah),Victorious"
+ },
+ {
+  "No": 47,
+  "Transliteration": "Misbah",
+  "Muhammad (SAW) Names in Urdu": "مصباح",
+  "Muhammad (SAW) Names in Arabic": "مِصبَاح",
+  "Meanings in Urdu": "چراغ",
+  "Meanings in English": "Lamp"
+ },
+ {
+  "No": 48,
+  "Transliteration": "Aamir",
+  "Muhammad (SAW) Names in Urdu": "عامر",
+  "Muhammad (SAW) Names in Arabic": "اٰمِر",
+  "Meanings in Urdu": "حکم دینے والا",
+  "Meanings in English": "Prince, Commander"
+ },
+ {
+  "No": 49,
+  "Transliteration": "Hijazi",
+  "Muhammad (SAW) Names in Urdu": "حجازی",
+  "Muhammad (SAW) Names in Arabic": "حِجَازِی",
+  "Meanings in Urdu": "حجاز والا",
+  "Meanings in English": "From the Hijaz"
+ },
+ {
+  "No": 50,
+  "Transliteration": "Nazari",
+  "Muhammad (SAW) Names in Urdu": "نزاری",
+  "Muhammad (SAW) Names in Arabic": "نَزَارِی",
+  "Meanings in Urdu": "مضر بن ںضار کی اولاد سے",
+  "Meanings in English": "From Muzir bin Nazari family"
+ },
+ {
+  "No": 51,
+  "Transliteration": "Qureshi",
+  "Muhammad (SAW) Names in Urdu": "قریشی",
+  "Muhammad (SAW) Names in Arabic": "قُرَیشِی",
+  "Meanings in Urdu": "قریشی",
+  "Meanings in English": "From the Clan Quraish"
+ },
+ {
+  "No": 52,
+  "Transliteration": "Muzari",
+  "Muhammad (SAW) Names in Urdu": "مضری",
+  "Muhammad (SAW) Names in Arabic": "مُضَرِی",
+  "Meanings in Urdu": "قبیلہ مضر سے",
+  "Meanings in English": "From the Tribe Mudar"
+ },
+ {
+  "No": 53,
+  "Transliteration": "Nabi ul Tauba",
+  "Muhammad (SAW) Names in Urdu": "نبی التوبہ",
+  "Muhammad (SAW) Names in Arabic": "نَبِیُّ التَّوبَۃ",
+  "Meanings in Urdu": "متوجہ ہونے والا نبی",
+  "Meanings in English": "The Prophet of Repentance"
+ },
+ {
+  "No": 54,
+  "Transliteration": "Hafiz",
+  "Muhammad (SAW) Names in Urdu": "حافظ",
+  "Muhammad (SAW) Names in Arabic": "حَافِظ",
+  "Meanings in Urdu": "یاد رکھنے والا",
+  "Meanings in English": "Preserver"
+ },
+ {
+  "No": 55,
+  "Transliteration": "Kamil",
+  "Muhammad (SAW) Names in Urdu": "کامل",
+  "Muhammad (SAW) Names in Arabic": "کَامِل",
+  "Meanings in Urdu": "کامل۔ مکمل",
+  "Meanings in English": "Perfect"
+ },
+ {
+  "No": 56,
+  "Transliteration": "Sadiq",
+  "Muhammad (SAW) Names in Urdu": "صادق",
+  "Muhammad (SAW) Names in Arabic": "صَادِق",
+  "Meanings in Urdu": "سچا",
+  "Meanings in English": "Sincere"
+ },
+ {
+  "No": 57,
+  "Transliteration": "Amin, Ameen",
+  "Muhammad (SAW) Names in Urdu": "امین",
+  "Muhammad (SAW) Names in Arabic": "اَمِین",
+  "Meanings in Urdu": "امانت دار",
+  "Meanings in English": "Trustworthy"
+ },
+ {
+  "No": 58,
+  "Transliteration": "Abdullah",
+  "Muhammad (SAW) Names in Urdu": "عبداللہ",
+  "Muhammad (SAW) Names in Arabic": "عَبدُاللہ",
+  "Meanings in Urdu": "اللہ کا بندہ",
+  "Meanings in English": "Allah’s Servant"
+ },
+ {
+  "No": 59,
+  "Transliteration": "Kalim Allah",
+  "Muhammad (SAW) Names in Urdu": "کلیم اللہ",
+  "Muhammad (SAW) Names in Arabic": "کَلِیمُ اللہ",
+  "Meanings in Urdu": "اللہ سے کلام کرنے والا",
+  "Meanings in English": "He to whom Allah had Taked"
+ },
+ {
+  "No": 60,
+  "Transliteration": "Habib Ullah",
+  "Muhammad (SAW) Names in Urdu": "حبیب اللہ",
+  "Muhammad (SAW) Names in Arabic": "حَبِیبُ اللہ",
+  "Meanings in Urdu": "اللہ کا دوست، اللہ کا محبوب",
+  "Meanings in English": "Allah’s Beloved Friend"
+ },
+ {
+  "No": 61,
+  "Transliteration": "Naji Ullah",
+  "Muhammad (SAW) Names in Urdu": "نجی اللہ",
+  "Muhammad (SAW) Names in Arabic": "نَجِیُّ اللہ",
+  "Meanings in Urdu": "اللہ کا رازدار",
+  "Meanings in English": "Allah’s Intimate Friend"
+ },
+ {
+  "No": 62,
+  "Transliteration": "Safi Allah",
+  "Muhammad (SAW) Names in Urdu": "صفی اللہ",
+  "Muhammad (SAW) Names in Arabic": "صَفِیُّ اللہ",
+  "Meanings in Urdu": "اللہ کا مخلص دوست",
+  "Meanings in English": "Allah’s Sincere Friend"
+ },
+ {
+  "No": 63,
+  "Transliteration": "Khatam al Ambia",
+  "Muhammad (SAW) Names in Urdu": "خاتم الانبیاء",
+  "Muhammad (SAW) Names in Arabic": "خَاتِمُ الاَنبِیَاء",
+  "Meanings in Urdu": "نبیوں کا سلسہ ختم کرنے والا",
+  "Meanings in English": "Seal of the Prophets"
+ },
+ {
+  "No": 64,
+  "Transliteration": "Haseeb",
+  "Muhammad (SAW) Names in Urdu": "حسیب",
+  "Muhammad (SAW) Names in Arabic": "حَسِیب",
+  "Meanings in Urdu": "کافی",
+  "Meanings in English": "Respected"
+ },
+ {
+  "No": 65,
+  "Transliteration": "Mujeeb",
+  "Muhammad (SAW) Names in Urdu": "مجیب",
+  "Muhammad (SAW) Names in Arabic": "مُجِیب",
+  "Meanings in Urdu": "قبول کرنے والا",
+  "Meanings in English": "Complying, Replying"
+ },
+ {
+  "No": 66,
+  "Transliteration": "Shakoor",
+  "Muhammad (SAW) Names in Urdu": "شکور",
+  "Muhammad (SAW) Names in Arabic": "شَکُور",
+  "Meanings in Urdu": "شکر گزار",
+  "Meanings in English": "Most Grateful"
+ },
+ {
+  "No": 67,
+  "Transliteration": "Muqtasid",
+  "Muhammad (SAW) Names in Urdu": "مقتصد",
+  "Muhammad (SAW) Names in Arabic": "مُقتَصِد",
+  "Meanings in Urdu": "میانہ روی پر چلنےوالا",
+  "Meanings in English": "Adopting a Middle Course"
+ },
+ {
+  "No": 68,
+  "Transliteration": "Rasool ar Rahmat",
+  "Muhammad (SAW) Names in Urdu": "رسول الرحمت",
+  "Muhammad (SAW) Names in Arabic": "رَسُول الرَحمَۃ",
+  "Meanings in Urdu": "مہربانی والا رسول",
+  "Meanings in English": "The Messenger of Mercy"
+ },
+ {
+  "No": 69,
+  "Transliteration": "Qawi",
+  "Muhammad (SAW) Names in Urdu": "قوی",
+  "Muhammad (SAW) Names in Arabic": "قَوِی",
+  "Meanings in Urdu": "طاقت والا",
+  "Meanings in English": "Strong"
+ },
+ {
+  "No": 70,
+  "Transliteration": "Hafi",
+  "Muhammad (SAW) Names in Urdu": "حفی",
+  "Muhammad (SAW) Names in Arabic": "حَفِی",
+  "Meanings in Urdu": "خبر رکھنے والا",
+  "Meanings in English": "Well-Informed"
+ },
+ {
+  "No": 71,
+  "Transliteration": "Mamoon",
+  "Muhammad (SAW) Names in Urdu": "مامون",
+  "Muhammad (SAW) Names in Arabic": "مَامُون",
+  "Meanings in Urdu": "امن والا",
+  "Meanings in English": "Trusted"
+ },
+ {
+  "No": 72,
+  "Transliteration": "Maloom",
+  "Muhammad (SAW) Names in Urdu": "معلوم",
+  "Muhammad (SAW) Names in Arabic": "مَعلُوم",
+  "Meanings in Urdu": "علم والا",
+  "Meanings in English": "Well Known"
+ },
+ {
+  "No": 73,
+  "Transliteration": "Haq",
+  "Muhammad (SAW) Names in Urdu": "حق",
+  "Muhammad (SAW) Names in Arabic": "حَق",
+  "Meanings in Urdu": "حق",
+  "Meanings in English": "Truth"
+ },
+ {
+  "No": 74,
+  "Transliteration": "Mubeen",
+  "Muhammad (SAW) Names in Urdu": "مبین",
+  "Muhammad (SAW) Names in Arabic": "مُبِین",
+  "Meanings in Urdu": "ظاہر",
+  "Meanings in English": "Clear, Obvious"
+ },
+ {
+  "No": 75,
+  "Transliteration": "Muti",
+  "Muhammad (SAW) Names in Urdu": "مطیع",
+  "Muhammad (SAW) Names in Arabic": "مُطِیع",
+  "Meanings in Urdu": "تابعدار",
+  "Meanings in English": "Obedient"
+ },
+ {
+  "No": 76,
+  "Transliteration": "Awwal",
+  "Muhammad (SAW) Names in Urdu": "اول",
+  "Muhammad (SAW) Names in Arabic": "اَوَّل",
+  "Meanings in Urdu": "پہلا، اول",
+  "Meanings in English": "First"
+ },
+ {
+  "No": 77,
+  "Transliteration": "Akhir",
+  "Muhammad (SAW) Names in Urdu": "آخر",
+  "Muhammad (SAW) Names in Arabic": "اٰخِر",
+  "Meanings in Urdu": "پیچھے",
+  "Meanings in English": "Last"
+ },
+ {
+  "No": 78,
+  "Transliteration": "Zahir",
+  "Muhammad (SAW) Names in Urdu": "ظاہر",
+  "Muhammad (SAW) Names in Arabic": "ظَاہِر",
+  "Meanings in Urdu": "زاہر",
+  "Meanings in English": "Outward, External"
+ },
+ {
+  "No": 79,
+  "Transliteration": "Batin",
+  "Muhammad (SAW) Names in Urdu": "باطن",
+  "Muhammad (SAW) Names in Arabic": "بَاطِن",
+  "Meanings in Urdu": "پوشیدہ، چھپا ہوا",
+  "Meanings in English": "Internal, Hidden,  Inner"
+ },
+ {
+  "No": 80,
+  "Transliteration": "Yatim",
+  "Muhammad (SAW) Names in Urdu": "یتیم",
+  "Muhammad (SAW) Names in Arabic": "یَتِیم",
+  "Meanings in Urdu": "یتیم",
+  "Meanings in English": "Orphan"
+ },
+ {
+  "No": 81,
+  "Transliteration": "Kareem",
+  "Muhammad (SAW) Names in Urdu": "کریم",
+  "Muhammad (SAW) Names in Arabic": "کَرِیم",
+  "Meanings in Urdu": "سخی",
+  "Meanings in English": "Generous"
+ },
+ {
+  "No": 82,
+  "Transliteration": "Hakeem",
+  "Muhammad (SAW) Names in Urdu": "حکیم",
+  "Muhammad (SAW) Names in Arabic": "حَکِیم",
+  "Meanings in Urdu": "حکمت والا",
+  "Meanings in English": "Wise"
+ },
+ {
+  "No": 83,
+  "Transliteration": "Sayyed",
+  "Muhammad (SAW) Names in Urdu": "سید",
+  "Muhammad (SAW) Names in Arabic": "سَیَّد",
+  "Meanings in Urdu": "سردار",
+  "Meanings in English": "Lord"
+ },
+ {
+  "No": 84,
+  "Transliteration": "Siraj",
+  "Muhammad (SAW) Names in Urdu": "سراج",
+  "Muhammad (SAW) Names in Arabic": "سِرَاج",
+  "Meanings in Urdu": "چراغ",
+  "Meanings in English": "Lamp"
+ },
+ {
+  "No": 85,
+  "Transliteration": "Munir",
+  "Muhammad (SAW) Names in Urdu": "منیر",
+  "Muhammad (SAW) Names in Arabic": "مُنِیر",
+  "Meanings in Urdu": "روشن",
+  "Meanings in English": "Radiant"
+ },
+ {
+  "No": 86,
+  "Transliteration": "Muharram",
+  "Muhammad (SAW) Names in Urdu": "محرم",
+  "Muhammad (SAW) Names in Arabic": "مُحَرَّم",
+  "Meanings in Urdu": "قابل عزت",
+  "Meanings in English": "Respectable, Forbidden, Immune"
+ },
+ {
+  "No": 87,
+  "Transliteration": "Mukarram",
+  "Muhammad (SAW) Names in Urdu": "مکرم",
+  "Muhammad (SAW) Names in Arabic": "مُکَرَّم",
+  "Meanings in Urdu": "عزت والا",
+  "Meanings in English": "Honored,Venerated"
+ },
+ {
+  "No": 88,
+  "Transliteration": "Mubashir",
+  "Muhammad (SAW) Names in Urdu": "مبشر",
+  "Muhammad (SAW) Names in Arabic": "مُبَشِّر",
+  "Meanings in Urdu": "خوشخبری دینے والا",
+  "Meanings in English": "Bringer of Good News"
+ },
+ {
+  "No": 89,
+  "Transliteration": "Muzakkir",
+  "Muhammad (SAW) Names in Urdu": "مزکر",
+  "Muhammad (SAW) Names in Arabic": "مُزَکِّر",
+  "Meanings in Urdu": "نصیت کرنیوالے",
+  "Meanings in English": "Who makes Remember, Preacher"
+ },
+ {
+  "No": 90,
+  "Transliteration": "Mutahhar",
+  "Muhammad (SAW) Names in Urdu": "مطھر",
+  "Muhammad (SAW) Names in Arabic": "مُطَھَّر",
+  "Meanings in Urdu": "پاکیزہ",
+  "Meanings in English": "Purified"
+ },
+ {
+  "No": 91,
+  "Transliteration": "Qareeb",
+  "Muhammad (SAW) Names in Urdu": "قریب",
+  "Muhammad (SAW) Names in Arabic": "قَرِیب",
+  "Meanings in Urdu": "قریب",
+  "Meanings in English": "Near"
+ },
+ {
+  "No": 92,
+  "Transliteration": "Khalil, Khaleel",
+  "Muhammad (SAW) Names in Urdu": "خلیل",
+  "Muhammad (SAW) Names in Arabic": "خَلِیل",
+  "Meanings in Urdu": "ولی ، دوست",
+  "Meanings in English": "Good Friend"
+ },
+ {
+  "No": 93,
+  "Transliteration": "Mad’u",
+  "Muhammad (SAW) Names in Urdu": "مدعو",
+  "Muhammad (SAW) Names in Arabic": "مَدعُو",
+  "Meanings in Urdu": "دعوت دینے والا",
+  "Meanings in English": "Who is Called"
+ },
+ {
+  "No": 94,
+  "Transliteration": "Jawad",
+  "Muhammad (SAW) Names in Urdu": "جواد",
+  "Muhammad (SAW) Names in Arabic": "جَوَّاد",
+  "Meanings in Urdu": "سخی",
+  "Meanings in English": "Generous, Magnanimous"
+ },
+ {
+  "No": 95,
+  "Transliteration": "Khatim",
+  "Muhammad (SAW) Names in Urdu": "خاتم",
+  "Muhammad (SAW) Names in Arabic": "خَاتِم",
+  "Meanings in Urdu": "ختم کرنے والا",
+  "Meanings in English": "Seal"
+ },
+ {
+  "No": 96,
+  "Transliteration": "Adil",
+  "Muhammad (SAW) Names in Urdu": "عادل",
+  "Muhammad (SAW) Names in Arabic": "عَادِل",
+  "Meanings in Urdu": "انصاف کرنے والا، عدل کرنے والا",
+  "Meanings in English": "Justice"
+ },
+ {
+  "No": 97,
+  "Transliteration": "Shaheer",
+  "Muhammad (SAW) Names in Urdu": "شھیر",
+  "Muhammad (SAW) Names in Arabic": "شَھِیر",
+  "Meanings in Urdu": "شہرت والا",
+  "Meanings in English": "Well Known, famous"
+ },
+ {
+  "No": 98,
+  "Transliteration": "Shaheed",
+  "Muhammad (SAW) Names in Urdu": "شہید",
+  "Muhammad (SAW) Names in Arabic": "شَھِید",
+  "Meanings in Urdu": "گواہ، شہید",
+  "Meanings in English": "Witnessing, Martyr"
+ },
+ {
+  "No": 99,
+  "Transliteration": "Rasool al Malahim",
+  "Muhammad (SAW) Names in Urdu": "رسول الملاحم",
+  "Muhammad (SAW) Names in Arabic": "رَسُولُ المَلاَحِم",
+  "Meanings in Urdu": "رسول الملاحم",
+  "Meanings in English": "The Messenger of the Battles of the Last day"
+ }
+]
