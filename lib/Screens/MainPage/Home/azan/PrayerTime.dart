@@ -52,13 +52,13 @@ class _PrayerTimeState extends State<PrayerTime> {
     Coordinates coordinates =
         Coordinates(position.latitude, position.longitude);
 
-    CalculationParameters params = CalculationMethod.MuslimWorldLeague();
+    CalculationParameters params = CalculationMethod.muslimWorldLeague();
   
     List<String> prayerstiming = [];
-    params.madhab = Madhab.Hanafi;
+    params.madhab = Madhab.hanafi;
    var namazTimeHanafi = await namazTimeCollector(coordinates, date, params,location,"Hanafi");
 
-   params.madhab = Madhab.Shafi;
+   params.madhab = Madhab.shafi;
    var namazTimeShafi = await namazTimeCollector(coordinates, date, params,location,"Shafi",namazTimeHanafi);
 
    
@@ -74,7 +74,7 @@ class _PrayerTimeState extends State<PrayerTime> {
     List<Map> prayerstiming = [];
 
      PrayerTimes prayerTimes =
-        PrayerTimes(coordinates, date, params, precision: true);
+        PrayerTimes(coordinates: coordinates, date: date, calculationParameters: params,precision: true);
     DateTime fajrTime = tz.TZDateTime.from(prayerTimes.fajr!, location);
     DateTime sunriseTime = tz.TZDateTime.from(prayerTimes.sunrise!, location);
     DateTime dhuhrTime = tz.TZDateTime.from(prayerTimes.dhuhr!, location);

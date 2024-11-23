@@ -22,7 +22,7 @@ class MyWidget extends StatelessWidget {
     return ElevatedButton(onPressed: null,
     child: Text("sing up"),
     style: ElevatedButton.styleFrom(
-      primary: Colors.black,
+      // primary: Colors.black,
     ),
     );
   }

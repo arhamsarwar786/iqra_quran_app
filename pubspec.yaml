@@ -53,6 +53,7 @@ dependencies:
   share_plus: 
   flutter_localization: ^0.1.14
   easy_localization: ^3.0.3
+  file:
 
 dev_dependencies:
   flutter_test:
