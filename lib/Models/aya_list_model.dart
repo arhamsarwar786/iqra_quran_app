@@ -30,6 +30,7 @@ class Aya {
     String translation2;
     int ayatNumber;
     String? sajda;
+    String? manzil;
 
     Aya({
         required this.arabic,
@@ -37,6 +38,7 @@ class Aya {
         required this.translation2,
         required this.ayatNumber,
         required this.sajda,
+        required this.manzil,
     });
 
     factory Aya.fromJson(Map<String, dynamic> json) => Aya(
@@ -45,6 +47,7 @@ class Aya {
         translation2: json["translation2"],
         ayatNumber: json["ayatNumber"],
         sajda: json["sajda"],
+        manzil: json["manzil"],
     );
 
     Map<String, dynamic> toJson() => {
@@ -52,6 +55,7 @@ class Aya {
         "translation1": translation1,
         "translation2": translation2,
         "ayatNumber":ayatNumber,
-        "sajda":sajda
+        "sajda":sajda,
+        "manzil":manzil,
     };
 }

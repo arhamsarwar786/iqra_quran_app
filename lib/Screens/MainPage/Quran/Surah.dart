@@ -32,6 +32,7 @@ class _SurahState extends State<Surah> {
   Widget build(BuildContext context) {
     return Builder(builder: (context) {
       var bloc = context.read<ThemeProvider>();
+      // debugger();
       return Padding(
           padding: const EdgeInsets.all(12.0),
           child: FutureBuilder(

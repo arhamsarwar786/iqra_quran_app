@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Screens/MainPage/Quran/translation/parah_translation_screen.dart';
 import 'package:iqra/Screens/MainPage/Quran/translation/surah_translation_screen.dart';
+import 'package:iqra/Utils/common_aya.dart';
 import 'package:iqra/Utils/customThemes.dart';
 import 'package:provider/provider.dart';
 // import 'arabic';
@@ -67,8 +68,16 @@ class _QuranViewState extends State<QuranView> {
     var bloc = context.read<ThemeProvider>();
     List total = [];
     List<RukoModel> rukoList = await getRuko();
-    // List<SajdaModel> sajdaList = await getSajda();
-    // print(sajdaList.toString() + " total Sajda");
+     quranViewWidget.add(Stack(
+            alignment: Alignment.center,
+            children: [
+              Text(
+                bissMillahArabic,
+                style: MyTextStyle.heading1
+                    .copyWith(fontSize: 30, fontFamily: bloc.arabicFontFamily, color: bloc.selectedTheme),
+              ),
+            ],
+          ));
     for (var i = 0; i < rukoList.length; i++) {
       // debugger();
       int start = i > 0 ? rukoList[i - 1].ayaBeforeRako : 0;
@@ -132,65 +141,14 @@ class _QuranViewState extends State<QuranView> {
       //     }
       //   }
       // } else {
-        for (int k = 0; k < ayaList.length; k++) {
-          var aya = ayaList[k];
-          if(aya.sajda != null){
-            // break;
-           var newList = ayaList.sublist(k+1,ayaList.length);
-           print(newList.length);
+       
+      for (int k = 0; k < ayaList.length; k++) {
+        var aya = ayaList[k];
+        if (aya.sajda != null) {
+          // break;
+          var newList = ayaList.sublist(k + 1, ayaList.length);
+          print(newList.length);
           //  debugger();
-           textSpanChildren.add(
-            TextSpan(
-              text: "${(aya.arabic).trim()} ",
-              style: const TextStyle(color: Colors.black),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  print(i);
-                  SHEET.bottomSheetPreview(context,aya,bloc);
-                },
-            ),
-          );
-             quranViewWidget.add(RichText(
-        text: TextSpan(
-          children: textSpanChildren,
-          style: TextStyle(
-              fontSize: bloc.arabicFontSize,
-              fontFamily: bloc.arabicFontFamily,
-              color: Colors.black
-              // Add other styles as needed
-              ),
-        ),
-      ));
-      textSpanChildren = [];
-
-          quranViewWidget.add(Stack(
-        alignment: Alignment.center,
-        children: [
-          Text(
-            aya.sajda!,
-            style: MyTextStyle.heading1
-                .copyWith(fontSize: 30, fontFamily: bloc.arabicFontFamily),
-          ),
-          
-        ],
-      ));
-
-      for (var a in newList) {
-        textSpanChildren.add(
-            TextSpan(
-              text: "${(a.arabic).trim()} ",
-              style: const TextStyle(color: Colors.black),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  print(i);
-                  SHEET.bottomSheetPreview(context,aya,bloc);
-                },
-            ),
-          );
-      }
-      break;
-
-          }else{
           textSpanChildren.add(
             TextSpan(
               text: "${(aya.arabic).trim()} ",
@@ -198,12 +156,90 @@ class _QuranViewState extends State<QuranView> {
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
                   print(i);
-                  SHEET.bottomSheetPreview(context,aya,bloc);
+                  SHEET.bottomSheetPreview(context, aya, bloc);
                 },
             ),
           );
+          quranViewWidget.add(RichText(
+            text: TextSpan(
+              children: textSpanChildren,
+              style: TextStyle(
+                  fontSize: bloc.arabicFontSize,
+                  fontFamily: bloc.arabicFontFamily,
+                  color: Colors.black
+                  // Add other styles as needed
+                  ),
+            ),
+          ));
+          textSpanChildren = [];
+
+ 
+          quranViewWidget.add(Stack(
+            alignment: Alignment.center,
+            children: [
+              Text(
+                aya.sajda!,
+                style: MyTextStyle.heading1
+                    .copyWith(fontSize: 30, fontFamily: bloc.arabicFontFamily, color: bloc.selectedTheme),
+              ),
+            ],
+          ));
+
+          for (var a in newList) {
+            textSpanChildren.add(
+              TextSpan(
+                text: "${(a.arabic).trim()} ",
+                style: const TextStyle(color: Colors.black),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    print(i);
+                    SHEET.bottomSheetPreview(context, aya, bloc);
+                  },
+              ),
+            );
           }
+          break;
+        } else {
+          if(aya.ayatNumber == 0 )
+          {
+            continue;
+          }
+
+            
+            // debugger();
+           
+          
+        
+          
+          textSpanChildren.add(
+            TextSpan(
+              text: "${(aya.arabic).trim()} ",
+              style: const TextStyle(color: Colors.black),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  print(i);
+                  SHEET.bottomSheetPreview(context, aya, bloc);
+                },
+            ),
+          );
+                   if(aya.manzil != null){
+            // debugger();
+            quranViewWidget.add(SizedBox(height: 10,));
+              quranViewWidget.add(Stack(
+            alignment: Alignment.topLeft,
+            children: [
+              Text(
+                aya.manzil!,
+                style: MyTextStyle.heading1
+                    .copyWith(fontSize: 24, fontFamily: bloc.arabicFontFamily, color: bloc.selectedTheme),
+              ),
+            ],
+          ));
+          quranViewWidget.add(SizedBox(height: 10,));
+          }
+
         }
+      }
       // }
       quranViewWidget.add(RichText(
         text: TextSpan(
@@ -223,7 +259,7 @@ class _QuranViewState extends State<QuranView> {
           Text(
             "ع",
             style: MyTextStyle.heading1
-                .copyWith(fontSize: 70, fontFamily: bloc.arabicFontFamily),
+                .copyWith(fontSize: 70, fontFamily: bloc.arabicFontFamily, color: bloc.selectedTheme),
           ),
           Positioned(bottom: 30, child: Text(rukoList[i].diff.toString())),
           Positioned(top: 20, child: Text(rukoList[i].rakuNumber.toString())),
@@ -571,18 +607,24 @@ class _QuranViewState extends State<QuranView> {
               //     ? CircularProgressIndicator()
               //     :
               Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  image: DecorationImage(image: AssetImage("assets/images/border.png",),fit: BoxFit.fill, alignment: Alignment.topCenter)
-                ),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      image: DecorationImage(
+                          image: AssetImage(
+                            "assets/images/border.png",
+                          ),
+                          fit: BoxFit.fill,
+                          alignment: Alignment.topCenter)),
                   // height: size.height / 1.75,
- padding: const EdgeInsets.only(left: 0, right: 0, top: 20, bottom: 20),
+                  padding: const EdgeInsets.only(
+                      left: 0, right: 0, top: 20, bottom: 20),
                   child: Directionality(
                     textDirection: TextDirection.rtl,
                     child: SingleChildScrollView(
                       controller: _scrollViewController,
                       child: Container(
-                        margin: const EdgeInsets.only(left: 23, right: 30, top: 30, bottom: 30),
+                        margin: const EdgeInsets.only(
+                            left: 23, right: 30, top: 30, bottom: 30),
                         child: Column(
                           children: quranViewWidget,
                         ),

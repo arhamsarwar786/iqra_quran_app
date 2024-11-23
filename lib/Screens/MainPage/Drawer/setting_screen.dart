@@ -49,7 +49,7 @@ class _SettingScreenState extends State<SettingScreen> {
               children: [
                 Card(
                   child: Container(
-                    height: 100,
+                    // height: 100,
                     width: size.width,
                     padding: const EdgeInsets.all(10),
                     child: Column(
@@ -72,7 +72,7 @@ class _SettingScreenState extends State<SettingScreen> {
                             ),
                             const Spacer(),
                             Container(
-                              height: 40,
+                              // height: 40,
                               width: 150,
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(5),
