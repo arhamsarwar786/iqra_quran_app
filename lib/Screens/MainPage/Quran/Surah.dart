@@ -1,18 +1,9 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:iqra/Helper/favourite.dart';
 import 'package:iqra/Models/quaran_favorate.dart';
 import 'package:iqra/Provider/theme_provider.dart';
-import 'package:iqra/Screens/MainPage/Quran/Favorite.dart';
-import 'package:iqra/Screens/MainPage/Quran/Quran.dart';
-import 'package:iqra/widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../Models/aya_list_model.dart';
-import '../../../Models/ruko_model.dart';
-import '../../../Utils/constants.dart';
 import 'Quranview.dart';
 
 class Surah extends StatefulWidget {

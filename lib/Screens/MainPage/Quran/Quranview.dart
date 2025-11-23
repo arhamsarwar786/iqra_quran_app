@@ -10,9 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:arabic_numbers/arabic_numbers.dart';
 import 'package:flutter/rendering.dart';
 import 'package:iqra/Provider/theme_provider.dart';
-import 'package:iqra/Screens/MainPage/Quran/translation/parah_translation_screen.dart';
 import 'package:iqra/Screens/MainPage/Quran/translation/surah_translation_screen.dart';
-import 'package:iqra/Utils/common_aya.dart';
 import 'package:iqra/Utils/customThemes.dart';
 import 'package:provider/provider.dart';
 // import 'arabic';
@@ -20,8 +18,6 @@ import '../../../Models/aya_list_model.dart';
 import '../../../Models/ruko_model.dart';
 import '../../../Models/sajda_model.dart';
 import '../../../Utils/bottom_sheet_preview.dart';
-import '../../../Utils/constants.dart';
-import '../../../Utils/fs_system.dart';
 import '../../../Utils/utils.dart';
 import '../../../widgets.dart';
 
@@ -68,16 +64,6 @@ class _QuranViewState extends State<QuranView> {
     var bloc = context.read<ThemeProvider>();
     List total = [];
     List<RukoModel> rukoList = await getRuko();
-     quranViewWidget.add(Stack(
-            alignment: Alignment.center,
-            children: [
-              Text(
-                bissMillahArabic,
-                style: MyTextStyle.heading1
-                    .copyWith(fontSize: 30, fontFamily: bloc.arabicFontFamily, color: bloc.selectedTheme),
-              ),
-            ],
-          ));
     for (var i = 0; i < rukoList.length; i++) {
       // debugger();
       int start = i > 0 ? rukoList[i - 1].ayaBeforeRako : 0;
@@ -306,7 +292,6 @@ class _QuranViewState extends State<QuranView> {
     //  await getArabic();
     getRuko().then((ruko) {
       getSajda().then((sajda) {
-        bismillaChecker();
         listTextSpan(bloc, ruko, sajda).then((val) {
           print(children.length);
           // debugger();
@@ -322,6 +307,7 @@ class _QuranViewState extends State<QuranView> {
   void initState() {
     super.initState();
     viewMaker();
+    bismillaChecker();
     // loadData();
     _scrollViewController = ScrollController();
     _scrollViewController!.addListener(() {
@@ -348,7 +334,7 @@ class _QuranViewState extends State<QuranView> {
   bool isBismilla = true;
 
   bismillaChecker() {
-    bool isAvailable = widget.ayat![0].arabic == bismillaArabic;
+    bool isAvailable = widget.ayat![0].ayatNumber == 0;
     if (!isAvailable) {
       setState(() {
         isBismilla = false;
@@ -511,7 +497,7 @@ class _QuranViewState extends State<QuranView> {
                 floating: false,
                 pinned: true,
                 snap: false,
-                toolbarHeight: 150,
+                // toolbarHeight: 90,
                 flexibleSpace: FlexibleSpaceBar(
                   centerTitle: true,
                   title: Container(
@@ -521,25 +507,28 @@ class _QuranViewState extends State<QuranView> {
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
+                        // SizedBox(height: 5,),
                         Row(
                           children: [
                             Expanded(
-                              child: Image.asset(
+                              child: Image.asset(                                
                                 "assets/images/borderLeft1.png",
+                                height: 5,
+                                fit: BoxFit.fill,
                                 color: Color.fromARGB(255, 255, 109, 109),
                               ),
                             ),
                             Expanded(
                               child: Image.asset(
+                                                                height: 5,
+                                fit: BoxFit.fill,
                                 "assets/images/borderRight1.png",
                                 color: Colors.white,
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(
-                          height: 5,
-                        ),
+                    //  Spacer(),
                         if (isBismilla)
                           Text(
                             "${bismillaArabic}",
@@ -548,25 +537,28 @@ class _QuranViewState extends State<QuranView> {
                                 fontSize: 10,
                                 fontFamily: bloc.arabicFontFamily),
                           ),
-                        SizedBox(
-                          height: 5,
-                        ),
+                      //  Spacer(),
                         Row(
                           children: [
                             Expanded(
                               child: Image.asset(
                                 "assets/images/borderLeft1.png",
                                 color: Colors.white,
+                                                                height: 5,
+                                fit: BoxFit.fill,
                               ),
                             ),
                             Expanded(
                               child: Image.asset(
                                 "assets/images/borderRight1.png",
                                 color: Color.fromARGB(255, 255, 109, 109),
+                                                                height: 5,
+                                fit: BoxFit.fill,
                               ),
                             ),
                           ],
                         ),
+                          //  SizedBox(height: 5,),
                       ],
                     ),
                   ),
@@ -585,7 +577,7 @@ class _QuranViewState extends State<QuranView> {
                           title: Text(
                             '${widget.surahName}',
                             style: TextStyle(
-                              color: Colors.black,
+                              color: Colors.black, 
                               fontFamily: bloc.urduFontFamily,
                             ),
                           ),
@@ -594,18 +586,10 @@ class _QuranViewState extends State<QuranView> {
                     ],
                   ),
                 ),
-              ),
-              // SliverPersistentHeader(
-
-              //     pinned: true,
-              //   ),
+              ),   
             ];
           },
-
           body:
-              // children.isEmpty
-              //     ? CircularProgressIndicator()
-              //     :
               Container(
                   decoration: BoxDecoration(
                       color: Colors.white,
@@ -629,128 +613,8 @@ class _QuranViewState extends State<QuranView> {
                           children: quranViewWidget,
                         ),
                       ),
-                      // child: RichText(
-                      //   text: TextSpan(
-                      // //       style: TextStyle(
-                      //           fontSize: bloc.arabicFontSize,
-                      //           fontFamily: bloc.arabicFontFamily,
-                      //           color: Colors.black
-                      //           // Add other styles as needed
-                      //           ),
-                      //       children:
-                      //           // [
-                      //           //   ...widget.ayat!.mapIndexed((i, e) {
-                      //           //     RukoModel? rukoModel = isRuku(i);
-                      //           //     SajdaModel? sajdaModel = isSajda(i);
-                      //           //     if (rukoData != null) {
-                      //           //   return TextSpan(
-                      //           //     text:
-                      //           //         "ع",
-                      //           //     style: rukoModel == null
-                      //           //         ? TextStyle(
-                      //           //             fontSize: bloc.arabicFontSize,
-                      //           //             fontFamily: bloc.arabicFontFamily,
-                      //           //             color: Colors.black
-                      //           //             // Add other styles as needed
-                      //           //             )
-                      //           //         : MyTextStyle.heading1.copyWith(
-                      //           //             fontSize: 70,
-                      //           //             fontFamily: bloc.arabicFontFamily),
-                      //           //     recognizer: TapGestureRecognizer()
-                      //           //       ..onTap = () {
-                      //           //         print(i);
-                      //           //         // debugger();
-                      //           //       },
-                      //           //   );
-                      //           // }
-                      //           //     return TextSpan(
-                      //           //       text:
-                      //           //           "${(widget.ayat![i].arabic).trim()}",
-                      //           //       style: rukoModel == null
-                      //           //           ? TextStyle(
-                      //           //               fontSize: bloc.arabicFontSize,
-                      //           //               fontFamily: bloc.arabicFontFamily,
-                      //           //               color: Colors.black
-                      //           //               // Add other styles as needed
-                      //           //               )
-                      //           //           : MyTextStyle.heading1.copyWith(
-                      //           //               fontSize: 70,
-                      //           //               fontFamily: bloc.arabicFontFamily),
-                      //           //       recognizer: TapGestureRecognizer()
-                      //           //         ..onTap = () {
-                      //           //           print(i);
-                      //           //           // debugger();
-                      //           //         },
-                      //           //     );
-                      //           //   })
-                      //           // ]
-
-                      //           children
-                      //       // [
-                      //       //   for (int i = isBismilla ? 1 : 0;
-                      //       //       i < widget.ayat!.length;
-                      //       //       i++)
-                      //       //     TextSpan(
-                      //       //       text: "${(widget.ayat![i].arabic).trim()} ",
-                      //       //       recognizer: TapGestureRecognizer()
-                      //       //         ..onTap = () {
-                      //       //           print(i);
-                      //       //           // debugger();
-                      //       //         },
-                      //       //     ),
-                      //       // ],
-                      //       ),
-                      // ),
-                    ),
-                  )
-
-                  // child: Directionality(
-                  //  textDirection: TextDirection.rtl,
-                  //  child: Wrap(children: [
-                  //   Text("asdkasldkadkajkal"),
-                  //   Text("asdkasldkadkajkal------"),
-                  //   Text("as dka sldkadkajkal"),
-                  //   Text("asdkasldkadkajkal"),
-                  //   // Text("asdkasldkadkajkal"),
-                  //  ],),
-                  // ),
-
-                  // ?   ListView.builder(
-                  //     itemCount: int.parse(widget.ayatCount.toString()),
-                  //     itemBuilder: (context, index) {
-                  //       return Wrap(children: [
-                  //         Column(children: [
-                  //           Text(
-                  //               quran["quran"]["sura"][int.parse(
-                  //                           widget.surahCount.toString()) -
-                  //                       1]["aya"][index]["text"] +
-                  //                   " (" +
-                  //                   arabicNumber.convert(index) +
-                  //                   ")",
-                  //               textAlign: TextAlign.right,
-                  //               style: TextStyle(
-                  //                 fontFamily: bloc.arabicFontFamily,
-                  //                   color: Colors.black,
-                  //                   fontSize: 30,
-                  //                   fontWeight: FontWeight.w600),
-                  //             ),
-                  //             Text(
-                  //               // "Ali",
-                  // quran["sura"][int.parse(
-                  //         widget.surahCount.toString()) -
-                  //     1]["aya"][index]["text"],
-                  //               textAlign: TextAlign.right,
-                  //               style: TextStyle(
-                  //                 fontFamily: bloc.urduFontFamily,
-                  //                   color: Colors.black,
-                  //                   fontSize: 15,
-                  //                   fontWeight: FontWeight.w400),
-                  //             ),
-
-                  //         ],)
-                  //       ],);
-
-                  //     })
+                      ),
+                  ),
                   ),
         ),
       );
