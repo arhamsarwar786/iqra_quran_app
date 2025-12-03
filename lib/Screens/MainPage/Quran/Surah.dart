@@ -57,7 +57,7 @@ class _SurahState extends State<Surah> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => QuranView(
-                                            ayat: ayatList.aya,
+                                            // ayat: ayatList.aya,
                                             suratNumber: index + 1,
                                             ayatCount: ayatList.aya.length.toString(),
                                             surahName: data["sura"][index]["name"],

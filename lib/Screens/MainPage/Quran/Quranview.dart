@@ -22,16 +22,19 @@ import '../../../Utils/utils.dart';
 import '../../../widgets.dart';
 
 class QuranView extends StatefulWidget {
-  QuranView({this.ayatCount, this.surahName, this.ayat, this.suratNumber});
+  QuranView({this.ayatCount, this.surahName, this.suratNumber});
   final String? ayatCount;
   int? suratNumber;
-  List<Aya>? ayat;
+  // List<Aya>? ayat;
   final String? surahName;
   @override
   State<QuranView> createState() => _QuranViewState();
 }
 
 class _QuranViewState extends State<QuranView> {
+
+  List listAyat = [];
+
   ArabicNumbers arabicNumber = ArabicNumbers();
   ScrollController? _scrollViewController;
   bool _showAppbar = true;
@@ -68,7 +71,7 @@ class _QuranViewState extends State<QuranView> {
       // debugger();
       int start = i > 0 ? rukoList[i - 1].ayaBeforeRako : 0;
       int next = rukoList[i].ayaAfterRako + 1;
-      int ayaLength = widget.ayat!.length;
+      int ayaLength = listAyat!.length;
       // int start = i > 0 ? int.parse(rukoList[i - 1].ayaAfterRako)  : 0;
       // int next = start + int.parse(rukoList[i].diff);
 
@@ -77,8 +80,8 @@ class _QuranViewState extends State<QuranView> {
       // }
       // debugger();
       print(
-          "${start} ---- ${next} |--- length = ${widget.ayat!.length} -- total Ruko = ${rukoList.length}");
-      var ayaList = widget.ayat!.sublist(start, next);
+          "${start} ---- ${next} |--- length = ${listAyat!.length} -- total Ruko = ${rukoList.length}");
+      var ayaList = listAyat!.sublist(start, next);
       // ayaLength > next ? ayaLength : next
       List<TextSpan> textSpanChildren = [];
       // if (sajdaList.isNotEmpty) {
@@ -127,7 +130,7 @@ class _QuranViewState extends State<QuranView> {
       //     }
       //   }
       // } else {
-       
+
       for (int k = 0; k < ayaList.length; k++) {
         var aya = ayaList[k];
         if (aya.sajda != null) {
@@ -137,7 +140,7 @@ class _QuranViewState extends State<QuranView> {
           //  debugger();
           textSpanChildren.add(
             TextSpan(
-              text: "${(aya.arabic).trim()} ",
+              text: "${(aya["arabicText"]).trim()} ",
               style: const TextStyle(color: Colors.black),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
@@ -159,14 +162,15 @@ class _QuranViewState extends State<QuranView> {
           ));
           textSpanChildren = [];
 
- 
           quranViewWidget.add(Stack(
             alignment: Alignment.center,
             children: [
               Text(
                 aya.sajda!,
-                style: MyTextStyle.heading1
-                    .copyWith(fontSize: 30, fontFamily: bloc.arabicFontFamily, color: bloc.selectedTheme),
+                style: MyTextStyle.heading1.copyWith(
+                    fontSize: 30,
+                    fontFamily: bloc.arabicFontFamily,
+                    color: bloc.selectedTheme),
               ),
             ],
           ));
@@ -186,17 +190,12 @@ class _QuranViewState extends State<QuranView> {
           }
           break;
         } else {
-          if(aya.ayatNumber == 0 )
-          {
+          if (aya["ayatId"] == "0") {
             continue;
           }
 
-            
-            // debugger();
-           
-          
-        
-          
+          // debugger();
+
           textSpanChildren.add(
             TextSpan(
               text: "${(aya.arabic).trim()} ",
@@ -208,22 +207,27 @@ class _QuranViewState extends State<QuranView> {
                 },
             ),
           );
-                   if(aya.manzil != null){
+          if (aya.manzil != null) {
             // debugger();
-            quranViewWidget.add(SizedBox(height: 10,));
-              quranViewWidget.add(Stack(
-            alignment: Alignment.topLeft,
-            children: [
-              Text(
-                aya.manzil!,
-                style: MyTextStyle.heading1
-                    .copyWith(fontSize: 24, fontFamily: bloc.arabicFontFamily, color: bloc.selectedTheme),
-              ),
-            ],
-          ));
-          quranViewWidget.add(SizedBox(height: 10,));
+            quranViewWidget.add(SizedBox(
+              height: 10,
+            ));
+            quranViewWidget.add(Stack(
+              alignment: Alignment.topLeft,
+              children: [
+                Text(
+                  aya.manzil!,
+                  style: MyTextStyle.heading1.copyWith(
+                      fontSize: 24,
+                      fontFamily: bloc.arabicFontFamily,
+                      color: bloc.selectedTheme),
+                ),
+              ],
+            ));
+            quranViewWidget.add(SizedBox(
+              height: 10,
+            ));
           }
-
         }
       }
       // }
@@ -244,8 +248,10 @@ class _QuranViewState extends State<QuranView> {
         children: [
           Text(
             "ع",
-            style: MyTextStyle.heading1
-                .copyWith(fontSize: 70, fontFamily: bloc.arabicFontFamily, color: bloc.selectedTheme),
+            style: MyTextStyle.heading1.copyWith(
+                fontSize: 70,
+                fontFamily: bloc.arabicFontFamily,
+                color: bloc.selectedTheme),
           ),
           Positioned(bottom: 30, child: Text(rukoList[i].diff.toString())),
           Positioned(top: 20, child: Text(rukoList[i].rakuNumber.toString())),
@@ -269,7 +275,7 @@ class _QuranViewState extends State<QuranView> {
     print(total.length);
     setState(() {});
     // debugger();
-    // for (var i = 0; i < widget.ayat!.length ; i++) {
+    // for (var i = 0; i < listAyat!.length ; i++) {
     // if(rukoList.isNotEmpty){
     //   for (var j = 0; j < rukoList.length; j++) {
     //   if(i == rukoList[j].ayaAfterRako){
@@ -288,8 +294,6 @@ class _QuranViewState extends State<QuranView> {
 
   loadData() async {
     var bloc = context.read<ThemeProvider>();
-
-    //  await getArabic();
     getRuko().then((ruko) {
       getSajda().then((sajda) {
         listTextSpan(bloc, ruko, sajda).then((val) {
@@ -306,6 +310,8 @@ class _QuranViewState extends State<QuranView> {
   @override
   void initState() {
     super.initState();
+    loadQuranView().then((val){
+    listAyat = val;
     viewMaker();
     bismillaChecker();
     // loadData();
@@ -329,12 +335,13 @@ class _QuranViewState extends State<QuranView> {
         }
       }
     });
+    });
   }
 
   bool isBismilla = true;
 
   bismillaChecker() {
-    bool isAvailable = widget.ayat![0].ayatNumber == 0;
+    bool isAvailable = listAyat![0]["ayatId"] == "0";
     if (!isAvailable) {
       setState(() {
         isBismilla = false;
@@ -363,37 +370,35 @@ class _QuranViewState extends State<QuranView> {
 
   String arabicText = "";
 
-  getArabic() {
-    for (int index = 0;
-        index < int.parse(widget.ayatCount.toString());
-        index++) {
-      arabicText += "${widget.ayat![index].arabic}${index == 0 ? '\n' : " "}";
+
+  Future<List> loadQuranView() async {
+    final quran = await DefaultAssetBundle.of(context)
+        .loadString("assets/extraction/quran2026.json");
+    final quranResponse = jsonDecode(quran);
+    String? prev;
+    final quranAyat = [];
+    for (var item in quranResponse) {
+      if (prev != null && item["surahId"] != prev) {
+        print("ID changed from $prev to ${item['id']}");
+        break;
+      }
+      prev = item["surahId"];
+      quranAyat.add(item);
     }
-    setState(() {});
+
+    return quranAyat;
   }
-
-  //   String arabicText = "";
-
-  // getArabic(){
-  //   for(int index = 0; index < int.parse(widget.ayatCount.toString()); index++){
-  //     RukoModel rukoModel =  isRuku(index);
-  //   arabicText += "${widget.ayat![index].arabic}".trim() + "${index == 0 ? '\n' : " "}" + "${rukoModel == null  ? "" : ""}";
-  //   }
-  //   setState(() {
-
-  //   });
-  // }
 
   List<TextSpan> children = [];
 
   listTextSpan(bloc, ruko, sajda) async {
     // debugger();
-    for (int i = isBismilla ? 1 : 0; i < widget.ayat!.length; i++) {
+    for (int i = isBismilla ? 1 : 0; i < listAyat!.length; i++) {
       RukoModel? rukoModel = isRuku(i, ruko);
       SajdaModel? sajdaModel = isSajda(i, sajda);
       children.add(
         TextSpan(
-          text: "${(widget.ayat![i].arabic).trim()} ",
+          text: "${(listAyat![i].arabic).trim()} ",
           recognizer: TapGestureRecognizer()
             ..onTap = () {
               print(i);
@@ -442,7 +447,7 @@ class _QuranViewState extends State<QuranView> {
       return Scaffold(
         // floatingActionButton: FloatingActionButton(
         //   onPressed: () {},
-        //   child: Text(widget.ayat!.length.toString()),
+        //   child: Text(listAyat!.length.toString()),
         // ),
         bottomNavigationBar: isScrollingDown
             ? SizedBox()
@@ -452,14 +457,14 @@ class _QuranViewState extends State<QuranView> {
                   BottomNavigationBarItem(
                       icon: InkWell(
                           onTap: () {
-                            push(
-                                context,
-                                SurahTranslationScreen(
-                                  ayatCount: widget.ayatCount.toString(),
-                                  ayatList: widget.ayat,
-                                  suratNumber: widget.suratNumber,
-                                  surahName: widget.surahName,
-                                ));
+                            // push(
+                            //     context,
+                            //     SurahTranslationScreen(
+                            //       ayatCount: widget.ayatCount.toString(),
+                            //       ayatList: listAyat,
+                            //       suratNumber: widget.suratNumber,
+                            //       surahName: widget.surahName,
+                            //     ));
                           },
                           child: Icon(Icons.book)),
                       label: "Translation"),
@@ -511,7 +516,7 @@ class _QuranViewState extends State<QuranView> {
                         Row(
                           children: [
                             Expanded(
-                              child: Image.asset(                                
+                              child: Image.asset(
                                 "assets/images/borderLeft1.png",
                                 height: 5,
                                 fit: BoxFit.fill,
@@ -520,7 +525,7 @@ class _QuranViewState extends State<QuranView> {
                             ),
                             Expanded(
                               child: Image.asset(
-                                                                height: 5,
+                                height: 5,
                                 fit: BoxFit.fill,
                                 "assets/images/borderRight1.png",
                                 color: Colors.white,
@@ -528,7 +533,7 @@ class _QuranViewState extends State<QuranView> {
                             ),
                           ],
                         ),
-                    //  Spacer(),
+                        //  Spacer(),
                         if (isBismilla)
                           Text(
                             "${bismillaArabic}",
@@ -537,14 +542,14 @@ class _QuranViewState extends State<QuranView> {
                                 fontSize: 10,
                                 fontFamily: bloc.arabicFontFamily),
                           ),
-                      //  Spacer(),
+                        //  Spacer(),
                         Row(
                           children: [
                             Expanded(
                               child: Image.asset(
                                 "assets/images/borderLeft1.png",
                                 color: Colors.white,
-                                                                height: 5,
+                                height: 5,
                                 fit: BoxFit.fill,
                               ),
                             ),
@@ -552,13 +557,13 @@ class _QuranViewState extends State<QuranView> {
                               child: Image.asset(
                                 "assets/images/borderRight1.png",
                                 color: Color.fromARGB(255, 255, 109, 109),
-                                                                height: 5,
+                                height: 5,
                                 fit: BoxFit.fill,
                               ),
                             ),
                           ],
                         ),
-                          //  SizedBox(height: 5,),
+                        //  SizedBox(height: 5,),
                       ],
                     ),
                   ),
@@ -577,7 +582,7 @@ class _QuranViewState extends State<QuranView> {
                           title: Text(
                             '${widget.surahName}',
                             style: TextStyle(
-                              color: Colors.black, 
+                              color: Colors.black,
                               fontFamily: bloc.urduFontFamily,
                             ),
                           ),
@@ -586,36 +591,35 @@ class _QuranViewState extends State<QuranView> {
                     ],
                   ),
                 ),
-              ),   
+              ),
             ];
           },
-          body:
-              Container(
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      image: DecorationImage(
-                          image: AssetImage(
-                            "assets/images/border.png",
-                          ),
-                          fit: BoxFit.fill,
-                          alignment: Alignment.topCenter)),
-                  // height: size.height / 1.75,
-                  padding: const EdgeInsets.only(
-                      left: 0, right: 0, top: 20, bottom: 20),
-                  child: Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: SingleChildScrollView(
-                      controller: _scrollViewController,
-                      child: Container(
-                        margin: const EdgeInsets.only(
-                            left: 23, right: 30, top: 30, bottom: 30),
-                        child: Column(
-                          children: quranViewWidget,
-                        ),
-                      ),
-                      ),
+          body: Container(
+            decoration: BoxDecoration(
+                color: Colors.white,
+                image: DecorationImage(
+                    image: AssetImage(
+                      "assets/images/border.png",
+                    ),
+                    fit: BoxFit.fill,
+                    alignment: Alignment.topCenter)),
+            // height: size.height / 1.75,
+            padding:
+                const EdgeInsets.only(left: 0, right: 0, top: 20, bottom: 20),
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: SingleChildScrollView(
+                controller: _scrollViewController,
+                child: Container(
+                  margin: const EdgeInsets.only(
+                      left: 23, right: 30, top: 30, bottom: 30),
+                  child: Column(
+                    children: quranViewWidget,
                   ),
-                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       );
     }));
@@ -652,7 +656,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 //                  physics:
 //                      const NeverScrollableScrollPhysics(),
 //                  shrinkWrap: true,
-//                  itemCount: widget.ayat!.length,
+//                  itemCount: listAyat!.length,
 //                  itemBuilder: (context, index) {
 // RukoModel? rukoModel =  isRuku(index);
 // SajdaModel? sajdaModel =  isSajda(index);
@@ -662,7 +666,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 //                       //  Divider(),
 //                       //  Divider(),
 //                        Text(
-//                          widget.ayat![index].arabic.toString(),
+//                          listAyat![index].arabic.toString(),
 //                          // " (" +
 //                          // arabicNumber.convert(index) +
 //                          // ")",
@@ -677,7 +681,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 //                       //  Divider(),
 //                       //  Text("ترجمہ: کنزالایمان"),
 //                       //   Text(
-//                       //    widget.ayat![index].translation1.toString(),
+//                       //    listAyat![index].translation1.toString(),
 //                       //    // " (" +
 //                       //    // arabicNumber.convert(index) +
 //                       //    // ")",
@@ -691,7 +695,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 //                       //  Divider(),
 //                       //  Divider(),
 //                       //   Text(
-//                       //    widget.ayat![index].translation2.toString(),
+//                       //    listAyat![index].translation2.toString(),
 //                       //    // " (" +
 //                       //    // arabicNumber.convert(index) +
 //                       //    // ")",
