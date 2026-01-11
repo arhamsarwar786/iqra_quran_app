@@ -1,36 +1,26 @@
 // ignore_for_file: file_names
 
 import 'dart:convert';
-import 'dart:developer';
 
-import 'package:collection/collection.dart'; // You have to add this manually, for some reason it cannot be added automatically
 import 'package:flutter/gestures.dart';
-
 import 'package:flutter/material.dart';
 import 'package:arabic_numbers/arabic_numbers.dart';
 import 'package:flutter/rendering.dart';
 import 'package:iqra/Provider/theme_provider.dart';
-import 'package:iqra/Screens/MainPage/Quran/translation/parah_translation_screen.dart';
-import 'package:iqra/Screens/MainPage/Quran/translation/surah_translation_screen.dart';
 import 'package:iqra/Utils/customThemes.dart';
 import 'package:provider/provider.dart';
-// import 'arabic';
 import '../../../Models/aya_list_model.dart';
-import '../../../Models/para_model.dart';
+import '../../../Models/para_model.dart' as ParaModel;
 import '../../../Models/ruko_model.dart';
 import '../../../Models/sajda_model.dart';
 import '../../../Utils/bottom_sheet_preview.dart';
-import '../../../Utils/constants.dart';
-import '../../../Utils/fs_system.dart';
-import '../../../Utils/utils.dart';
-import '../../../widgets.dart';
 
 class ParaArabicScreen extends StatefulWidget {
   ParaArabicScreen(
       {super.key, this.para, this.ayatInPara, this.parahCount, this.parahname});
   final String? parahCount;
-  int? ayatInPara;
-  Para? para;
+  final int? ayatInPara;
+  final ParaModel.Para? para;
   final String? parahname;
   @override
   State<ParaArabicScreen> createState() => _ParaArabicScreenState();
@@ -43,109 +33,260 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   bool isScrollingDown = true;
 
   List<Widget> paraArabicScreenWidget = [];
+  List listAyat = [];
+
+  Future<List<RukoModel>> getRuko() async {
+    var data = await DefaultAssetBundle.of(context)
+        .loadString("assets/extraction/ruko.json");
+    var rukoDataLocal = rukoModelFromJson(data);
+    List<RukoModel> rukoData = rukoDataLocal
+        .where((element) => 
+            listAyat.any((aya) => (aya as Aya).surahId == element.surat.toString()))
+        .toList();
+    return rukoData;
+  }
+
+  Future<List<SajdaModel>> getSajda() async {
+    var data = await DefaultAssetBundle.of(context)
+        .loadString("assets/extraction/sajda.json");
+    var sajdaDataLocal = sajdaModelFromJson(data);
+    List<SajdaModel> sajdaData = sajdaDataLocal
+        .where((element) => 
+            listAyat.any((aya) => (aya as Aya).surahId == element.surat.toString()))
+        .toList();
+    return sajdaData;
+  }
+
+  Future<List> loadParaView() async {
+    final quran = await DefaultAssetBundle.of(context)
+        .loadString("assets/extraction/quran2026.json");
+    final quranResponse = jsonDecode(quran) as List;
+    String paraId = widget.parahCount.toString();
+    final paraAyat = [];
+    
+    for (var item in quranResponse) {
+      if (item["paraId"].toString() == paraId) {
+        paraAyat.add(Aya.fromJson(item));
+      }
+    }
+
+    return paraAyat;
+  }
 
   viewMaker() async {
     var bloc = context.read<ThemeProvider>();
-    // List tempView = [];
+    List<RukoModel> rukoList = await getRuko();
+    
+    // Group ayats by surah to handle ruku properly
+    Map<String, List<Aya>> ayatsBySurah = {};
+    for (var aya in listAyat) {
+      var ayaObj = aya as Aya;
+      String surahId = ayaObj.surahId ?? "0";
+      if (!ayatsBySurah.containsKey(surahId)) {
+        ayatsBySurah[surahId] = [];
+      }
+      ayatsBySurah[surahId]!.add(ayaObj);
+    }
 
-    // for (var i = 0; i < widget.para!.data!.length; i++) {
-    var para = widget.para!.data![0];
-    List<TextSpan> textSpanChildren = [];
-    for (var j = 0; j < para.aya!.length; j++) {
-      var ayat = para.aya![j];
+    // Process each surah's rukus
+    for (var surahId in ayatsBySurah.keys) {
+      var surahAyats = ayatsBySurah[surahId]!;
+      var surahRukus = rukoList.where((r) => r.surat.toString() == surahId).toList();
+      
+      if (surahRukus.isEmpty) {
+        // No rukus for this surah, just add all ayats
+        List<TextSpan> textSpanChildren = [];
+        for (var aya in surahAyats) {
+          if (aya.ayatNumber == "0") continue;
+          
+          textSpanChildren.add(
+            TextSpan(
+              text: "${(aya.arabicText).trim()} ",
+              style: const TextStyle(color: Colors.black),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  SHEET.bottomSheetPreview(context, aya, bloc);
+                },
+            ),
+          );
+          
+          if (aya.sajda != null) {
+            paraArabicScreenWidget.add(RichText(
+              text: TextSpan(
+                children: textSpanChildren,
+                style: TextStyle(
+                    fontSize: bloc.arabicFontSize,
+                    fontFamily: bloc.arabicFontFamily,
+                    color: Colors.black),
+              ),
+            ));
+            textSpanChildren = [];
+            
+            paraArabicScreenWidget.add(Stack(
+              alignment: Alignment.center,
+              children: [
+                Text(
+                  aya.sajda!,
+                  style: MyTextStyle.heading1.copyWith(
+                      fontSize: 30,
+                      fontFamily: bloc.arabicFontFamily,
+                      color: bloc.selectedTheme),
+                ),
+              ],
+            ));
+          }
+          
+          if (aya.manzil != null) {
+            paraArabicScreenWidget.add(RichText(
+              text: TextSpan(
+                children: textSpanChildren,
+                style: TextStyle(
+                    fontSize: bloc.arabicFontSize,
+                    fontFamily: bloc.arabicFontFamily,
+                    color: Colors.black),
+              ),
+            ));
+            textSpanChildren = [];
+            
+            paraArabicScreenWidget.add(SizedBox(height: 10));
+            paraArabicScreenWidget.add(Stack(
+              alignment: Alignment.topLeft,
+              children: [
+                Text(
+                  aya.manzil!,
+                  style: MyTextStyle.heading1.copyWith(
+                      fontSize: 24,
+                      fontFamily: bloc.arabicFontFamily,
+                      color: bloc.selectedTheme),
+                ),
+              ],
+            ));
+            paraArabicScreenWidget.add(SizedBox(height: 10));
+          }
+        }
+        
+        if (textSpanChildren.isNotEmpty) {
+          paraArabicScreenWidget.add(RichText(
+            text: TextSpan(
+              children: textSpanChildren,
+              style: TextStyle(
+                  fontSize: bloc.arabicFontSize,
+                  fontFamily: bloc.arabicFontFamily,
+                  color: Colors.black),
+            ),
+          ));
+        }
+        continue;
+      }
 
-      //  if (ayat.isSurahChange != null && ayat.isSurahChange!) {
-      //   // debugger();
-      //   paraArabicScreenWidget.add(RichText(
-      //     text: TextSpan(
-      //       children: textSpanChildren,
-      //       style: TextStyle(
-      //           fontSize: bloc.arabicFontSize,
-      //           fontFamily: bloc.arabicFontFamily,
-      //           color: Colors.black
-      //           // Add other styles as needed
-      //           ),
-      //     ),
-      //   ));
-      //   textSpanChildren = [];
-      //   paraArabicScreenWidget.add(Stack(
-      //     alignment: Alignment.center,
-      //     children: [
-      //       Text(
-      //         "${ayat.surat}",
-      //         style: MyTextStyle.heading1
-      //             .copyWith(fontSize: 70, fontFamily: bloc.arabicFontFamily),
-      //       ),
-      //       Positioned(bottom: 30, child: Text(ayat.diff.toString())),
-      //       Positioned(top: 20, child: Text(ayat.rakuNumber.toString())),
-      //       Positioned(bottom: 0, child: Text(ayat.bottomNumber.toString()))
-      //     ],
-      //   ));
-      // }else{
-      if (ayat.isRuko == null) {
-        textSpanChildren.add(
-          TextSpan(
-            text: "${(ayat.arabic)!.trim()} ",
-            style: TextStyle(color: Colors.black),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                print(j);
-              },
-          ),
-        );
-      }  else {
+      // Process rukus for this surah
+      for (var i = 0; i < surahRukus.length; i++) {
+        int start = i > 0 ? surahRukus[i - 1].ayaBeforeRako : 0;
+        int next = surahRukus[i].ayaAfterRako + 1;
+        
+        var ayaList = surahAyats.where((a) {
+          int ayaNum = int.tryParse(a.ayatNumber ?? "0") ?? 0;
+          return ayaNum >= start && ayaNum < next;
+        }).toList();
+        
+        List<TextSpan> textSpanChildren = [];
+        
+        for (var aya in ayaList) {
+          if (aya.ayatNumber == "0") continue;
+          
+          textSpanChildren.add(
+            TextSpan(
+              text: "${(aya.arabicText).trim()} ",
+              style: const TextStyle(color: Colors.black),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  SHEET.bottomSheetPreview(context, aya, bloc);
+                },
+            ),
+          );
+          
+          if (aya.sajda != null) {
+            paraArabicScreenWidget.add(RichText(
+              text: TextSpan(
+                children: textSpanChildren,
+                style: TextStyle(
+                    fontSize: bloc.arabicFontSize,
+                    fontFamily: bloc.arabicFontFamily,
+                    color: Colors.black),
+              ),
+            ));
+            textSpanChildren = [];
+            
+            paraArabicScreenWidget.add(Stack(
+              alignment: Alignment.center,
+              children: [
+                Text(
+                  aya.sajda!,
+                  style: MyTextStyle.heading1.copyWith(
+                      fontSize: 30,
+                      fontFamily: bloc.arabicFontFamily,
+                      color: bloc.selectedTheme),
+                ),
+              ],
+            ));
+          }
+          
+          if (aya.manzil != null) {
+            paraArabicScreenWidget.add(SizedBox(height: 10));
+            paraArabicScreenWidget.add(Stack(
+              alignment: Alignment.topLeft,
+              children: [
+                Text(
+                  aya.manzil!,
+                  style: MyTextStyle.heading1.copyWith(
+                      fontSize: 24,
+                      fontFamily: bloc.arabicFontFamily,
+                      color: bloc.selectedTheme),
+                ),
+              ],
+            ));
+            paraArabicScreenWidget.add(SizedBox(height: 10));
+          }
+        }
+        
         paraArabicScreenWidget.add(RichText(
           text: TextSpan(
             children: textSpanChildren,
             style: TextStyle(
                 fontSize: bloc.arabicFontSize,
                 fontFamily: bloc.arabicFontFamily,
-                color: Colors.black
-                // Add other styles as needed
-                ),
+                color: Colors.black),
           ),
         ));
-        textSpanChildren = [];
+        
         paraArabicScreenWidget.add(Stack(
           alignment: Alignment.center,
           children: [
             Text(
               "ع",
-              style: MyTextStyle.heading1
-                  .copyWith(fontSize: 70, fontFamily: bloc.arabicFontFamily),
+              style: MyTextStyle.heading1.copyWith(
+                  fontSize: 70,
+                  fontFamily: bloc.arabicFontFamily,
+                  color: bloc.selectedTheme),
             ),
-            Positioned(bottom: 30, child: Text(ayat.diff.toString())),
-            Positioned(top: 20, child: Text(ayat.rakuNumber.toString())),
-            Positioned(bottom: 0, child: Text(ayat.bottomNumber.toString()))
+            Positioned(bottom: 30, child: Text(surahRukus[i].diff.toString())),
+            Positioned(top: 20, child: Text(surahRukus[i].rakuNumber.toString())),
+            Positioned(bottom: 0, child: Text(surahRukus[i].bottomNumber.toString()))
           ],
         ));
       }
-
-      // }
-
-      // }
-      // paraArabicScreenWidget.add(RichText(
-      //   text: TextSpan(
-      //     children: textSpanChildren,
-      //     style: TextStyle(
-      //         fontSize: bloc.arabicFontSize,
-      //         fontFamily: bloc.arabicFontFamily,
-      //         color: Colors.black
-      //         // Add other styles as needed
-      //         ),
-      //   ),
-      // ));
-      // debugger();
-
-      setState(() {});
     }
+    
+    setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    viewMaker();
-    // loadData();
+    loadParaView().then((val) {
+      listAyat = val;
+      viewMaker();
+    });
     _scrollViewController = ScrollController();
     _scrollViewController!.addListener(() {
       if (_scrollViewController!.position.userScrollDirection ==
@@ -177,13 +318,12 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return SafeArea(child: Builder(builder: (context) {
       var bloc = context.read<ThemeProvider>();
       return Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () {},
-          child: Text(widget.parahCount!.length.toString()),
+          child: Text(listAyat.length.toString()),
         ),
         bottomNavigationBar: isScrollingDown
             ? SizedBox()
@@ -299,7 +439,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                           ),
                           backgroundColor: Colors.white,
                           title: Text(
-                            '${widget.para!.name}',
+                            widget.parahname ?? 'Para ${widget.parahCount}',
                             style: TextStyle(
                               color: Colors.black,
                               fontFamily: bloc.urduFontFamily,

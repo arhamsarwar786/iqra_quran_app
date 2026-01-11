@@ -1,7 +1,6 @@
 // ignore_for_file: file_names
 
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:collection/collection.dart'; // You have to add this manually, for some reason it cannot be added automatically
 import 'package:flutter/gestures.dart';
@@ -10,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:arabic_numbers/arabic_numbers.dart';
 import 'package:flutter/rendering.dart';
 import 'package:iqra/Provider/theme_provider.dart';
-import 'package:iqra/Screens/MainPage/Quran/translation/surah_translation_screen.dart';
 import 'package:iqra/Utils/customThemes.dart';
 import 'package:provider/provider.dart';
 // import 'arabic';
@@ -19,12 +17,11 @@ import '../../../Models/ruko_model.dart';
 import '../../../Models/sajda_model.dart';
 import '../../../Utils/bottom_sheet_preview.dart';
 import '../../../Utils/utils.dart';
-import '../../../widgets.dart';
 
 class QuranView extends StatefulWidget {
   QuranView({this.ayatCount, this.surahName, this.suratNumber});
   final String? ayatCount;
-  int? suratNumber;
+  final int? suratNumber;
   // List<Aya>? ayat;
   final String? surahName;
   @override
@@ -45,7 +42,7 @@ class _QuranViewState extends State<QuranView> {
         .loadString("assets/extraction/ruko.json");
     var rukoDataLocal = rukoModelFromJson(data);
     rukoData = rukoDataLocal
-        .where((element) => element.surat == widget.suratNumber)
+        .where((element) => element.surat == (widget.suratNumber ?? 0))
         .toList();
     return rukoData ?? [];
   }
@@ -55,7 +52,7 @@ class _QuranViewState extends State<QuranView> {
         .loadString("assets/extraction/sajda.json");
     var sajdaDataLocal = sajdaModelFromJson(data);
     sajdaData = sajdaDataLocal
-        .where((element) => element.surat == widget.suratNumber.toString())
+        .where((element) => element.surat.toString() == widget.suratNumber.toString())
         .toList();
 
     return sajdaData ?? [];
@@ -71,7 +68,6 @@ class _QuranViewState extends State<QuranView> {
       // debugger();
       int start = i > 0 ? rukoList[i - 1].ayaBeforeRako : 0;
       int next = rukoList[i].ayaAfterRako + 1;
-      int ayaLength = listAyat!.length;
       // int start = i > 0 ? int.parse(rukoList[i - 1].ayaAfterRako)  : 0;
       // int next = start + int.parse(rukoList[i].diff);
 
@@ -80,8 +76,8 @@ class _QuranViewState extends State<QuranView> {
       // }
       // debugger();
       print(
-          "${start} ---- ${next} |--- length = ${listAyat!.length} -- total Ruko = ${rukoList.length}");
-      var ayaList = listAyat!.sublist(start, next);
+          "${start} ---- ${next} |--- length = ${listAyat.length} -- total Ruko = ${rukoList.length}");
+      var ayaList = listAyat.sublist(start, next);
       // ayaLength > next ? ayaLength : next
       List<TextSpan> textSpanChildren = [];
       // if (sajdaList.isNotEmpty) {
@@ -132,7 +128,7 @@ class _QuranViewState extends State<QuranView> {
       // } else {
 
       for (int k = 0; k < ayaList.length; k++) {
-        var aya = ayaList[k];
+        var aya = ayaList[k] as Aya;
         if (aya.sajda != null) {
           // break;
           var newList = ayaList.sublist(k + 1, ayaList.length);
@@ -140,7 +136,7 @@ class _QuranViewState extends State<QuranView> {
           //  debugger();
           textSpanChildren.add(
             TextSpan(
-              text: "${(aya["arabicText"]).trim()} ",
+              text: "${(aya.arabicText).trim()} ",
               style: const TextStyle(color: Colors.black),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
@@ -176,9 +172,10 @@ class _QuranViewState extends State<QuranView> {
           ));
 
           for (var a in newList) {
+            var ayaObj = a as Aya;
             textSpanChildren.add(
               TextSpan(
-                text: "${(a.arabic).trim()} ",
+                text: "${(ayaObj.arabicText).trim()} ",
                 style: const TextStyle(color: Colors.black),
                 recognizer: TapGestureRecognizer()
                   ..onTap = () {
@@ -190,7 +187,7 @@ class _QuranViewState extends State<QuranView> {
           }
           break;
         } else {
-          if (aya["ayatId"] == "0") {
+          if (aya.ayatNumber == "0") {
             continue;
           }
 
@@ -198,7 +195,7 @@ class _QuranViewState extends State<QuranView> {
 
           textSpanChildren.add(
             TextSpan(
-              text: "${(aya.arabic).trim()} ",
+              text: "${(aya.arabicText).trim()} ",
               style: const TextStyle(color: Colors.black),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
@@ -341,11 +338,13 @@ class _QuranViewState extends State<QuranView> {
   bool isBismilla = true;
 
   bismillaChecker() {
-    bool isAvailable = listAyat![0]["ayatId"] == "0";
-    if (!isAvailable) {
-      setState(() {
-        isBismilla = false;
-      });
+    if (listAyat.isNotEmpty && listAyat[0] is Aya) {
+      bool isAvailable = (listAyat[0] as Aya).ayatNumber == "0";
+      if (!isAvailable) {
+        setState(() {
+          isBismilla = false;
+        });
+      }
     }
   }
 
@@ -358,7 +357,7 @@ class _QuranViewState extends State<QuranView> {
 
   isRuku(index, List<RukoModel> ruko) {
     var data = ruko.firstWhereOrNull(
-        (element) => (element.ayaAfterRako == index.toString()));
+        (element) => (element.ayaAfterRako == index));
     return data;
   }
 
@@ -374,16 +373,17 @@ class _QuranViewState extends State<QuranView> {
   Future<List> loadQuranView() async {
     final quran = await DefaultAssetBundle.of(context)
         .loadString("assets/extraction/quran2026.json");
-    final quranResponse = jsonDecode(quran);
-    String? prev;
+    final quranResponse = jsonDecode(quran) as List;
+    String surahId = widget.suratNumber.toString();
     final quranAyat = [];
+    
     for (var item in quranResponse) {
-      if (prev != null && item["surahId"] != prev) {
-        print("ID changed from $prev to ${item['id']}");
+      if (item["surahId"].toString() == surahId) {
+        quranAyat.add(Aya.fromJson(item));
+      } else if (quranAyat.isNotEmpty) {
+        // We've moved past the desired surah
         break;
       }
-      prev = item["surahId"];
-      quranAyat.add(item);
     }
 
     return quranAyat;
@@ -393,12 +393,14 @@ class _QuranViewState extends State<QuranView> {
 
   listTextSpan(bloc, ruko, sajda) async {
     // debugger();
-    for (int i = isBismilla ? 1 : 0; i < listAyat!.length; i++) {
-      RukoModel? rukoModel = isRuku(i, ruko);
-      SajdaModel? sajdaModel = isSajda(i, sajda);
+    for (int i = isBismilla ? 1 : 0; i < listAyat.length; i++) {
+      var aya = listAyat[i] as Aya;
+      int ayaNumber = int.tryParse(aya.ayatNumber ?? "0") ?? 0;
+      RukoModel? rukoModel = isRuku(ayaNumber, ruko);
+      SajdaModel? sajdaModel = isSajda(ayaNumber, sajda);
       children.add(
         TextSpan(
-          text: "${(listAyat![i].arabic).trim()} ",
+          text: "${(aya.arabicText).trim()} ",
           recognizer: TapGestureRecognizer()
             ..onTap = () {
               print(i);
@@ -441,7 +443,6 @@ class _QuranViewState extends State<QuranView> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return SafeArea(child: Builder(builder: (context) {
       var bloc = context.read<ThemeProvider>();
       return Scaffold(

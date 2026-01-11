@@ -14,14 +14,12 @@ class MaterialScreen extends StatefulWidget {
 
 class _MaterialScreenState extends State<MaterialScreen> {
 
-  
- 
-
   @override
   Widget build(BuildContext context) {
       Provider.of<ThemeProvider>(context).getSelectedTheme();
     return  MaterialApp(
         theme: ThemeData(
+          useMaterial3: false,
           // primarySwatch: MaterialColor(myColor.value, {myColor.value:myColor}),
           primaryColor: Provider.of<ThemeProvider>(context).selectedTheme,
           // colorScheme: ColorScheme.fromSwatch().copyWith(

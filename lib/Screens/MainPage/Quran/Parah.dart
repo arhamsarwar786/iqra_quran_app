@@ -2,14 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:iqra/Provider/theme_provider.dart';
-import 'package:iqra/Screens/MainPage/Quran/ParahView.dart';
 import 'package:iqra/Screens/MainPage/Quran/para_arabic_screen.dart';
-import 'package:iqra/Screens/MainPage/Quran/translation/parah_translation_screen.dart';
 import 'package:iqra/widgets.dart';
 import 'package:provider/provider.dart';
-
-import '../../../Models/para_model.dart';
-// import 'ParahView.dart';
 
 class Parah extends StatefulWidget {
   const Parah({Key? key}) : super(key: key);
@@ -19,21 +14,21 @@ class Parah extends StatefulWidget {
 }
 
 class _ParahState extends State<Parah> {
-  static const parah = [
+  static const parahNames = [
     'آلم',
-    'سَيَقُولُ	',
-    'تِلْكَ ٱلْرُّسُلُ	',
-    'لن تنالوا	',
-    'وَٱلْمُحْصَنَاتُ	',
+    'سَيَقُولُ',
+    'تِلْكَ ٱلْرُّسُلُ',
+    'لن تنالوا',
+    'وَٱلْمُحْصَنَاتُ',
     'لَا يُحِبُّ ٱللهُ',
     'وَإِذَا سَمِعُوا',
-    'وَلَوْ أَنَّنَا	',
+    'وَلَوْ أَنَّنَا',
     'قَالَ ٱلْمَلَأُ',
-    'وَٱعْلَمُواْ	',
-    'يَعْتَذِرُونَ	',
-    'وَمَا مِنْ دَآبَّةٍ	',
+    'وَٱعْلَمُواْ',
+    'يَعْتَذِرُونَ',
+    'وَمَا مِنْ دَآبَّةٍ',
     'وَمَا أُبَرِّئُ',
-    'رُبَمَا ',
+    'رُبَمَا',
     'سُبْحَانَ ٱلَّذِى',
     'قَالَ أَلَمْ',
     'ٱقْتَرَبَ لِلْنَّاسِ',
@@ -42,48 +37,15 @@ class _ParahState extends State<Parah> {
     'أَمَّنْ خَلَقَ',
     'أُتْلُ مَاأُوْحِیَ',
     'وَمَنْ يَّقْنُتْ',
-    'وَمَآ لي	',
+    'وَمَآ لي',
     'فَمَنْ أَظْلَمُ',
     'إِلَيْهِ يُرَدُّ',
     'حم',
-    'قَالَ فَمَا خَطْبُكُم	',
-    'قَدْ سَمِعَ ٱللهُ	',
-    'تَبَارَكَ ٱلَّذِى	',
+    'قَالَ فَمَا خَطْبُكُم',
+    'قَدْ سَمِعَ ٱللهُ',
+    'تَبَارَكَ ٱلَّذِى',
     'عَمَّ',
   ];
-  static const _num = [
-    '148',
-    '111',
-    '126',
-    '131',
-    '124',
-    '110',
-    '149',
-    '142',
-    '159',
-    '127',
-    '151',
-    '170',
-    '154',
-    '227',
-    '185',
-    '269',
-    '190',
-    '202',
-    '339',
-    '171',
-    '178',
-    '169',
-    '357',
-    '175',
-    '246',
-    '195',
-    '399',
-    '137',
-    '431',
-    '564',
-  ];
-  List<int> numberofayat = [];
 
   @override
   Widget build(BuildContext context) {
@@ -94,30 +56,54 @@ class _ParahState extends State<Parah> {
               const EdgeInsets.only(left: 8.0, right: 8.0, top: 15, bottom: 10),
           child: FutureBuilder(
               future: DefaultAssetBundle.of(context)
-                  .loadString("assets/extraction/quran-devsinn-para.json"),
+                  .loadString("assets/extraction/quran2026.json"),
               builder: (context, snapshot) {
-                if(snapshot.hasData){
-                var data = json.decode(snapshot.data.toString());
-                ParahModel parahData = ParahModel.fromJson(data);
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator(color: bloc.selectedTheme));
+                }
+
+                // Parse the JSON and group by paraId
+                final quranData = json.decode(snapshot.data.toString()) as List;
+                Map<String, List<Map<String, dynamic>>> paraGroups = {};
+                
+                for (var item in quranData) {
+                  String paraId = item["paraId"]?.toString() ?? "0";
+                  if (!paraGroups.containsKey(paraId)) {
+                    paraGroups[paraId] = [];
+                  }
+                  paraGroups[paraId]!.add(item);
+                }
+
+                // Get sorted para numbers (1-30)
+                List<int> paraNumbers = paraGroups.keys
+                    .map((k) => int.tryParse(k) ?? 0)
+                    .where((n) => n > 0)
+                    .toList()
+                  ..sort();
+
                 return GridView.builder(
-                    itemCount: parahData.para!.length,
+                    itemCount: paraNumbers.length,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       childAspectRatio: 2 / 2,
-                      // crossAxisSpacing: 10,
                       mainAxisSpacing: 20,
                     ),
                     itemBuilder: (context, index) {
-                      Para para = parahData.para![index];
+                      int paraNumber = paraNumbers[index];
+                      int ayatCount = paraGroups[paraNumber.toString()]!.length;
+                      String paraName = index < parahNames.length 
+                          ? parahNames[index] 
+                          : 'Para $paraNumber';
+
                       return InkWell(
                         onTap: () {
                           push(context,
                            ParaArabicScreen(
-                            para: para,
-                            ayatInPara: para.totalAyat,
-                                        parahCount: (index + 1).toString(),
-                                        parahname: para.name,)
+                            para: null,
+                            ayatInPara: ayatCount,
+                                        parahCount: paraNumber.toString(),
+                                        parahname: paraName,)
                                         );
                           // Navigator.push(
                           //     context,
@@ -171,7 +157,7 @@ class _ParahState extends State<Parah> {
                                   children: [
                                     FittedBox(
                                       child: Text(
-                                        para.name!,
+                                        paraName,
                                         style: TextStyle(
                                             fontFamily: bloc.urduFontFamily,
                                             color: Colors.black,
@@ -213,12 +199,6 @@ class _ParahState extends State<Parah> {
                         ),
                       );
                     });
-              
-
-                }
-
-                return CircularProgressIndicator.adaptive();
-                
               }));
     });
   }

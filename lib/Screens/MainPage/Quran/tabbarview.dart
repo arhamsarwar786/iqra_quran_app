@@ -41,7 +41,7 @@ class TabBarDemo extends StatelessWidget {
                         color: Colors.white,
                         fontSize: 14),
                     indicatorPadding:
-                        EdgeInsets.only(left: 40, right: 40, bottom: 5),
+                        EdgeInsets.only(left: 10, right: 10, bottom: 5),
                     tabs: const[
                       Tab(
                         text: "Quran",
