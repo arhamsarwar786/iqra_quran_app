@@ -51,6 +51,8 @@ dependencies:
   shared_preferences: 
   just_audio: 
   share_plus: 
+  path_provider:
+  flutter_card_swiper: ^7.0.1
   flutter_localization: ^0.1.14
   easy_localization: ^3.0.3
   file:

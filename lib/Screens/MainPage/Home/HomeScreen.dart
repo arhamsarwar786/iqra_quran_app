@@ -3,7 +3,7 @@ import 'package:iqra/Screens/MainPage/Dua/dua_screen.dart';
 import 'package:iqra/Screens/MainPage/Home/azan/PrayerTime.dart';
 import 'package:iqra/Screens/MainPage/Home/qibal/qibla.dart';
 import 'package:iqra/Screens/MainPage/Tasbeeh/tasbee.dart';
-import 'package:iqra/Screens/MainPage/Tasbeeh/tasbee_detail.dart';
+import 'package:iqra/Utils/share_verse.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
@@ -17,6 +17,12 @@ import 'NameofAllah.dart';
 import 'NameofMohammad.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import "package:timezone/data/latest.dart" as tz;
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -41,6 +47,7 @@ class _HomeState extends State<Home> {
   }
 
   final HijriCalendar _today = HijriCalendar.fromDate(DateTime.now());
+  
   List<String> imageName = [
     "Rectangle 3.png",
     "Rectangle 4.png",
@@ -450,6 +457,13 @@ padding: const EdgeInsets.only(left: 8.0,
                     fontWeight: FontWeight.w700),
               ),
               const Spacer(),
+              IconButton(
+                onPressed: () => AppShare.image(context, bloc),
+                icon: Icon(Icons.share, color: Theme.of(context).primaryColor),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              const SizedBox(width: 10),
               Text(
                 "البقرة",
                 style: TextStyle(
