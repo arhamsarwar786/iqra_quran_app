@@ -15,21 +15,21 @@ class TranlationCardSection extends StatelessWidget {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Card(
-      child: Container(
+      child: SizedBox(
         width: size.width,
         child: Stack(
           alignment: Alignment.center, children: [
           Container(
-            margin: EdgeInsets.symmetric(vertical: 50,horizontal: 20),
+            margin: const EdgeInsets.symmetric(vertical: 50,horizontal: 20),
             alignment: Alignment.center,
-            constraints: BoxConstraints(minHeight: 250),
+            constraints: const BoxConstraints(minHeight: 250),
             color: MyColors.whiteColor,
             width: size.width,
             child: Column(
               children: [
-                Text("${arabic}",style: MyTextStyle.heading3.copyWith(fontSize: provider!.arabicFontSize,fontFamily: provider!.arabicFontFamily),textDirection: TextDirection.rtl,),
-                  Text("ترجمہ: کنزالایمان"),
-                Text("${urdu}",style: MyTextStyle.heading3.copyWith(fontSize: provider!.urduFontSize,fontFamily: provider!.urduFontFamily),textDirection: TextDirection.rtl),
+                Text("$arabic",style: MyTextStyle.heading3.copyWith(fontSize: provider!.arabicFontSize,fontFamily: provider!.arabicFontFamily),textDirection: TextDirection.rtl,),
+                  const Text("ترجمہ: کنزالایمان"),
+                Text("$urdu",style: MyTextStyle.heading3.copyWith(fontSize: provider!.urduFontSize,fontFamily: provider!.urduFontFamily),textDirection: TextDirection.rtl),
               ],
             ),
           ),

@@ -17,7 +17,7 @@ class DuaScreen extends StatelessWidget {
         backgroundColor: bloc.selectedSecondary,
         appBar: AppBar(
           backgroundColor: bloc.selectedTheme,
-          title: Text("Dua"),
+          title: const Text("Dua"),
           centerTitle: true,
           // actions: [IconButton(onPressed: () {}, icon: Icon(Icons.search))],
         ),
@@ -37,9 +37,9 @@ class DuaScreen extends StatelessWidget {
                                 )));
                   },
                   child: Container(
-                    margin: EdgeInsets.only(left: 10, right: 10, top: 10),
-                    padding: EdgeInsets.all(15),
-                    constraints: BoxConstraints(minHeight: 80),
+                    margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
+                    padding: const EdgeInsets.all(15),
+                    constraints: const BoxConstraints(minHeight: 80),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       color: Theme.of(context).primaryColor,

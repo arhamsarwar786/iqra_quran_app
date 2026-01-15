@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 import '../../../widgets.dart';
 
 class PQuranView extends StatefulWidget {
-  PQuranView({
+  PQuranView({super.key, 
     this.ayatInSura,
     this.parahCount,
     this.parahname,
   });
   final String? parahCount;
-  List<int>? ayatInSura;
+  final List<int>? ayatInSura;
   final String? parahname;
   // final String? ayaCount;
   @override
@@ -59,7 +59,6 @@ class _PQuranViewState extends State<PQuranView> {
   List<String> urdudata = [];
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: customAppBar(context, "${widget.parahname}"),
         body: FutureBuilder(
@@ -125,7 +124,7 @@ class _PQuranViewState extends State<PQuranView> {
                                                 widget.parahCount.toString())) -
                                             1])]),
                                     textAlign: TextAlign.right,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         color: Colors.black,
                                         fontSize: 30,
                                         fontWeight: FontWeight.w600),
@@ -134,7 +133,7 @@ class _PQuranViewState extends State<PQuranView> {
                               ),
                             );
                           })
-                      : Center(
+                      : const Center(
                           child: CircularProgressIndicator(
                           color: Colors.black,
                         )));

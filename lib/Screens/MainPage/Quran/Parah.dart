@@ -116,7 +116,7 @@ class _ParahState extends State<Parah> {
                         },
                         child: Card(
                           elevation: 5,
-                          child: Container(
+                          child: SizedBox(
                             height: MediaQuery.of(context).size.height * 0.22,
                             width: MediaQuery.of(context).size.height * 0.22,
                             child: Column(
@@ -136,7 +136,7 @@ class _ParahState extends State<Parah> {
                                         child: Center(
                                             child: Text(
                                           (index + 1).toString(),
-                                          style: TextStyle(color: Colors.white),
+                                          style: const TextStyle(color: Colors.white),
                                         )),
                                       ),
                                     ),

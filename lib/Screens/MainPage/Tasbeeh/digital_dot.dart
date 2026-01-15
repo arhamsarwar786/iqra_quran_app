@@ -7,16 +7,16 @@ class DigitalDot extends StatelessWidget {
   final double? height;
   final Color ?color;
 
-  DigitalDot({Key? key, @required this.height, @required this.color})
+  const DigitalDot({Key? key, @required this.height, @required this.color})
       : assert(height != null),
         assert(color != null),
         super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return new CustomPaint(
-      size: new Size(height! / 2.0, height!),
-      painter: new _DigitalDotPainter(height!, color!),
+    return CustomPaint(
+      size: Size(height! / 2.0, height!),
+      painter: _DigitalDotPainter(height!, color!),
     );
   }
 }
@@ -38,11 +38,11 @@ class _DigitalDotPainter extends CustomPainter {
     final double width = height / 2;
     final double thickness = width / 2;
 
-    final Paint paint = new Paint()
+    final Paint paint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
 
-    canvas.drawRect(new Rect.fromLTWH(
+    canvas.drawRect(Rect.fromLTWH(
       width / 2 - thickness / 2,
       height - thickness,
       thickness,

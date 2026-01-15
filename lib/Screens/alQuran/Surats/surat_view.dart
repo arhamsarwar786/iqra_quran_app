@@ -13,9 +13,9 @@ class SuratView extends StatelessWidget {
     var size = MediaQuery.of(context).size;
     return Scaffold(
       floatingActionButton: FloatingActionButton(onPressed: () {}),
-      backgroundColor: Color.fromARGB(255, 185, 185, 185),
+      backgroundColor: const Color.fromARGB(255, 185, 185, 185),
       appBar: AppBar(
-        title: Text("Translation"),
+        title: const Text("Translation"),
       ),
       body: SingleChildScrollView(
         child:Consumer<MyProvider>(
@@ -33,7 +33,7 @@ class SuratView extends StatelessWidget {
                   child: Text(quran.name.toString(),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 30),),
                 ),
                 ListView.builder(
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     itemCount: quran.verses!.length,
                     itemBuilder: (context, index) {
@@ -51,19 +51,19 @@ class SuratView extends StatelessWidget {
                           ),
                           Center(
                               child: Container(
-                                padding: EdgeInsets.all(50),
+                                padding: const EdgeInsets.all(50),
                                 child: Text(
                             data.arabicText!,
-                            style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
                           ),
                               )),
 
                                  Center(
                               child: Container(
-                                padding: EdgeInsets.only(top: 100,left: 50),
+                                padding: const EdgeInsets.only(top: 100,left: 50),
                                 child: Text(
                             data.translation!,
-                            style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400),
+                            style: const TextStyle(fontSize: 20,fontWeight: FontWeight.w400),
                           ),
                               )),
                           Positioned(

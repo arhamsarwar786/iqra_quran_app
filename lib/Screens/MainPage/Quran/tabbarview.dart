@@ -9,6 +9,8 @@ import 'Quran.dart';
 import 'Surah.dart';
 
 class TabBarDemo extends StatelessWidget {
+  const TabBarDemo({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

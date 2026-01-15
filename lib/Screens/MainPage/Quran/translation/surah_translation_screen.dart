@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import "package:flutter/material.dart";
 import 'package:iqra/Provider/theme_provider.dart';
@@ -13,7 +12,7 @@ class SurahTranslationScreen extends StatefulWidget {
   SurahTranslationScreen(
       {super.key, this.ayatList, this.ayatCount, this.suratNumber,this.surahName});
   final String? ayatCount;
-  List<Aya>? ayatList;
+  final List<Aya>? ayatList;
   final int? suratNumber;
   final String? surahName;
 
@@ -30,12 +29,13 @@ class _SurahTranslationScreenState extends State<SurahTranslationScreen> {
         var bloc = context.read<ThemeProvider>();
         return Scaffold(
           appBar: PreferredSize(
-              preferredSize: Size.fromHeight(100.0),
+              preferredSize: const Size.fromHeight(100.0),
               child: AppBar(
                 centerTitle: true,
-                title: Text("Translation"),
-                backgroundColor: Color.fromARGB(255, 170, 170, 170),
+                title: const Text("Translation"),
+                backgroundColor: const Color.fromARGB(255, 170, 170, 170),
                 bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(50),
                   child: Container(
                     height: 50,
                     color: bloc.selectedTheme,
@@ -47,7 +47,6 @@ class _SurahTranslationScreenState extends State<SurahTranslationScreen> {
                           .copyWith(color: MyColors.whiteColor),
                     ),
                   ),
-                  preferredSize: Size.fromHeight(50),
                 ),
               )),
           body: ListView.builder(

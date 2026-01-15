@@ -1,14 +1,13 @@
 import 'dart:developer';
 
-import 'package:objectbox/objectbox.dart';
 import '../Models/tasbih_model.dart';
 import '../objectbox.g.dart';
 
 class ObjectBox {
   late final Store _store;
   late final Box<TasbihModel> _tasbihBox;
-  ObjectBox._init(_store) {
-    _tasbihBox = Box<TasbihModel>(_store);
+  ObjectBox._init(store) {
+    _tasbihBox = Box<TasbihModel>(store);
   }
   static Future<ObjectBox> init() async {
     final open = await openStore();

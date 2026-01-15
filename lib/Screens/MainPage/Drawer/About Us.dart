@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../Utils/constants.dart';
 import '../../../widgets.dart';
 
 class Aboutus extends StatefulWidget {

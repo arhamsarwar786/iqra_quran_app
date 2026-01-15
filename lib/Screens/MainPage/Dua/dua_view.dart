@@ -3,13 +3,12 @@ import 'package:iqra/Screens/MainPage/Drawer/setting_screen.dart';
 import 'package:iqra/Utils/constants.dart';
 import 'package:iqra/widgets.dart';
 import 'package:provider/provider.dart';
-import '../../../Models/khalimas_model.dart';
 import '../../../Provider/theme_provider.dart';
 import '../Khalima/widgets.dart';
 
 class DuaView extends StatelessWidget {
   final arabic, urdu;
-  DuaView({this.arabic, this.urdu});
+  const DuaView({super.key, this.arabic, this.urdu});
 
   @override
   Widget build(BuildContext context) {
@@ -23,15 +22,15 @@ class DuaView extends StatelessWidget {
           actions: [
             IconButton(
               onPressed: () {
-                push(context, SettingScreen());
+                push(context, const SettingScreen());
               },
               icon: const Icon(Icons.settings),
             ),
           ],
           backgroundColor: bloc.selectedTheme,
-          title: Text(
+          title: const Text(
             "Dua",
-            style: const TextStyle(
+            style: TextStyle(
                 color: Colors.white, fontWeight: FontWeight.w900),
           ),
           centerTitle: true,
@@ -113,22 +112,22 @@ class DuaView extends StatelessWidget {
                   ),
                 ),
               ),
-              CustomBorders(
+              const CustomBorders(
                 image: "ktopleft.png",
                 top: 10,
                 left: 10,
               ),
-              CustomBorders(
+              const CustomBorders(
                 image: "ktopright.png",
                 top: 10,
                 right: 10,
               ),
-              CustomBorders(
+              const CustomBorders(
                 image: "kbottomleft.png",
                 bottom: 10,
                 left: 10,
               ),
-              CustomBorders(
+              const CustomBorders(
                 image: "kbottomright.png",
                 bottom: 10,
                 right: 10,

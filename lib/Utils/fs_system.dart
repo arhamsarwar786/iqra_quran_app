@@ -2,14 +2,13 @@
 
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 
 
 import 'dart:convert';
 import 'dart:io';
 
 addIndex(context)async{
-   final filePath = '/Users/arhamsarwar/Documents/GitHub/iqra_quran_app/assets/extraction/quran-devsinn.json';
+   const filePath = '/Users/arhamsarwar/Documents/GitHub/iqra_quran_app/assets/extraction/quran-devsinn.json';
 
   // // Read the JSON file
   // final jsonString = await rootBundle.loadString(filePath);

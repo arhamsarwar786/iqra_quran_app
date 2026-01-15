@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:iqra/Provider/theme_provider.dart';
-import 'package:iqra/Screens/MainPage/Home/HomeScreen.dart';
 import 'package:iqra/Screens/MainPage/Khalima/kalma_view.dart';
 import 'package:iqra/Screens/MainPage/Khalima/khalimas_list.dart';
 import 'package:iqra/Screens/MainPage/Khalima/widgets.dart';
@@ -14,11 +13,13 @@ import '../../../widgets.dart';
 import '../main_screen.dart';
 
 class KhalimaScreen extends StatelessWidget {
-  List<KhalimasModel>? khalimaList;
+  final List<KhalimasModel>? khalimaList;
+
+  KhalimaScreen({super.key, this.khalimaList});
 
   @override
   Widget build(BuildContext context) {
-    khalimaList = khalimasModelFromJson(jsonEncode(khalimasData));
+    var khalimaList = this.khalimaList ?? khalimasModelFromJson(jsonEncode(khalimasData));
 
     Size size = MediaQuery.of(context).size;
    
@@ -45,7 +46,7 @@ class KhalimaScreen extends StatelessWidget {
                 onPressed: () {
                Navigator.pop(context);
                 },
-                icon: Icon(Icons.arrow_back)),
+                icon: const Icon(Icons.arrow_back)),
           ),
           body: Container(
             alignment: Alignment.center,
@@ -102,22 +103,22 @@ class KhalimaScreen extends StatelessWidget {
                               ],
                             ),
                           ),
-                          CustomBorders(
+                          const CustomBorders(
                             image: "ktopleft.png",
                             top: 10,
                             left: 10,
                           ),
-                          CustomBorders(
+                          const CustomBorders(
                             image: "ktopright.png",
                             top: 10,
                             right: 10,
                           ),
-                          CustomBorders(
+                          const CustomBorders(
                             image: "kbottomleft.png",
                             bottom: 10,
                             left: 10,
                           ),
-                          CustomBorders(
+                          const CustomBorders(
                             image: "kbottomright.png",
                             bottom: 10,
                             right: 10,

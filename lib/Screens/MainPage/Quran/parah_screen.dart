@@ -12,7 +12,7 @@ class ParahScreen extends StatefulWidget {
   ParahScreen(
       {super.key, this.ayatInSura, this.parahCount, this.parahname});
   final String? parahCount;
-  List<int>? ayatInSura;
+  final List<int>? ayatInSura;
   final String? parahname;
 
   @override
@@ -63,12 +63,13 @@ class _ParahScreenState extends State<ParahScreen> {
         var bloc = context.read<ThemeProvider>();
         return Scaffold(
           appBar: PreferredSize(
-              preferredSize: Size.fromHeight(100.0),
+              preferredSize: const Size.fromHeight(100.0),
               child: AppBar(
                 centerTitle: true,
-                title: Text("Translation"),
-                backgroundColor: Color.fromARGB(255, 170, 170, 170),
+                title: const Text("Translation"),
+                backgroundColor: const Color.fromARGB(255, 170, 170, 170),
                 bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(50),
                   child: Container(
                     height: 50,
                     color: bloc.selectedTheme,
@@ -80,7 +81,6 @@ class _ParahScreenState extends State<ParahScreen> {
                           .copyWith(color: MyColors.whiteColor),
                     ),
                   ),
-                  preferredSize: Size.fromHeight(50),
                 ),
               )),
           body: FutureBuilder(

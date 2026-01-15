@@ -11,7 +11,7 @@ import 'package:stream_transform/stream_transform.dart' show CombineLatest;
 /// Get Qiblah direction
 class FlutterQiblah {
   static const MethodChannel _channel =
-      const MethodChannel('ml.medyas.flutter_qiblah');
+      MethodChannel('ml.medyas.flutter_qiblah');
   static final FlutterQiblah _instance = FlutterQiblah._();
 
   Stream<QiblahDirection>? _qiblahStream;
@@ -48,12 +48,10 @@ class FlutterQiblah {
   /// Direction varies from 0-360, 0 being north.
   /// Qiblah varies from 0-360, offset from direction(North)
   static Stream<QiblahDirection> get qiblahStream {
-    if (_instance._qiblahStream == null) {
-      _instance._qiblahStream = _merge<CompassEvent, Position>(
+    _instance._qiblahStream ??= _merge<CompassEvent, Position>(
         FlutterCompass.events!,
         Geolocator.getPositionStream(),
       );
-    }
 
     return _instance._qiblahStream!;
   }

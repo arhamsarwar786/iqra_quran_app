@@ -4,11 +4,11 @@ import 'package:iqra/Screens/MainPage/Tasbeeh/tasbee.dart';
 import 'package:iqra/widgets.dart';
 import 'package:provider/provider.dart';
 import '../../../Models/tasbih_model.dart';
-import '../../../Utils/constants.dart';
 import '../../../main.dart';
-import 'tasbee_detail.dart';
 
 class TasbihInfo extends StatefulWidget {
+  const TasbihInfo({super.key});
+
 
 
   @override
@@ -80,8 +80,8 @@ var tasbihProvider= Provider.of<TasbeeCount>(context,listen: false);
                     color: Colors.white,
                     child: ListTile(
                       onTap: (){
-                        tasbihProvider.setValue(user.count);
-                        push(context, Tasbih(value:user.virdh));
+                        // tasbihProvider.setValue(user.count);
+                        push(context, Tasbih());
                       },
                       trailing: IconButton(
                           onPressed: () {
@@ -96,7 +96,7 @@ var tasbihProvider= Provider.of<TasbeeCount>(context,listen: false);
                         ),
                       ),
                       subtitle: Text(
-                        "Total Count: " +user.count.toString(),
+                        "Total Count: ${user.count}",
                         style: const TextStyle(
                           color: Colors.grey,
                         ),

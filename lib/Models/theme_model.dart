@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class ThemeModel {
   final String? primary;
   final String? secondary;

@@ -1,7 +1,5 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:iqra/Helper/preference/saved_preferences.dart';
 import 'package:iqra/Utils/customThemes.dart';
 import 'package:iqra/Utils/utils.dart';
 import 'package:iqra/widgets.dart';
@@ -11,6 +9,8 @@ import '../../../controller/methods.dart';
 import '../../../Models/theme_model.dart';
 
 class SettingScreen extends StatefulWidget {
+  const SettingScreen({super.key});
+
   @override
   State<SettingScreen> createState() => _SettingScreenState();
 }
@@ -151,7 +151,7 @@ class _SettingScreenState extends State<SettingScreen> {
                                 child: DropdownButton(
                                    hint: Padding(
                                     padding: const EdgeInsets.only(left: 5),
-                                    child: Text("${bloc.arabicFontFamily}"),
+                                    child: Text(bloc.arabicFontFamily),
                                   ),   
                                   icon: const Icon(Icons.keyboard_arrow_down),
                                   items: arabicFontFamily.map((items) {
@@ -217,7 +217,7 @@ class _SettingScreenState extends State<SettingScreen> {
                             ),
                           ],
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 20,
                         ),
                         FittedBox(
@@ -267,7 +267,7 @@ class _SettingScreenState extends State<SettingScreen> {
                                 child: DropdownButton(
                                   hint: Padding(
                                     padding: const EdgeInsets.only(left: 5),
-                                    child: Text("${bloc.urduFontFamily}"),
+                                    child: Text(bloc.urduFontFamily),
                                   ),                                  
                                   icon: const Icon(Icons.keyboard_arrow_down),
                                   items: urduFontFamily.map((items) {
@@ -333,7 +333,7 @@ class _SettingScreenState extends State<SettingScreen> {
                             ),
                           ],
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 20,
                         ),
                         FittedBox(

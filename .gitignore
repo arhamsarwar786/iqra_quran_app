@@ -1,1 +1,10 @@
 build
+
+# Android keystore files - NEVER commit these!
+*.jks
+*.keystore
+key.properties
+android/key.properties
+android/app/upload-keystore.jks
+android/app/*.jks
+android/app/*.keystore

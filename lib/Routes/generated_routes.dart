@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../Screens/MainPage/main_screen.dart';
 
 // class GeneratedRoutes {
 //   Route? onGeneratedRoute(RouteSettings settings) {
@@ -20,10 +19,10 @@ class MyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(onPressed: null,
-    child: Text("sing up"),
     style: ElevatedButton.styleFrom(
       // primary: Colors.black,
     ),
+    child: const Text("sing up"),
     );
   }
 }

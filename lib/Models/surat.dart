@@ -271,11 +271,11 @@ class WordAudio {
     dynamic url;
 
     factory WordAudio.fromJson(Map<dynamic, dynamic> json) => WordAudio(
-        url: json["url"] == null ? null : json["url"],
+        url: json["url"],
     );
 
     Map<dynamic, dynamic> toJson() => {
-        "url": url == null ? null : url,
+        "url": url,
     };
 }
 
@@ -303,12 +303,12 @@ class TransliterationClass {
 
     factory TransliterationClass.fromJson(Map<dynamic, dynamic> json) => TransliterationClass(
         languageName: languageNameValues.map![json["language_name"]],
-        text: json["text"] == null ? null : json["text"],
+        text: json["text"],
     );
 
     Map<dynamic, dynamic> toJson() => {
         "language_name": languageNameValues.reverse[languageName],
-        "text": text == null ? null : text,
+        "text": text,
     };
 }
 
@@ -319,9 +319,7 @@ class EnumValues<T> {
     EnumValues(this.map);
 
     Map<T, dynamic> get reverse {
-        if (reverseMap == null) {
-            reverseMap = map!.map((k, v) => new MapEntry(v, k));
-        }
+        reverseMap ??= map!.map((k, v) => MapEntry(v, k));
         return reverseMap!;
     }
 }

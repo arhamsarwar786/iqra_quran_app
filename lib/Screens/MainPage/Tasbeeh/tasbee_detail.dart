@@ -1,14 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:iqra/Provider/form_validate.dart';
-import 'package:iqra/Screens/MainPage/Home/HomeScreen.dart';
 import 'package:iqra/Screens/MainPage/Tasbeeh/tasbee.dart';
-import 'package:iqra/Utils/constants.dart';
+import 'package:iqra/Screens/MainPage/Tasbeeh/tasheeh_list_screen.dart';
 import 'package:iqra/widgets.dart';
 import 'package:provider/provider.dart';
 import '../../../Provider/tasbih_count.dart';
 
 class TasbeeDetail extends StatefulWidget {
+  const TasbeeDetail({super.key});
+
   @override
   State<TasbeeDetail> createState() => _TasbeeDetailState();
 }
@@ -32,9 +33,9 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).primaryColor,
       isExtended: true,
-      child: Icon(Icons.add),
+      child: const Icon(Icons.add),
         onPressed: (){
-          
+          Navigator.push(context, MaterialPageRoute(builder: (context)=> const TasheehListScreen())); 
       }),
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -182,12 +183,12 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
                         value.checkValidate(true);
                       } else {
                         value.checkValidate(false);
-                        tasbihProvider
-                            .setValue(int.parse(countController.text));
+                        // tasbihProvider
+                        //     .setValue(int.parse(countController.text));
                         push(
                           context,
                           Tasbih(
-                            value: nameController.text,
+                         
                           ),
                         );
                       }

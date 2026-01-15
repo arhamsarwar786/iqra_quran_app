@@ -16,7 +16,7 @@ class Demo extends StatelessWidget {
           var data = jsonDecode(snapshot.data);
           
           if (!snapshot.hasData) {
-              return CircularProgressIndicator();
+              return const CircularProgressIndicator();
           }
           // print(snapshot.data[0]['aya'].toString() + "arham");
 
@@ -25,9 +25,9 @@ class Demo extends StatelessWidget {
             itemBuilder: (context,index){
             return  ListTile(
               title: Text(
-                "${data[1]["aya"][index]['arabic']}",textAlign: TextAlign.right,style: TextStyle(fontSize: 30,fontFamily: "pdmsSaleem"),
+                "${data[1]["aya"][index]['arabic']}",textAlign: TextAlign.right,style: const TextStyle(fontSize: 30,fontFamily: "pdmsSaleem"),
               ), subtitle: Text(
-                "${data[1]["aya"][index]['urdu']}",textAlign: TextAlign.right,style: TextStyle(fontSize: 30,fontFamily: "lateef"),
+                "${data[1]["aya"][index]['urdu']}",textAlign: TextAlign.right,style: const TextStyle(fontSize: 30,fontFamily: "lateef"),
               ),
             );
           });

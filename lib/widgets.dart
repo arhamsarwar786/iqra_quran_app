@@ -1,11 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 
-import 'Provider/main_provider.dart';
 import 'Screens/MainPage/main_screen.dart';
-import 'Utils/constants.dart';
 
 pushUntil(context, screen) {
   return Navigator.pushAndRemoveUntil(
@@ -67,7 +64,7 @@ customRouteAppBar(BuildContext context, String title, Widget route) {
     backgroundColor: Colors.transparent,
     leading: IconButton(
       onPressed: () {
-        pushUntil(context, MainScreen());
+        pushUntil(context, const MainScreen());
       },
       iconSize: 20,
       color: Theme.of(context).primaryColor,
@@ -138,13 +135,13 @@ floatinButton(context){
     child: FloatingActionButton(      
             onPressed: () {
               // provider.screenIndex=0 ;
-              pushUntil(context, MainScreen());
+              pushUntil(context, const MainScreen());
             },
             backgroundColor: Theme.of(context).primaryColor,
             child:
-                 FittedBox(
+                 const FittedBox(
                     child: Column(
-                      children: const [
+                      children: [
                         Icon(Icons.home,size: 30,),
                         Text(
                           "HOME",
@@ -161,7 +158,7 @@ floatinButton(context){
   );
 }
 void snackBar(BuildContext context,String text) {                                                                               
- final _snackBar2 = SnackBar(
+ final snackBar2 = SnackBar(
         content: Text(text),
         // backgroundColor: Theme.of(context).primaryColor,
         duration: const Duration(seconds: 1),
@@ -176,13 +173,13 @@ void snackBar(BuildContext context,String text) {
           onVisible: () {
             print('Snackbar is visible');
           },
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
         behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.symmetric(horizontal: 30,vertical: 10),
-        padding: EdgeInsets.all(15.0),
+        margin: const EdgeInsets.symmetric(horizontal: 30,vertical: 10),
+        padding: const EdgeInsets.all(15.0),
       );
   // Find the Scaffold in the Widget tree and use it to show a SnackBar!                                            
-  ScaffoldMessenger.of(context).showSnackBar(_snackBar2);
+  ScaffoldMessenger.of(context).showSnackBar(snackBar2);
   
    }
 // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

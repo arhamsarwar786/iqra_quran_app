@@ -1,16 +1,14 @@
-import 'package:flutter/cupertino.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Screens/MainPage/Dua/dua_screen.dart';
 import 'package:iqra/Screens/MainPage/Home/azan/PrayerTime.dart';
 import 'package:iqra/Screens/MainPage/Home/qibal/qibla.dart';
+import 'package:iqra/Screens/MainPage/Tasbeeh/tasbee.dart';
 import 'package:iqra/Screens/MainPage/Tasbeeh/tasbee_detail.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:hijri/hijri_calendar.dart';
-import '../../../Provider/main_provider.dart';
-import '../../../Utils/constants.dart';
 import '../../../widgets.dart';
 import '../Drawer/Drawerr Screen.dart';
 import '../Khalima/kalma_screen.dart';
@@ -42,13 +40,19 @@ class _HomeState extends State<Home> {
     super.initState();
   }
 
-  HijriCalendar _today = HijriCalendar.fromDate(DateTime.now());
+  final HijriCalendar _today = HijriCalendar.fromDate(DateTime.now());
   List<String> imageName = [
     "Rectangle 3.png",
     "Rectangle 4.png",
-    "Rectangle 5.png",
+    "after-prayer-dua.jpg",
     "Rectangle 6.png",
     "Rectangle 7.png",
+    "dhikr-After-Salah.jpg",
+    "dua-after-prayer.jpg",
+    "Good-deeds-to-do-in-Muharram-768x432.jpg",
+    "List-of-Adhkar-After-Prayer.jpg",
+    "Masnoon-Dua-After-Salah.jpg"
+
   ];
   @override
   Widget build(BuildContext context) {
@@ -65,7 +69,7 @@ class _HomeState extends State<Home> {
             extendBodyBehindAppBar: true,
             // backgroundColor: Colors.red,
             key: _scaffoldKey,
-            drawer: Darwerr(),
+            drawer: const Darwerr(),
             resizeToAvoidBottomInset: false,
             appBar: AppBar(
               backgroundColor: Colors.transparent,
@@ -153,7 +157,6 @@ class _HomeState extends State<Home> {
 
   // ScreenList //
   Widget screensList(BuildContext context, Size size, ThemeProvider bloc) {
-    MyProvider provider = Provider.of<MyProvider>(context, listen: false);
     return Padding(
 padding: const EdgeInsets.only(left: 8.0,
                       right: 8.0,),      child: Card(
@@ -227,7 +230,13 @@ padding: const EdgeInsets.only(left: 8.0,
                 ),
                 InkWell(
                   onTap: () {
-                    push(context, TasbeeDetail());
+                    push(
+                          context,
+                          Tasbih(
+                            // value: nameController.text,
+                          ),
+                        );
+                    // push(context, const TasbeeDetail());
                   },
                   child: Column(
                     children: [
@@ -301,7 +310,7 @@ padding: const EdgeInsets.only(left: 8.0,
             ),
             child: InkWell(
               onTap: () {
-                push(context, DirectionTOQiblah());
+                push(context, const DirectionTOQiblah());
               },
               child: Container(
                 height: size.height * 0.06,
@@ -349,7 +358,7 @@ padding: const EdgeInsets.only(left: 8.0,
           ),
           InkWell(
             onTap: () {
-              push(context, PrayerTime());
+              push(context, const PrayerTime());
             },
             child: Card(
               elevation: 10,
@@ -440,7 +449,7 @@ padding: const EdgeInsets.only(left: 8.0,
                     fontSize: 16,
                     fontWeight: FontWeight.w700),
               ),
-              Spacer(),
+              const Spacer(),
               Text(
                 "البقرة",
                 style: TextStyle(
@@ -449,7 +458,7 @@ padding: const EdgeInsets.only(left: 8.0,
                     fontFamily: bloc.arabicFontFamily,
                     fontWeight: FontWeight.w700),
               ),
-              SizedBox(width: 10,),
+              const SizedBox(width: 10,),
               Text(
                 "1-23",
                 style: TextStyle(
@@ -479,7 +488,7 @@ padding: const EdgeInsets.only(left: 8.0,
                           fontFamily: bloc.arabicFontFamily,
                           fontWeight: FontWeight.w500),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
                     Text(
@@ -626,16 +635,16 @@ padding: const EdgeInsets.only(left: 8.0,
                   color: Theme.of(context).primaryColor,
                   borderRadius: BorderRadius.circular(45),
                 ),
-                child: FittedBox(
+                child: const FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: EdgeInsets.all(8.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisAlignment: MainAxisAlignment.center,
                       // ignore: prefer_const_literals_to_create_immutables
                       children: <Widget>[
-                        const Text(
+                        Text(
                           "NAME OF MUHAMMAD",
                           style: TextStyle(
                             color: Colors.white,
@@ -643,7 +652,7 @@ padding: const EdgeInsets.only(left: 8.0,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const Text(
+                        Text(
                           "(PBUH)",
                           style: TextStyle(
                             color: Colors.white,
@@ -667,13 +676,13 @@ padding: const EdgeInsets.only(left: 8.0,
 class SearchInQuaran extends StatelessWidget {
   SearchInQuaran({Key? key, this.today, this.size, this.bloc})
       : super(key: key);
-  HijriCalendar? today;
-  Size? size;
-  ThemeProvider? bloc;
+  final HijriCalendar? today;
+  final Size? size;
+  final ThemeProvider? bloc;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: size!.width,
       // padding: EdgeInsets.symmetric(horizontal: 10),
       // color: Colors.red,
@@ -737,7 +746,7 @@ class SearchInQuaran extends StatelessWidget {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Container(
+                              const SizedBox(
                                 height: 20,
                                 width: 20,
                               ),
@@ -761,7 +770,7 @@ class SearchInQuaran extends StatelessWidget {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Container(
+                              const SizedBox(
                                 height: 20,
                                 width: 20,
                               ),
@@ -782,7 +791,7 @@ class SearchInQuaran extends StatelessWidget {
                       ),
                       /////////////////////////////////////
                       Container(
-                        margin: EdgeInsets.only(left: 10),
+                        margin: const EdgeInsets.only(left: 10),
                         color: Theme.of(context).primaryColor,
                         height: size!.height / 8,
                         width: 2,
@@ -820,7 +829,7 @@ class SearchInQuaran extends StatelessWidget {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Container(
+                                const SizedBox(
                                   height: 12,
                                   width: 12,
                                 ),
@@ -867,7 +876,7 @@ class SearchInQuaran extends StatelessWidget {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Container(
+                                const SizedBox(
                                   height: 12,
                                   width: 12,
                                 ),
@@ -887,13 +896,13 @@ class SearchInQuaran extends StatelessWidget {
                           ],
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 20,
                       ),
                     ],
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
               ],

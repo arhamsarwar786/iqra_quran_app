@@ -4,6 +4,8 @@ import '../../../../widgets.dart';
 import 'comapss.dart';
 
 class DirectionTOQiblah extends StatefulWidget {
+  const DirectionTOQiblah({super.key});
+
   @override
   _DirectionTOQiblahState createState() => _DirectionTOQiblahState();
 }
@@ -17,17 +19,20 @@ class _DirectionTOQiblahState extends State<DirectionTOQiblah> {
         body: FutureBuilder(
           future: _deviceSupport,
           builder: (_, AsyncSnapshot<bool?> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting)
-              return CircularProgressIndicator();
-            if (snapshot.hasError)
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            }
+            if (snapshot.hasError) {
               return Center(
                 child: Text("Error: ${snapshot.error.toString()}"),
               );
+            }
 
-            if (snapshot.data!)
-              return QiblahCompass();
-            else
-              return Text("No data");
+            if (snapshot.data!) {
+              return const QiblahCompass();
+            } else {
+              return const Text("No data");
+            }
           },
         ),
       

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class CustomBorders extends StatelessWidget {
   final image, top, left, bottom, right,color;
-  CustomBorders(
-      {@required this.image, this.top, this.left, this.right, this.bottom, this.color = Colors.white});
+  const CustomBorders(
+      {super.key, @required this.image, this.top, this.left, this.right, this.bottom, this.color = Colors.white});
 
   @override
   Widget build(BuildContext context) {

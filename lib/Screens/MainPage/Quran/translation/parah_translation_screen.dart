@@ -13,8 +13,8 @@ class ParahTranslationScreen extends StatefulWidget {
   ParahTranslationScreen(
       {super.key,this.para, this.ayatInPara, this.parahCount, this.parahname});
   final String? parahCount;
-  int? ayatInPara;
-  Para? para;
+  final int? ayatInPara;
+  final Para? para;
   final String? parahname;
 
   @override
@@ -65,12 +65,13 @@ class _ParahTranslationScreenState extends State<ParahTranslationScreen> {
         var bloc = context.read<ThemeProvider>();
         return Scaffold(
           appBar: PreferredSize(
-              preferredSize: Size.fromHeight(100.0),
+              preferredSize: const Size.fromHeight(100.0),
               child: AppBar(
                 centerTitle: true,
-                title: Text("Translation"),
-                backgroundColor: Color.fromARGB(255, 170, 170, 170),
+                title: const Text("Translation"),
+                backgroundColor: const Color.fromARGB(255, 170, 170, 170),
                 bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(50),
                   child: Container(
                     height: 50,
                     color: bloc.selectedTheme,
@@ -82,7 +83,6 @@ class _ParahTranslationScreenState extends State<ParahTranslationScreen> {
                           .copyWith(color: MyColors.whiteColor),
                     ),
                   ),
-                  preferredSize: Size.fromHeight(50),
                 ),
               )),
           body: FutureBuilder(

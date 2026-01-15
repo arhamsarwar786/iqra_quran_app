@@ -9,7 +9,7 @@ import 'widgets.dart';
 
 class KhalimaView extends StatelessWidget {
   final KhalimasModel khalima;
-  KhalimaView(this.khalima);
+  const KhalimaView(this.khalima, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class KhalimaView extends StatelessWidget {
           appBar: AppBar(
             actions: [
               IconButton(onPressed: (){
-                push(context, SettingScreen());
+                push(context, const SettingScreen());
               }, icon: const Icon(Icons.settings),),
             ],
             backgroundColor: bloc.selectedTheme,
@@ -104,22 +104,22 @@ class KhalimaView extends StatelessWidget {
                     ),
                   ),
                 ),
-                CustomBorders(
+                const CustomBorders(
                   image: "ktopleft.png",
                   top: 10,
                   left: 10,
                 ),
-                CustomBorders(
+                const CustomBorders(
                   image: "ktopright.png",
                   top: 10,
                   right: 10,
                 ),
-                CustomBorders(
+                const CustomBorders(
                   image: "kbottomleft.png",
                   bottom: 10,
                   left: 10,
                 ),
-                CustomBorders(
+                const CustomBorders(
                   image: "kbottomright.png",
                   bottom: 10,
                   right: 10,

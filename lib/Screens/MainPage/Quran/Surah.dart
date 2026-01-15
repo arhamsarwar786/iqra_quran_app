@@ -93,7 +93,7 @@ class _SurahState extends State<Surah> {
                                   child: Text(
                                 (index + 1).toString(),
                                 // "5",
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                 ),
                               )),

@@ -7,13 +7,13 @@ import 'package:iqra/widgets.dart';
 customAlertBox(BuildContext context,{ onTab, title,decription, isSuccess = true}) {  
   // Create button  
   Widget okButton = MaterialButton(  
-    color: isSuccess ? Theme.of(context).primaryColor : Colors.red,
-    child:  Text("OK",style: TextStyle(color: Colors.white),),  
-    onPressed: onTab,  
+    color: isSuccess ? Theme.of(context).primaryColor : Colors.red,  
+    onPressed: onTab,
+    child:  const Text("OK",style: TextStyle(color: Colors.white),),  
   ); 
     Widget cancelButton = MaterialButton(  
     color:  Colors.grey,
-    child:  Text("Cancel",style: TextStyle(color: Colors.white),),  
+    child:  const Text("Cancel",style: TextStyle(color: Colors.white),),  
     onPressed: (){
       pop(context);
     },  

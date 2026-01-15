@@ -5,7 +5,6 @@ import 'package:lat_lng_to_timezone/lat_lng_to_timezone.dart' as tzmap;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:adhan_dart/adhan_dart.dart';
-import '../../../../Utils/constants.dart';
 import '../../../../widgets.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -62,9 +61,8 @@ class _PrayerTimeState extends State<PrayerTime> {
    var namazTimeShafi = await namazTimeCollector(coordinates, date, params,location,"Shafi",namazTimeHanafi);
 
    
-    Qibla Direction;
     // var qiblaDirection = Qibla.qibla(coordinates);
-  print(namazTimeHanafi.toString() + "arham" + namazTimeShafi.toString());
+  print("${namazTimeHanafi}arham$namazTimeShafi");
    
     // print(qiblaDirection);
     return prayerstiming;
@@ -75,18 +73,17 @@ class _PrayerTimeState extends State<PrayerTime> {
 
      PrayerTimes prayerTimes =
         PrayerTimes(coordinates: coordinates, date: date, calculationParameters: params,precision: true);
-    DateTime fajrTime = tz.TZDateTime.from(prayerTimes.fajr!, location);
-    DateTime sunriseTime = tz.TZDateTime.from(prayerTimes.sunrise!, location);
+    // DateTime sunriseTime = tz.TZDateTime.from(prayerTimes.sunrise!, location);
     DateTime dhuhrTime = tz.TZDateTime.from(prayerTimes.dhuhr!, location);
     DateTime asrTime = tz.TZDateTime.from(prayerTimes.asr!, location);
     DateTime maghribTime = tz.TZDateTime.from(prayerTimes.maghrib!, location);
     DateTime ishaTime = tz.TZDateTime.from(prayerTimes.isha!, location);
 
-    String fajer = DateFormat("h:mma").format(fajrTime);
-    String dhuhr = DateFormat("h:mma").format(dhuhrTime);
-    String asr = DateFormat("h:mma").format(asrTime);
-    String maghrib = DateFormat("h:mma").format(maghribTime);
-    String isha = DateFormat("h:mma").format(ishaTime);
+    // String fajer = DateFormat("h:mma").format(fajrTime);
+    // String dhuhr = DateFormat("h:mma").format(dhuhrTime);
+    // String asr = DateFormat("h:mma").format(asrTime);
+    // String maghrib = DateFormat("h:mma").format(maghribTime);
+    // String isha = DateFormat("h:mma").format(ishaTime);
 
     if (timings != null) {
         for (var time in timings) {
@@ -97,10 +94,10 @@ class _PrayerTimeState extends State<PrayerTime> {
     }
 
     //  prayerstiming.add({"fika":"${fika}","time":});
-    prayerstiming.add({"fika":"${fika}","time":DateFormat("h:mma").format(dhuhrTime)});
-    prayerstiming.add({"fika":"${fika}","time":DateFormat("h:mma").format(asrTime)});
-    prayerstiming.add({"fika":"${fika}","time":DateFormat("h:mma").format(maghribTime)});
-    prayerstiming.add({"fika":"${fika}","time":DateFormat("h:mma").format(ishaTime)});
+    prayerstiming.add({"fika":"$fika","time":DateFormat("h:mma").format(dhuhrTime)});
+    prayerstiming.add({"fika":"$fika","time":DateFormat("h:mma").format(asrTime)});
+    prayerstiming.add({"fika":"$fika","time":DateFormat("h:mma").format(maghribTime)});
+    prayerstiming.add({"fika":"$fika","time":DateFormat("h:mma").format(ishaTime)});
 
 
     return prayerstiming;
@@ -122,12 +119,12 @@ class _PrayerTimeState extends State<PrayerTime> {
                   topRight: Radius.circular(40),
                   topLeft: Radius.circular(40),
                 )),
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
+            child: const Padding(
+              padding: EdgeInsets.all(12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: const <Widget>[
+                children: <Widget>[
                   Text(
                     "Lahore,Pakistan",
                     style: TextStyle(
@@ -182,7 +179,7 @@ class _PrayerTimeState extends State<PrayerTime> {
                                                       Icons.volume_up,
                                                       color: Theme.of(context).primaryColor,
                                                     ),
-                                                    SizedBox(width: 10),
+                                                    const SizedBox(width: 10),
                                                     Text(
                                                       _name[index],
                                                       style: TextStyle(
@@ -194,12 +191,12 @@ class _PrayerTimeState extends State<PrayerTime> {
                                                 Row(
                                                   children: [
                                                     Text(
-                                                      '${snapshot.data![index]}',
+                                                      snapshot.data![index],
                                                       style: TextStyle(
                                                         color: Theme.of(context).primaryColor,
                                                       ),
                                                     ),
-                                                    SizedBox(width: 10),
+                                                    const SizedBox(width: 10),
                                                     Icon(
                                                       Icons.settings,
                                                       color: Theme.of(context).primaryColor,
@@ -212,7 +209,7 @@ class _PrayerTimeState extends State<PrayerTime> {
                                         ),
                                       );
                                     })
-                                : Center(
+                                : const Center(
                                     child: CircularProgressIndicator(
                                       color: Colors.blueGrey,
                                     ),

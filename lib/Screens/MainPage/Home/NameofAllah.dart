@@ -1,5 +1,4 @@
 
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -8,7 +7,6 @@ import 'package:iqra/Provider/theme_provider.dart';
 import 'package:provider/provider.dart';
 // import 'package:intl/intl.dart';
 
-import '../../../Utils/constants.dart';
 
 class NameofAllah extends StatefulWidget {
   const NameofAllah({Key? key}) : super(key: key);
@@ -68,9 +66,9 @@ class _NameofAllahState extends State<NameofAllah> {
         itemBuilder: (context, index) {
           var name = names![index];
           return Container(
-            margin: EdgeInsets.only(left: 10, right: 10, top: 10),
-            padding: EdgeInsets.all(15),
-            constraints: BoxConstraints(
+            margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
+            padding: const EdgeInsets.all(15),
+            constraints: const BoxConstraints(
               minHeight: 80
             ),
             decoration: BoxDecoration(
@@ -80,14 +78,14 @@ class _NameofAllahState extends State<NameofAllah> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
+                SizedBox(
                   width: size.width * 0.40,
                   child: Text(
                     name.namesOfAllahInUrdu!,
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
-                Container(
+                SizedBox(
                   width: size.width * 0.45,
 
                   child: Text(

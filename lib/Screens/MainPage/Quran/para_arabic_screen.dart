@@ -16,7 +16,7 @@ import '../../../Models/sajda_model.dart';
 import '../../../Utils/bottom_sheet_preview.dart';
 
 class ParaArabicScreen extends StatefulWidget {
-  ParaArabicScreen(
+  const ParaArabicScreen(
       {super.key, this.para, this.ayatInPara, this.parahCount, this.parahname});
   final String? parahCount;
   final int? ayatInPara;
@@ -148,7 +148,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
             ));
             textSpanChildren = [];
             
-            paraArabicScreenWidget.add(SizedBox(height: 10));
+            paraArabicScreenWidget.add(const SizedBox(height: 10));
             paraArabicScreenWidget.add(Stack(
               alignment: Alignment.topLeft,
               children: [
@@ -161,7 +161,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                 ),
               ],
             ));
-            paraArabicScreenWidget.add(SizedBox(height: 10));
+            paraArabicScreenWidget.add(const SizedBox(height: 10));
           }
         }
         
@@ -232,7 +232,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
           }
           
           if (aya.manzil != null) {
-            paraArabicScreenWidget.add(SizedBox(height: 10));
+            paraArabicScreenWidget.add(const SizedBox(height: 10));
             paraArabicScreenWidget.add(Stack(
               alignment: Alignment.topLeft,
               children: [
@@ -245,7 +245,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                 ),
               ],
             ));
-            paraArabicScreenWidget.add(SizedBox(height: 10));
+            paraArabicScreenWidget.add(const SizedBox(height: 10));
           }
         }
         
@@ -326,7 +326,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
           child: Text(listAyat.length.toString()),
         ),
         bottomNavigationBar: isScrollingDown
-            ? SizedBox()
+            ? const SizedBox()
             : BottomNavigationBar(
                 backgroundColor: bloc.selectedTheme,
                 items: [
@@ -342,7 +342,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                             //       surahName: widget.surahName,
                             //     ));
                           },
-                          child: Icon(Icons.book)),
+                          child: const Icon(Icons.book)),
                       label: "Translation"),
                   BottomNavigationBarItem(
                       icon: InkWell(
@@ -360,9 +360,9 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                                     seconds: durationInSeconds.toInt()),
                                 curve: Curves.linear);
                           },
-                          child: Icon(Icons.fit_screen_outlined)),
+                          child: const Icon(Icons.fit_screen_outlined)),
                       label: "Auto Scrol"),
-                  BottomNavigationBarItem(
+                  const BottomNavigationBarItem(
                       icon: Icon(Icons.settings), label: "Setting")
                 ],
               ),
@@ -382,7 +382,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                 flexibleSpace: FlexibleSpaceBar(
                   centerTitle: true,
                   title: Container(
-                    margin: EdgeInsets.only(top: 0),
+                    margin: const EdgeInsets.only(top: 0),
                     // color: Colors.blueAccent,
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
@@ -393,7 +393,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                             Expanded(
                               child: Image.asset(
                                 "assets/images/borderLeft1.png",
-                                color: Color.fromARGB(255, 255, 109, 109),
+                                color: const Color.fromARGB(255, 255, 109, 109),
                               ),
                             ),
                             Expanded(
@@ -404,7 +404,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                             ),
                           ],
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 5,
                         ),
                         Row(
@@ -418,7 +418,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                             Expanded(
                               child: Image.asset(
                                 "assets/images/borderRight1.png",
-                                color: Color.fromARGB(255, 255, 109, 109),
+                                color: const Color.fromARGB(255, 255, 109, 109),
                               ),
                             ),
                           ],
@@ -431,10 +431,10 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                     children: [
                       AnimatedContainer(
                         height: _showAppbar ? 56.0 : 56.0,
-                        duration: Duration(milliseconds: 200),
+                        duration: const Duration(milliseconds: 200),
                         child: AppBar(
                           centerTitle: true,
-                          iconTheme: IconThemeData(
+                          iconTheme: const IconThemeData(
                             color: Colors.black,
                           ),
                           backgroundColor: Colors.white,
@@ -463,7 +463,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
               //     ? CircularProgressIndicator()
               //     :
               Container(
-                  padding: EdgeInsets.all(2),
+                  padding: const EdgeInsets.all(2),
                   // height: size.height / 1.75,
 
                   child: Directionality(
@@ -600,30 +600,6 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       );
     }));
     // )})
-  }
-}
-
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverAppBarDelegate(this._tabBar);
-
-  final TabBar _tabBar;
-
-  @override
-  double get minExtent => _tabBar.preferredSize.height;
-  @override
-  double get maxExtent => _tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return new Container(
-      child: _tabBar,
-    );
-  }
-
-  @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return false;
   }
 }
 

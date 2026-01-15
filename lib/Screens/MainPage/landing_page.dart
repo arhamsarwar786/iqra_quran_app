@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class LandingPage extends StatefulWidget {
+  const LandingPage({super.key});
+
   @override
   _LandingPageState createState() => _LandingPageState();
 }
@@ -41,42 +43,31 @@ class _LandingPageState extends State<LandingPage> {
     '’’اے اللہ!میں نے تیری خاطر روزہ رکھا اور تیرے اوپر ایمان لایا اور تجھ پر بھروسہ کیا اورتیرے رزق سے اسے کھول رہا ہوں۔‘',
   ];
 
-  static const _sub1 = [
-    'القرآن',
-    'کلمے',
-    'نماز',
-    'دعائیں',
-  ];
   static const _img = [
     'assets/images/Quran.jpg',
     'assets/images/Dua.jpg',
   ];
-  static const _img1 = [
-    'assets/images/Quran1.jpg',
-    'assets/images/kalma sharif.jpg',
-    'assets/images/Nimaz1.jpg',
-    'assets/images/Duwa1.jpg',
-  ];
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Color.fromARGB(255, 233, 244, 248),
+        backgroundColor: const Color.fromARGB(255, 233, 244, 248),
         body: CustomScrollView(
           controller: _scrollController,
           slivers: <Widget>[
             SliverAppBar(
-              leading: Padding(
-                padding: const EdgeInsets.only(left: 5.0),
+              leading: const Padding(
+                padding: EdgeInsets.only(left: 5.0),
                 child: Icon(
                   Icons.menu,
                   size: 30,
                   color: Colors.white,
                 ),
               ),
-              actions: <Widget>[
+              actions: const <Widget>[
                 Padding(
-                  padding: const EdgeInsets.only(right: 10.0),
+                  padding: EdgeInsets.only(right: 10.0),
                   child: Icon(
                     Icons.info_outline,
                     size: 30,
@@ -93,7 +84,7 @@ class _LandingPageState extends State<LandingPage> {
                           'Remaining Time of Isha',
                           style: TextStyle(color: _textColor, fontSize: 10),
                         ),
-                        Text(
+                        const Text(
                           '05hrs, 40mins',
                           style: TextStyle(color: Colors.red, fontSize: 18),
                         ),
@@ -115,7 +106,7 @@ class _LandingPageState extends State<LandingPage> {
                             width: double.infinity,
                             decoration: BoxDecoration(
                                 image: DecorationImage(
-                                    image: AssetImage(
+                                    image: const AssetImage(
                                       "assets/images/top.jpg",
                                     ),
                                     colorFilter: ColorFilter.mode(
@@ -145,12 +136,12 @@ class _LandingPageState extends State<LandingPage> {
                                           Container(
                                             height: 20,
                                             width: 20,
-                                            decoration: BoxDecoration(
+                                            decoration: const BoxDecoration(
                                                 image: DecorationImage(
                                                     image: AssetImage(
                                                         "assets/images/islam1.png"))),
                                           ),
-                                          Text(
+                                          const Text(
                                             "13,Ramadan-ul-Mubarak,1443AH",
                                             style: TextStyle(
                                                 color: Colors.white,
@@ -159,10 +150,10 @@ class _LandingPageState extends State<LandingPage> {
                                           ),
                                         ],
                                       ),
-                                      SizedBox(
+                                      const SizedBox(
                                         height: 7,
                                       ),
-                                      Row(
+                                      const Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.end,
                                         children: [
@@ -180,10 +171,10 @@ class _LandingPageState extends State<LandingPage> {
                                           ),
                                         ],
                                       ),
-                                      SizedBox(
+                                      const SizedBox(
                                         height: 7,
                                       ),
-                                      Row(
+                                      const Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.end,
                                         children: [
@@ -196,10 +187,10 @@ class _LandingPageState extends State<LandingPage> {
                                           ),
                                         ],
                                       ),
-                                      SizedBox(
+                                      const SizedBox(
                                         height: 7,
                                       ),
-                                      Row(
+                                      const Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.end,
                                         children: [
@@ -227,8 +218,8 @@ class _LandingPageState extends State<LandingPage> {
             SliverList(
               delegate: SliverChildListDelegate([
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: 10),
-                  child: Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  child: const Card(
                     elevation: 10,
                     child: ListTile(
                       leading: CircleAvatar(
@@ -251,8 +242,8 @@ class _LandingPageState extends State<LandingPage> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: 10),
-                  child: Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  child: const Card(
                     elevation: 10,
                     child: ListTile(
                       leading: CircleAvatar(
@@ -316,7 +307,7 @@ class _LandingPageState extends State<LandingPage> {
                                       Text(
                                         _data[index],
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold),
@@ -324,7 +315,7 @@ class _LandingPageState extends State<LandingPage> {
                                       Text(
                                         _data1[index],
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             color: Colors.white70,
                                             fontSize: 15,
                                             fontWeight: FontWeight.w600),
@@ -338,13 +329,13 @@ class _LandingPageState extends State<LandingPage> {
                         )));
                   },
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 30,
                 ),
                 GridView(
                   shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     childAspectRatio: 1.3,
                     // crossAxisSpacing: 10,
@@ -393,19 +384,19 @@ class _LandingPageState extends State<LandingPage> {
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(100),
                                 image: DecorationImage(
-                                  colorFilter: new ColorFilter.mode(
+                                  colorFilter: ColorFilter.mode(
                                       Colors.black54.withOpacity(0.9),
                                       BlendMode.exclusion),
                                   image:
-                                      AssetImage("assets/images/logoCrop.jpeg"),
+                                      const AssetImage("assets/images/logoCrop.jpeg"),
                                   fit: BoxFit.fill,
                                 )),
                           ),
                         )),
-                        SizedBox(
+                        const SizedBox(
                           height: 5,
                         ),
-                        Text(
+                        const Text(
                           "القرآن",
                           style: TextStyle(
                               color: Colors.black,
@@ -429,15 +420,15 @@ class _LandingPageState extends State<LandingPage> {
                                   colorFilter: ColorFilter.mode(
                                       Colors.black54.withOpacity(0.9),
                                       BlendMode.exclusion),
-                                  image: AssetImage("assets/images/dua.jpg"),
+                                  image: const AssetImage("assets/images/dua.jpg"),
                                   fit: BoxFit.fill,
                                 )),
                           ),
                         )),
-                        SizedBox(
+                        const SizedBox(
                           height: 5,
                         ),
-                        Text(
+                        const Text(
                           'دعائیں/کلمے',
                           style: TextStyle(
                               color: Colors.black,
@@ -458,18 +449,18 @@ class _LandingPageState extends State<LandingPage> {
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(100),
                                 image: DecorationImage(
-                                  colorFilter: new ColorFilter.mode(
+                                  colorFilter: ColorFilter.mode(
                                       Colors.black54.withOpacity(0.9),
                                       BlendMode.exclusion),
-                                  image: AssetImage("assets/images/namaz.png"),
+                                  image: const AssetImage("assets/images/namaz.png"),
                                   fit: BoxFit.fill,
                                 )),
                           ),
                         )),
-                        SizedBox(
+                        const SizedBox(
                           height: 5,
                         ),
-                        Text(
+                        const Text(
                           'نماز',
                           style: TextStyle(
                               color: Colors.black,

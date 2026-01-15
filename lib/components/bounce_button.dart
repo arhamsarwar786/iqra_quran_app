@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class BouncingButton extends StatefulWidget {
   final Widget? child;
-   VoidCallback? onPress;
+  final VoidCallback? onPress;
 
   BouncingButton({@required this.child, Key? key, this.onPress})
       : assert(child != null),
@@ -22,7 +22,7 @@ class _BouncingButtonState extends State<BouncingButton>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 100),
+      duration: const Duration(milliseconds: 100),
       lowerBound: 0.0,
       upperBound: 0.1,
     );

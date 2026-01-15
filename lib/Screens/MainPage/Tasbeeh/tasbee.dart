@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:iqra/Provider/tasbeeh_provider.dart';
+import 'package:iqra/Provider/theme_provider.dart';
+import 'package:iqra/Screens/MainPage/Tasbeeh/tasheeh_list_screen.dart';
 import 'package:iqra/components/alerts.dart';
 import 'package:iqra/components/bounce_button.dart';
 import 'package:iqra/widgets.dart';
@@ -6,7 +9,6 @@ import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
 import '../../../Models/tasbih_model.dart';
 import '../../../Provider/tasbih_count.dart';
-import '../../../Utils/constants.dart';
 import '../../../main.dart';
 import 'digital_font.dart';
 import 'tasbee_info.dart';
@@ -14,8 +16,7 @@ import 'tasbee_info.dart';
 ///////////////////////////////////////////////
 
 class Tasbih extends StatefulWidget {
-  final value;
-  Tasbih({this.value});
+  const Tasbih({super.key});
   @override
   State<Tasbih> createState() => _MyWidgetState();
 }
@@ -37,23 +38,32 @@ class _MyWidgetState extends State<Tasbih> {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     var tasbihProvider = Provider.of<TasbeeCount>(context);
+    var tasbeehProvider = Provider.of<TasbeehProvider>(context);
+    var themeProvider = Provider.of<ThemeProvider>(context);
+    final selectedTasbeeh = tasbeehProvider.selectedTasbeeh;
+    
     return Scaffold(
+     floatingActionButton: FloatingActionButton(
+        backgroundColor: Theme.of(context).primaryColor,
+      isExtended: true,
+      child: const Icon(Icons.add),
+        onPressed: (){
+          push(context, const TasheehListScreen());
+      }),
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
-        title: const Text("Tasbih"),
+        title: const Text("Tasbeeh"),
         centerTitle: true,
         actions: [
           IconButton(
               onPressed: () async {
-                var user = widget.value.isEmpty
-                    ? push(context, TasbihInfo())
-                    : TasbihModel(
-                        virdh: widget.value.toString(),
-                        count: tasbihProvider.currentStep.toInt() != 0
-                            ? tasbihProvider.currentStep.toInt()
-                            : tasbihProvider.totalCount);
-                widget.value.isEmpty ? null : await objectbox.insertUser(user);
-                push(context, TasbihInfo());
+                if (selectedTasbeeh != null) {
+                  var user = TasbihModel(
+                      virdh: selectedTasbeeh.arabic ?? '',
+                      count: tasbihProvider.currentStep.toInt());
+                  await objectbox.insertUser(user);
+                }
+                push(context, const TasbihInfo());
               },
               icon: const Icon(Icons.favorite)),
         ],
@@ -62,27 +72,60 @@ class _MyWidgetState extends State<Tasbih> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // widget.value != null
-          //     ? Expanded(
-          //         flex: 1,
-          //         child: Center(
-          //           child: Text(
-          //             widget.value.toString(),
-          //             style: TextStyle(
-          //               color: Theme.of(context).primaryColor,
-          //               shadows: const [
-          //                 Shadow(
-          //                     offset: Offset(0.4, 0.4),
-          //                     // blurRadius: 2,
-          //                     color: Colors.white12),
-          //               ],
-          //               fontWeight: FontWeight.bold,
-          //             ),
-          //           ),
-          //         ),
-          //       )
-          //     : const Expanded(flex: 0, child: Text('')),
-          Expanded(
+          selectedTasbeeh != null
+              ? Expanded(
+                  flex: 2,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            selectedTasbeeh.arabic ?? '',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor,
+                              fontFamily: themeProvider.arabicFontFamily,
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              shadows: const [
+                                Shadow(
+                                    offset: Offset(0.5, 0.5),
+                                    blurRadius: 3,
+                                    color: Colors.black12),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            selectedTasbeeh.transliteration ?? '',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: themeProvider.urduFontFamily,
+                              color: Theme.of(context).primaryColor.withOpacity(0.7),
+                              fontSize: 16,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            selectedTasbeeh.urduMeaning ?? '',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: themeProvider.urduFontFamily,
+                              color: Theme.of(context).primaryColor.withOpacity(0.8),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        
+         Expanded(
             flex: 7,
             child: Center(
               child: Consumer<TasbeeCount>(builder: (context, value, widget) {
@@ -113,16 +156,7 @@ class _MyWidgetState extends State<Tasbih> {
                               children: [
                                 DigitalNumber(
                                   value: value.currentStep.toInt(),
-                                  height: 40,
-                                  color: Colors.white,
-                                ),
-                                const Text(
-                                  "  /  ",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                DigitalNumber(
-                                  value: value.totalCount,
-                                  height: 20,
+                                  height: 50,
                                   color: Colors.white,
                                 ),
                               ],
@@ -136,12 +170,9 @@ class _MyWidgetState extends State<Tasbih> {
                           right: 0,
                           child: BouncingButton(
                             onPress: () async {
-
-                              if (value.currentStep != value.totalStep) {
-                                   player.setAsset('assets/sound/beep.wav');
-                                value.increment();
-                                player.play();
-                              }
+                              player.setAsset('assets/sound/beep.wav');
+                              value.increment();
+                              player.play();
                             },
                             child: CircleAvatar(
                               radius: 80,
@@ -169,7 +200,7 @@ class _MyWidgetState extends State<Tasbih> {
                                 child: CircleAvatar(
                                   radius: 20,
                                   backgroundColor:
-                                      Color.fromARGB(255, 255, 0, 0)
+                                      const Color.fromARGB(255, 255, 0, 0)
                                           .withOpacity(1.0),
                                 ))),
                       ],
@@ -241,15 +272,15 @@ class RPSCustomPainter extends CustomPainter {
         size.height * 0.1923098);
     path_0.close();
 
-    Paint paint_0_stroke = Paint()
+    Paint paint0Stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.width * 0.02109705;
-    paint_0_stroke.color = Color(0xffFFF8F8).withOpacity(1.0);
-    canvas.drawPath(path_0, paint_0_stroke);
+    paint0Stroke.color = const Color(0xffFFF8F8).withOpacity(1.0);
+    canvas.drawPath(path_0, paint0Stroke);
 
-    Paint paint_0_fill = Paint()..style = PaintingStyle.fill;
-    paint_0_fill.color = Theme.of(context).primaryColor;
-    canvas.drawPath(path_0, paint_0_fill);
+    Paint paint0Fill = Paint()..style = PaintingStyle.fill;
+    paint0Fill.color = Theme.of(context).primaryColor;
+    canvas.drawPath(path_0, paint0Fill);
 
     Path path_1 = Path();
     path_1.moveTo(size.width * 0.9198312, size.height * 0.2192429);
@@ -304,15 +335,15 @@ class RPSCustomPainter extends CustomPainter {
         size.height * 0.2192429);
     path_1.close();
 
-    Paint paint_1_stroke = Paint()
+    Paint paint1Stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    paint_1_stroke.color = Color(0xff0F0D0D).withOpacity(1.0);
-    canvas.drawPath(path_1, paint_1_stroke);
+    paint1Stroke.color = const Color(0xff0F0D0D).withOpacity(1.0);
+    canvas.drawPath(path_1, paint1Stroke);
 
-    Paint paint_1_fill = Paint()..style = PaintingStyle.fill;
-    paint_1_fill.color = const Color(0xff141414).withOpacity(1.0);
-    canvas.drawPath(path_1, paint_1_fill);
+    Paint paint1Fill = Paint()..style = PaintingStyle.fill;
+    paint1Fill.color = const Color(0xff141414).withOpacity(1.0);
+    canvas.drawPath(path_1, paint1Fill);
   }
 
   @override

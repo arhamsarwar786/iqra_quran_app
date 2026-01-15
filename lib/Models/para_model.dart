@@ -7,15 +7,15 @@ class ParahModel {
     if (json['para'] != null) {
       para = <Para>[];
       json['para'].forEach((v) {
-        para!.add(new Para.fromJson(v));
+        para!.add(Para.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.para != null) {
-      data['para'] = this.para!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (para != null) {
+      data['para'] = para!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -38,17 +38,17 @@ class Para {
     if (json['data'] != null) {
       data = <Data>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(Data.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = this.name;
-    data['totalAyat'] = this.totalAyat;
-    data['totalSajda'] = this.totalSajda;
-    data['para'] = this.para;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['name'] = name;
+    data['totalAyat'] = totalAyat;
+    data['totalSajda'] = totalSajda;
+    data['para'] = para;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
@@ -67,16 +67,16 @@ class Data {
     if (json['aya'] != null) {
       aya = <Aya>[];
       json['aya'].forEach((v) {
-        aya!.add(new Aya.fromJson(v));
+        aya!.add(Aya.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['part'] = this.part;
-    if (this.aya != null) {
-      data['aya'] = this.aya!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['part'] = part;
+    if (aya != null) {
+      data['aya'] = aya!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -129,20 +129,20 @@ class Aya {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['isRuko'] = this.isRuko;
-    data['Surat'] = this.surat;
-    data['rakuNumber'] = this.rakuNumber;
-    data['ayaAfterRako'] = this.ayaAfterRako;
-    data['Place'] = this.place;
-    data['ayaBeforeRako'] = this.ayaBeforeRako;
-    data['Diff'] = this.diff;
-    data['bottomNumber'] = this.bottomNumber;
-    data['arabic'] = this.arabic;
-    data['translation1'] = this.translation1;
-    data['translation2'] = this.translation2;
-    data['ayatNumber'] = this.ayatNumber;
-    data['isSurahChange'] = this.isSurahChange;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['isRuko'] = isRuko;
+    data['Surat'] = surat;
+    data['rakuNumber'] = rakuNumber;
+    data['ayaAfterRako'] = ayaAfterRako;
+    data['Place'] = place;
+    data['ayaBeforeRako'] = ayaBeforeRako;
+    data['Diff'] = diff;
+    data['bottomNumber'] = bottomNumber;
+    data['arabic'] = arabic;
+    data['translation1'] = translation1;
+    data['translation2'] = translation2;
+    data['ayatNumber'] = ayatNumber;
+    data['isSurahChange'] = isSurahChange;
     return data;
   }
 }

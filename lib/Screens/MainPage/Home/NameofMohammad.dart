@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../Utils/constants.dart';
 
 class NameofMohammad extends StatefulWidget {
   const NameofMohammad({Key? key}) : super(key: key);
@@ -182,7 +181,7 @@ class _NameofMohammadState extends State<NameofMohammad> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Container(
+                SizedBox(
                     width: MediaQuery.of(context).size.width*0.27,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),

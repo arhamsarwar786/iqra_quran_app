@@ -5,6 +5,8 @@ import 'flutter_qiblah.dart';
 import 'package:geolocator/geolocator.dart';
 
 class QiblahCompass extends StatefulWidget {
+  const QiblahCompass({super.key});
+
   @override
   _QiblahCompassState createState() => _QiblahCompassState();
 }
@@ -29,8 +31,9 @@ class _QiblahCompassState extends State<QiblahCompass> {
       child: StreamBuilder(
         stream: stream,
         builder: (context, AsyncSnapshot<LocationStatus> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting)
-            return CircularProgressIndicator();
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          }
           if (snapshot.data!.enabled == true) {
             switch (snapshot.data!.status) {
               case LocationPermission.always:
@@ -56,7 +59,7 @@ class _QiblahCompassState extends State<QiblahCompass> {
                 return Container();
             }
           } else {
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
             // LocationErrorWidget(
             //   error: "Please enable Location service",
             //   callback: _checkLocationStatus,
@@ -74,8 +77,9 @@ class _QiblahCompassState extends State<QiblahCompass> {
       await FlutterQiblah.requestPermissions();
       final s = await FlutterQiblah.checkLocationStatus();
       _locationStreamController.sink.add(s);
-    } else
+    } else {
       _locationStreamController.sink.add(locationStatus);
+    }
   }
 
   @override
@@ -92,13 +96,16 @@ class QiblahCompassWidget extends StatelessWidget {
     height: 300,
     width: 250,
   );
+
+  QiblahCompassWidget({super.key});
   @override
   Widget build(BuildContext context) {   
     return StreamBuilder(
       stream: FlutterQiblah.qiblahStream,
       builder: (_, AsyncSnapshot<QiblahDirection> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting)
-          return CircularProgressIndicator();
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        }
 
         final qiblahDirection = snapshot.data!;
 

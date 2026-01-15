@@ -41,7 +41,7 @@ class _QuranState extends State<Quran> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Container(
+                          SizedBox(
                               height: MediaQuery.of(context).size.height * 10,
                               width: MediaQuery.of(context).size.width * 0.20,
                              child: Icon(Icons.list,size: 70,color: bloc.selectedTheme),),
@@ -72,12 +72,12 @@ class _QuranState extends State<Quran> {
                       ),
                       child: InkWell(
                         onTap: () {
-                          push(context, Favorite());
+                          push(context, const Favorite());
                         },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Container(
+                            SizedBox(
                                 height: MediaQuery.of(context).size.height * 0.10,
                                 width: MediaQuery.of(context).size.width * 0.20,
                                 child: Icon(Icons.favorite_border,size: 70,color: bloc.selectedTheme),

@@ -1,13 +1,9 @@
 // import 'dart:ffi';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Screens/MainPage/Drawer/setting_screen.dart';
 import 'package:provider/provider.dart';
-import '../../../Utils/constants.dart';
 import '../../../widgets.dart';
 import '../Dua/dua_screen.dart';
 import '../Khalima/kalma_screen.dart';
@@ -20,6 +16,8 @@ import 'ContactUs.dart';
 // import 'contactUs.dart';
 
 class Darwerr extends StatefulWidget {
+  const Darwerr({super.key});
+
   @override
   _DarwerrState createState() => _DarwerrState();
 }
@@ -47,15 +45,15 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
     Icons.settings,
     Icons.share    
   ];
-  List _navigationSc = [
-    Favorite(),
-    TabBarDemo(),
+  final List _navigationSc = [
+    const Favorite(),
+    const TabBarDemo(),
     KhalimaScreen(),
-    DuaScreen(),
-    TasbeeDetail(),
-    Contactus(),
-    Aboutus(),
-    SettingScreen(),
+    const DuaScreen(),
+    const TasbeeDetail(),
+    const Contactus(),
+    const Aboutus(),
+    const SettingScreen(),
   ];
   static const _initialDelayTime = Duration(milliseconds: 50);
   static const _itemSlideTime = Duration(milliseconds: 600);
@@ -69,7 +67,6 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
 
   late AnimationController _staggeredController;
   final List<Interval> _itemSlideIntervals = [];
-  late Interval _buttonInterval;
 
   @override
   void initState() {
@@ -125,7 +122,7 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
                     width: double.infinity,
                     child: Container(
                       height: 200,
-                      padding: EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(20),
                       // width: MediaQuery.of(context).size.width * 0.60,
                      child: Image.asset("assets/images/iqra${provider.iconNumber}.png",fit: BoxFit.fitHeight,),
                     ),
@@ -161,7 +158,7 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
                               elevation: 3,
                               child: ListTile(
                                 dense: true,
-                                leading: Container(
+                                leading: SizedBox(
                                   height: 30,
                                   width: 30,
                                  child: Icon(_icons[i],color: bloc.selectedTheme,),
@@ -173,7 +170,7 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
                                 title: Text(
                                   _menuTitles[i],
                                   textAlign: TextAlign.left,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 15,
                                     color: Color(0xff00164C),
                                     fontWeight: FontWeight.bold,

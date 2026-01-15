@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iqra/Provider/form_validate.dart';
 import 'package:iqra/Provider/tasbih_count.dart';
+import 'package:iqra/Provider/tasbeeh_provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
-import 'package:iqra/demo.dart';
 import 'package:iqra/material_screen.dart';
 import 'package:provider/provider.dart';
 import 'Helper/tasbih_helper.dart';
@@ -18,11 +18,13 @@ void main() async {
     [DeviceOrientation.portraitUp]
      )
         .then((_) {
-          runApp(MyApp());
+          runApp(const MyApp());
         });
     }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     // GeneratedRoutes _appRoutes = GeneratedRoutes();
@@ -32,6 +34,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: ((context) => TasbeeCount())),
         ChangeNotifierProvider(create: ((context) => FormValidate())),
         ChangeNotifierProvider(create: ((context) => ThemeProvider())),
+        ChangeNotifierProvider(create: ((context) => TasbeehProvider())),
       ],
       // child: const Demo(),
       child: const MaterialScreen(),

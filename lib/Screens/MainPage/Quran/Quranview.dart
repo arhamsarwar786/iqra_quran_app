@@ -19,7 +19,7 @@ import '../../../Utils/bottom_sheet_preview.dart';
 import '../../../Utils/utils.dart';
 
 class QuranView extends StatefulWidget {
-  QuranView({this.ayatCount, this.surahName, this.suratNumber});
+  const QuranView({super.key, this.ayatCount, this.surahName, this.suratNumber});
   final String? ayatCount;
   final int? suratNumber;
   // List<Aya>? ayat;
@@ -76,7 +76,7 @@ class _QuranViewState extends State<QuranView> {
       // }
       // debugger();
       print(
-          "${start} ---- ${next} |--- length = ${listAyat.length} -- total Ruko = ${rukoList.length}");
+          "$start ---- $next |--- length = ${listAyat.length} -- total Ruko = ${rukoList.length}");
       var ayaList = listAyat.sublist(start, next);
       // ayaLength > next ? ayaLength : next
       List<TextSpan> textSpanChildren = [];
@@ -206,7 +206,7 @@ class _QuranViewState extends State<QuranView> {
           );
           if (aya.manzil != null) {
             // debugger();
-            quranViewWidget.add(SizedBox(
+            quranViewWidget.add(const SizedBox(
               height: 10,
             ));
             quranViewWidget.add(Stack(
@@ -221,7 +221,7 @@ class _QuranViewState extends State<QuranView> {
                 ),
               ],
             ));
-            quranViewWidget.add(SizedBox(
+            quranViewWidget.add(const SizedBox(
               height: 10,
             ));
           }
@@ -451,7 +451,7 @@ class _QuranViewState extends State<QuranView> {
         //   child: Text(listAyat!.length.toString()),
         // ),
         bottomNavigationBar: isScrollingDown
-            ? SizedBox()
+            ? const SizedBox()
             : BottomNavigationBar(
                 backgroundColor: bloc.selectedTheme,
                 items: [
@@ -467,7 +467,7 @@ class _QuranViewState extends State<QuranView> {
                             //       surahName: widget.surahName,
                             //     ));
                           },
-                          child: Icon(Icons.book)),
+                          child: const Icon(Icons.book)),
                       label: "Translation"),
                   BottomNavigationBarItem(
                       icon: InkWell(
@@ -485,9 +485,9 @@ class _QuranViewState extends State<QuranView> {
                                     seconds: durationInSeconds.toInt()),
                                 curve: Curves.linear);
                           },
-                          child: Icon(Icons.fit_screen_outlined)),
+                          child: const Icon(Icons.fit_screen_outlined)),
                       label: "Auto Scrol"),
-                  BottomNavigationBarItem(
+                  const BottomNavigationBarItem(
                       icon: Icon(Icons.settings), label: "Setting")
                 ],
               ),
@@ -507,7 +507,7 @@ class _QuranViewState extends State<QuranView> {
                 flexibleSpace: FlexibleSpaceBar(
                   centerTitle: true,
                   title: Container(
-                    margin: EdgeInsets.only(top: 0),
+                    margin: const EdgeInsets.only(top: 0),
                     // color: Colors.blueAccent,
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
@@ -521,7 +521,7 @@ class _QuranViewState extends State<QuranView> {
                                 "assets/images/borderLeft1.png",
                                 height: 5,
                                 fit: BoxFit.fill,
-                                color: Color.fromARGB(255, 255, 109, 109),
+                                color: const Color.fromARGB(255, 255, 109, 109),
                               ),
                             ),
                             Expanded(
@@ -537,7 +537,7 @@ class _QuranViewState extends State<QuranView> {
                         //  Spacer(),
                         if (isBismilla)
                           Text(
-                            "${bismillaArabic}",
+                            bismillaArabic,
                             style: MyTextStyle.heading2.copyWith(
                                 color: Colors.white,
                                 fontSize: 10,
@@ -557,7 +557,7 @@ class _QuranViewState extends State<QuranView> {
                             Expanded(
                               child: Image.asset(
                                 "assets/images/borderRight1.png",
-                                color: Color.fromARGB(255, 255, 109, 109),
+                                color: const Color.fromARGB(255, 255, 109, 109),
                                 height: 5,
                                 fit: BoxFit.fill,
                               ),
@@ -573,10 +573,10 @@ class _QuranViewState extends State<QuranView> {
                     children: [
                       AnimatedContainer(
                         height: _showAppbar ? 56.0 : 56.0,
-                        duration: Duration(milliseconds: 200),
+                        duration: const Duration(milliseconds: 200),
                         child: AppBar(
                           centerTitle: true,
-                          iconTheme: IconThemeData(
+                          iconTheme: const IconThemeData(
                             color: Colors.black,
                           ),
                           backgroundColor: Colors.white,
@@ -596,7 +596,7 @@ class _QuranViewState extends State<QuranView> {
             ];
           },
           body: Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
                 color: Colors.white,
                 image: DecorationImage(
                     image: AssetImage(
@@ -625,30 +625,6 @@ class _QuranViewState extends State<QuranView> {
       );
     }));
     // )})
-  }
-}
-
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverAppBarDelegate(this._tabBar);
-
-  final TabBar _tabBar;
-
-  @override
-  double get minExtent => _tabBar.preferredSize.height;
-  @override
-  double get maxExtent => _tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return new Container(
-      child: _tabBar,
-    );
-  }
-
-  @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return false;
   }
 }
 

@@ -8,9 +8,7 @@ import '../../Utils/constants.dart';
 import '../../widgets.dart';
 import 'Dua/dua_screen.dart';
 import 'Home/HomeScreen.dart';
-import 'Khalima/kalma_screen.dart';
 import 'Quran/tabbarview.dart';
-import 'Tasbeeh/tasbee_detail.dart';
 
 List<Widget> screens = [
   const Home(),
@@ -18,6 +16,8 @@ List<Widget> screens = [
 ];
 
 class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
@@ -25,7 +25,6 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
-    MyProvider provider = Provider.of<MyProvider>(context, listen: false);
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -74,11 +73,10 @@ class _MainScreenState extends State<MainScreen> {
 class BottomBarApp extends StatelessWidget {
   final ThemeProvider? bloc;
   final isShow;
-  const BottomBarApp({this.bloc,this.isShow = true});
+  const BottomBarApp({super.key, this.bloc,this.isShow = true});
 
   @override
   Widget build(BuildContext context) {
-    MyProvider provider = Provider.of<MyProvider>(context, listen: false);
     return BottomAppBar(
     
       shape: const CircularNotchedRectangle(),
@@ -92,7 +90,7 @@ class BottomBarApp extends StatelessWidget {
           children: [
             GestureDetector(
               onTap: () {
-                push(context, TabBarDemo());
+                push(context, const TabBarDemo());
               },
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

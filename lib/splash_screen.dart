@@ -7,6 +7,8 @@ import 'package:iqra/Utils/constants.dart';
 
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -20,9 +22,9 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();    
-    Timer(Duration(seconds: 5), () {
+    Timer(const Duration(seconds: 5), () {
       Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (_) => MainScreen()));
+          .pushReplacement(MaterialPageRoute(builder: (_) => const MainScreen()));
     });
     super.initState();
     controller =
@@ -71,7 +73,7 @@ class _SplashScreenState extends State<SplashScreen>
                       fit: BoxFit.fitWidth)),
             ),
             
-            Align(
+            const Align(
               alignment: Alignment.bottomCenter,
               child: Row(
                 mainAxisSize: MainAxisSize.min,

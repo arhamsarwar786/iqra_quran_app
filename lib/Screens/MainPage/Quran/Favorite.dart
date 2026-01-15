@@ -3,11 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:iqra/Helper/favourite.dart';
 import 'package:iqra/Models/quaran_favorate.dart';
-import 'package:iqra/Screens/MainPage/Quran/Quranview.dart';
-import 'package:iqra/Utils/constants.dart';
 
 class Favorite extends StatefulWidget {
-  Favorite({this.suratTitle, this.verses, this.urduMeaning});
+  const Favorite({super.key, this.suratTitle, this.verses, this.urduMeaning});
   final suratTitle;
   final verses;
   final urduMeaning;
@@ -20,8 +18,8 @@ class _FavoriteState extends State<Favorite> {
   // fetchPref(){
 
   // }
-  @override
   List list = [];
+  @override
   void initState() {
     super.initState();
     list.add(widget.suratTitle);
@@ -74,7 +72,7 @@ class _FavoriteState extends State<Favorite> {
         future: SavedPreferences.getFav(),
         builder: (context, snapshot) {
           if(snapshot.hasData==false){
-            return Center(child: CircularProgressIndicator(),);
+            return const Center(child: CircularProgressIndicator(),);
           } 
           //  var data =snapshot.data;
           List<QuranFavorite> list;

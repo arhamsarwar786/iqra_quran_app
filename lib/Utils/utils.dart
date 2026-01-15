@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 const fontFamilyList = [
   {"name": "NotoNaskhArabic", "fontFamily": "notoNash"},
