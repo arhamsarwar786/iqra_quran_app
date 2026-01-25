@@ -1,4 +1,6 @@
 
+import 'dart:developer';
+
 import "package:flutter/material.dart";
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Utils/constants.dart';
@@ -12,7 +14,7 @@ class SurahTranslationScreen extends StatefulWidget {
   SurahTranslationScreen(
       {super.key, this.ayatList, this.ayatCount, this.suratNumber,this.surahName});
   final String? ayatCount;
-  final List<Aya>? ayatList;
+  final List? ayatList;
   final int? suratNumber;
   final String? surahName;
 
@@ -24,6 +26,7 @@ class _SurahTranslationScreenState extends State<SurahTranslationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    debugger();
     return SafeArea(
       child: Builder(builder: (context) {
         var bloc = context.read<ThemeProvider>();

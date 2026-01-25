@@ -73,56 +73,50 @@ class _MyWidgetState extends State<Tasbih> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           selectedTasbeeh != null
-              ? Expanded(
-                  flex: 2,
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            selectedTasbeeh.arabic ?? '',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontFamily: themeProvider.arabicFontFamily,
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              shadows: const [
-                                Shadow(
-                                    offset: Offset(0.5, 0.5),
-                                    blurRadius: 3,
-                                    color: Colors.black12),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            selectedTasbeeh.transliteration ?? '',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: themeProvider.urduFontFamily,
-                              color: Theme.of(context).primaryColor.withOpacity(0.7),
-                              fontSize: 16,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            selectedTasbeeh.urduMeaning ?? '',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: themeProvider.urduFontFamily,
-                              color: Theme.of(context).primaryColor.withOpacity(0.8),
-                              fontSize: 14,
-                            ),
-                          ),
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      selectedTasbeeh.arabic ?? '',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontFamily: themeProvider.arabicFontFamily,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        shadows: const [
+                          Shadow(
+                              offset: Offset(0.5, 0.5),
+                              blurRadius: 3,
+                              color: Colors.black12),
                         ],
                       ),
                     ),
-                  ),
-                )
+                    // const SizedBox(height: 3),
+                    Text(
+                      selectedTasbeeh.transliteration ?? '',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: themeProvider.urduFontFamily,
+                        color: Theme.of(context).primaryColor.withOpacity(0.7),
+                        fontSize: 20,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                    // const SizedBox(height: 2),
+                    Text(
+                      selectedTasbeeh.urduMeaning ?? '',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: themeProvider.urduFontFamily,
+                        color: Theme.of(context).primaryColor.withOpacity(0.8),
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                ),
+              )
               : const SizedBox.shrink(),
         
          Expanded(
@@ -130,6 +124,7 @@ class _MyWidgetState extends State<Tasbih> {
             child: Center(
               child: Consumer<TasbeeCount>(builder: (context, value, widget) {
                 return Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 30),
                     alignment: Alignment.center,
                     child: Stack(
                       children: [

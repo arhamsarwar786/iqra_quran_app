@@ -23,7 +23,7 @@ class _SettingScreenState extends State<SettingScreen> {
   void initState() {
     super.initState();
     arabicFontSize.clear();
-    for (var i = 12; i <= 40; i++) {
+    for (var i = 12; i <= 50; i++) {
       arabicFontSize.add(i.toDouble());
     }
     print(arabicFontSize);
@@ -61,7 +61,7 @@ class _SettingScreenState extends State<SettingScreen> {
                               fontSize: 20,
                               color: bloc.selectedTheme),
                         ),
-                        Divider(
+                      Divider(
                           color: bloc.selectedTheme,
                         ),
                         Row(
@@ -133,47 +133,48 @@ class _SettingScreenState extends State<SettingScreen> {
                         Divider(
                           color: bloc.selectedTheme,
                         ),
-                        Row(
-                          children: [
-                            Text(
-                              "Arabic Font",
-                              style: MyTextStyle.heading3,
-                            ),
-                            const Spacer(),
-                            Container(
-                              height: 40,
-                              width: 200,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(
-                                      width: 1, color: bloc.selectedTheme)),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                   hint: Padding(
-                                    padding: const EdgeInsets.only(left: 5),
-                                    child: Text(bloc.arabicFontFamily),
-                                  ),   
-                                  icon: const Icon(Icons.keyboard_arrow_down),
-                                  items: arabicFontFamily.map((items) {
-                                    return DropdownMenuItem(
-                                      value: items,
-                                      child: Text(
-                                        items,
-                                        style: MyTextStyle.heading3,
-                                      ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (newValue) async {
+                        // Row(
+                        //   children: [
+                        //     Text(
+                        //       "Arabic Font",
+                        //       style: MyTextStyle.heading3,
+                        //     ),
+                        //     const Spacer(),
+                        //     Container(
+                        //       height: 40,
+                        //       width: 200,
+                        //       decoration: BoxDecoration(
+                        //           borderRadius: BorderRadius.circular(5),
+                        //           border: Border.all(
+                        //               width: 1, color: bloc.selectedTheme)),
+                        //       child: DropdownButtonHideUnderline(
+                        //         child: DropdownButton(                                  
+                        //            hint: Padding(
+                        //             padding: const EdgeInsets.only(left: 5),
+                        //             child: Text(bloc.arabicFontFamily),
+                        //           ),   
+                        //           icon: const Icon(Icons.keyboard_arrow_down),
+                        //           items: arabicFontFamily.map((items) {
+                        //             return DropdownMenuItem(
+                        //               value: items,
+                        //               child: Text(
+                        //                 items,
+                        //                 style: MyTextStyle.heading3,
+                        //               ),
+                        //             );
+                        //           }).toList(),
+                        //           onChanged: true ? null : (newValue) async {
                                     
-                                    bloc.changeArabicFamily(newValue);
-                                    snackBar(context, '$newValue Arabic Family Changed!');
-                                    setState(() {});
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                        //             bloc.changeArabicFamily(newValue);
+                        //             snackBar(context, '$newValue Arabic Family Changed!');
+                        //             setState(() {});
+                        //           },
+                        //         ),
+                        //       ),
+                        //     ),
+                       
+                        //   ],
+                        // ),
                         const SizedBox(
                           height: 10,
                         ),
@@ -231,6 +232,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   ),
                 ),
 
+
   ///////////////////////////////// URDU BLOCK 
                 Card(
                   child: Container(
@@ -246,7 +248,7 @@ class _SettingScreenState extends State<SettingScreen> {
                               fontSize: 20,
                               color: bloc.selectedTheme),
                         ),
-                        Divider(
+                          Divider(
                           color: bloc.selectedTheme,
                         ),
                         Row(

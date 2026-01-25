@@ -1,6 +1,7 @@
 // ignore_for_file: file_names
 
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:collection/collection.dart'; // You have to add this manually, for some reason it cannot be added automatically
 import 'package:flutter/gestures.dart';
@@ -9,7 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:arabic_numbers/arabic_numbers.dart';
 import 'package:flutter/rendering.dart';
 import 'package:iqra/Provider/theme_provider.dart';
+import 'package:iqra/Screens/MainPage/Quran/translation/surah_translation_screen.dart';
 import 'package:iqra/Utils/customThemes.dart';
+import 'package:iqra/widgets.dart';
 import 'package:provider/provider.dart';
 // import 'arabic';
 import '../../../Models/aya_list_model.dart';
@@ -458,14 +461,15 @@ class _QuranViewState extends State<QuranView> {
                   BottomNavigationBarItem(
                       icon: InkWell(
                           onTap: () {
-                            // push(
-                            //     context,
-                            //     SurahTranslationScreen(
-                            //       ayatCount: widget.ayatCount.toString(),
-                            //       ayatList: listAyat,
-                            //       suratNumber: widget.suratNumber,
-                            //       surahName: widget.surahName,
-                            //     ));
+                            debugger();
+                            push(
+                                context,
+                                SurahTranslationScreen(
+                                  ayatCount: widget.ayatCount.toString(),
+                                  ayatList: listAyat,
+                                  suratNumber: widget.suratNumber,
+                                  surahName: widget.surahName,
+                                ));
                           },
                           child: const Icon(Icons.book)),
                       label: "Translation"),
