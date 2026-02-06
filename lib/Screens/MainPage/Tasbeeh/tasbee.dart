@@ -22,7 +22,6 @@ class Tasbih extends StatefulWidget {
 }
 
 class _MyWidgetState extends State<Tasbih> {
-
   @override
   void initState() {
     super.initState();
@@ -41,15 +40,15 @@ class _MyWidgetState extends State<Tasbih> {
     var tasbeehProvider = Provider.of<TasbeehProvider>(context);
     var themeProvider = Provider.of<ThemeProvider>(context);
     final selectedTasbeeh = tasbeehProvider.selectedTasbeeh;
-    
+
     return Scaffold(
-     floatingActionButton: FloatingActionButton(
-        backgroundColor: Theme.of(context).primaryColor,
-      isExtended: true,
-      child: const Icon(Icons.add),
-        onPressed: (){
-          push(context, const TasheehListScreen());
-      }),
+      floatingActionButton: FloatingActionButton(
+          backgroundColor: Theme.of(context).primaryColor,
+          isExtended: true,
+          child: const Icon(Icons.add),
+          onPressed: () {
+            push(context, const TasheehListScreen());
+          }),
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
         title: const Text("Tasbeeh"),
@@ -74,57 +73,58 @@ class _MyWidgetState extends State<Tasbih> {
         children: [
           selectedTasbeeh != null
               ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      selectedTasbeeh.arabic ?? '',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontFamily: themeProvider.arabicFontFamily,
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        shadows: const [
-                          Shadow(
-                              offset: Offset(0.5, 0.5),
-                              blurRadius: 3,
-                              color: Colors.black12),
-                        ],
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        selectedTasbeeh.arabic ?? '',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontFamily: themeProvider.arabicFontFamily,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          shadows: const [
+                            Shadow(
+                                offset: Offset(0.5, 0.5),
+                                blurRadius: 3,
+                                color: Colors.black12),
+                          ],
+                        ),
                       ),
-                    ),
-                    // const SizedBox(height: 3),
-                    Text(
-                      selectedTasbeeh.transliteration ?? '',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: themeProvider.urduFontFamily,
-                        color: Theme.of(context).primaryColor.withOpacity(0.7),
-                        fontSize: 20,
-                        fontStyle: FontStyle.italic,
+                      // const SizedBox(height: 3),
+                      Text(
+                        selectedTasbeeh.transliteration ?? '',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: themeProvider.urduFontFamily,
+                          color:
+                              Theme.of(context).primaryColor.withOpacity(0.7),
+                          fontSize: 20,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
-                    ),
-                    // const SizedBox(height: 2),
-                    Text(
-                      selectedTasbeeh.urduMeaning ?? '',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: themeProvider.urduFontFamily,
-                        color: Theme.of(context).primaryColor.withOpacity(0.8),
-                        fontSize: 20,
+                      // const SizedBox(height: 2),
+                      Text(
+                        selectedTasbeeh.urduMeaning ?? '',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: themeProvider.urduFontFamily,
+                          color:
+                              Theme.of(context).primaryColor.withOpacity(0.8),
+                          fontSize: 20,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              )
+                    ],
+                  ),
+                )
               : const SizedBox.shrink(),
-        
-         Expanded(
+          Expanded(
             flex: 7,
             child: Center(
               child: Consumer<TasbeeCount>(builder: (context, value, widget) {
                 return Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 30),
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 30),
                     alignment: Alignment.center,
                     child: Stack(
                       children: [

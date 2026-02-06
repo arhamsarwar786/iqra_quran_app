@@ -73,77 +73,80 @@ class _MainScreenState extends State<MainScreen> {
 class BottomBarApp extends StatelessWidget {
   final ThemeProvider? bloc;
   final isShow;
-  const BottomBarApp({super.key, this.bloc,this.isShow = true});
+  const BottomBarApp({super.key, this.bloc, this.isShow = true});
 
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
-    
+      color: bloc!.selectedSecondary,
+      elevation: 0,
       shape: const CircularNotchedRectangle(),
       child: Container(
-        color: bloc!.selectedSecondary,
         padding: const EdgeInsets.symmetric(horizontal: 50),
         height: 60,
-        child: !isShow ? Container() : Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            GestureDetector(
-              onTap: () {
-                push(context, const TabBarDemo());
-              },
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+        child: !isShow
+            ? Container()
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    height: 24,
-                    width: 18,
-                    decoration: BoxDecoration(
-                        // color: Colors.red,
-                        image: DecorationImage(
-                            image: AssetImage("assets/images/Tasbi${bloc!.iconNumber}.png"),
-                            fit: BoxFit.fill)),
-                  ),
-                  Text(
-                    "Quran",
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: MyColors.greyColor,
+                  GestureDetector(
+                    onTap: () {
+                      push(context, const TabBarDemo());
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          height: 24,
+                          width: 18,
+                          decoration: BoxDecoration(
+                              // color: Colors.red,
+                              image: DecorationImage(
+                                  image: AssetImage(
+                                      "assets/images/Tasbi${bloc!.iconNumber}.png"),
+                                  fit: BoxFit.fill)),
+                        ),
+                        Text(
+                          "Quran",
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: MyColors.greyColor,
+                          ),
+                        )
+                      ],
                     ),
-                  )
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      // push(context, TabBarDemo());
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          height: 26,
+                          width: 27,
+                          decoration: const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage("assets/images/hadees.png"),
+                                fit: BoxFit.fill),
+                          ),
+                        ),
+                        Text(
+                          " Hadees",
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: MyColors.greyColor,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
                 ],
               ),
-            ),
-            GestureDetector(
-              onTap: () {
-                // push(context, TabBarDemo());
-              },
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    height: 26,
-                    width: 27,
-                    decoration: const BoxDecoration(
-                        image: DecorationImage(
-                            image: AssetImage("assets/images/hadees.png"),
-                            fit: BoxFit.fill),
-                            ),
-                  ),
-                  Text(
-                    " Hadees",
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: MyColors.greyColor,
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -40,8 +40,8 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
         .loadString("assets/extraction/ruko.json");
     var rukoDataLocal = rukoModelFromJson(data);
     List<RukoModel> rukoData = rukoDataLocal
-        .where((element) => 
-            listAyat.any((aya) => (aya as Aya).surahId == element.surat.toString()))
+        .where((element) => listAyat
+            .any((aya) => (aya as Aya).surahId == element.surat.toString()))
         .toList();
     return rukoData;
   }
@@ -51,8 +51,8 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
         .loadString("assets/extraction/sajda.json");
     var sajdaDataLocal = sajdaModelFromJson(data);
     List<SajdaModel> sajdaData = sajdaDataLocal
-        .where((element) => 
-            listAyat.any((aya) => (aya as Aya).surahId == element.surat.toString()))
+        .where((element) => listAyat
+            .any((aya) => (aya as Aya).surahId == element.surat.toString()))
         .toList();
     return sajdaData;
   }
@@ -63,7 +63,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     final quranResponse = jsonDecode(quran) as List;
     String paraId = widget.parahCount.toString();
     final paraAyat = [];
-    
+
     for (var item in quranResponse) {
       if (item["paraId"].toString() == paraId) {
         paraAyat.add(Aya.fromJson(item));
@@ -76,7 +76,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   viewMaker() async {
     var bloc = context.read<ThemeProvider>();
     List<RukoModel> rukoList = await getRuko();
-    
+
     // Group ayats by surah to handle ruku properly
     Map<String, List<Aya>> ayatsBySurah = {};
     for (var aya in listAyat) {
@@ -91,14 +91,15 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     // Process each surah's rukus
     for (var surahId in ayatsBySurah.keys) {
       var surahAyats = ayatsBySurah[surahId]!;
-      var surahRukus = rukoList.where((r) => r.surat.toString() == surahId).toList();
-      
+      var surahRukus =
+          rukoList.where((r) => r.surat.toString() == surahId).toList();
+
       if (surahRukus.isEmpty) {
         // No rukus for this surah, just add all ayats
         List<TextSpan> textSpanChildren = [];
         for (var aya in surahAyats) {
           if (aya.ayatNumber == "0") continue;
-          
+
           textSpanChildren.add(
             TextSpan(
               text: "${(aya.arabicText).trim()} ",
@@ -109,7 +110,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                 },
             ),
           );
-          
+
           if (aya.sajda != null) {
             paraArabicScreenWidget.add(RichText(
               text: TextSpan(
@@ -121,7 +122,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
               ),
             ));
             textSpanChildren = [];
-            
+
             paraArabicScreenWidget.add(Stack(
               alignment: Alignment.center,
               children: [
@@ -135,7 +136,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
               ],
             ));
           }
-          
+
           if (aya.manzil != null) {
             paraArabicScreenWidget.add(RichText(
               text: TextSpan(
@@ -147,7 +148,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
               ),
             ));
             textSpanChildren = [];
-            
+
             paraArabicScreenWidget.add(const SizedBox(height: 10));
             paraArabicScreenWidget.add(Stack(
               alignment: Alignment.topLeft,
@@ -164,7 +165,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
             paraArabicScreenWidget.add(const SizedBox(height: 10));
           }
         }
-        
+
         if (textSpanChildren.isNotEmpty) {
           paraArabicScreenWidget.add(RichText(
             text: TextSpan(
@@ -183,17 +184,17 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       for (var i = 0; i < surahRukus.length; i++) {
         int start = i > 0 ? surahRukus[i - 1].ayaBeforeRako : 0;
         int next = surahRukus[i].ayaAfterRako + 1;
-        
+
         var ayaList = surahAyats.where((a) {
           int ayaNum = int.tryParse(a.ayatNumber ?? "0") ?? 0;
           return ayaNum >= start && ayaNum < next;
         }).toList();
-        
+
         List<TextSpan> textSpanChildren = [];
-        
+
         for (var aya in ayaList) {
           if (aya.ayatNumber == "0") continue;
-          
+
           textSpanChildren.add(
             TextSpan(
               text: "${(aya.arabicText).trim()} ",
@@ -204,7 +205,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                 },
             ),
           );
-          
+
           if (aya.sajda != null) {
             paraArabicScreenWidget.add(RichText(
               text: TextSpan(
@@ -216,7 +217,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
               ),
             ));
             textSpanChildren = [];
-            
+
             paraArabicScreenWidget.add(Stack(
               alignment: Alignment.center,
               children: [
@@ -230,7 +231,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
               ],
             ));
           }
-          
+
           if (aya.manzil != null) {
             paraArabicScreenWidget.add(const SizedBox(height: 10));
             paraArabicScreenWidget.add(Stack(
@@ -248,7 +249,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
             paraArabicScreenWidget.add(const SizedBox(height: 10));
           }
         }
-        
+
         paraArabicScreenWidget.add(RichText(
           text: TextSpan(
             children: textSpanChildren,
@@ -258,7 +259,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                 color: Colors.black),
           ),
         ));
-        
+
         paraArabicScreenWidget.add(Stack(
           alignment: Alignment.center,
           children: [
@@ -270,13 +271,15 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                   color: bloc.selectedTheme),
             ),
             Positioned(bottom: 30, child: Text(surahRukus[i].diff.toString())),
-            Positioned(top: 20, child: Text(surahRukus[i].rakuNumber.toString())),
-            Positioned(bottom: 0, child: Text(surahRukus[i].bottomNumber.toString()))
+            Positioned(
+                top: 20, child: Text(surahRukus[i].rakuNumber.toString())),
+            Positioned(
+                bottom: 0, child: Text(surahRukus[i].bottomNumber.toString()))
           ],
         ));
       }
     }
-    
+
     setState(() {});
   }
 
@@ -343,7 +346,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                             //     ));
                           },
                           child: const Icon(Icons.book)),
-                      label: "Translation"),
+                      label: "Translations"),
                   BottomNavigationBarItem(
                       icon: InkWell(
                           onTap: () {

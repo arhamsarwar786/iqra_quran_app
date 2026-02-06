@@ -1,7 +1,4 @@
-
-
-
-  import 'dart:io';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -12,219 +9,511 @@ import 'dart:ui' as ui;
 
 import 'package:share_plus/share_plus.dart';
 
-
 class AppShare {
+  static Future<File> _generateImage({
+    required BuildContext context,
+    required ThemeProvider bloc,
+    required String title,
+    required String arabicText,
+    required String translationText,
+    String? englishText,
+    String? translatorName,
+    String? paraNumber,
+    String? surahNumber,
+    String? ayatNumber,
+  }) async {
+    const double width = 1080;
+    const double centerX = width / 2;
+    const double contentWidth = 940; // width - padding
 
-  static Future<void> image(BuildContext context, ThemeProvider bloc) async {
-    try {
-      final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder);
-      const size = Size(1080, 1920);
+    // --- 1. Pre-calculate Heights ---
 
-      // Background gradient
-      final gradient = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          bloc.selectedSecondary,
-          Colors.white,
-        ],
-      );
-      
-      final paint = Paint()..shader = gradient.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-      canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+    // Header Logic
+    // If we have detailed info, title is the Surah Name, and we build a subtitle.
+    String mainTitle = title;
+    String? subTitle;
 
-      // Draw header background
-      final headerPaint = Paint()..color = Theme.of(context).primaryColor;
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          const Rect.fromLTWH(60, 100, 960, 150),
-          const Radius.circular(30),
-        ),
-        headerPaint,
-      );
-
-      // Load and draw logo
-      try {
-        final ByteData logoData = await rootBundle.load('assets/images/logo.png');
-        final ui.Codec codec = await ui.instantiateImageCodec(
-          logoData.buffer.asUint8List(),
-          targetWidth: 100,
-        );
-        final ui.FrameInfo frameInfo = await codec.getNextFrame();
-        canvas.drawImage(frameInfo.image, const Offset(100, 125), Paint());
-      } catch (e) {
-        print('Logo not found: $e');
-      }
-
-      // Draw "IQRA QURAN" text
-      final appNamePainter = TextPainter(
-        text: const TextSpan(
-          text: 'IQRA QURAN',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 48,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        textDirection: ui.TextDirection.ltr,
-      );
-      appNamePainter.layout();
-      appNamePainter.paint(canvas, const Offset(220, 140));
-
-      // Draw "Daily Verse" subtitle
-      final subtitlePainter = TextPainter(
-        text: const TextSpan(
-          text: 'Daily Verse',
-          style: TextStyle(
-            color: Colors.white70,
-            fontSize: 32,
-          ),
-        ),
-        textDirection: ui.TextDirection.ltr,
-      );
-      subtitlePainter.layout();
-      subtitlePainter.paint(canvas, const Offset(220, 190));
-
-      // Draw decorative border
-      final borderPaint = Paint()
-        ..color = Theme.of(context).primaryColor.withOpacity(0.3)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3;
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          const Rect.fromLTWH(80, 320, 920, 1200),
-          const Radius.circular(40),
-        ),
-        borderPaint,
-      );
-
-      // Draw content background
-      final contentPaint = Paint()..color = Colors.white.withOpacity(0.95);
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          const Rect.fromLTWH(80, 320, 920, 1200),
-          const Radius.circular(40),
-        ),
-        contentPaint,
-      );
-
-      // Draw "Surah Al-Baqarah" header
-      final surahPainter = TextPainter(
-        text: TextSpan(
-          text: 'Surah Al-Baqarah (2:2)',
-          style: TextStyle(
-            color: Theme.of(context).primaryColor,
-            fontSize: 42,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        textDirection: ui.TextDirection.ltr,
-      );
-      surahPainter.layout();
-      surahPainter.paint(canvas, const Offset(140, 380));
-
-      // Draw Arabic text
-      final arabicPainter = TextPainter(
-        text: TextSpan(
-          text: 'ذٰلِكَ الۡڪِتٰبُ لَا رَيۡبَ ۛۚ  ۖ فِيۡهِ ۛۚ\nهُدًى لِّلۡمُتَّقِيۡنَۙ‏',
-          style: TextStyle(
-            color: Colors.black87,
-            fontSize: 72,
-            fontFamily: bloc.arabicFontFamily,
-            fontWeight: FontWeight.w600,
-            height: 2.0,
-          ),
-        ),
-        textDirection: ui.TextDirection.rtl,
-        textAlign: TextAlign.center,
-        maxLines: 3,
-      );
-      arabicPainter.layout(maxWidth: 820);
-      arabicPainter.paint(canvas, const Offset(130, 520));
-
-      // Draw Urdu translation
-      final urduPainter = TextPainter(
-        text: TextSpan(
-          text: 'یہ اللہ کی کتاب ہے، اس میں کوئی شک نہیں\nہدایت ہے اُن پرہیز گار لوگوں کے لیے',
-          style: TextStyle(
-            color: Colors.black87,
-            fontSize: 48,
-            fontFamily: bloc.urduFontFamily,
-            height: 1.8,
-          ),
-        ),
-        textDirection: ui.TextDirection.rtl,
-        textAlign: TextAlign.center,
-        maxLines: 3,
-      );
-      urduPainter.layout(maxWidth: 820);
-      urduPainter.paint(canvas, const Offset(130, 920));
-
-      // Draw decorative line
-      final linePaint = Paint()
-        ..color = Theme.of(context).primaryColor.withOpacity(0.5)
-        ..strokeWidth = 2;
-      canvas.drawLine(
-        const Offset(200, 1180),
-        const Offset(880, 1180),
-        linePaint,
-      );
-
-      // Draw English translation
-      final englishPainter = TextPainter(
-        text: const TextSpan(
-          text: 'This is the Book about which there is no doubt,\na guidance for those conscious of Allah',
-          style: TextStyle(
-            color: Colors.black54,
-            fontSize: 36,
-            height: 1.6,
-          ),
-        ),
-        textDirection: ui.TextDirection.ltr,
-        textAlign: TextAlign.center,
-        maxLines: 3,
-      );
-      englishPainter.layout(maxWidth: 820);
-      englishPainter.paint(canvas, const Offset(130, 1230));
-
-      // Draw footer
-      final footerPainter = TextPainter(
-        text: TextSpan(
-          text: 'Download IQRA QURAN App',
-          style: TextStyle(
-            color: bloc.selectedTheme,
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        textDirection: ui.TextDirection.ltr,
-      );
-      footerPainter.layout();
-      footerPainter.paint(canvas, const Offset(280, 1720));
-
-      // Convert to image
-      final picture = recorder.endRecording();
-      final img = await picture.toImage(size.width.toInt(), size.height.toInt());
-      final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
-      final buffer = byteData!.buffer.asUint8List();
-
-      // Save to temporary file
-      final tempDir = await getTemporaryDirectory();
-      final file = File('${tempDir.path}/quran_verse_${DateTime.now().millisecondsSinceEpoch}.png');
-      await file.writeAsBytes(buffer);
-
-      // Share the image
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        text: 'Quran Daily Verse - Surah Al-Baqarah (2:2)\n\nذٰلِكَ الۡڪِتٰبُ لَا رَيۡبَ ۛۚ  ۖ فِيۡهِ ۛۚ هُدًى لِّلۡمُتَّقِيۡنَۙ‏\n\nYeh Allah ki kitaab hai, is mein koi shak nahi, hidayat hai un parhezgaar logon ke liye.\n\nDownload IQRA QURAN App',
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error sharing verse: $e')),
-      );
+    if (paraNumber != null || surahNumber != null || ayatNumber != null) {
+      // Build subtitle from available parts
+      List<String> parts = [];
+      if (paraNumber != null) parts.add("Para: $paraNumber");
+      if (surahNumber != null) parts.add("Surah: $surahNumber");
+      if (ayatNumber != null) parts.add("Verse: $ayatNumber");
+      subTitle = parts.join("  •  ");
     }
+
+    // Header Content Height Calculation
+    const double headerBaseHeight =
+        250.0; // Increased base height for two lines
+
+    final titlePainter = TextPainter(
+      text: TextSpan(
+        text: mainTitle,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 60, // Main Title (Surah Name)
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Roboto',
+          letterSpacing: 0.5,
+        ),
+      ),
+      textDirection: ui.TextDirection.ltr,
+      textAlign: TextAlign.center,
+    );
+    titlePainter.layout(maxWidth: 900);
+
+    TextPainter? subTitlePainter;
+    if (subTitle != null) {
+      subTitlePainter = TextPainter(
+        text: TextSpan(
+          text: subTitle,
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 32, // Subtitle
+            fontWeight: FontWeight.normal,
+            fontFamily: 'Roboto',
+          ),
+        ),
+        textDirection: ui.TextDirection.ltr,
+        textAlign: TextAlign.center,
+      );
+      subTitlePainter.layout(maxWidth: 900);
+    }
+
+    // Arabic Text Height
+    final arabicPainter = TextPainter(
+      text: TextSpan(
+        text: arabicText,
+        style: TextStyle(
+          color: const Color(0xff333333), // Softer darker grey/black
+          fontSize: 90,
+          fontFamily: bloc.arabicFontFamily,
+          fontWeight: FontWeight.w400, // Reduced bold
+          height: 1.6,
+        ),
+      ),
+      textDirection: ui.TextDirection.rtl,
+      textAlign: TextAlign.center,
+    );
+    arabicPainter.layout(maxWidth: contentWidth);
+
+    // Urdu Text Height
+    final urduPainter = TextPainter(
+      text: TextSpan(
+        text: translationText,
+        style: TextStyle(
+          color: Colors.grey[800], // Dark grey
+          fontSize: 56,
+          fontFamily: bloc.urduFontFamily,
+          height: 1.8,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      textDirection: ui.TextDirection.rtl,
+      textAlign: TextAlign.center,
+    );
+    urduPainter.layout(maxWidth: contentWidth);
+
+    // Translator Name Height
+    double translatorHeight = 0;
+    TextPainter? translatorPainter;
+    if (translatorName != null && translatorName.isNotEmpty) {
+      translatorPainter = TextPainter(
+        text: TextSpan(
+          text: translatorName,
+          style: TextStyle(
+            color: Colors.grey[600], // Lighter grey
+            fontSize: 36,
+            fontFamily: bloc.urduFontFamily,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        textDirection: ui.TextDirection.rtl,
+        textAlign: TextAlign.center,
+      );
+      translatorPainter.layout(maxWidth: contentWidth);
+      translatorHeight = translatorPainter.height + 40; // Spacing
+    }
+
+    // English Text Height
+    double englishHeight = 0;
+    TextPainter? englishPainter;
+    if (englishText != null && englishText.isNotEmpty) {
+      englishPainter = TextPainter(
+        text: TextSpan(
+          text: englishText,
+          style: TextStyle(
+            color: Colors.grey[800], // Dark grey
+            fontSize: 42,
+            height: 1.5,
+            fontFamily: 'Roboto',
+            fontStyle: FontStyle.normal,
+          ),
+        ),
+        textDirection: ui.TextDirection.ltr,
+        textAlign: TextAlign.center,
+      );
+      englishPainter.layout(maxWidth: contentWidth);
+      englishHeight = englishPainter.height + 60; // Include padding if exists
+    }
+
+    // Footer Height
+    const double footerHeight = 250.0;
+
+    // Spacings
+    const double topPadding = 120.0; // Space between header and arabic
+    const double dividerSpacing =
+        80.0; // Space + divider between arabic and urdu
+
+    // Total Height Calculation
+    final double totalHeight = headerBaseHeight +
+        topPadding +
+        arabicPainter.height +
+        dividerSpacing +
+        urduPainter.height +
+        translatorHeight +
+        englishHeight +
+        footerHeight;
+
+    // Ensure minimum height of 1920 (Standard HD)
+    final double finalHeight = totalHeight < 1920 ? 1920 : totalHeight;
+    final Size size = Size(width, finalHeight);
+
+    // --- 2. Start Drawing ---
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    // Background - Plain White
+    final bgPaint = Paint()..color = Colors.white;
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), bgPaint);
+
+    // Subtle Pattern
+    final patternPaint = Paint()
+      ..color = Colors.grey.withOpacity(0.03)
+      ..strokeWidth = 2;
+    for (double i = 0; i < size.width; i += 40) {
+      canvas.drawLine(Offset(i, 0), Offset(i, size.height), patternPaint);
+    }
+
+    // --- Header Section ---
+    final headerPaint = Paint()..color = bloc.selectedTheme; // Use bloc theme
+    canvas.drawRect(
+        Rect.fromLTWH(0, 0, size.width, headerBaseHeight), headerPaint);
+
+    // Draw Main Title
+    double titleY = (headerBaseHeight - titlePainter.height) / 2;
+    if (subTitlePainter != null) {
+      titleY = (headerBaseHeight -
+              (titlePainter.height + subTitlePainter.height + 10)) /
+          2;
+    }
+    titlePainter.paint(
+        canvas, Offset(centerX - (titlePainter.width / 2), titleY));
+
+    // Draw Subtitle
+    if (subTitlePainter != null) {
+      subTitlePainter.paint(
+          canvas,
+          Offset(centerX - (subTitlePainter.width / 2),
+              titleY + titlePainter.height + 10));
+    }
+
+    // --- Content Drawing ---
+    double currentY = headerBaseHeight + topPadding;
+
+    // 1. Arabic Text
+    arabicPainter.paint(
+        canvas, Offset(centerX - (arabicPainter.width / 2), currentY));
+
+    currentY += arabicPainter.height + 40; // Spacing after Arabic
+
+    // 2. Divider
+    final dividerPaint = Paint()
+      ..color = bloc.selectedTheme.withOpacity(0.3)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawLine(Offset(centerX - 100, currentY),
+        Offset(centerX - 20, currentY), dividerPaint);
+    canvas.drawCircle(Offset(centerX, currentY), 10,
+        dividerPaint..style = PaintingStyle.fill);
+    canvas.drawLine(
+        Offset(centerX + 20, currentY),
+        Offset(centerX + 100, currentY),
+        dividerPaint..style = PaintingStyle.stroke);
+
+    currentY += 40; // Spacing after Divider
+
+    // 3. Urdu Translation
+    urduPainter.paint(
+        canvas, Offset(centerX - (urduPainter.width / 2), currentY));
+
+    currentY += urduPainter.height + 20;
+
+    // 4. Translator Name
+    if (translatorPainter != null) {
+      translatorPainter.paint(
+          canvas, Offset(centerX - (translatorPainter.width / 2), currentY));
+      currentY += translatorHeight;
+    } else {
+      currentY += 40;
+    }
+
+    // 5. English Translation
+    if (englishPainter != null) {
+      englishPainter.paint(
+          canvas, Offset(centerX - (englishPainter.width / 2), currentY));
+      currentY += englishHeight;
+    }
+
+    // --- Footer Section ---
+    // Position footer at the bottom relative to content or absolute bottom of dynamic size
+    // We'll place it at (finalHeight - 200) to ensure it's at the bottom
+    double footerY = finalHeight - 200;
+
+    // Logo Area
+    const double logoSize = 120;
+    try {
+      // Use dynamic logo based on selected theme/iconNumber
+      final String logoPath = "assets/images/iqra${bloc.iconNumber}.png";
+      final ByteData logoData = await rootBundle.load(logoPath);
+      final ui.Codec codec = await ui.instantiateImageCodec(
+        logoData.buffer.asUint8List(),
+        targetWidth: logoSize.toInt(),
+      );
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      canvas.drawImage(frameInfo.image,
+          Offset(size.width - logoSize - 60, footerY + 20), Paint());
+    } catch (e) {
+      // Fallback or ignore
+      print("Error loading logo for share image: $e");
+    }
+
+    // Branding Text
+    final brandPainter = TextPainter(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: 'IQRA QURAN\n',
+            style: TextStyle(
+              color: bloc.selectedTheme,
+              fontSize: 40,
+              fontWeight: FontWeight.bold,
+              height: 1.2,
+            ),
+          ),
+          const TextSpan(
+            text: 'Read & Learn Quran',
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 28,
+              fontWeight: FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
+      textDirection: ui.TextDirection.ltr,
+      textAlign: TextAlign.left,
+    );
+    brandPainter.layout();
+    brandPainter.paint(canvas, Offset(60, footerY + 30));
+
+    // Convert to image
+    final picture = recorder.endRecording();
+    final img = await picture.toImage(size.width.toInt(), size.height.toInt());
+    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+    final buffer = byteData!.buffer.asUint8List();
+
+    // Save to temporary file
+    final tempDir = await getTemporaryDirectory();
+    final file = File(
+        '${tempDir.path}/quran_verse_${DateTime.now().millisecondsSinceEpoch}.png');
+    await file.writeAsBytes(buffer);
+
+    return file;
   }
 
+  static Future<void> image({
+    required BuildContext context,
+    required ThemeProvider bloc,
+    required String title,
+    required String arabicText,
+    required String translationText,
+    String? englishText,
+    String? translatorName,
+    String? paraNumber,
+    String? surahNumber,
+    String? ayatNumber,
+  }) async {
+    try {
+      // Show loading indicator usually, but generation is fast.
+      // Generate the image
+      final file = await _generateImage(
+        context: context,
+        bloc: bloc,
+        title: title,
+        arabicText: arabicText,
+        translationText: translationText,
+        englishText: englishText,
+        translatorName: translatorName,
+        paraNumber: paraNumber,
+        surahNumber: surahNumber,
+        ayatNumber: ayatNumber,
+      );
 
+      if (!context.mounted) return;
+
+      // Show preview dialog
+      await showDialog(
+        context: context,
+        useSafeArea: true,
+        barrierColor: Colors.black.withOpacity(0.9), // Darker backdrop
+        builder: (context) => Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.zero, // maximize width
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                // Action Buttons (Top)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Cancel Button
+                      Material(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(30),
+                        child: InkWell(
+                          onTap: () => Navigator.pop(context),
+                          borderRadius: BorderRadius.circular(30),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 8),
+                            child: const Row(
+                              children: [
+                                Icon(Icons.close,
+                                    color: Colors.white, size: 16),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Close',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Share Button
+                      Material(
+                        color: bloc.selectedTheme, // Use bloc theme
+                        borderRadius: BorderRadius.circular(30),
+                        elevation: 3,
+                        shadowColor: bloc.selectedTheme.withOpacity(0.4),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.pop(context);
+                            String shareText =
+                                '$title\n\n$arabicText\n\n$translationText';
+                            if (translatorName != null &&
+                                translatorName.isNotEmpty) {
+                              shareText += '\n($translatorName)';
+                            }
+                            if (englishText != null && englishText.isNotEmpty) {
+                              shareText += '\n\n$englishText';
+                            }
+                            // Add Reference if available
+                            if (paraNumber != null ||
+                                surahNumber != null ||
+                                ayatNumber != null) {
+                              List<String> refs = [];
+                              if (paraNumber != null)
+                                refs.add("Para: $paraNumber");
+                              if (surahNumber != null)
+                                refs.add("Surah No: $surahNumber");
+                              if (ayatNumber != null)
+                                refs.add("Verse: $ayatNumber");
+                              shareText += '\n\nReference: ${refs.join(", ")}';
+                            }
+
+                            shareText += '\n\nDownload IQRA QURAN App';
+
+                            Share.shareXFiles(
+                              [XFile(file.path)],
+                              text: shareText,
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(30),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 8),
+                            child: const Row(
+                              children: [
+                                Icon(Icons.share_rounded,
+                                    color: Colors.white, size: 16),
+                                SizedBox(width: 6),
+                                Text(
+                                  'Share',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Scrollable Image Area
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.file(
+                          file,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20), // Bottom padding
+              ],
+            ),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error sharing verse: $e')),
+        );
+      }
+    }
+  }
 }

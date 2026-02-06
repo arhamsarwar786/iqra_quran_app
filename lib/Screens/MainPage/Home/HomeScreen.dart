@@ -47,7 +47,7 @@ class _HomeState extends State<Home> {
   }
 
   final HijriCalendar _today = HijriCalendar.fromDate(DateTime.now());
-  
+
   List<String> imageName = [
     "Rectangle 3.png",
     "Rectangle 4.png",
@@ -59,45 +59,52 @@ class _HomeState extends State<Home> {
     "Good-deeds-to-do-in-Muharram-768x432.jpg",
     "List-of-Adhkar-After-Prayer.jpg",
     "Masnoon-Dua-After-Salah.jpg"
-
   ];
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return Builder(builder: (context) {
-      var bloc = context.watch<ThemeProvider>();
-      return SafeArea(
-        child: Scaffold(
-          // backgroundColor: bloc.selectedSecondary,
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerDocked,
-            floatingActionButton: floatinButton(context),
-            bottomNavigationBar: BottomBarApp(bloc:bloc),
-            extendBodyBehindAppBar: true,
-            // backgroundColor: Colors.red,
-            key: _scaffoldKey,
-            drawer: const Darwerr(),
-            resizeToAvoidBottomInset: false,
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              leading: IconButton(
-                  onPressed: () => _scaffoldKey.currentState!.openDrawer(),
-                  icon: const Icon(Icons.menu)),
-              actions: [
-                GestureDetector(
-                  onTap: () {},
-                  child: Image.asset("assets/images/infoIcon.png"),
-                ),
-                // IconButton(onPressed: (){
+    return Builder(
+      builder: (context) {
+        var bloc = context.watch<ThemeProvider>();
+        SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          systemNavigationBarColor: bloc.selectedSecondary,
+          systemNavigationBarIconBrightness: Brightness.dark,
+        ));
+        return Scaffold(
+          backgroundColor: bloc.selectedSecondary,
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
+          floatingActionButton: floatinButton(context),
+          bottomNavigationBar: BottomBarApp(bloc: bloc),
+          extendBodyBehindAppBar: true,
+          extendBody:
+              true, // Allow body to extend behind bottom bar for immersive feel if needed, or closer to bottom
+          // backgroundColor: Colors.red,
+          key: _scaffoldKey,
+          drawer: const Darwerr(),
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+                onPressed: () => _scaffoldKey.currentState!.openDrawer(),
+                icon: const Icon(Icons.menu)),
+            actions: [
+              GestureDetector(
+                onTap: () {},
+                child: Image.asset("assets/images/infoIcon.png"),
+              ),
+              // IconButton(onPressed: (){
 
-                // }, icon:const Icon(Icons.notifications)),
-              ],
-            ),
-            body: Column(
+              // }, icon:const Icon(Icons.notifications)),
+            ],
+          ),
+          body: SingleChildScrollView(
+            child: Column(
               children: [
                 SizedBox(
-                  // color: Colors.yellow,
                   height: 330,
                   child: Stack(
                     children: [
@@ -108,7 +115,6 @@ class _HomeState extends State<Home> {
                           viewportFraction: 1.01,
                           scrollDirection: Axis.horizontal,
                           autoPlay: true,
-                          // enlargeStrategy: CenterPageEnlargeStrategy.height,
                         ),
                         itemBuilder: (context, index, pageViewIndex) {
                           return Image(
@@ -116,57 +122,41 @@ class _HomeState extends State<Home> {
                                 AssetImage("assets/images/${imageName[index]}"),
                             width: size.width,
                             fit: BoxFit.fitWidth,
-                            // height: 30,
                           );
                         },
                       ),
                       Positioned(
-                          bottom: 0,
-                          child: SearchInQuaran(
-                              today: _today, size: size, bloc: bloc)),
+                        bottom: 0,
+                        child: SearchInQuaran(
+                            today: _today, size: size, bloc: bloc),
+                      ),
                     ],
                   ),
                 ),
-                // Container(height: 50,color: Colors.transparent,),
-                Expanded(
-                  child: SingleChildScrollView(
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        prayerQiblaList(context, size, bloc),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        screensList(context, size, bloc),
-                        // prayerQiblaList
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        // hadeesDailyVerse
-                        quranDailyVerse(context, size, bloc),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        namesAllahProphet(context, size, bloc),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                prayerQiblaList(context, size, bloc),
+                const SizedBox(height: 10),
+                screensList(context, size, bloc),
+                const SizedBox(height: 10),
+                quranDailyVerse(context, size, bloc),
+                const SizedBox(height: 10),
+                namesAllahProphet(context, size, bloc),
+                const SizedBox(height: 80), // Added spacing for bottom bar
               ],
-            )),
-      );
-    });
+            ),
+          ),
+        );
+      },
+    );
   }
 
   // ScreenList //
   Widget screensList(BuildContext context, Size size, ThemeProvider bloc) {
     return Padding(
-padding: const EdgeInsets.only(left: 8.0,
-                      right: 8.0,),      child: Card(
+      padding: const EdgeInsets.only(
+        left: 8.0,
+        right: 8.0,
+      ),
+      child: Card(
         elevation: 5,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
@@ -174,8 +164,8 @@ padding: const EdgeInsets.only(left: 8.0,
         child: Container(
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(30)),
           child: Padding(
-            padding:
-                const EdgeInsets.only(left: 15.0, right: 15.0, top: 7, bottom: 7),
+            padding: const EdgeInsets.only(
+                left: 15.0, right: 15.0, top: 7, bottom: 7),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -238,11 +228,11 @@ padding: const EdgeInsets.only(left: 8.0,
                 InkWell(
                   onTap: () {
                     push(
-                          context,
-                          Tasbih(
-                            // value: nameController.text,
+                      context,
+                      Tasbih(
+                          // value: nameController.text,
                           ),
-                        );
+                    );
                     // push(context, const TasbeeDetail());
                   },
                   child: Column(
@@ -305,8 +295,10 @@ padding: const EdgeInsets.only(left: 8.0,
 
   Widget prayerQiblaList(BuildContext context, Size size, ThemeProvider bloc) {
     return Padding(
-      padding: const EdgeInsets.only(left: 8.0,
-                      right: 8.0,),
+      padding: const EdgeInsets.only(
+        left: 8.0,
+        right: 8.0,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -394,7 +386,8 @@ padding: const EdgeInsets.only(left: 8.0,
                         height: 22,
                         decoration: const BoxDecoration(
                             image: DecorationImage(
-                                image: AssetImage("assets/images/prayerTime.png"),
+                                image:
+                                    AssetImage("assets/images/prayerTime.png"),
                                 fit: BoxFit.cover)),
                       ),
                       const SizedBox(
@@ -458,7 +451,16 @@ padding: const EdgeInsets.only(left: 8.0,
               ),
               const Spacer(),
               IconButton(
-                onPressed: () => AppShare.image(context, bloc),
+                onPressed: () => AppShare.image(
+                  context: context,
+                  bloc: bloc,
+                  title: "Surah Al-Baqarah (2:2)",
+                  arabicText:
+                      " ذٰلِكَ الۡڪِتٰبُ لَا رَيۡبَ ۛۚ  ۖ فِيۡهِ ۛۚ هُدًى لِّلۡمُتَّقِيۡنَۙ‏",
+                  translationText:
+                      "یہ اللہ کی کتاب ہے، اس میں کوئی شک نہیں ہدایت ہے اُن پرہیز گار لوگوں کے لیے",
+                  translatorName: "ترجمہ: کنزالایمان",
+                ),
                 icon: Icon(Icons.share, color: Theme.of(context).primaryColor),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -472,7 +474,9 @@ padding: const EdgeInsets.only(left: 8.0,
                     fontFamily: bloc.arabicFontFamily,
                     fontWeight: FontWeight.w700),
               ),
-              const SizedBox(width: 10,),
+              const SizedBox(
+                width: 10,
+              ),
               Text(
                 "1-23",
                 style: TextStyle(
@@ -594,8 +598,10 @@ padding: const EdgeInsets.only(left: 8.0,
   Widget namesAllahProphet(
       BuildContext context, Size size, ThemeProvider bloc) {
     return Padding(
-      padding: const EdgeInsets.only(left: 8.0,
-                      right: 8.0,),
+      padding: const EdgeInsets.only(
+        left: 8.0,
+        right: 8.0,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
