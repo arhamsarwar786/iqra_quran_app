@@ -41,6 +41,7 @@ dependencies:
   intl: 
   hijri:
   geolocator: 
+  geocoding: 
   lat_lng_to_timezone: any
   flutter_compass: any 
   stream_transform: any

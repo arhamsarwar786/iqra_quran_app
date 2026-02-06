@@ -5,6 +5,7 @@ import 'package:flutter_compass/flutter_compass.dart';
 import 'utils.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:stream_transform/stream_transform.dart' show CombineLatest;
+
 /// [FlutterQiblah] is a singleton class that provides assess to compass events,
 /// check for sensor support in Android
 /// Get current  location
@@ -48,10 +49,13 @@ class FlutterQiblah {
   /// Direction varies from 0-360, 0 being north.
   /// Qiblah varies from 0-360, offset from direction(North)
   static Stream<QiblahDirection> get qiblahStream {
+    if (FlutterCompass.events == null) {
+      return Stream.error("Compass not supported on this device");
+    }
     _instance._qiblahStream ??= _merge<CompassEvent, Position>(
-        FlutterCompass.events!,
-        Geolocator.getPositionStream(),
-      );
+      FlutterCompass.events!,
+      Geolocator.getPositionStream(),
+    );
 
     return _instance._qiblahStream!;
   }

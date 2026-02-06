@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iqra/Screens/MainPage/Home/qibal/flutter_qiblah.dart';
 import '../../../../widgets.dart';
-import 'comapss.dart';
+import 'compass.dart';
 
 class DirectionTOQiblah extends StatefulWidget {
   const DirectionTOQiblah({super.key});
@@ -15,27 +15,27 @@ class _DirectionTOQiblahState extends State<DirectionTOQiblah> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: mainScreenAppBarPush(context, "Direction to Qiblah"),
-        body: FutureBuilder(
-          future: _deviceSupport,
-          builder: (_, AsyncSnapshot<bool?> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            }
-            if (snapshot.hasError) {
-              return Center(
-                child: Text("Error: ${snapshot.error.toString()}"),
-              );
-            }
+      appBar: mainScreenAppBarPush(context, "Direction to Qiblah"),
+      body: FutureBuilder(
+        future: _deviceSupport,
+        builder: (_, AsyncSnapshot<bool?> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(
+              child: Text("Error: ${snapshot.error.toString()}"),
+            );
+          }
 
-            if (snapshot.data!) {
-              return const QiblahCompass();
-            } else {
-              return const Text("No data");
-            }
-          },
-        ),
-      
+          if (snapshot.data == true) {
+            return const QiblahCompass();
+          } else {
+            return const Center(
+                child: Text("Compass sensor not supported on this device"));
+          }
+        },
+      ),
     );
   }
 }
