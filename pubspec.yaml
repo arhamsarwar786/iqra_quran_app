@@ -100,6 +100,7 @@ flutter:
     - assets/quran_kareem/urdu_translation/quranmetadata.json
     - assets/quran_kareem/urdu_translation/final_quran.json
     - assets/extraction/quran2026.json
+    - assets/extraction/para.json
     - assets/json_data/tasbeeh.json
   #   - images/a_dot_ham.jpeg
 

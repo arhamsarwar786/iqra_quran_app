@@ -1,6 +1,5 @@
 // ignore_for_file: file_names
 
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:collection/collection.dart'; // You have to add this manually, for some reason it cannot be added automatically
@@ -13,6 +12,7 @@ import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Screens/MainPage/Quran/translation/surah_translation_screen.dart';
 import 'package:iqra/Utils/customThemes.dart';
 import 'package:iqra/widgets.dart';
+import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:provider/provider.dart';
 // import 'arabic';
 import '../../../Models/aya_list_model.dart';
@@ -22,7 +22,8 @@ import '../../../Utils/bottom_sheet_preview.dart';
 import '../../../Utils/utils.dart';
 
 class QuranView extends StatefulWidget {
-  const QuranView({super.key, this.ayatCount, this.surahName, this.suratNumber});
+  const QuranView(
+      {super.key, this.ayatCount, this.surahName, this.suratNumber});
   final String? ayatCount;
   final int? suratNumber;
   // List<Aya>? ayat;
@@ -32,7 +33,6 @@ class QuranView extends StatefulWidget {
 }
 
 class _QuranViewState extends State<QuranView> {
-
   List listAyat = [];
 
   ArabicNumbers arabicNumber = ArabicNumbers();
@@ -41,21 +41,18 @@ class _QuranViewState extends State<QuranView> {
   bool isScrollingDown = true;
 
   Future<List<RukoModel>> getRuko() async {
-    var data = await DefaultAssetBundle.of(context)
-        .loadString("assets/extraction/ruko.json");
-    var rukoDataLocal = rukoModelFromJson(data);
-    rukoData = rukoDataLocal
+    final provider = context.read<QuranDataProvider>();
+    rukoData = provider.rukoData
         .where((element) => element.surat == (widget.suratNumber ?? 0))
         .toList();
     return rukoData ?? [];
   }
 
   Future<List<SajdaModel>> getSajda() async {
-    var data = await DefaultAssetBundle.of(context)
-        .loadString("assets/extraction/sajda.json");
-    var sajdaDataLocal = sajdaModelFromJson(data);
-    sajdaData = sajdaDataLocal
-        .where((element) => element.surat.toString() == widget.suratNumber.toString())
+    final provider = context.read<QuranDataProvider>();
+    sajdaData = provider.sajdaData
+        .where((element) =>
+            element.surat.toString() == widget.suratNumber.toString())
         .toList();
 
     return sajdaData ?? [];
@@ -310,31 +307,31 @@ class _QuranViewState extends State<QuranView> {
   @override
   void initState() {
     super.initState();
-    loadQuranView().then((val){
-    listAyat = val;
-    viewMaker();
-    bismillaChecker();
-    // loadData();
-    _scrollViewController = ScrollController();
-    _scrollViewController!.addListener(() {
-      if (_scrollViewController!.position.userScrollDirection ==
-          ScrollDirection.reverse) {
-        if (!isScrollingDown) {
-          isScrollingDown = true;
-          _showAppbar = true;
-          setState(() {});
+    loadQuranView().then((val) {
+      listAyat = val;
+      viewMaker();
+      bismillaChecker();
+      // loadData();
+      _scrollViewController = ScrollController();
+      _scrollViewController!.addListener(() {
+        if (_scrollViewController!.position.userScrollDirection ==
+            ScrollDirection.reverse) {
+          if (!isScrollingDown) {
+            isScrollingDown = true;
+            _showAppbar = true;
+            setState(() {});
+          }
         }
-      }
 
-      if (_scrollViewController!.position.userScrollDirection ==
-          ScrollDirection.forward) {
-        if (isScrollingDown) {
-          isScrollingDown = false;
-          _showAppbar = false;
-          setState(() {});
+        if (_scrollViewController!.position.userScrollDirection ==
+            ScrollDirection.forward) {
+          if (isScrollingDown) {
+            isScrollingDown = false;
+            _showAppbar = false;
+            setState(() {});
+          }
         }
-      }
-    });
+      });
     });
   }
 
@@ -359,8 +356,8 @@ class _QuranViewState extends State<QuranView> {
   }
 
   isRuku(index, List<RukoModel> ruko) {
-    var data = ruko.firstWhereOrNull(
-        (element) => (element.ayaAfterRako == index));
+    var data =
+        ruko.firstWhereOrNull((element) => (element.ayaAfterRako == index));
     return data;
   }
 
@@ -372,24 +369,13 @@ class _QuranViewState extends State<QuranView> {
 
   String arabicText = "";
 
-
   Future<List> loadQuranView() async {
-    final quran = await DefaultAssetBundle.of(context)
-        .loadString("assets/extraction/quran2026.json");
-    final quranResponse = jsonDecode(quran) as List;
-    String surahId = widget.suratNumber.toString();
-    final quranAyat = [];
-    
-    for (var item in quranResponse) {
-      if (item["surahId"].toString() == surahId) {
-        quranAyat.add(Aya.fromJson(item));
-      } else if (quranAyat.isNotEmpty) {
-        // We've moved past the desired surah
-        break;
-      }
+    final provider = context.read<QuranDataProvider>();
+    if (!provider.isLoaded) {
+      await provider.loadQuranData();
     }
-
-    return quranAyat;
+    int surahId = widget.suratNumber ?? 0;
+    return provider.getAyatsBySurah(surahId);
   }
 
   List<TextSpan> children = [];

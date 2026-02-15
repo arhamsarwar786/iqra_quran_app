@@ -1,13 +1,12 @@
 // ignore_for_file: file_names
 
-import 'dart:convert';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:arabic_numbers/arabic_numbers.dart';
 import 'package:flutter/rendering.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Utils/customThemes.dart';
+import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:provider/provider.dart';
 import '../../../Models/aya_list_model.dart';
 import '../../../Models/para_model.dart' as ParaModel;
@@ -36,41 +35,28 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   List listAyat = [];
 
   Future<List<RukoModel>> getRuko() async {
-    var data = await DefaultAssetBundle.of(context)
-        .loadString("assets/extraction/ruko.json");
-    var rukoDataLocal = rukoModelFromJson(data);
-    List<RukoModel> rukoData = rukoDataLocal
+    final provider = context.read<QuranDataProvider>();
+    return provider.rukoData
         .where((element) => listAyat
             .any((aya) => (aya as Aya).surahId == element.surat.toString()))
         .toList();
-    return rukoData;
   }
 
   Future<List<SajdaModel>> getSajda() async {
-    var data = await DefaultAssetBundle.of(context)
-        .loadString("assets/extraction/sajda.json");
-    var sajdaDataLocal = sajdaModelFromJson(data);
-    List<SajdaModel> sajdaData = sajdaDataLocal
-        .where((element) => listAyat
-            .any((aya) => (aya as Aya).surahId == element.surat.toString()))
+    final provider = context.read<QuranDataProvider>();
+    return provider.sajdaData
+        .where((element) =>
+            listAyat.any((aya) => (aya as Aya).surahId == element.surat))
         .toList();
-    return sajdaData;
   }
 
   Future<List> loadParaView() async {
-    final quran = await DefaultAssetBundle.of(context)
-        .loadString("assets/extraction/quran2026.json");
-    final quranResponse = jsonDecode(quran) as List;
-    String paraId = widget.parahCount.toString();
-    final paraAyat = [];
-
-    for (var item in quranResponse) {
-      if (item["paraId"].toString() == paraId) {
-        paraAyat.add(Aya.fromJson(item));
-      }
+    final provider = context.read<QuranDataProvider>();
+    if (!provider.isLoaded) {
+      await provider.loadQuranData();
     }
-
-    return paraAyat;
+    String paraId = widget.parahCount.toString();
+    return provider.getAyatsByPara(int.tryParse(paraId) ?? 0);
   }
 
   viewMaker() async {

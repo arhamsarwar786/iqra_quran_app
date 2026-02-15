@@ -74,8 +74,7 @@ class SavedPrefernces {
     return data;
   }
 
-
-    static setUrduFontFamily(theme) async {
+  static setUrduFontFamily(theme) async {
     final pref = await SharedPreferences.getInstance();
     pref.reload();
     pref.setString('urduFamily', jsonEncode(theme));
@@ -92,4 +91,14 @@ class SavedPrefernces {
     return data;
   }
 
+  ///// Madhab (Fiqa)
+  static setMadhab(String madhab) async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.setString('madhab', madhab);
+  }
+
+  static Future<String> getMadhab() async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getString('madhab') ?? 'hanafi';
+  }
 }

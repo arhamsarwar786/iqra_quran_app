@@ -1,0 +1,302 @@
+[
+  {
+    "paraId": 1,
+    "paraName": "الٓمّٓ",
+    "paraStartSurahId": 1,
+    "paraStartRukuId": 1,
+    "paraStartAyatId": 1,
+    "paraVisible": 1,
+    "search_para_name": "الٓمّٓ",
+    "search_para_no": "١"
+  },
+  {
+    "paraId": 2,
+    "paraName": "سَیَقُوْلُ",
+    "paraStartSurahId": 2,
+    "paraStartRukuId": 17,
+    "paraStartAyatId": 142,
+    "paraVisible": 1,
+    "search_para_name": "سَيَقُوْلُ",
+    "search_para_no": "٢"
+  },
+  {
+    "paraId": 3,
+    "paraName": "تِلْكَ الرُّسُلُ",
+    "paraStartSurahId": 2,
+    "paraStartRukuId": 33,
+    "paraStartAyatId": 253,
+    "paraVisible": 1,
+    "search_para_name": "تِلْكَ الرُّسُلُ",
+    "search_para_no": "٣"
+  },
+  {
+    "paraId": 4,
+    "paraName": "لَنْ  تَنَالُوا",
+    "paraStartSurahId": 3,
+    "paraStartRukuId": 10,
+    "paraStartAyatId": 92,
+    "paraVisible": 1,
+    "search_para_name": "لَنْ تَنَالُوا",
+    "search_para_no": "٤"
+  },
+  {
+    "paraId": 5,
+    "paraName": "وَ الْمُحْصَنٰتُ",
+    "paraStartSurahId": 4,
+    "paraStartRukuId": 4,
+    "paraStartAyatId": 24,
+    "paraVisible": 1,
+    "search_para_name": "وَالْمُحْصَنٰتُ",
+    "search_para_no": "٥"
+  },
+  {
+    "paraId": 6,
+    "paraName": "لَا یُحِبُّ اللّٰهُ",
+    "paraStartSurahId": 4,
+    "paraStartRukuId": 21,
+    "paraStartAyatId": 148,
+    "paraVisible": 1,
+    "search_para_name": "لَايُحِبُّ اللّٰهُ",
+    "search_para_no": "٦"
+  },
+  {
+    "paraId": 7,
+    "paraName": "وَ اِذَا سَمِعُوْا",
+    "paraStartSurahId": 5,
+    "paraStartRukuId": 11,
+    "paraStartAyatId": 83,
+    "paraVisible": 1,
+    "search_para_name": "وَاِذَاسَمِعُوْا",
+    "search_para_no": "٧"
+  },
+  {
+    "paraId": 8,
+    "paraName": "وَ لَوْ اَنَّنَا",
+    "paraStartSurahId": 6,
+    "paraStartRukuId": 14,
+    "paraStartAyatId": 111,
+    "paraVisible": 1,
+    "search_para_name": "وَ لَوْ اَنَّنَا",
+    "search_para_no": "٨"
+  },
+  {
+    "paraId": 9,
+    "paraName": "قَالَ الْمَلَاُ",
+    "paraStartSurahId": 7,
+    "paraStartRukuId": 11,
+    "paraStartAyatId": 88,
+    "paraVisible": 1,
+    "search_para_name": "قَالَ الْمَلَاُ",
+    "search_para_no": "٩"
+  },
+  {
+    "paraId": 10,
+    "paraName": "وَ اعْلَمُوْۤا",
+    "paraStartSurahId": 8,
+    "paraStartRukuId": 5,
+    "paraStartAyatId": 41,
+    "paraVisible": 1,
+    "search_para_name": "وَ اعْلَمُوْۤا",
+    "search_para_no": "١٠"
+  },
+  {
+    "paraId": 11,
+    "paraName": "یَعْتَذِرُوْنَ",
+    "paraStartSurahId": 9,
+    "paraStartRukuId": 12,
+    "paraStartAyatId": 94,
+    "paraVisible": 1,
+    "search_para_name": "يَعْتَذِرُوْنَ",
+    "search_para_no": "١١"
+  },
+  {
+    "paraId": 12,
+    "paraName": "وَ مَا مِنْ دَآبَّةٍ",
+    "paraStartSurahId": 11,
+    "paraStartRukuId": 1,
+    "paraStartAyatId": 6,
+    "paraVisible": 1,
+    "search_para_name": "وَمَا مِنْ دَآبَّةٍ",
+    "search_para_no": "١٢"
+  },
+  {
+    "paraId": 13,
+    "paraName": "وَ مَاۤ اُبَرِّئُ",
+    "paraStartSurahId": 12,
+    "paraStartRukuId": 7,
+    "paraStartAyatId": 53,
+    "paraVisible": 1,
+    "search_para_name": "وَمَاۤ اُبَرِّئُ",
+    "search_para_no": "١٣"
+  },
+  {
+    "paraId": 14,
+    "paraName": "رُبَمَا",
+    "paraStartSurahId": 15,
+    "paraStartRukuId": 1,
+    "paraStartAyatId": 2,
+    "paraVisible": 1,
+    "search_para_name": "رُبَمَا",
+    "search_para_no": "١٤"
+  },
+  {
+    "paraId": 15,
+    "paraName": "سُبْحٰنَ الَّذِیْۤ",
+    "paraStartSurahId": 17,
+    "paraStartRukuId": 1,
+    "paraStartAyatId": 1,
+    "paraVisible": 1,
+    "search_para_name": "سُبْحٰنَ الَّذِىْۤ",
+    "search_para_no": "١٥"
+  },
+  {
+    "paraId": 16,
+    "paraName": "قَالَ اَلَمْ",
+    "paraStartSurahId": 18,
+    "paraStartRukuId": 10,
+    "paraStartAyatId": 75,
+    "paraVisible": 1,
+    "search_para_name": "قَالَ اَلَمْ",
+    "search_para_no": "١٦"
+  },
+  {
+    "paraId": 17,
+    "paraName": "اِقْتَرَبَ لِلنَّاسِ",
+    "paraStartSurahId": 21,
+    "paraStartRukuId": 1,
+    "paraStartAyatId": 1,
+    "paraVisible": 1,
+    "search_para_name": "اِقْتَرَبَ لِلنَّاسِ",
+    "search_para_no": "١٧"
+  },
+  {
+    "paraId": 18,
+    "paraName": "قَدْ اَفْلَحَ",
+    "paraStartSurahId": 23,
+    "paraStartRukuId": 1,
+    "paraStartAyatId": 1,
+    "paraVisible": 1,
+    "search_para_name": "قَدْ اَفْلَحَ",
+    "search_para_no": "١٨"
+  },
+  {
+    "paraId": 19,
+    "paraName": "وَ قَالَ الَّذِیْنَ",
+    "paraStartSurahId": 25,
+    "paraStartRukuId": 3,
+    "paraStartAyatId": 21,
+    "paraVisible": 1,
+    "search_para_name": "وَ قَالَ الَّذِيْنَ",
+    "search_para_no": "١٩"
+  },
+  {
+    "paraId": 20,
+    "paraName": "اَمَّنْ خَلَقَ",
+    "paraStartSurahId": 27,
+    "paraStartRukuId": 5,
+    "paraStartAyatId": 60,
+    "paraVisible": 1,
+    "search_para_name": "اَمَّنْ خَلَقَ",
+    "search_para_no": "٢٠"
+  },
+  {
+    "paraId": 21,
+    "paraName": "اُتْلُ مَاۤ اُوْحِیَ",
+    "paraStartSurahId": 29,
+    "paraStartRukuId": 5,
+    "paraStartAyatId": 45,
+    "paraVisible": 1,
+    "search_para_name": "اُتْلُ مَاۤ اُوْحِىَ",
+    "search_para_no": "٢١"
+  },
+  {
+    "paraId": 22,
+    "paraName": "وَ مَنْ یَّقْنُتْ",
+    "paraStartSurahId": 33,
+    "paraStartRukuId": 4,
+    "paraStartAyatId": 31,
+    "paraVisible": 1,
+    "search_para_name": "وَ مَنْ يَّقْنُتْ",
+    "search_para_no": "٢٢"
+  },
+  {
+    "paraId": 23,
+    "paraName": "وَ مَا لِیَ",
+    "paraStartSurahId": 36,
+    "paraStartRukuId": 2,
+    "paraStartAyatId": 22,
+    "paraVisible": 1,
+    "search_para_name": "وَ مَالِىَ",
+    "search_para_no": "٢٣"
+  },
+  {
+    "paraId": 24,
+    "paraName": "فَمَنْ اَظْلَمُ",
+    "paraStartSurahId": 39,
+    "paraStartRukuId": 4,
+    "paraStartAyatId": 32,
+    "paraVisible": 1,
+    "search_para_name": "فَمَنْ اَظْلَمُ",
+    "search_para_no": "٢٤"
+  },
+  {
+    "paraId": 25,
+    "paraName": "اِلَیْهِ یُرَدُّ",
+    "paraStartSurahId": 41,
+    "paraStartRukuId": 6,
+    "paraStartAyatId": 47,
+    "paraVisible": 1,
+    "search_para_name": "اِلَيْهِ يُرَدُّ",
+    "search_para_no": "٢٥"
+  },
+  {
+    "paraId": 26,
+    "paraName": "حٰمٓ",
+    "paraStartSurahId": 46,
+    "paraStartRukuId": 1,
+    "paraStartAyatId": 1,
+    "paraVisible": 1,
+    "search_para_name": "حٰمٓ",
+    "search_para_no": "٢٦"
+  },
+  {
+    "paraId": 27,
+    "paraName": "قَالَ فَمَا خَطْبُكُمْ",
+    "paraStartSurahId": 51,
+    "paraStartRukuId": 2,
+    "paraStartAyatId": 31,
+    "paraVisible": 1,
+    "search_para_name": "قَالَ فَمَا خَطْبُكُمْ",
+    "search_para_no": "٢٧"
+  },
+  {
+    "paraId": 28,
+    "paraName": "قَدْ سَمِعَ اللّٰهُ",
+    "paraStartSurahId": 58,
+    "paraStartRukuId": 1,
+    "paraStartAyatId": 1,
+    "paraVisible": 1,
+    "search_para_name": "قَدْ سَمِعَ اللّٰهُ",
+    "search_para_no": "٢٨"
+  },
+  {
+    "paraId": 29,
+    "paraName": "تَبٰرَكَ الَّذِیْ",
+    "paraStartSurahId": 67,
+    "paraStartRukuId": 1,
+    "paraStartAyatId": 1,
+    "paraVisible": 1,
+    "search_para_name": "تَبٰرَكَ الَّذِىْ",
+    "search_para_no": "٢٩"
+  },
+  {
+    "paraId": 30,
+    "paraName": "عَمَّ",
+    "paraStartSurahId": 78,
+    "paraStartRukuId": 1,
+    "paraStartAyatId": 1,
+    "paraVisible": 1,
+    "search_para_name": "عَمَّ",
+    "search_para_no": "٣٠"
+  }
+]

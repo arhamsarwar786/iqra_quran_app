@@ -9,8 +9,7 @@ import 'package:provider/provider.dart';
 import '../../../../components/tranlation_card_section.dart';
 
 class ParahScreen extends StatefulWidget {
-  ParahScreen(
-      {super.key, this.ayatInSura, this.parahCount, this.parahname});
+  ParahScreen({super.key, this.ayatInSura, this.parahCount, this.parahname});
   final String? parahCount;
   final List<int>? ayatInSura;
   final String? parahname;

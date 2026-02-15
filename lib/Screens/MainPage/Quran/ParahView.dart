@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import '../../../widgets.dart';
 
 class PQuranView extends StatefulWidget {
-  PQuranView({super.key, 
+  PQuranView({
+    super.key,
     this.ayatInSura,
     this.parahCount,
     this.parahname,
@@ -20,7 +21,6 @@ class PQuranView extends StatefulWidget {
 }
 
 class _PQuranViewState extends State<PQuranView> {
-
   List<int> num = [
     0,
     148 + 2,
@@ -66,7 +66,7 @@ class _PQuranViewState extends State<PQuranView> {
                 .loadString("assets/quran_kareem/urdu_translation/quran.json"),
             builder: (context, snapshot) {
               var quran = json.decode(snapshot.data.toString());
-              if (snapshot.hasData) {                
+              if (snapshot.hasData) {
                 var a = 0;
                 for (int i = 0; i < num.length; i++) {
                   a = a + num[i];

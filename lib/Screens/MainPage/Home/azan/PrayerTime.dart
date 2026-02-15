@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../../../../Provider/theme_provider.dart';
 import '../../../../widgets.dart';
 import '../../../../Utils/share_verse.dart';
+import '../../../../Helper/preference/saved_preferences.dart';
 import '../qibal/qibla.dart';
 
 class PrayerTime extends StatefulWidget {
@@ -25,15 +26,27 @@ class _PrayerTimeState extends State<PrayerTime> {
   late Future<Map<String, dynamic>> _prayerCacheFuture;
   Map<String, dynamic>? _lastData;
   bool _showFardOnly = true;
+  String _madhab = 'hanafi';
 
   @override
   void initState() {
     super.initState();
+    _initMadhab();
     _prayerCacheFuture = _getPrayerData();
     // Update every second for the clock, calculations are light
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) setState(() {});
     });
+  }
+
+  Future<void> _initMadhab() async {
+    String m = await SavedPrefernces.getMadhab();
+    if (mounted) {
+      setState(() {
+        _madhab = m;
+        _refreshData();
+      });
+    }
   }
 
   @override
@@ -91,7 +104,7 @@ class _PrayerTimeState extends State<PrayerTime> {
     Coordinates coordinates =
         Coordinates(position.latitude, position.longitude);
     CalculationParameters params = CalculationMethod.muslimWorldLeague();
-    params.madhab = Madhab.hanafi;
+    params.madhab = _madhab == 'hanafi' ? Madhab.hanafi : Madhab.shafi;
 
     // We pass TODAY'S DATE in UTC to ensure adhan_dart calculates correctly for the global day
     // then we handle local conversion manually.
@@ -384,6 +397,31 @@ class _PrayerTimeState extends State<PrayerTime> {
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("Fiqa / Madhab",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: Colors.grey)),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            _madhabChip("Hanafi", "hanafi", themeProvider),
+                            const SizedBox(width: 12),
+                            _madhabChip(
+                                "Shafi / Standard", "shafi", themeProvider),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -538,6 +576,46 @@ class _PrayerTimeState extends State<PrayerTime> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _madhabChip(String label, String value, ThemeProvider tp) {
+    bool isSelected = _madhab == value;
+    return GestureDetector(
+      onTap: () async {
+        if (!isSelected) {
+          setState(() {
+            _madhab = value;
+          });
+          await SavedPrefernces.setMadhab(value);
+          _refreshData();
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? tp.selectedTheme : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+              color: isSelected ? tp.selectedTheme : Colors.grey.shade300),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                      color: tp.selectedTheme.withOpacity(0.2),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2))
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black87,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            fontSize: 12,
+          ),
+        ),
       ),
     );
   }
