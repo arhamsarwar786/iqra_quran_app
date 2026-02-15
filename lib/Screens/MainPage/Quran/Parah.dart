@@ -42,6 +42,8 @@ class _ParahState extends State<Parah> {
                 int paraNumber = paraItem.paraId ?? 0;
                 int ayatCount =
                     quranProvider.paraAyatCounts[paraNumber.toString()] ?? 0;
+                int rukuCount =
+                    quranProvider.paraRukuCounts[paraNumber.toString()] ?? 0;
                 String paraName = paraItem.paraName ?? 'Para $paraNumber';
 
                 return InkWell(
@@ -56,6 +58,7 @@ class _ParahState extends State<Parah> {
                         ));
                   },
                   child: Card(
+                    color: bloc.selectedSecondary,
                     elevation: 5,
                     child: SizedBox(
                       height: MediaQuery.of(context).size.height * 0.22,
@@ -80,31 +83,50 @@ class _ParahState extends State<Parah> {
                                   )),
                                 ),
                               ),
-                              Container(
-                                height: 50,
-                                width: 50,
-                                decoration: const BoxDecoration(
-                                    image: DecorationImage(
-                                        image: AssetImage(
-                                            "assets/images/cornertop.png"),
-                                        fit: BoxFit.fill)),
-                              ),
                             ],
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                          Column(
                             children: [
-                              FittedBox(
-                                child: Text(
-                                  paraName,
-                                  style: TextStyle(
-                                      fontFamily: bloc.arabicFontFamily,
-                                      color: Colors.black,
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                              )
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  FittedBox(
+                                    child: Text(
+                                      paraName,
+                                      style: TextStyle(
+                                          fontFamily: bloc.arabicFontFamily,
+                                          color: Colors.black,
+                                          fontSize: 30,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  )
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Ayat: $ayatCount",
+                                    style: TextStyle(
+                                        fontFamily: bloc.arabicFontFamily,
+                                        color: Colors.black,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    "Ruku: $rukuCount",
+                                    style: TextStyle(
+                                        fontFamily: bloc.arabicFontFamily,
+                                        color: Colors.black,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500),
+                                  )
+                                ],
+                              ),
                             ],
                           ),
                           Row(

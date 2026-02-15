@@ -74,6 +74,16 @@ class SurahHeaderCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
+                            metadata.index,
+                            textAlign: TextAlign.right,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
                             metadata.name,
                             textAlign: TextAlign.right,
                             style: TextStyle(
@@ -81,16 +91,6 @@ class SurahHeaderCard extends StatelessWidget {
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
                               fontFamily: theme.arabicFontFamily,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            metadata.index,
-                            textAlign: TextAlign.right,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
@@ -101,20 +101,20 @@ class SurahHeaderCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            "(${metadata.type == 'Meccan' ? 'مكية' : 'مدنية'})",
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
-                              fontFamily: theme.arabicFontFamily,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
                             metadata.order,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            "(${metadata.type == 'Meccan' ? 'مكية' : 'مدنية'})",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                              fontFamily: theme.arabicFontFamily,
                             ),
                           ),
                         ],

@@ -19,6 +19,7 @@ class QuranDataProvider extends ChangeNotifier {
   List<SajdaModel> _sajdaData = [];
   List<SurahMetadata> _surahMetadata = [];
   final Map<String, int> _paraAyatCounts = {};
+  final Map<String, int> _paraRukuCounts = {};
   bool _isLoading = false;
   bool _isLoaded = false;
 
@@ -28,6 +29,7 @@ class QuranDataProvider extends ChangeNotifier {
   List<SajdaModel> get sajdaData => _sajdaData;
   List<SurahMetadata> get surahMetadata => _surahMetadata;
   Map<String, int> get paraAyatCounts => _paraAyatCounts;
+  Map<String, int> get paraRukuCounts => _paraRukuCounts;
   bool get isLoading => _isLoading;
   bool get isLoaded => _isLoaded;
 
@@ -94,6 +96,24 @@ class QuranDataProvider extends ChangeNotifier {
       }
       debugPrint(
           'Quran Data Bank: Calculated counts for ${_paraAyatCounts.length} paras.');
+
+      // Calculate para ruku counts
+      _paraRukuCounts.clear();
+      for (var ruko in _rukoData) {
+        // Get the para ID for this ruko by finding the ayat
+        var ayat = _quranData.firstWhere(
+          (aya) =>
+              aya.surahId == ruko.surat.toString() &&
+              aya.ayatNumberInt == ruko.ayaAfterRako,
+          orElse: () => Aya(ayatNumber: "0", arabicText: ""),
+        );
+        String paraId = ayat.paraId?.toString() ?? "0";
+        if (paraId != "0") {
+          _paraRukuCounts[paraId] = (_paraRukuCounts[paraId] ?? 0) + 1;
+        }
+      }
+      debugPrint(
+          'Quran Data Bank: Calculated ruku counts for ${_paraRukuCounts.length} paras.');
 
       _isLoaded = true;
       notifyListeners();

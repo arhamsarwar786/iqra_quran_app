@@ -1,7 +1,8 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-
+import 'package:iqra/Provider/theme_provider.dart';
+import 'package:provider/provider.dart';
 
 import '../../../widgets.dart';
 import 'Parah.dart';
@@ -13,6 +14,7 @@ class TabBarDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var themeProvider = context.read<ThemeProvider>();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -24,7 +26,8 @@ class TabBarDemo extends StatelessWidget {
               height: 45,
               width: 45,
               decoration: BoxDecoration(
-                  image: DecorationImage(image: AssetImage("assets/images/book.png"))),
+                  image: DecorationImage(
+                      image: AssetImage("assets/images/book.png"))),
             )),
         appBar: mainScreenAppBarPush(context, "Recite Quran"),
         body: DefaultTabController(
@@ -34,17 +37,22 @@ class TabBarDemo extends StatelessWidget {
               Container(
                 constraints: BoxConstraints(maxHeight: 170.0),
                 child: Material(
-                  color: Theme.of(context).primaryColor,
-                        // color: Color(0xffCC7180),
+                  color: themeProvider.selectedTheme,
                   child: TabBar(
-                    indicatorColor: Colors.white,
+                    labelStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: themeProvider.selectedSecondary,
+                        fontSize: 14),
+                    labelColor: themeProvider.selectedSecondary,
+                    unselectedLabelColor: themeProvider.selectedSecondary,
+                    indicatorColor: themeProvider.selectedSecondary,
                     unselectedLabelStyle: TextStyle(
                         fontWeight: FontWeight.normal,
-                        color: Colors.white,
+                        color: themeProvider.selectedSecondary,
                         fontSize: 14),
                     indicatorPadding:
                         EdgeInsets.only(left: 10, right: 10, bottom: 5),
-                    tabs: const[
+                    tabs: const [
                       Tab(
                         text: "Quran",
                       ),
@@ -77,6 +85,8 @@ class TabBarDemo extends StatelessWidget {
                       height: MediaQuery.of(context).size.height,
                       width: MediaQuery.of(context).size.width,
                       decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: AssetImage("assets/images/BgImage.png")),
                         color: Colors.grey[100],
                         borderRadius: BorderRadius.only(
                           topRight: Radius.circular(40),
@@ -84,7 +94,7 @@ class TabBarDemo extends StatelessWidget {
                         ),
                       ),
                       child: TabBarView(
-                        children:const[
+                        children: const [
                           Quran(),
                           Surah(),
                           Parah(),

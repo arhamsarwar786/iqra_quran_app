@@ -101,4 +101,15 @@ class SavedPrefernces {
     final pref = await SharedPreferences.getInstance();
     return pref.getString('madhab') ?? 'hanafi';
   }
+
+  ///// Prayer Notifications
+  static setPrayerNotificationsEnabled(bool enabled) async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.setBool('prayer_notifications_enabled', enabled);
+  }
+
+  static Future<bool> getPrayerNotificationsEnabled() async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getBool('prayer_notifications_enabled') ?? true;
+  }
 }

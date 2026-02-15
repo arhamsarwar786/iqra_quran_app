@@ -14,6 +14,7 @@ import 'package:geocoding_ios/geocoding_ios.dart';
 import 'package:geolocator_apple/geolocator_apple.dart';
 import 'package:path_provider_foundation/path_provider_foundation.dart';
 import 'package:shared_preferences_foundation/shared_preferences_foundation.dart';
+import 'package:flutter_local_notifications_linux/flutter_local_notifications_linux.dart';
 import 'package:path_provider_linux/path_provider_linux.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences_linux/shared_preferences_linux.dart';
@@ -106,6 +107,15 @@ class _PluginRegistrant {
       }
 
     } else if (Platform.isLinux) {
+      try {
+        LinuxFlutterLocalNotificationsPlugin.registerWith();
+      } catch (err) {
+        print(
+          '`flutter_local_notifications_linux` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
       try {
         PathProviderLinux.registerWith();
       } catch (err) {

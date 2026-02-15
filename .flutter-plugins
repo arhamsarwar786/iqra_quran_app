@@ -1,6 +1,8 @@
 # This is a generated file; do not edit or check into version control.
 audio_session=/Users/as-macbook/.pub-cache/hosted/pub.dev/audio_session-0.1.21/
 flutter_compass=/Users/as-macbook/.pub-cache/hosted/pub.dev/flutter_compass-0.8.1/
+flutter_local_notifications=/Users/as-macbook/.pub-cache/hosted/pub.dev/flutter_local_notifications-17.2.4/
+flutter_local_notifications_linux=/Users/as-macbook/.pub-cache/hosted/pub.dev/flutter_local_notifications_linux-4.0.1/
 flutter_localization=/Users/as-macbook/.pub-cache/hosted/pub.dev/flutter_localization-0.1.14/
 geocoding=/Users/as-macbook/.pub-cache/hosted/pub.dev/geocoding-4.0.0/
 geocoding_android=/Users/as-macbook/.pub-cache/hosted/pub.dev/geocoding_android-4.0.1/

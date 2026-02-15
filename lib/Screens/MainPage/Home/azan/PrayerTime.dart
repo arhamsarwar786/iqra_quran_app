@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:lat_lng_to_timezone/lat_lng_to_timezone.dart' as tzmap;
-import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:adhan_dart/adhan_dart.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -12,6 +9,7 @@ import '../../../../Provider/theme_provider.dart';
 import '../../../../widgets.dart';
 import '../../../../Utils/share_verse.dart';
 import '../../../../Helper/preference/saved_preferences.dart';
+import '../../../../Services/prayer_notification_service.dart';
 import '../qibal/qibla.dart';
 
 class PrayerTime extends StatefulWidget {
@@ -27,16 +25,29 @@ class _PrayerTimeState extends State<PrayerTime> {
   Map<String, dynamic>? _lastData;
   bool _showFardOnly = true;
   String _madhab = 'hanafi';
+  bool _notificationsEnabled = true;
+  Position? _currentPosition;
 
   @override
   void initState() {
     super.initState();
+    _initializeNotifications();
     _initMadhab();
     _prayerCacheFuture = _getPrayerData();
     // Update every second for the clock, calculations are light
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) setState(() {});
     });
+  }
+
+  Future<void> _initializeNotifications() async {
+    await PrayerNotificationService.initialize();
+    bool enabled = await SavedPrefernces.getPrayerNotificationsEnabled();
+    if (mounted) {
+      setState(() {
+        _notificationsEnabled = enabled;
+      });
+    }
   }
 
   Future<void> _initMadhab() async {
@@ -106,6 +117,10 @@ class _PrayerTimeState extends State<PrayerTime> {
     CalculationParameters params = CalculationMethod.muslimWorldLeague();
     params.madhab = _madhab == 'hanafi' ? Madhab.hanafi : Madhab.shafi;
 
+    // Debug: Print madhab being used
+    print('🕌 Calculating prayer times with madhab: $_madhab');
+    print('📍 Location: ${position.latitude}, ${position.longitude}');
+
     // We pass TODAY'S DATE in UTC to ensure adhan_dart calculates correctly for the global day
     // then we handle local conversion manually.
     final DateTime nowUtc = DateTime.now().toUtc();
@@ -144,6 +159,13 @@ class _PrayerTimeState extends State<PrayerTime> {
     add("Fajr", pt.fajr, true);
     add("Zuhr", pt.dhuhr, true);
     add("Asr", pt.asr, true);
+
+    // Debug: Print Asr time to verify madhab difference
+    if (pt.asr != null) {
+      print(
+          '⏰ Asr time ($_madhab): ${DateFormat("h:mm a").format(pt.asr!.toLocal())}');
+    }
+
     add("Maghrib", pt.maghrib, true);
     add("Isha", pt.isha, true);
 
@@ -166,6 +188,17 @@ class _PrayerTimeState extends State<PrayerTime> {
         (a["dateTime"] as DateTime).compareTo(b["dateTime"] as DateTime));
     fardList.sort((a, b) =>
         (a["dateTime"] as DateTime).compareTo(b["dateTime"] as DateTime));
+
+    // Store position for notification scheduling
+    _currentPosition = position;
+
+    // Schedule notifications if enabled
+    if (_notificationsEnabled) {
+      await PrayerNotificationService.scheduleAllPrayers(
+        position: position,
+        madhab: _madhab,
+      );
+    }
 
     return {
       "location": locationName,
@@ -224,6 +257,7 @@ class _PrayerTimeState extends State<PrayerTime> {
         ],
       ),
       body: FutureBuilder<Map<String, dynamic>>(
+        key: ValueKey(_madhab), // Force rebuild when madhab changes
         future: _prayerCacheFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting &&
@@ -416,6 +450,112 @@ class _PrayerTimeState extends State<PrayerTime> {
                           ],
                         ),
                         const SizedBox(height: 16),
+
+                        // Notification Toggle
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: themeProvider.selectedTheme
+                                          .withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(
+                                      Icons.notifications_active_rounded,
+                                      color: themeProvider.selectedTheme,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Prayer Notifications",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                          color: Color(0xFF2D3436),
+                                        ),
+                                      ),
+                                      SizedBox(height: 2),
+                                      Text(
+                                        "Get notified at prayer times",
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Switch(
+                                value: _notificationsEnabled,
+                                activeColor: themeProvider.selectedTheme,
+                                onChanged: (value) async {
+                                  setState(() {
+                                    _notificationsEnabled = value;
+                                  });
+                                  await SavedPrefernces
+                                      .setPrayerNotificationsEnabled(value);
+
+                                  if (value && _currentPosition != null) {
+                                    // Schedule notifications
+                                    await PrayerNotificationService
+                                        .scheduleAllPrayers(
+                                      position: _currentPosition!,
+                                      madhab: _madhab,
+                                    );
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Prayer notifications enabled'),
+                                          duration: Duration(seconds: 2),
+                                        ),
+                                      );
+                                    }
+                                  } else {
+                                    // Cancel notifications
+                                    await PrayerNotificationService
+                                        .cancelAllNotifications();
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Prayer notifications disabled'),
+                                          duration: Duration(seconds: 2),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
@@ -585,11 +725,37 @@ class _PrayerTimeState extends State<PrayerTime> {
     return GestureDetector(
       onTap: () async {
         if (!isSelected) {
+          // Clear cached data first
+          _lastData = null;
+
           setState(() {
             _madhab = value;
           });
+
           await SavedPrefernces.setMadhab(value);
+
+          // Force refresh with new madhab
           _refreshData();
+
+          // Show feedback
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content:
+                    Text('Switched to $label - Recalculating prayer times...'),
+                duration: const Duration(seconds: 2),
+                backgroundColor: tp.selectedTheme,
+              ),
+            );
+          }
+
+          // Reschedule notifications with new madhab if enabled
+          if (_notificationsEnabled && _currentPosition != null) {
+            await PrayerNotificationService.scheduleAllPrayers(
+              position: _currentPosition!,
+              madhab: value,
+            );
+          }
         }
       },
       child: Container(
