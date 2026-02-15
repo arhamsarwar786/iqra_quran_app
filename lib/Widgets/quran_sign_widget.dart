@@ -149,6 +149,7 @@ class QuranSignPainter extends CustomPainter {
     const double gap = 70.0; // Widened gap for better spacing
     const double sidePadding = 12.0;
 
+    // Horizontal Lines
     canvas.drawLine(
         const Offset(sidePadding, 0), Offset(size.width / 2 - gap, 0), paint);
     canvas.drawLine(Offset(size.width / 2 + gap, 0),
@@ -157,10 +158,22 @@ class QuranSignPainter extends CustomPainter {
         Offset(size.width / 2 - gap, size.height), paint);
     canvas.drawLine(Offset(size.width / 2 + gap, size.height),
         Offset(size.width - sidePadding, size.height), paint);
-    canvas.drawLine(
-        const Offset(sidePadding, 0), Offset(sidePadding, size.height), paint);
+
+    // Corner Brackets (instead of full vertical lines)
+    const double cornerHeight = 15.0;
+
+    // Top Left
+    canvas.drawLine(const Offset(sidePadding, 0),
+        const Offset(sidePadding, cornerHeight), paint);
+    // Top Right
     canvas.drawLine(Offset(size.width - sidePadding, 0),
-        Offset(size.width - sidePadding, size.height), paint);
+        Offset(size.width - sidePadding, cornerHeight), paint);
+    // Bottom Left
+    canvas.drawLine(Offset(sidePadding, size.height),
+        Offset(sidePadding, size.height - cornerHeight), paint);
+    // Bottom Right
+    canvas.drawLine(Offset(size.width - sidePadding, size.height),
+        Offset(size.width - sidePadding, size.height - cornerHeight), paint);
   }
 
   @override
