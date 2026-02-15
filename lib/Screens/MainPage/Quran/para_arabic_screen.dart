@@ -5,12 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:arabic_numbers/arabic_numbers.dart';
 import 'package:flutter/rendering.dart';
 import 'package:iqra/Provider/theme_provider.dart';
-import 'package:iqra/Utils/customThemes.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:provider/provider.dart';
 import '../../../Models/aya_list_model.dart';
 import '../../../Models/para_model.dart' as ParaModel;
 import '../../../Models/ruko_model.dart';
+import '../../../Widgets/surah_header_card.dart';
+import '../../../Widgets/quran_sign_widget.dart';
 import '../../../Utils/bottom_sheet_preview.dart';
 
 class ParaArabicScreen extends StatefulWidget {
@@ -48,9 +49,35 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
     paraArabicScreenWidget.clear();
     List<TextSpan> textSpanChildren = [];
+    String? currentSurahId;
 
     for (var aya in listAyat) {
-      if (aya.ayatNumber == "0") continue; // Skip Bismillah
+      // Check for Surah change
+      if (currentSurahId != aya.surahId) {
+        // Flush current text block before showing Surah card
+        if (textSpanChildren.isNotEmpty) {
+          paraArabicScreenWidget.add(RichText(
+            text: TextSpan(
+              children: List.from(textSpanChildren),
+              style: TextStyle(
+                  fontSize: bloc.arabicFontSize,
+                  fontFamily: bloc.arabicFontFamily,
+                  color: Colors.black),
+            ),
+          ));
+          textSpanChildren.clear();
+        }
+
+        currentSurahId = aya.surahId;
+        final metadata =
+            quranProvider.getSurahMetadata(int.tryParse(aya.surahId!) ?? 0);
+        if (metadata != null) {
+          paraArabicScreenWidget.add(SurahHeaderCard(metadata: metadata));
+        }
+      }
+
+      if (aya.ayatNumber == "0")
+        continue; // Skip Bismillah since it's in the card
 
       // Add the ayah text (already contains inline numbers and markers)
       textSpanChildren.add(
@@ -68,8 +95,11 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       bool isSajda = aya.hasSajda;
       bool isManzil = aya.manzil != null;
       bool isRuoEnd = aya.hasRuko;
+      bool isArba = aya.hasArba;
+      bool isNisf = aya.hasNisf;
+      bool isSalsa = aya.hasSalsa;
 
-      if (isSajda || isManzil || isRuoEnd) {
+      if (isSajda || isManzil || isRuoEnd || isArba || isNisf || isSalsa) {
         // Flush current text block
         if (textSpanChildren.isNotEmpty) {
           paraArabicScreenWidget.add(RichText(
@@ -86,40 +116,16 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
         // Add Sajda widget if present
         if (isSajda) {
-          paraArabicScreenWidget.add(Stack(
-            alignment: Alignment.center,
-            children: [
-              Text(
-                "السجدة",
-                style: MyTextStyle.heading1.copyWith(
-                    fontSize: 30,
-                    fontFamily: bloc.arabicFontFamily,
-                    color: bloc.selectedTheme),
-              ),
-            ],
-          ));
+          paraArabicScreenWidget.add(const QuranSignWidget(sign: "السجدة"));
         }
 
         // Add Manzil widget if present
         if (isManzil) {
-          paraArabicScreenWidget.add(const SizedBox(height: 10));
-          paraArabicScreenWidget.add(Stack(
-            alignment: Alignment.topLeft,
-            children: [
-              Text(
-                aya.manzil!,
-                style: MyTextStyle.heading1.copyWith(
-                    fontSize: 24,
-                    fontFamily: bloc.arabicFontFamily,
-                    color: bloc.selectedTheme),
-              ),
-            ],
-          ));
-          paraArabicScreenWidget.add(const SizedBox(height: 10));
+          paraArabicScreenWidget.add(QuranSignWidget(sign: aya.manzil!));
         }
 
-        // Add Ruko (Big Sign) widget if present
-        if (isRuoEnd) {
+        // Add Ruko/Division (Big Sign) widget if present
+        if (isRuoEnd || isArba || isNisf || isSalsa) {
           // Find ruko metadata for numbers
           RukoModel? ruko;
           try {
@@ -132,23 +138,18 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
             ruko = null;
           }
 
-          if (ruko != null) {
-            paraArabicScreenWidget.add(Stack(
-              alignment: Alignment.center,
-              children: [
-                Text(
-                  "ع",
-                  style: MyTextStyle.heading1.copyWith(
-                      fontSize: 70,
-                      fontFamily: bloc.arabicFontFamily,
-                      color: bloc.selectedTheme),
-                ),
-                Positioned(bottom: 30, child: Text(ruko.diff.toString())),
-                Positioned(top: 20, child: Text(ruko.rakuNumber.toString())),
-                Positioned(bottom: 0, child: Text(ruko.bottomNumber.toString()))
-              ],
-            ));
-          }
+          String divLabel = "";
+          if (isArba) divLabel = "الربع";
+          if (isNisf) divLabel = "النصف";
+          if (isSalsa) divLabel = "الثلاثة";
+
+          paraArabicScreenWidget.add(QuranSignWidget(
+            sign: "ع",
+            label: divLabel,
+            topNumber: ruko?.rakuNumber.toString(),
+            middleNumber: ruko?.diff.toString(),
+            bottomNumber: ruko?.bottomNumber.toString(),
+          ));
         }
       }
     }
@@ -331,7 +332,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                             widget.parahname ?? 'Para ${widget.parahCount}',
                             style: TextStyle(
                               color: Colors.black,
-                              fontFamily: bloc.urduFontFamily,
+                              fontFamily: bloc.arabicFontFamily,
                             ),
                           ),
                         ),
@@ -340,287 +341,22 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                   ),
                 ),
               ),
-              // SliverPersistentHeader(
-
-              //     pinned: true,
-              //   ),
             ];
           },
 
-          body:
-              // children.isEmpty
-              //     ? CircularProgressIndicator()
-              //     :
-              Container(
-                  padding: const EdgeInsets.all(2),
-                  // height: size.height / 1.75,
-
-                  child: Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: SingleChildScrollView(
-                      controller: _scrollViewController,
-                      child: Column(
-                        children: paraArabicScreenWidget,
-                      ),
-                      // child: RichText(
-                      //   text: TextSpan(
-                      // //       style: TextStyle(
-                      //           fontSize: bloc.arabicFontSize,
-                      //           fontFamily: bloc.arabicFontFamily,
-                      //           color: Colors.black
-                      //           // Add other styles as needed
-                      //           ),
-                      //       children:
-                      //           // [
-                      //           //   ...widget.ayat!.mapIndexed((i, e) {
-                      //           //     RukoModel? rukoModel = isRuku(i);
-                      //           //     SajdaModel? sajdaModel = isSajda(i);
-                      //           //     if (rukoData != null) {
-                      //           //   return TextSpan(
-                      //           //     text:
-                      //           //         "ع",
-                      //           //     style: rukoModel == null
-                      //           //         ? TextStyle(
-                      //           //             fontSize: bloc.arabicFontSize,
-                      //           //             fontFamily: bloc.arabicFontFamily,
-                      //           //             color: Colors.black
-                      //           //             // Add other styles as needed
-                      //           //             )
-                      //           //         : MyTextStyle.heading1.copyWith(
-                      //           //             fontSize: 70,
-                      //           //             fontFamily: bloc.arabicFontFamily),
-                      //           //     recognizer: TapGestureRecognizer()
-                      //           //       ..onTap = () {
-                      //           //         print(i);
-                      //           //         // debugger();
-                      //           //       },
-                      //           //   );
-                      //           // }
-                      //           //     return TextSpan(
-                      //           //       text:
-                      //           //           "${(widget.ayat![i].arabic).trim()}",
-                      //           //       style: rukoModel == null
-                      //           //           ? TextStyle(
-                      //           //               fontSize: bloc.arabicFontSize,
-                      //           //               fontFamily: bloc.arabicFontFamily,
-                      //           //               color: Colors.black
-                      //           //               // Add other styles as needed
-                      //           //               )
-                      //           //           : MyTextStyle.heading1.copyWith(
-                      //           //               fontSize: 70,
-                      //           //               fontFamily: bloc.arabicFontFamily),
-                      //           //       recognizer: TapGestureRecognizer()
-                      //           //         ..onTap = () {
-                      //           //           print(i);
-                      //           //           // debugger();
-                      //           //         },
-                      //           //     );
-                      //           //   })
-                      //           // ]
-
-                      //           children
-                      //       // [
-                      //       //   for (int i = isBismilla ? 1 : 0;
-                      //       //       i < widget.ayat!.length;
-                      //       //       i++)
-                      //       //     TextSpan(
-                      //       //       text: "${(widget.ayat![i].arabic).trim()} ",
-                      //       //       recognizer: TapGestureRecognizer()
-                      //       //         ..onTap = () {
-                      //       //           print(i);
-                      //       //           // debugger();
-                      //       //         },
-                      //       //     ),
-                      //       // ],
-                      //       ),
-                      // ),
-                    ),
-                  )
-
-                  // child: Directionality(
-                  //  textDirection: TextDirection.rtl,
-                  //  child: Wrap(children: [
-                  //   Text("asdkasldkadkajkal"),
-                  //   Text("asdkasldkadkajkal------"),
-                  //   Text("as dka sldkadkajkal"),
-                  //   Text("asdkasldkadkajkal"),
-                  //   // Text("asdkasldkadkajkal"),
-                  //  ],),
-                  // ),
-
-                  // ?   ListView.builder(
-                  //     itemCount: int.parse(widget.ayatCount.toString()),
-                  //     itemBuilder: (context, index) {
-                  //       return Wrap(children: [
-                  //         Column(children: [
-                  //           Text(
-                  //               quran["quran"]["sura"][int.parse(
-                  //                           widget.surahCount.toString()) -
-                  //                       1]["aya"][index]["text"] +
-                  //                   " (" +
-                  //                   arabicNumber.convert(index) +
-                  //                   ")",
-                  //               textAlign: TextAlign.right,
-                  //               style: TextStyle(
-                  //                 fontFamily: bloc.arabicFontFamily,
-                  //                   color: Colors.black,
-                  //                   fontSize: 30,
-                  //                   fontWeight: FontWeight.w600),
-                  //             ),
-                  //             Text(
-                  //               // "Ali",
-                  // quran["sura"][int.parse(
-                  //         widget.surahCount.toString()) -
-                  //     1]["aya"][index]["text"],
-                  //               textAlign: TextAlign.right,
-                  //               style: TextStyle(
-                  //                 fontFamily: bloc.urduFontFamily,
-                  //                   color: Colors.black,
-                  //                   fontSize: 15,
-                  //                   fontWeight: FontWeight.w400),
-                  //             ),
-
-                  //         ],)
-                  //       ],);
-
-                  //     })
-                  ),
+          body: Directionality(
+            textDirection: TextDirection.rtl,
+            child: SingleChildScrollView(
+              controller: _scrollViewController,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: paraArabicScreenWidget,
+              ),
+            ),
+          ),
         ),
       );
     }));
     // )})
   }
 }
-
-//              ListView.builder(
-//                  // controller: _scrollViewController,
-//                  physics:
-//                      const NeverScrollableScrollPhysics(),
-//                  shrinkWrap: true,
-//                  itemCount: widget.ayat!.length,
-//                  itemBuilder: (context, index) {
-// RukoModel? rukoModel =  isRuku(index);
-// SajdaModel? sajdaModel =  isSajda(index);
-//                    return Column(
-//                      children: [
-//                       // Divider(),
-//                       //  Divider(),
-//                       //  Divider(),
-//                        Text(
-//                          widget.ayat![index].arabic.toString(),
-//                          // " (" +
-//                          // arabicNumber.convert(index) +
-//                          // ")",
-//                          textAlign: TextAlign.right,
-//                          style: TextStyle(
-//                            fontSize: bloc.arabicFontSize,fontFamily: bloc.arabicFontFamily,
-//                           fontWeight: FontWeight.bold
-//                              ),
-//                        ),
-//                       //  Divider(),
-//                       //  Divider(),
-//                       //  Divider(),
-//                       //  Text("ترجمہ: کنزالایمان"),
-//                       //   Text(
-//                       //    widget.ayat![index].translation1.toString(),
-//                       //    // " (" +
-//                       //    // arabicNumber.convert(index) +
-//                       //    // ")",
-//                       //    textAlign: TextAlign.right,
-//                       //    style: TextStyle(
-//                       //      fontSize: bloc.urduFontSize,fontFamily: bloc.urduFontFamily,
-//                       //     fontWeight: FontWeight.w500
-//                       //        ),
-//                       //  ),
-//                       //  Divider(),
-//                       //  Divider(),
-//                       //  Divider(),
-//                       //   Text(
-//                       //    widget.ayat![index].translation2.toString(),
-//                       //    // " (" +
-//                       //    // arabicNumber.convert(index) +
-//                       //    // ")",
-//                       //    textAlign: TextAlign.right,
-//                       //    style: TextStyle(
-//                       //      fontSize: bloc.urduFontSize,fontFamily: bloc.urduFontFamily,
-//                       //     fontWeight: FontWeight.w500
-//                       //        ),
-//                       //  ),
-
-// Row(
-// mainAxisSize: MainAxisSize.max,
-// mainAxisAlignment: MainAxisAlignment.center,
-//   children: [
-//                        if(rukoModel != null )
-//                        Row(
-//                          // mainAxisAlignment: MainAxisAlignment.center,
-//                          crossAxisAlignment:
-//                              CrossAxisAlignment.center,
-//                          children: [
-//                           //  Expanded(
-//                           //      child: Image.asset(
-//                           //          "assets/images/borderLeft${bloc.iconNumber}.png")),
-//      Stack(
-//       alignment: Alignment.center,
-//        children: [
-//          Text(
-//            "ع",
-//            style: MyTextStyle.heading1
-//                .copyWith(
-//                    fontSize: 70,
-//                    fontFamily: bloc
-//                        .arabicFontFamily),
-//          ),
-//          Positioned(
-//           bottom: 30,
-//           child: Text(rukoModel.diff)),
-//           Positioned(
-//           top: 20,
-//           child: Text(rukoModel.rakuNumber))
-//        ],
-//      ),
-
-//     //  Expanded(
-//         //  child: Image.asset(
-//         //      "assets/images/borderRight${bloc.iconNumber}.png")),
-//    ],
-//  )
-//                      ,
-//                      if(sajdaModel != null )
-//                      Row(
-//                       mainAxisAlignment: MainAxisAlignment.center,
-//                        children: [
-//                                                  if(sajdaModel.serial != null)
-//                           Text(" (${sajdaModel.serial}) ", style: MyTextStyle.heading1
-//                                          .copyWith(
-//                                              fontSize: 20,
-//                                              color: MyColors.greenColor,
-//                                              fontFamily: bloc
-//                                                  .arabicFontFamily),),
-//                          Text(" ${sajdaModel.place} ", style: MyTextStyle.heading1
-//                                          .copyWith(
-//                                              fontSize: 20,
-//                                              color: MyColors.greenColor,
-//                                              fontFamily: bloc
-//                                                  .arabicFontFamily),),
-
-//                        ],
-//                      )
-
-// ],)
-//                      ],
-//                    );
-//                  },
-//                  ),
-
-//                Wrap(
-//                  children: [
-
-// // bloc.arabicFontSize
-//  Text(
-//    arabicText,
-//    textAlign: TextAlign.right,
-//    style: MyTextStyle.heading3.copyWith(fontSize: bloc.arabicFontSize,fontFamily: bloc.arabicFontFamily),textDirection: TextDirection.rtl,
-//  ),
-//    ],
-//  )

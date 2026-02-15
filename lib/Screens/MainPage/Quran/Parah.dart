@@ -99,7 +99,7 @@ class _ParahState extends State<Parah> {
                                 child: Text(
                                   paraName,
                                   style: TextStyle(
-                                      fontFamily: bloc.urduFontFamily,
+                                      fontFamily: bloc.arabicFontFamily,
                                       color: Colors.black,
                                       fontSize: 30,
                                       fontWeight: FontWeight.w500),

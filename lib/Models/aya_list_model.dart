@@ -99,4 +99,7 @@ class Aya {
   int get ayatNumberInt => int.tryParse(ayatNumber ?? "0") ?? 0;
   bool get hasRuko => arabicText.contains('\u06E0');
   bool get hasSajda => arabicText.contains('\u06E9');
+  bool get hasArba => arabicText.contains('\u065B');
+  bool get hasNisf => arabicText.contains('\u065C');
+  bool get hasSalsa => arabicText.contains('\u065D');
 }

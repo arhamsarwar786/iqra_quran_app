@@ -5,6 +5,7 @@ import '../Models/aya_list_model.dart';
 import '../Models/para_metadata_model.dart';
 import '../Models/ruko_model.dart';
 import '../Models/sajda_model.dart';
+import '../Models/surah_metadata_model.dart';
 
 class QuranDataProvider extends ChangeNotifier {
   // Singleton pattern
@@ -16,6 +17,7 @@ class QuranDataProvider extends ChangeNotifier {
   List<ParaMetadata> _paraMetadata = [];
   List<RukoModel> _rukoData = [];
   List<SajdaModel> _sajdaData = [];
+  List<SurahMetadata> _surahMetadata = [];
   final Map<String, int> _paraAyatCounts = {};
   bool _isLoading = false;
   bool _isLoaded = false;
@@ -24,6 +26,7 @@ class QuranDataProvider extends ChangeNotifier {
   List<ParaMetadata> get paraMetadata => _paraMetadata;
   List<RukoModel> get rukoData => _rukoData;
   List<SajdaModel> get sajdaData => _sajdaData;
+  List<SurahMetadata> get surahMetadata => _surahMetadata;
   Map<String, int> get paraAyatCounts => _paraAyatCounts;
   bool get isLoading => _isLoading;
   bool get isLoaded => _isLoaded;
@@ -73,6 +76,14 @@ class QuranDataProvider extends ChangeNotifier {
       debugPrint(
           'Quran Data Bank: Loaded ${_sajdaData.length} sajda metadata.');
 
+      // Load Surah metadata
+      debugPrint('Quran Data Bank: Loading quranmetadata.json...');
+      final String surahMetaJsonString = await rootBundle.loadString(
+          'assets/quran_kareem/urdu_translation/quranmetadata.json');
+      _surahMetadata = surahMetadataFromJson(surahMetaJsonString);
+      debugPrint(
+          'Quran Data Bank: Loaded ${_surahMetadata.length} surah metadata.');
+
       // Calculate para ayat counts
       _paraAyatCounts.clear();
       for (var item in _quranData) {
@@ -101,6 +112,16 @@ class QuranDataProvider extends ChangeNotifier {
     return _quranData
         .where((aya) => aya.surahId == surahId.toString())
         .toList();
+  }
+
+  /// Get Surah metadata by ID
+  SurahMetadata? getSurahMetadata(int surahId) {
+    try {
+      return _surahMetadata
+          .firstWhere((element) => element.index == surahId.toString());
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Get ayats for a specific Para (Juz)
