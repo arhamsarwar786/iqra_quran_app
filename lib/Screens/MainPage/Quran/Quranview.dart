@@ -302,11 +302,6 @@ class _QuranViewState extends State<QuranView> {
                 body: Container(
                   decoration: const BoxDecoration(
                     color: Colors.white,
-                    image: DecorationImage(
-                      image: AssetImage("assets/images/border.png"),
-                      fit: BoxFit.fill,
-                      alignment: Alignment.topCenter,
-                    ),
                   ),
                   padding: const EdgeInsets.only(top: 20, bottom: 20),
                   child: Directionality(

@@ -19,118 +19,122 @@ class KhalimaScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var khalimaList = this.khalimaList ?? khalimasModelFromJson(jsonEncode(khalimasData));
+    var khalimaList =
+        this.khalimaList ?? khalimasModelFromJson(jsonEncode(khalimasData));
 
     Size size = MediaQuery.of(context).size;
-   
-    return Builder(
-      builder: (context) {
-        var bloc = context.read<ThemeProvider>();
-        return Scaffold(
-          backgroundColor: bloc.selectedSecondary,
-                      floatingActionButton: floatinButton(context),
- floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerDocked,
-                 bottomNavigationBar: BottomBarApp(bloc:bloc,isShow: false,),
-            extendBodyBehindAppBar: true,
-                      // bottomNavigationBar: BottomBarApp(bloc),
-          appBar: AppBar(
-            backgroundColor: bloc.selectedTheme,
-            title: const Text(
-              "Kalma",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
-            ),
-            centerTitle: true,
-            elevation: 0,
-            leading: IconButton(
-                onPressed: () {
-               Navigator.pop(context);
-                },
-                icon: const Icon(Icons.arrow_back)),
-          ),
-          body: Container(
-            alignment: Alignment.center,
-            width: size.width,
-            height: size.height,
-            padding: const EdgeInsets.symmetric(horizontal: 10),        
-            child: Center(
-              child: GridView.builder(
-                  shrinkWrap: true,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
-                    childAspectRatio: 3.3 / 2.5,
-                  ),
-                  itemCount: khalimaList!.length,
-                  itemBuilder: (context, index) {
-                    KhalimasModel khalima = khalimaList![index];
-                    return GestureDetector(
-                      onTap: () {
-                        push(context, KhalimaView(khalima));
-                      },
-                      child: Stack(
-                        children: [
-                          Container(
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor,
-                              boxShadow: kElevationToShadow[4],
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  khalima.title!,
-                                  style: TextStyle(
-                                    color:MyColors. whiteColor,
-                                    // fontSize: 20,
 
-                                    fontWeight: FontWeight.w900,
-                                  ),
+    return Builder(builder: (context) {
+      var bloc = context.read<ThemeProvider>();
+      return Scaffold(
+        backgroundColor: bloc.selectedSecondary,
+        // floatingActionButton: floatinButton(context),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+        // extendBodyBehindAppBar: true,
+        // bottomNavigationBar: BottomBarApp(bloc),
+        appBar: AppBar(
+          backgroundColor: bloc.selectedTheme,
+          title: const Text(
+            "Kalma",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
+          ),
+          centerTitle: true,
+          elevation: 0,
+          leading: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: const Icon(Icons.arrow_back)),
+        ),
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("assets/images/BgImage.png"),
+              fit: BoxFit.cover,
+            ),
+          ),
+          alignment: Alignment.center,
+          width: size.width,
+          height: size.height,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Center(
+            child: GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  childAspectRatio: 3.3 / 2.5,
+                ),
+                itemCount: khalimaList!.length,
+                itemBuilder: (context, index) {
+                  KhalimasModel khalima = khalimaList![index];
+                  return GestureDetector(
+                    onTap: () {
+                      push(context, KhalimaView(khalima));
+                    },
+                    child: Stack(
+                      children: [
+                        Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            boxShadow: kElevationToShadow[4],
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                khalima.title!,
+                                style: TextStyle(
+                                  color: MyColors.whiteColor,
+                                  // fontSize: 20,
+
+                                  fontWeight: FontWeight.w900,
                                 ),
-                                Text(
-                                  khalima.meaning!,
-                                  style: TextStyle(
-                                    fontFamily:"alQalam",
-                                    color:MyColors. whiteColor,
-                                    // fontSize: 20,
+                              ),
+                              Text(
+                                khalima.meaning!,
+                                style: TextStyle(
+                                  fontFamily: "alQalam",
+                                  color: MyColors.whiteColor,
+                                  // fontSize: 20,
 
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                )
-                              ],
-                            ),
+                                  fontWeight: FontWeight.normal,
+                                ),
+                              )
+                            ],
                           ),
-                          const CustomBorders(
-                            image: "ktopleft.png",
-                            top: 10,
-                            left: 10,
-                          ),
-                          const CustomBorders(
-                            image: "ktopright.png",
-                            top: 10,
-                            right: 10,
-                          ),
-                          const CustomBorders(
-                            image: "kbottomleft.png",
-                            bottom: 10,
-                            left: 10,
-                          ),
-                          const CustomBorders(
-                            image: "kbottomright.png",
-                            bottom: 10,
-                            right: 10,
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-            ),
+                        ),
+                        const CustomBorders(
+                          image: "ktopleft.png",
+                          top: 10,
+                          left: 10,
+                        ),
+                        const CustomBorders(
+                          image: "ktopright.png",
+                          top: 10,
+                          right: 10,
+                        ),
+                        const CustomBorders(
+                          image: "kbottomleft.png",
+                          bottom: 10,
+                          left: 10,
+                        ),
+                        const CustomBorders(
+                          image: "kbottomright.png",
+                          bottom: 10,
+                          right: 10,
+                        ),
+                      ],
+                    ),
+                  );
+                }),
           ),
-        );
-      }
-    );
+        ),
+      );
+    });
   }
 }

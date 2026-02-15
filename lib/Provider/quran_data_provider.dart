@@ -79,9 +79,9 @@ class QuranDataProvider extends ChangeNotifier {
           'Quran Data Bank: Loaded ${_sajdaData.length} sajda metadata.');
 
       // Load Surah metadata
-      debugPrint('Quran Data Bank: Loading quranmetadata.json...');
-      final String surahMetaJsonString = await rootBundle.loadString(
-          'assets/quran_kareem/urdu_translation/quranmetadata.json');
+      debugPrint('Quran Data Bank: Loading surah.json...');
+      final String surahMetaJsonString =
+          await rootBundle.loadString('assets/extraction/surah.json');
       _surahMetadata = surahMetadataFromJson(surahMetaJsonString);
       debugPrint(
           'Quran Data Bank: Loaded ${_surahMetadata.length} surah metadata.');
@@ -200,6 +200,24 @@ class QuranDataProvider extends ChangeNotifier {
       }
     }
     return list;
+  }
+
+  /// Get a random small ayat (length < 150 characters)
+  Aya? getRandomSmallAyat() {
+    if (_quranData.isEmpty) return null;
+
+    // Filter for small ayats, excluding Bismillah (often ayat 0) if present
+    var smallAyats = _quranData.where((aya) {
+      return aya.arabicText.length < 150 && aya.ayatNumber != "0";
+    }).toList();
+
+    if (smallAyats.isEmpty) {
+      // Fallback to any random ayat if no small ones found (unlikely)
+      smallAyats = _quranData;
+    }
+
+    // Return a random ayat
+    return smallAyats[DateTime.now().microsecond % smallAyats.length];
   }
 }
 

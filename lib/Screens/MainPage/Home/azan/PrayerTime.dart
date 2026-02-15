@@ -213,509 +213,516 @@ class _PrayerTimeState extends State<PrayerTime> {
   Widget build(BuildContext context) {
     var themeProvider = Provider.of<ThemeProvider>(context);
 
-    return Scaffold(
-      backgroundColor: themeProvider.selectedSecondary,
-      appBar: AppBar(
-        title: Column(
-          children: [
-            const Text("PRAYER TIME",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                    fontSize: 16)),
-            Text(DateFormat("h:mm:ss a").format(DateTime.now()),
-                style: TextStyle(
-                    fontSize: 12,
-                    color: themeProvider.selectedTheme,
-                    fontWeight: FontWeight.bold)),
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: themeProvider.selectedSecondary,
+        appBar: AppBar(
+          title: Column(
+            children: [
+              const Text("PRAYER TIME",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                      fontSize: 16)),
+              Text(DateFormat("h:mm:ss a").format(DateTime.now()),
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: themeProvider.selectedTheme,
+                      fontWeight: FontWeight.bold)),
+            ],
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          foregroundColor: Colors.black87,
+          actions: [
+            IconButton(
+              onPressed: () {
+                if (_lastData != null) {
+                  AppShare.namazTimes(
+                    context: context,
+                    bloc: themeProvider,
+                    location: _lastData!["location"],
+                    date:
+                        DateFormat("EEEE, d MMMM yyyy").format(DateTime.now()),
+                    times: _lastData!["timesList"],
+                  );
+                }
+              },
+              icon:
+                  Icon(Icons.share_rounded, color: themeProvider.selectedTheme),
+            ),
+            IconButton(
+              onPressed: () => push(context, const DirectionTOQiblah()),
+              icon: Icon(Icons.compass_calibration_rounded,
+                  color: themeProvider.selectedTheme),
+            )
           ],
         ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: Colors.black87,
-        actions: [
-          IconButton(
-            onPressed: () {
-              if (_lastData != null) {
-                AppShare.namazTimes(
-                  context: context,
-                  bloc: themeProvider,
-                  location: _lastData!["location"],
-                  date: DateFormat("EEEE, d MMMM yyyy").format(DateTime.now()),
-                  times: _lastData!["timesList"],
-                );
-              }
-            },
-            icon: Icon(Icons.share_rounded, color: themeProvider.selectedTheme),
-          ),
-          IconButton(
-            onPressed: () => push(context, const DirectionTOQiblah()),
-            icon: Icon(Icons.compass_calibration_rounded,
-                color: themeProvider.selectedTheme),
-          )
-        ],
-      ),
-      body: FutureBuilder<Map<String, dynamic>>(
-        key: ValueKey(_madhab), // Force rebuild when madhab changes
-        future: _prayerCacheFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting &&
-              _lastData == null) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(
-                child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text("Error Loading Times\n${snapshot.error}",
-                      textAlign: TextAlign.center),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                      onPressed: _refreshData, child: const Text("Retry"))
-                ],
-              ),
-            ));
-          }
-
-          final data = snapshot.data ?? _lastData!;
-          _lastData = data;
-
-          final now = DateTime.now();
-          final List<Map<String, dynamic>> fardList = data["fardList"];
-          final DateTime? sunrise = data["sunrise"];
-          final DateTime? nextFajr = data["nextFajr"];
-
-          // logic for current and next FARZ explicitly
-          String currentFarz = "";
-          DateTime? currentFarzEnd;
-          String nextFarz = "";
-          DateTime? nextFarzStart;
-
-          // Standard Farz Sequence logic
-          for (var i = 0; i < fardList.length; i++) {
-            final DateTime time = fardList[i]["dateTime"]; // Local
-            if (time.isAfter(now)) {
-              nextFarz = fardList[i]["name"];
-              nextFarzStart = time;
-              if (i > 0) {
-                currentFarz = fardList[i - 1]["name"];
-                // Special Rule: Fajr ends at Sunrise
-                currentFarzEnd = (currentFarz == "Fajr") ? sunrise : time;
-              } else {
-                // Before Fajr (Night)
-                currentFarz = "Isha (Passing)";
-                currentFarzEnd = fardList[0]["dateTime"];
-              }
-              break;
+        body: FutureBuilder<Map<String, dynamic>>(
+          key: ValueKey(_madhab), // Force rebuild when madhab changes
+          future: _prayerCacheFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting &&
+                _lastData == null) {
+              return const Center(child: CircularProgressIndicator());
             }
-          }
-
-          // Case: After Isha
-          if (nextFarz.isEmpty) {
-            currentFarz = "Isha";
-            nextFarz = "Fajr";
-            nextFarzStart = nextFajr;
-          }
-
-          // Header Logic
-          String label = "";
-          String timeStr = "";
-
-          // Focus logic: If we are in an active window of a farz prayer, show its end
-          if (currentFarz.isNotEmpty &&
-              currentFarzEnd != null &&
-              now.isBefore(currentFarzEnd)) {
-            label = "$currentFarz Time Ends In";
-            timeStr = _formatDuration(currentFarzEnd.difference(now));
-          } else {
-            label = "Upcoming ($nextFarz) Starts In";
-            if (nextFarzStart != null) {
-              timeStr = _formatDuration(nextFarzStart.difference(now));
-            }
-          }
-
-          final List<Map<String, dynamic>> displayList =
-              _showFardOnly ? fardList : data["timesList"];
-
-          return RefreshIndicator(
-            onRefresh: () async => _refreshData(),
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
+            if (snapshot.hasError) {
+              return Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            themeProvider.selectedTheme,
-                            themeProvider.selectedTheme.withOpacity(0.8)
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.error_outline,
+                        size: 48, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text("Error Loading Times\n${snapshot.error}",
+                        textAlign: TextAlign.center),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                        onPressed: _refreshData, child: const Text("Retry"))
+                  ],
+                ),
+              ));
+            }
+
+            final data = snapshot.data ?? _lastData!;
+            _lastData = data;
+
+            final now = DateTime.now();
+            final List<Map<String, dynamic>> fardList = data["fardList"];
+            final DateTime? sunrise = data["sunrise"];
+            final DateTime? nextFajr = data["nextFajr"];
+
+            // logic for current and next FARZ explicitly
+            String currentFarz = "";
+            DateTime? currentFarzEnd;
+            String nextFarz = "";
+            DateTime? nextFarzStart;
+
+            // Standard Farz Sequence logic
+            for (var i = 0; i < fardList.length; i++) {
+              final DateTime time = fardList[i]["dateTime"]; // Local
+              if (time.isAfter(now)) {
+                nextFarz = fardList[i]["name"];
+                nextFarzStart = time;
+                if (i > 0) {
+                  currentFarz = fardList[i - 1]["name"];
+                  // Special Rule: Fajr ends at Sunrise
+                  currentFarzEnd = (currentFarz == "Fajr") ? sunrise : time;
+                } else {
+                  // Before Fajr (Night)
+                  currentFarz = "Isha (Passing)";
+                  currentFarzEnd = fardList[0]["dateTime"];
+                }
+                break;
+              }
+            }
+
+            // Case: After Isha
+            if (nextFarz.isEmpty) {
+              currentFarz = "Isha";
+              nextFarz = "Fajr";
+              nextFarzStart = nextFajr;
+            }
+
+            // Header Logic
+            String label = "";
+            String timeStr = "";
+
+            // Focus logic: If we are in an active window of a farz prayer, show its end
+            if (currentFarz.isNotEmpty &&
+                currentFarzEnd != null &&
+                now.isBefore(currentFarzEnd)) {
+              label = "$currentFarz Time Ends In";
+              timeStr = _formatDuration(currentFarzEnd.difference(now));
+            } else {
+              label = "Upcoming ($nextFarz) Starts In";
+              if (nextFarzStart != null) {
+                timeStr = _formatDuration(nextFarzStart.difference(now));
+              }
+            }
+
+            final List<Map<String, dynamic>> displayList =
+                _showFardOnly ? fardList : data["timesList"];
+
+            return RefreshIndicator(
+              onRefresh: () async => _refreshData(),
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              themeProvider.selectedTheme,
+                              themeProvider.selectedTheme.withOpacity(0.8)
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                                color: themeProvider.selectedTheme
+                                    .withOpacity(0.3),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10))
                           ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
                         ),
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                              color:
-                                  themeProvider.selectedTheme.withOpacity(0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10))
-                        ],
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.location_on_rounded,
+                                    color: Colors.white70, size: 18),
+                                const SizedBox(width: 8),
+                                Text(data["location"],
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16)),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                            Text(label,
+                                style: TextStyle(
+                                    color: Colors.white.withOpacity(0.8),
+                                    fontSize: 13,
+                                    letterSpacing: 0.8,
+                                    fontWeight: FontWeight.w500)),
+                            const SizedBox(height: 12),
+                            Text(timeStr,
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 48,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: -1)),
+                            const SizedBox(height: 16),
+                            GestureDetector(
+                              onTap: () =>
+                                  push(context, const DirectionTOQiblah()),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(40)),
+                                child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.explore_outlined,
+                                          color: Colors.white, size: 16),
+                                      SizedBox(width: 8),
+                                      Text("Check Qibla Direction",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500)),
+                                    ]),
+                              ),
+                            )
+                          ],
+                        ),
                       ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          const Text("Fiqa / Madhab",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: Colors.grey)),
+                          const SizedBox(height: 8),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.location_on_rounded,
-                                  color: Colors.white70, size: 18),
-                              const SizedBox(width: 8),
-                              Text(data["location"],
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16)),
+                              _madhabChip("Hanafi", "hanafi", themeProvider),
+                              const SizedBox(width: 12),
+                              _madhabChip(
+                                  "Shafi / Standard", "shafi", themeProvider),
                             ],
                           ),
-                          const SizedBox(height: 24),
-                          Text(label,
-                              style: TextStyle(
-                                  color: Colors.white.withOpacity(0.8),
-                                  fontSize: 13,
-                                  letterSpacing: 0.8,
-                                  fontWeight: FontWeight.w500)),
-                          const SizedBox(height: 12),
-                          Text(timeStr,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 48,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: -1)),
                           const SizedBox(height: 16),
-                          GestureDetector(
-                            onTap: () =>
-                                push(context, const DirectionTOQiblah()),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(40)),
-                              child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
+
+                          // Notification Toggle
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
                                   children: [
-                                    Icon(Icons.explore_outlined,
-                                        color: Colors.white, size: 16),
-                                    SizedBox(width: 8),
-                                    Text("Check Qibla Direction",
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500)),
-                                  ]),
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: themeProvider.selectedTheme
+                                            .withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Icon(
+                                        Icons.notifications_active_rounded,
+                                        color: themeProvider.selectedTheme,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    const Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Prayer Notifications",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                            color: Color(0xFF2D3436),
+                                          ),
+                                        ),
+                                        SizedBox(height: 2),
+                                        Text(
+                                          "Get notified at prayer times",
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Switch(
+                                  value: _notificationsEnabled,
+                                  activeColor: themeProvider.selectedTheme,
+                                  onChanged: (value) async {
+                                    setState(() {
+                                      _notificationsEnabled = value;
+                                    });
+                                    await SavedPrefernces
+                                        .setPrayerNotificationsEnabled(value);
+
+                                    if (value && _currentPosition != null) {
+                                      // Schedule notifications
+                                      await PrayerNotificationService
+                                          .scheduleAllPrayers(
+                                        position: _currentPosition!,
+                                        madhab: _madhab,
+                                      );
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Prayer notifications enabled'),
+                                            duration: Duration(seconds: 2),
+                                          ),
+                                        );
+                                      }
+                                    } else {
+                                      // Cancel notifications
+                                      await PrayerNotificationService
+                                          .cancelAllNotifications();
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Prayer notifications disabled'),
+                                            duration: Duration(seconds: 2),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Daily Schedule",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                  color: Color(0xFF2D3436))),
+                          Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(30),
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 4)
+                                ]),
+                            child: Row(
+                              children: [
+                                _toggleItem(
+                                    "Farz",
+                                    _showFardOnly,
+                                    () => setState(() => _showFardOnly = true),
+                                    themeProvider),
+                                _toggleItem(
+                                    "All",
+                                    !_showFardOnly,
+                                    () => setState(() => _showFardOnly = false),
+                                    themeProvider),
+                              ],
                             ),
                           )
                         ],
                       ),
                     ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text("Fiqa / Madhab",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Colors.grey)),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            _madhabChip("Hanafi", "hanafi", themeProvider),
-                            const SizedBox(width: 12),
-                            _madhabChip(
-                                "Shafi / Standard", "shafi", themeProvider),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final prayer = displayList[index];
+                          final String name = prayer["name"];
+                          final DateTime dateTime = prayer["dateTime"];
+                          final bool isFard = prayer["isFard"];
 
-                        // Notification Toggle
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 10,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: themeProvider.selectedTheme
-                                          .withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Icon(
-                                      Icons.notifications_active_rounded,
-                                      color: themeProvider.selectedTheme,
-                                      size: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  const Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "Prayer Notifications",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15,
-                                          color: Color(0xFF2D3436),
-                                        ),
-                                      ),
-                                      SizedBox(height: 2),
-                                      Text(
-                                        "Get notified at prayer times",
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              Switch(
-                                value: _notificationsEnabled,
-                                activeColor: themeProvider.selectedTheme,
-                                onChanged: (value) async {
-                                  setState(() {
-                                    _notificationsEnabled = value;
-                                  });
-                                  await SavedPrefernces
-                                      .setPrayerNotificationsEnabled(value);
+                          // Active check
+                          bool activeNow = (name == currentFarz);
+                          // If it's Fajr window (past start, before sunrise)
+                          if (name == "Fajr" &&
+                              now.isAfter(dateTime) &&
+                              sunrise != null &&
+                              now.isBefore(sunrise)) activeNow = true;
+                          // For Zuhr, Asr etc, it's active until next Farz
 
-                                  if (value && _currentPosition != null) {
-                                    // Schedule notifications
-                                    await PrayerNotificationService
-                                        .scheduleAllPrayers(
-                                      position: _currentPosition!,
-                                      madhab: _madhab,
-                                    );
-                                    if (mounted) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                              'Prayer notifications enabled'),
-                                          duration: Duration(seconds: 2),
-                                        ),
-                                      );
-                                    }
-                                  } else {
-                                    // Cancel notifications
-                                    await PrayerNotificationService
-                                        .cancelAllNotifications();
-                                    if (mounted) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                              'Prayer notifications disabled'),
-                                          duration: Duration(seconds: 2),
-                                        ),
-                                      );
-                                    }
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text("Daily Schedule",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                color: Color(0xFF2D3436))),
-                        Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
+                          final bool isPassed =
+                              dateTime.isBefore(now) && !activeNow;
+
+                          return Container(
+                            margin: const EdgeInsets.symmetric(vertical: 6),
+                            decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(30),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
-                                    blurRadius: 4)
-                              ]),
-                          child: Row(
-                            children: [
-                              _toggleItem(
-                                  "Farz",
-                                  _showFardOnly,
-                                  () => setState(() => _showFardOnly = true),
-                                  themeProvider),
-                              _toggleItem(
-                                  "All",
-                                  !_showFardOnly,
-                                  () => setState(() => _showFardOnly = false),
-                                  themeProvider),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final prayer = displayList[index];
-                        final String name = prayer["name"];
-                        final DateTime dateTime = prayer["dateTime"];
-                        final bool isFard = prayer["isFard"];
-
-                        // Active check
-                        bool activeNow = (name == currentFarz);
-                        // If it's Fajr window (past start, before sunrise)
-                        if (name == "Fajr" &&
-                            now.isAfter(dateTime) &&
-                            sunrise != null &&
-                            now.isBefore(sunrise)) activeNow = true;
-                        // For Zuhr, Asr etc, it's active until next Farz
-
-                        final bool isPassed =
-                            dateTime.isBefore(now) && !activeNow;
-
-                        return Container(
-                          margin: const EdgeInsets.symmetric(vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(22),
-                            border: Border.all(
-                                color: activeNow
-                                    ? themeProvider.selectedTheme
-                                    : Colors.transparent,
-                                width: 2),
-                            boxShadow: [
-                              activeNow
-                                  ? BoxShadow(
-                                      color: themeProvider.selectedTheme
-                                          .withOpacity(0.15),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4))
-                                  : BoxShadow(
-                                      color: Colors.black.withOpacity(0.02),
-                                      blurRadius: 5,
-                                      offset: const Offset(0, 2))
-                            ],
-                          ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 8),
-                            leading: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(22),
+                              border: Border.all(
                                   color: activeNow
                                       ? themeProvider.selectedTheme
-                                      : const Color(0xFFF1F2F6),
-                                  shape: BoxShape.circle),
-                              child: Icon(_getPrayerIcon(name),
-                                  color: activeNow
-                                      ? Colors.white
-                                      : const Color(0xFF747D8C),
-                                  size: 22),
-                            ),
-                            title: Row(
-                              children: [
-                                Text(name,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 17,
-                                        color: isPassed
-                                            ? const Color(0xFFA4B0BE)
-                                            : const Color(0xFF2D3436))),
-                                if (!isFard) ...[
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
+                                      : Colors.transparent,
+                                  width: 2),
+                              boxShadow: [
+                                activeNow
+                                    ? BoxShadow(
                                         color: themeProvider.selectedTheme
-                                            .withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(4)),
-                                    child: Text("Optional",
-                                        style: TextStyle(
-                                            color: themeProvider.selectedTheme,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold)),
-                                  )
-                                ]
+                                            .withOpacity(0.15),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 4))
+                                    : BoxShadow(
+                                        color: Colors.black.withOpacity(0.02),
+                                        blurRadius: 5,
+                                        offset: const Offset(0, 2))
                               ],
                             ),
-                            subtitle: activeNow
-                                ? Text("• Active Now",
-                                    style: TextStyle(
-                                        color: themeProvider.selectedTheme,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold))
-                                : null,
-                            trailing: Text(prayer["time"],
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 8),
+                              leading: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
                                     color: activeNow
                                         ? themeProvider.selectedTheme
-                                        : (isPassed
-                                            ? const Color(0xFFA4B0BE)
-                                            : const Color(0xFF57606F)))),
-                          ),
-                        );
-                      },
-                      childCount: displayList.length,
+                                        : const Color(0xFFF1F2F6),
+                                    shape: BoxShape.circle),
+                                child: Icon(_getPrayerIcon(name),
+                                    color: activeNow
+                                        ? Colors.white
+                                        : const Color(0xFF747D8C),
+                                    size: 22),
+                              ),
+                              title: Row(
+                                children: [
+                                  Text(name,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 17,
+                                          color: isPassed
+                                              ? const Color(0xFFA4B0BE)
+                                              : const Color(0xFF2D3436))),
+                                  if (!isFard) ...[
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                          color: themeProvider.selectedTheme
+                                              .withOpacity(0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(4)),
+                                      child: Text("Optional",
+                                          style: TextStyle(
+                                              color:
+                                                  themeProvider.selectedTheme,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold)),
+                                    )
+                                  ]
+                                ],
+                              ),
+                              subtitle: activeNow
+                                  ? Text("• Active Now",
+                                      style: TextStyle(
+                                          color: themeProvider.selectedTheme,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold))
+                                  : null,
+                              trailing: Text(prayer["time"],
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                      color: activeNow
+                                          ? themeProvider.selectedTheme
+                                          : (isPassed
+                                              ? const Color(0xFFA4B0BE)
+                                              : const Color(0xFF57606F)))),
+                            ),
+                          );
+                        },
+                        childCount: displayList.length,
+                      ),
                     ),
                   ),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 30)),
-              ],
-            ),
-          );
-        },
+                  const SliverToBoxAdapter(child: SizedBox(height: 30)),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

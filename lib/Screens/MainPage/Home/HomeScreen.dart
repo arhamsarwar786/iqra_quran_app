@@ -1,3 +1,6 @@
+import 'package:iqra/Models/aya_list_model.dart';
+import 'package:iqra/Models/surah_metadata_model.dart';
+import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Screens/MainPage/Dua/dua_screen.dart';
 import 'package:iqra/Screens/MainPage/Home/azan/PrayerTime.dart';
@@ -47,6 +50,7 @@ class _HomeState extends State<Home> {
   }
 
   final HijriCalendar _today = HijriCalendar.fromDate(DateTime.now());
+  Aya? _randomAyat;
 
   List<String> imageName = [
     "Rectangle 3.png",
@@ -66,6 +70,17 @@ class _HomeState extends State<Home> {
     return Builder(
       builder: (context) {
         var bloc = context.watch<ThemeProvider>();
+        var quranProvider = context.watch<QuranDataProvider>();
+
+        // Load random ayat once when data is available
+        if (_randomAyat == null && quranProvider.isLoaded) {
+          // Use a post-frame callback or just set it if we are confident it won't cause loops.
+          // Since this is inside build, setting a local state variable without setState is tricky if we want it to persist.
+          // Better to just store it in a member variable.
+          // However, modifying state during build is generally bad.
+          // But since this is a one-time init, it acts like a lazy loader.
+          _randomAyat = quranProvider.getRandomSmallAyat();
+        }
         SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.dark,
@@ -186,7 +201,7 @@ class _HomeState extends State<Home> {
                                 fit: BoxFit.fill)),
                       ),
                       Text(
-                        " Namaz",
+                        "Last Read",
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
@@ -416,6 +431,21 @@ class _HomeState extends State<Home> {
 
   // quranDailyVerse //
   Widget quranDailyVerse(BuildContext context, Size size, ThemeProvider bloc) {
+    if (_randomAyat == null) {
+      return const SizedBox(); // Or a skeleton loader
+    }
+
+    final int surahId = int.tryParse(_randomAyat!.surahId ?? "1") ?? 1;
+    final SurahMetadata? surah =
+        Provider.of<QuranDataProvider>(context, listen: false)
+            .getSurahMetadata(surahId);
+
+    final String surahNameArabic = surah?.name ?? "";
+    final String surahNameEnglish = surah?.tname ?? "";
+    final String verseRef = "$surahId:${_randomAyat!.ayatNumber}";
+    final String arabicText = _randomAyat!.arabicText;
+    final String translationText = _randomAyat!.tarjumaIrfan ?? "";
+
     return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -454,11 +484,9 @@ class _HomeState extends State<Home> {
                 onPressed: () => AppShare.image(
                   context: context,
                   bloc: bloc,
-                  title: "Surah Al-Baqarah (2:2)",
-                  arabicText:
-                      " ذٰلِكَ الۡڪِتٰبُ لَا رَيۡبَ ۛۚ  ۖ فِيۡهِ ۛۚ هُدًى لِّلۡمُتَّقِيۡنَۙ‏",
-                  translationText:
-                      "یہ اللہ کی کتاب ہے، اس میں کوئی شک نہیں ہدایت ہے اُن پرہیز گار لوگوں کے لیے",
+                  title: "Surah $surahNameEnglish ($verseRef)",
+                  arabicText: arabicText,
+                  translationText: translationText,
                   translatorName: "ترجمہ: کنزالایمان",
                 ),
                 icon: Icon(Icons.share, color: Theme.of(context).primaryColor),
@@ -467,7 +495,7 @@ class _HomeState extends State<Home> {
               ),
               const SizedBox(width: 10),
               Text(
-                "البقرة",
+                surahNameArabic,
                 style: TextStyle(
                     color: Theme.of(context).primaryColor,
                     fontSize: 20,
@@ -478,7 +506,7 @@ class _HomeState extends State<Home> {
                 width: 10,
               ),
               Text(
-                "1-23",
+                verseRef,
                 style: TextStyle(
                     color: Theme.of(context).primaryColor,
                     fontSize: 17,
@@ -498,7 +526,7 @@ class _HomeState extends State<Home> {
                 child: Column(
                   children: [
                     Text(
-                      " ذٰلِكَ الۡڪِتٰبُ لَا رَيۡبَ ۛۚ  ۖ فِيۡهِ ۛۚ هُدًى لِّلۡمُتَّقِيۡنَۙ‏",
+                      arabicText,
                       textAlign: TextAlign.right,
                       style: TextStyle(
                           color: Colors.black,
@@ -510,7 +538,7 @@ class _HomeState extends State<Home> {
                       height: 20,
                     ),
                     Text(
-                      "یہ اللہ کی کتاب ہے، اس میں کوئی شک نہیں ہدایت ہے اُن پرہیز گار لوگوں کے لیے",
+                      translationText,
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         color: Colors.black,
