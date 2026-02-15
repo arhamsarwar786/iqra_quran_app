@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:iqra/Provider/theme_provider.dart';
-import 'package:iqra/Utils/customThemes.dart';
 import 'package:provider/provider.dart';
 
 class QuranSignWidget extends StatelessWidget {
@@ -21,98 +20,125 @@ class QuranSignWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.watch<ThemeProvider>();
+    final theme = context.watch<ThemeProvider>();
+    final color = theme.selectedTheme;
+    final arabicFont = theme.arabicFontFamily;
+
+    final bool isRuko = sign == "ع";
+    final double frameHeight = isRuko ? 110 : 80;
 
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 5),
+      margin: const EdgeInsets.symmetric(vertical: 20),
       child: Stack(
         alignment: Alignment.center,
+        clipBehavior: Clip.none,
         children: [
-          // Background Borders
-          Row(
-            children: [
-              Expanded(
-                child: Image.asset(
-                  "assets/images/borderLeft${bloc.iconNumber}.png",
-                  color: bloc.selectedTheme,
-                  fit: BoxFit.contain,
-                ),
-              ),
-              Expanded(
-                child: Image.asset(
-                  "assets/images/borderRight${bloc.iconNumber}.png",
-                  color: bloc.selectedTheme,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ],
+          // THE FRAME
+          CustomPaint(
+            size: Size(MediaQuery.of(context).size.width - 40, frameHeight),
+            painter: QuranSignPainter(color: color),
           ),
 
-          // Sign and Numbers
-          SizedBox(
-            height: 100,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Text(
-                  sign,
-                  style: MyTextStyle.heading1.copyWith(
-                    fontSize: sign == "ع" ? 70 : 35,
-                    fontFamily: bloc.arabicFontFamily,
-                    color: bloc.selectedTheme,
-                  ),
+          // 1. THE MAIN RUKO SIGN (Balanced vertically)
+          Transform.translate(
+            offset: const Offset(
+                0, -10), // Moved up slightly to be truly centered in the frame
+            child: Text(
+              sign,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: isRuko ? 75 : 40,
+                fontFamily: arabicFont,
+                color: color,
+                height: 1.0,
+              ),
+            ),
+          ),
+
+          // 2. THE LABEL (e.g., Arba/Nisf)
+          if (label != null && label!.isNotEmpty)
+            Positioned(
+              left: MediaQuery.of(context).size.width / 2 + (isRuko ? 50 : 35),
+              child: Text(
+                label!,
+                style: TextStyle(
+                  fontSize: 22, // Increased font size
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                  fontFamily: arabicFont,
                 ),
-                if (label != null && label!.isNotEmpty)
-                  Positioned(
-                    top: 10,
-                    child: Text(
-                      label!,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: bloc.selectedTheme,
-                      ),
-                    ),
+              ),
+            ),
+
+          // 3. THE MIDDLE NUMBER (Positioned to the LEFT)
+          if (middleNumber != null)
+            Positioned(
+              right: MediaQuery.of(context).size.width / 2 + (isRuko ? 50 : 35),
+              child: Text(
+                middleNumber!,
+                style: TextStyle(
+                  fontSize: 18, // Increased font size for readability
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                  fontFamily: arabicFont,
+                ),
+              ),
+            ),
+
+          // 4. TOP NUMBER + DOT
+          Positioned(
+            top: -24,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isRuko || topNumber != null)
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration:
+                        BoxDecoration(color: color, shape: BoxShape.circle),
                   ),
+                const SizedBox(height: 1),
                 if (topNumber != null)
-                  Positioned(
-                    top: sign == "ع" ? 20 : 15,
-                    child: Text(
-                      topNumber!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+                  Text(
+                    topNumber!,
+                    style: TextStyle(
+                      fontSize: 18, // Increased count font size
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                      fontFamily: arabicFont,
+                      height: 1,
                     ),
                   ),
-                if (middleNumber != null)
-                  Positioned(
-                    top: sign == "ع" ? 45 : 40,
-                    right: sign == "ع"
-                        ? MediaQuery.of(context).size.width * 0.44
-                        : null,
-                    child: Text(
-                      middleNumber!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
+              ],
+            ),
+          ),
+
+          // 5. BOTTOM NUMBER + DOT
+          Positioned(
+            bottom: -24,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
                 if (bottomNumber != null)
-                  Positioned(
-                    bottom: sign == "ع" ? 10 : 15,
-                    child: Text(
-                      bottomNumber!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+                  Text(
+                    bottomNumber!,
+                    style: TextStyle(
+                      fontSize: 18, // Increased count font size
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                      fontFamily: arabicFont,
+                      height: 1,
                     ),
+                  ),
+                const SizedBox(height: 1),
+                if (isRuko || bottomNumber != null)
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration:
+                        BoxDecoration(color: color, shape: BoxShape.circle),
                   ),
               ],
             ),
@@ -121,4 +147,36 @@ class QuranSignWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+class QuranSignPainter extends CustomPainter {
+  final Color color;
+  QuranSignPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withOpacity(0.4)
+      ..strokeWidth = 1.2
+      ..style = PaintingStyle.stroke;
+
+    const double gap = 70.0; // Widened gap for better spacing
+    const double sidePadding = 12.0;
+
+    canvas.drawLine(
+        const Offset(sidePadding, 0), Offset(size.width / 2 - gap, 0), paint);
+    canvas.drawLine(Offset(size.width / 2 + gap, 0),
+        Offset(size.width - sidePadding, 0), paint);
+    canvas.drawLine(Offset(sidePadding, size.height),
+        Offset(size.width / 2 - gap, size.height), paint);
+    canvas.drawLine(Offset(size.width / 2 + gap, size.height),
+        Offset(size.width - sidePadding, size.height), paint);
+    canvas.drawLine(
+        const Offset(sidePadding, 0), Offset(sidePadding, size.height), paint);
+    canvas.drawLine(Offset(size.width - sidePadding, 0),
+        Offset(size.width - sidePadding, size.height), paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

@@ -9,7 +9,6 @@ import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:provider/provider.dart';
 import '../../../Models/aya_list_model.dart';
 import '../../../Models/para_model.dart' as ParaModel;
-import '../../../Models/ruko_model.dart';
 import '../../../Models/surah_metadata_model.dart';
 import '../../../Widgets/surah_header_card.dart';
 import '../../../Widgets/quran_sign_widget.dart';
@@ -135,41 +134,48 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
           textSpanChildren.clear();
         }
 
-        // Add Sajda widget if present
-        if (isSajda) {
-          paraArabicScreenWidget.add(const QuranSignWidget(sign: "السجدة"));
-        }
+        // Determine consolidated content for the sign widget
+        String mainSign = "";
+        String? displayLabel;
+        String? topNum;
+        String? midNum;
+        String? botNum;
 
-        // Add Manzil widget if present
-        if (isManzil) {
-          paraArabicScreenWidget.add(QuranSignWidget(sign: aya.manzil!));
-        }
+        if (isRuoEnd && (isArba || isNisf || isSalsa)) {
+          mainSign = "ع";
+          if (isArba) displayLabel = "الربع";
+          if (isNisf) displayLabel = "النصف";
+          if (isSalsa) displayLabel = "الثلاثة";
 
-        // Add Ruko/Division (Big Sign) widget if present
-        if (isRuoEnd || isArba || isNisf || isSalsa) {
-          // Find ruko metadata for numbers
-          RukoModel? ruko;
+          if (isSajda) {
+            displayLabel =
+                displayLabel != null ? "$displayLabel / السجدة" : "السجدة";
+          }
+
+          // Find ruko metadata
           try {
-            ruko = quranProvider.rukoData.firstWhere(
+            final ruko = quranProvider.rukoData.firstWhere(
               (r) =>
                   r.surat.toString() == aya.surahId &&
                   r.ayaAfterRako == aya.ayatNumberInt,
             );
-          } catch (e) {
-            ruko = null;
-          }
+            topNum = ruko.rakuNumber.toString();
+            midNum = ruko.diff.toString();
+            botNum = ruko.bottomNumber.toString();
+          } catch (_) {}
+        } else if (isSajda) {
+          mainSign = "السجدة";
+        } else if (isManzil) {
+          mainSign = aya.manzil!;
+        }
 
-          String divLabel = "";
-          if (isArba) divLabel = "الربع";
-          if (isNisf) divLabel = "النصف";
-          if (isSalsa) divLabel = "الثلاثة";
-
+        if (mainSign.isNotEmpty) {
           paraArabicScreenWidget.add(QuranSignWidget(
-            sign: "ع",
-            label: divLabel,
-            topNumber: ruko?.rakuNumber.toString(),
-            middleNumber: ruko?.diff.toString(),
-            bottomNumber: ruko?.bottomNumber.toString(),
+            sign: mainSign,
+            label: displayLabel,
+            topNumber: topNum,
+            middleNumber: midNum,
+            bottomNumber: botNum,
           ));
         }
       }
@@ -305,8 +311,11 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
               SliverAppBar(
                 automaticallyImplyLeading: false,
                 backgroundColor: bloc.selectedTheme,
-                expandedHeight: currentSurahMetadata != null ? 166.0 : 56.0,
-                toolbarHeight: currentSurahMetadata != null ? 110.0 : 56.0,
+                expandedHeight: (currentSurahMetadata != null ? 110.0 : 0.0) +
+                    (_showAppbar ? 56.0 : 0.0),
+                toolbarHeight: currentSurahMetadata != null
+                    ? 110.0
+                    : (_showAppbar ? 56.0 : 56.0),
                 floating: false,
                 pinned: true,
                 snap: false,

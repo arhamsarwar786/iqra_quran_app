@@ -1,7 +1,6 @@
 // ignore_for_file: file_names
 
 import 'package:flutter/gestures.dart';
-
 import 'package:flutter/material.dart';
 import 'package:arabic_numbers/arabic_numbers.dart';
 import 'package:flutter/rendering.dart';
@@ -10,10 +9,7 @@ import 'package:iqra/Screens/MainPage/Quran/translation/surah_translation_screen
 import 'package:iqra/widgets.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:provider/provider.dart';
-// import 'arabic';
 import '../../../Models/aya_list_model.dart';
-import '../../../Models/ruko_model.dart';
-import '../../../Models/sajda_model.dart';
 import '../../../Widgets/surah_header_card.dart';
 import '../../../Widgets/quran_sign_widget.dart';
 import '../../../Utils/bottom_sheet_preview.dart';
@@ -23,7 +19,6 @@ class QuranView extends StatefulWidget {
       {super.key, this.ayatCount, this.surahName, this.suratNumber});
   final String? ayatCount;
   final int? suratNumber;
-  // List<Aya>? ayat;
   final String? surahName;
   @override
   State<QuranView> createState() => _QuranViewState();
@@ -31,111 +26,106 @@ class QuranView extends StatefulWidget {
 
 class _QuranViewState extends State<QuranView> {
   List<Aya> listAyat = [];
-  List<RukoModel> rukoData = [];
-  List<SajdaModel> sajdaData = [];
   ArabicNumbers arabicNumber = ArabicNumbers();
   ScrollController? _scrollViewController;
   bool _showAppbar = true;
   bool isScrollingDown = true;
 
-  Future<List<RukoModel>> getRuko() async {
-    final provider = context.read<QuranDataProvider>();
-    rukoData = provider.rukoData
-        .where((element) => element.surat == (widget.suratNumber ?? 0))
-        .toList();
-    return rukoData;
-  }
-
-  Future<List<SajdaModel>> getSajda() async {
-    final provider = context.read<QuranDataProvider>();
-    sajdaData = provider.sajdaData
-        .where((element) =>
-            element.surat.toString() == widget.suratNumber.toString())
-        .toList();
-
-    return sajdaData;
-  }
-
   List<Widget> quranViewWidget = [];
 
   viewMaker() async {
     var bloc = context.read<ThemeProvider>();
+    var quranProvider = context.read<QuranDataProvider>();
 
     quranViewWidget.clear();
+    List<TextSpan> textSpanChildren = [];
 
-    List<RukoModel> rukoList = await getRuko();
-    for (var i = 0; i < rukoList.length; i++) {
-      // debugger();
-      int start = i > 0 ? rukoList[i - 1].ayaAfterRako : 0;
-      int next = rukoList[i].ayaAfterRako;
+    for (var aya in listAyat) {
+      if (aya.ayatNumber == "0") continue;
 
-      if (start >= listAyat.length) break;
-      int end = next > listAyat.length ? listAyat.length : next;
+      // Add text span
+      textSpanChildren.add(
+        TextSpan(
+          text: "${(aya.arabicText).trim()} ",
+          style: const TextStyle(color: Colors.black),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              SHEET.bottomSheetPreview(context, aya, bloc);
+            },
+        ),
+      );
 
-      var ayaList = listAyat.sublist(start, end);
-      List<TextSpan> textSpanChildren = [];
+      // Check for markers at this ayah
+      bool isSajda = aya.hasSajda;
+      bool isRuoEnd = aya.hasRuko;
+      bool isManzil = aya.manzil != null;
+      bool isArba = aya.hasArba;
+      bool isNisf = aya.hasNisf;
+      bool isSalsa = aya.hasSalsa;
 
-      for (int k = 0; k < ayaList.length; k++) {
-        var aya = ayaList[k] as Aya;
-        if (aya.sajda != null) {
-          var newList = ayaList.sublist(k + 1, ayaList.length);
-          textSpanChildren.add(
-            TextSpan(
-              text: "${(aya.arabicText).trim()} ",
-              style: const TextStyle(color: Colors.black),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  SHEET.bottomSheetPreview(context, aya, bloc);
-                },
-            ),
-          );
+      if (isSajda || isRuoEnd || isManzil || isArba || isNisf || isSalsa) {
+        // Flush text
+        if (textSpanChildren.isNotEmpty) {
           quranViewWidget.add(RichText(
             text: TextSpan(
-              children: textSpanChildren,
+              children: List.from(textSpanChildren),
               style: TextStyle(
                   fontSize: bloc.arabicFontSize,
                   fontFamily: bloc.arabicFontFamily,
                   color: Colors.black),
             ),
           ));
-          textSpanChildren = [];
+          textSpanChildren.clear();
+        }
 
-          quranViewWidget.add(QuranSignWidget(sign: aya.sajda!));
+        // Consolidated Sign logic
+        String mainSign = "";
+        String? displayLabel;
+        String? topNum;
+        String? midNum;
+        String? botNum;
 
-          for (var a in newList) {
-            var ayaObj = a as Aya;
-            textSpanChildren.add(
-              TextSpan(
-                text: "${(ayaObj.arabicText).trim()} ",
-                style: const TextStyle(color: Colors.black),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () {
-                    SHEET.bottomSheetPreview(context, ayaObj, bloc);
-                  },
-              ),
+        if (isRuoEnd && (isArba || isNisf || isSalsa)) {
+          mainSign = "ع";
+          if (isArba) displayLabel = "الربع";
+          if (isNisf) displayLabel = "النصف";
+          if (isSalsa) displayLabel = "الثلاثة";
+
+          if (isSajda) {
+            displayLabel =
+                displayLabel != null ? "$displayLabel / السجدة" : "السجدة";
+          }
+
+          try {
+            final ruko = quranProvider.rukoData.firstWhere(
+              (r) =>
+                  r.surat.toString() == aya.surahId &&
+                  r.ayaAfterRako == aya.ayatNumberInt,
             );
-          }
-          break;
-        } else {
-          if (aya.ayatNumber == "0") {
-            continue;
-          }
+            topNum = ruko.rakuNumber.toString();
+            midNum = ruko.diff.toString();
+            botNum = ruko.bottomNumber.toString();
+          } catch (_) {}
+        } else if (isSajda) {
+          mainSign = "السجدة";
+        } else if (isManzil) {
+          mainSign = aya.manzil!;
+        }
 
-          textSpanChildren.add(
-            TextSpan(
-              text: "${(aya.arabicText).trim()} ",
-              style: const TextStyle(color: Colors.black),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  SHEET.bottomSheetPreview(context, aya, bloc);
-                },
-            ),
-          );
-          if (aya.manzil != null) {
-            quranViewWidget.add(QuranSignWidget(sign: aya.manzil!));
-          }
+        if (mainSign.isNotEmpty) {
+          quranViewWidget.add(QuranSignWidget(
+            sign: mainSign,
+            label: displayLabel,
+            topNumber: topNum,
+            middleNumber: midNum,
+            bottomNumber: botNum,
+          ));
         }
       }
+    }
+
+    // Flush remaining
+    if (textSpanChildren.isNotEmpty) {
       quranViewWidget.add(RichText(
         text: TextSpan(
           children: textSpanChildren,
@@ -145,19 +135,10 @@ class _QuranViewState extends State<QuranView> {
               color: Colors.black),
         ),
       ));
-
-      quranViewWidget.add(QuranSignWidget(
-        sign: "ع",
-        topNumber: rukoList[i].rakuNumber.toString(),
-        middleNumber: rukoList[i].diff.toString(),
-        bottomNumber: rukoList[i].bottomNumber.toString(),
-      ));
     }
+
     setState(() {});
   }
-
-  bool isBismilla = false;
-  String bismillaArabic = "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ";
 
   @override
   void initState() {
@@ -171,7 +152,7 @@ class _QuranViewState extends State<QuranView> {
           ScrollDirection.reverse) {
         if (!isScrollingDown) {
           isScrollingDown = true;
-          _showAppbar = false; // Hide on scroll down
+          _showAppbar = false;
           setState(() {});
         }
       }
@@ -180,7 +161,7 @@ class _QuranViewState extends State<QuranView> {
           ScrollDirection.forward) {
         if (isScrollingDown) {
           isScrollingDown = false;
-          _showAppbar = true; // Show on scroll up
+          _showAppbar = true;
           setState(() {});
         }
       }
@@ -190,7 +171,6 @@ class _QuranViewState extends State<QuranView> {
   @override
   void dispose() {
     _scrollViewController!.dispose();
-    _scrollViewController!.removeListener(() {});
     super.dispose();
   }
 
@@ -249,8 +229,10 @@ class _QuranViewState extends State<QuranView> {
               SliverAppBar(
                 automaticallyImplyLeading: false,
                 backgroundColor: bloc.selectedTheme,
-                expandedHeight: metadata != null ? 166.0 : 56.0,
-                toolbarHeight: metadata != null ? 110.0 : 56.0,
+                expandedHeight: (metadata != null ? 110.0 : 0.0) +
+                    (_showAppbar ? 56.0 : 0.0),
+                toolbarHeight:
+                    metadata != null ? 110.0 : (_showAppbar ? 56.0 : 56.0),
                 floating: false,
                 pinned: true,
                 snap: false,
