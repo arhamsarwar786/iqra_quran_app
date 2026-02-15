@@ -20,23 +20,23 @@ class SurahHeaderCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Left Section: Rukus
+          // Right Section (via RTL): Ayas
           Expanded(
             flex: 2,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "رکوعاتها",
+                  "آياتها",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 14,
+                    fontSize: 16,
                     fontFamily: theme.arabicFontFamily,
                   ),
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  metadata.rukus,
+                  metadata.ayas,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -64,44 +64,60 @@ class SurahHeaderCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 // Surah Info Row
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        metadata.index,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      // Left Group: Order & Type
+                      // Right Group (via RTL): Name & Index
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            metadata.name,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: theme.arabicFontFamily,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            metadata.index,
+                            textAlign: TextAlign.right,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 10),
-                      Text(
-                        metadata.name,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: theme.arabicFontFamily,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        "(${metadata.type == 'Meccan' ? 'مكية' : 'مدنية'})",
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                          fontFamily: theme.arabicFontFamily,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        metadata.order,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
+
+                      // Left Group (via RTL): Type & Order
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "(${metadata.type == 'Meccan' ? 'مكية' : 'مدنية'})",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                              fontFamily: theme.arabicFontFamily,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            metadata.order,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -138,23 +154,23 @@ class SurahHeaderCard extends StatelessWidget {
               indent: 10,
               endIndent: 10),
 
-          // Right Section: Ayah count
+          // Left Section (via RTL): Rukus
           Expanded(
             flex: 2,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "آياتها",
+                  "رکوعاتها",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 14,
                     fontFamily: theme.arabicFontFamily,
                   ),
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  metadata.ayas,
+                  metadata.rukus,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
