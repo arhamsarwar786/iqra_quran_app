@@ -91,7 +91,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
             final key = GlobalKey();
             surahHeaderKeys[aya.surahId!] = key;
             paraArabicScreenWidget.add(Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15),
+              padding: const EdgeInsets.symmetric(vertical: 0),
               child: SurahHeaderCard(
                 key: key,
                 metadata: metadata,
