@@ -59,12 +59,11 @@ class QuranDataProvider extends ChangeNotifier {
       debugPrint(
           'Quran Data Bank: Loaded ${_paraMetadata.length} paras metadata.');
 
-      // Load ruko metadata
-      debugPrint('Quran Data Bank: Loading ruko.json...');
-      final String rukoJsonString =
-          await rootBundle.loadString('assets/extraction/ruko.json');
-      _rukoData = rukoModelFromJson(rukoJsonString);
-      debugPrint('Quran Data Bank: Loaded ${_rukoData.length} ruko metadata.');
+      // Generate ruko metadata from quran2026.json markers
+      debugPrint('Quran Data Bank: Generating ruko metadata from markers...');
+      _rukoData = _generateRukoFromMarkers(_quranData);
+      debugPrint(
+          'Quran Data Bank: Generated ${_rukoData.length} ruko metadata items.');
 
       // Load sajda metadata
       debugPrint('Quran Data Bank: Loading sajda.json...');
@@ -116,6 +115,50 @@ class QuranDataProvider extends ChangeNotifier {
             aya.surahId == surahId.toString() &&
             aya.paraId == paraId.toString())
         .toList();
+  }
+
+  List<RukoModel> _generateRukoFromMarkers(List<Aya> data) {
+    List<RukoModel> list = [];
+    int serial = 1;
+    String? currentSurahId;
+    String? currentParaId;
+    int rukoInSurah = 0;
+    int rukoInPara = 0;
+    int ayatsSinceLastRuko = 0;
+
+    for (var aya in data) {
+      if (aya.ayatNumber == "0") continue; // Skip Bismillah
+
+      if (currentSurahId != aya.surahId) {
+        currentSurahId = aya.surahId;
+        rukoInSurah = 0;
+        // ayatsSinceLastRuko = 0; // Don't reset here, will be reset by hasRuko
+      }
+
+      if (currentParaId != aya.paraId) {
+        currentParaId = aya.paraId;
+        rukoInPara = 0;
+      }
+
+      ayatsSinceLastRuko++;
+
+      if (aya.hasRuko) {
+        rukoInSurah++;
+        rukoInPara++;
+        list.add(RukoModel(
+          serial: serial++,
+          surat: int.tryParse(aya.surahId ?? "0") ?? 0,
+          rakuNumber: rukoInSurah,
+          ayaAfterRako: aya.ayatNumberInt,
+          place: "ع",
+          ayaBeforeRako: aya.ayatNumberInt + 1, // Next aya start
+          diff: ayatsSinceLastRuko,
+          bottomNumber: rukoInPara,
+        ));
+        ayatsSinceLastRuko = 0;
+      }
+    }
+    return list;
   }
 }
 

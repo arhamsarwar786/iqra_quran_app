@@ -4,60 +4,61 @@
 
 import 'dart:convert';
 
-AyaListModel ayaListModelFromJson(String str) => AyaListModel.fromJson(json.decode(str));
+AyaListModel ayaListModelFromJson(String str) =>
+    AyaListModel.fromJson(json.decode(str));
 
 String ayaListModelToJson(AyaListModel data) => json.encode(data.toJson());
 
 class AyaListModel {
-    List<Aya> aya;
+  List<Aya> aya;
 
-    AyaListModel({
-        required this.aya,
-    });
+  AyaListModel({
+    required this.aya,
+  });
 
-    factory AyaListModel.fromJson(Map<String, dynamic> json) => AyaListModel(
+  factory AyaListModel.fromJson(Map<String, dynamic> json) => AyaListModel(
         aya: List<Aya>.from(json["aya"].map((x) => Aya.fromJson(x))),
-    );
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "aya": List<dynamic>.from(aya.map((x) => x.toJson())),
-    };
+      };
 }
 
 class Aya {
-    String? ayatId;
-    String? ayatNumber;
-    String? groupId;
-    String? surahId;
-    String? paraId;
-    String? tafseerId;
-    String arabicText;
-    String? tarjumaIrfan;
-    String? tarjumaHind;
-    String? tarjumaPak;
-    String? withoutArab;
-    String? withoutHtmlTafseer;
-    String? sajda;
-    String? manzil;
+  String? ayatId;
+  String? ayatNumber;
+  String? groupId;
+  String? surahId;
+  String? paraId;
+  String? tafseerId;
+  String arabicText;
+  String? tarjumaIrfan;
+  String? tarjumaHind;
+  String? tarjumaPak;
+  String? withoutArab;
+  String? withoutHtmlTafseer;
+  String? sajda;
+  String? manzil;
 
-    Aya({
-        this.ayatId,
-        this.ayatNumber,
-        this.groupId,
-        this.surahId,
-        this.paraId,
-        this.tafseerId,
-        required this.arabicText,
-        this.tarjumaIrfan,
-        this.tarjumaHind,
-        this.tarjumaPak,
-        this.withoutArab,
-        this.withoutHtmlTafseer,
-        this.sajda,
-        this.manzil,
-    });
+  Aya({
+    this.ayatId,
+    this.ayatNumber,
+    this.groupId,
+    this.surahId,
+    this.paraId,
+    this.tafseerId,
+    required this.arabicText,
+    this.tarjumaIrfan,
+    this.tarjumaHind,
+    this.tarjumaPak,
+    this.withoutArab,
+    this.withoutHtmlTafseer,
+    this.sajda,
+    this.manzil,
+  });
 
-    factory Aya.fromJson(Map<String, dynamic> json) => Aya(
+  factory Aya.fromJson(Map<String, dynamic> json) => Aya(
         ayatId: json["ayatId"]?.toString(),
         ayatNumber: json["ayatNumber"]?.toString(),
         groupId: json["groupId"]?.toString(),
@@ -72,9 +73,9 @@ class Aya {
         withoutHtmlTafseer: json["withoutHtmlTafseer"],
         sajda: json["sajda"],
         manzil: json["manzil"],
-    );
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "ayatId": ayatId,
         "ayatNumber": ayatNumber,
         "groupId": groupId,
@@ -89,11 +90,13 @@ class Aya {
         "withoutHtmlTafseer": withoutHtmlTafseer,
         "sajda": sajda,
         "manzil": manzil,
-    };
-    
-    // Backward compatibility getters
-    String get arabic => arabicText;
-    String get translation1 => tarjumaIrfan ?? "";
-    String get translation2 => tarjumaHind ?? "";
-    int get ayatNumberInt => int.tryParse(ayatNumber ?? "0") ?? 0;
+      };
+
+  // Backward compatibility getters
+  String get arabic => arabicText;
+  String get translation1 => tarjumaIrfan ?? "";
+  String get translation2 => tarjumaHind ?? "";
+  int get ayatNumberInt => int.tryParse(ayatNumber ?? "0") ?? 0;
+  bool get hasRuko => arabicText.contains('\u06E0');
+  bool get hasSajda => arabicText.contains('\u06E9');
 }

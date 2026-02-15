@@ -33,7 +33,7 @@ class QuranView extends StatefulWidget {
 }
 
 class _QuranViewState extends State<QuranView> {
-  List listAyat = [];
+  List<Aya> listAyat = [];
 
   ArabicNumbers arabicNumber = ArabicNumbers();
   ScrollController? _scrollViewController;
@@ -308,7 +308,7 @@ class _QuranViewState extends State<QuranView> {
   void initState() {
     super.initState();
     loadQuranView().then((val) {
-      listAyat = val;
+      listAyat = List<Aya>.from(val);
       viewMaker();
       bismillaChecker();
       // loadData();
@@ -338,8 +338,8 @@ class _QuranViewState extends State<QuranView> {
   bool isBismilla = true;
 
   bismillaChecker() {
-    if (listAyat.isNotEmpty && listAyat[0] is Aya) {
-      bool isAvailable = (listAyat[0] as Aya).ayatNumber == "0";
+    if (listAyat.isNotEmpty) {
+      bool isAvailable = listAyat[0].ayatNumber == "0";
       if (!isAvailable) {
         setState(() {
           isBismilla = false;
@@ -384,9 +384,6 @@ class _QuranViewState extends State<QuranView> {
     // debugger();
     for (int i = isBismilla ? 1 : 0; i < listAyat.length; i++) {
       var aya = listAyat[i] as Aya;
-      int ayaNumber = int.tryParse(aya.ayatNumber ?? "0") ?? 0;
-      RukoModel? rukoModel = isRuku(ayaNumber, ruko);
-      SajdaModel? sajdaModel = isSajda(ayaNumber, sajda);
       children.add(
         TextSpan(
           text: "${(aya.arabicText).trim()} ",
@@ -396,31 +393,21 @@ class _QuranViewState extends State<QuranView> {
             },
         ),
       );
-      // debugger();
-      if (rukoModel != null) {
+
+      if (aya.hasRuko) {
         children.add(TextSpan(
           text: "\nع\n",
           style: MyTextStyle.heading1.copyWith(
             fontSize: 70,
             fontFamily: bloc.arabicFontFamily,
           ),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () {
-              print(i);
-              // debugger();
-            },
         ));
       }
-      if (sajdaModel != null) {
+      if (aya.sajda != null) {
         children.add(TextSpan(
-          text: "\n${sajdaModel.place}\n",
+          text: "\n${aya.sajda}\n",
           style: MyTextStyle.heading1
               .copyWith(fontSize: 70, fontFamily: bloc.arabicFontFamily),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () {
-              print(i);
-              // debugger();
-            },
         ));
       }
       // setState(() {
