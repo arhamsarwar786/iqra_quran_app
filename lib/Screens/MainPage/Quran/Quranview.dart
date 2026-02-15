@@ -17,10 +17,15 @@ import '../Drawer/setting_screen.dart';
 
 class QuranView extends StatefulWidget {
   const QuranView(
-      {super.key, this.ayatCount, this.surahName, this.suratNumber});
+      {super.key,
+      this.ayatCount,
+      this.surahName,
+      this.suratNumber,
+      this.targetAyatNumber});
   final String? ayatCount;
   final int? suratNumber;
   final String? surahName;
+  final int? targetAyatNumber;
   @override
   State<QuranView> createState() => _QuranViewState();
 }
@@ -31,6 +36,7 @@ class _QuranViewState extends State<QuranView> {
   ScrollController? _scrollViewController;
   bool _showAppbar = true;
   bool isScrollingDown = true;
+  GlobalKey? _targetKey;
 
   List<Widget> quranViewWidget = [];
 
@@ -40,15 +46,25 @@ class _QuranViewState extends State<QuranView> {
 
     quranViewWidget.clear();
     List<TextSpan> textSpanChildren = [];
+    List<int> currentBatchAyatNumbers = []; // Track ayats in current batch
 
     for (var aya in listAyat) {
       if (aya.ayatNumber == "0") continue;
 
+      currentBatchAyatNumbers.add(aya.ayatNumberInt);
+
       // Add text span
+      bool isTargetAyat = widget.targetAyatNumber != null &&
+          aya.ayatNumberInt == widget.targetAyatNumber;
+
       textSpanChildren.add(
         TextSpan(
           text: "${(aya.arabicText).trim()} ",
-          style: const TextStyle(color: Colors.black),
+          style: TextStyle(
+            color: Colors.black,
+            backgroundColor:
+                isTargetAyat ? bloc.selectedTheme.withOpacity(0.3) : null,
+          ),
           recognizer: TapGestureRecognizer()
             ..onTap = () {
               SHEET.bottomSheetPreview(context, aya, bloc);
@@ -67,7 +83,16 @@ class _QuranViewState extends State<QuranView> {
       if (isSajda || isRuoEnd || isManzil || isArba || isNisf || isSalsa) {
         // Flush text
         if (textSpanChildren.isNotEmpty) {
+          GlobalKey? keyForThisBlock;
+          // Check if target ayat is in this block
+          if (widget.targetAyatNumber != null &&
+              currentBatchAyatNumbers.contains(widget.targetAyatNumber)) {
+            keyForThisBlock = GlobalKey();
+            _targetKey = keyForThisBlock;
+          }
+
           quranViewWidget.add(RichText(
+            key: keyForThisBlock,
             text: TextSpan(
               children: List.from(textSpanChildren),
               style: TextStyle(
@@ -77,6 +102,7 @@ class _QuranViewState extends State<QuranView> {
             ),
           ));
           textSpanChildren.clear();
+          currentBatchAyatNumbers.clear(); // Reset batch tracking
         }
 
         // Consolidated Sign logic
@@ -127,7 +153,16 @@ class _QuranViewState extends State<QuranView> {
 
     // Flush remaining
     if (textSpanChildren.isNotEmpty) {
+      GlobalKey? keyForThisBlock;
+      // Check if target ayat is in this last block
+      if (widget.targetAyatNumber != null &&
+          currentBatchAyatNumbers.contains(widget.targetAyatNumber)) {
+        keyForThisBlock = GlobalKey();
+        _targetKey = keyForThisBlock;
+      }
+
       quranViewWidget.add(RichText(
+        key: keyForThisBlock,
         text: TextSpan(
           children: textSpanChildren,
           style: TextStyle(
@@ -139,6 +174,20 @@ class _QuranViewState extends State<QuranView> {
     }
 
     setState(() {});
+
+    // Trigger scroll if target key is set
+    if (_targetKey != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_targetKey!.currentContext != null) {
+          Scrollable.ensureVisible(
+            _targetKey!.currentContext!,
+            duration: const Duration(seconds: 1),
+            curve: Curves.easeInOut,
+            alignment: 0.1, // Align slightly from top
+          );
+        }
+      });
+    }
   }
 
   @override

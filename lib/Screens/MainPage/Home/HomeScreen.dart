@@ -2,6 +2,7 @@ import 'package:iqra/Models/aya_list_model.dart';
 import 'package:iqra/Models/surah_metadata_model.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
+import 'package:iqra/Screens/MainPage/Quran/Quranview.dart';
 import 'package:iqra/Screens/MainPage/Dua/dua_screen.dart';
 import 'package:iqra/Screens/MainPage/Home/azan/PrayerTime.dart';
 import 'package:iqra/Screens/MainPage/Home/qibal/qibla.dart';
@@ -448,110 +449,126 @@ class _HomeState extends State<Home> {
 
     return Card(
       elevation: 5,
+      color: bloc.selectedSecondary,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Container(
-        padding:
-            const EdgeInsets.only(top: 20, left: 10, right: 10, bottom: 20),
-        width: size.width,
-        decoration: BoxDecoration(
-          color: bloc.selectedSecondary,
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Column(children: [
-          Row(
-            children: [
-              Container(
-                height: 26,
-                width: 18,
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: AssetImage(
-                            "assets/images/quran${bloc.iconNumber}.png"),
-                        fit: BoxFit.fill)),
-              ),
-              const SizedBox(
-                width: 20,
-              ),
-              Text(
-                "QURAN",
-                style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700),
-              ),
-              const Spacer(),
-              IconButton(
-                onPressed: () => AppShare.image(
-                  context: context,
-                  bloc: bloc,
-                  title: "Surah $surahNameEnglish ($verseRef)",
-                  arabicText: arabicText,
-                  translationText: translationText,
-                  translatorName: "ترجمہ: کنزالایمان",
+      child: InkWell(
+        borderRadius: BorderRadius.circular(30),
+        onTap: () {
+          push(
+            context,
+            QuranView(
+              suratNumber: surahId,
+              surahName: surahNameArabic,
+              ayatCount: surah?.ayas ?? "0",
+              targetAyatNumber: int.tryParse(_randomAyat!.ayatNumber ?? "0"),
+            ),
+          );
+        },
+        child: Container(
+          padding:
+              const EdgeInsets.only(top: 20, left: 10, right: 10, bottom: 20),
+          width: size.width,
+          decoration: BoxDecoration(
+            // color: bloc.selectedSecondary, // Moved to Card for InkWell
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: Column(children: [
+            Row(
+              children: [
+                Container(
+                  height: 26,
+                  width: 18,
+                  decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage(
+                              "assets/images/quran${bloc.iconNumber}.png"),
+                          fit: BoxFit.fill)),
                 ),
-                icon: Icon(Icons.share, color: Theme.of(context).primaryColor),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                surahNameArabic,
-                style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontSize: 20,
-                    fontFamily: bloc.arabicFontFamily,
-                    fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              Text(
-                verseRef,
-                style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700),
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Row(
-            children: [
-              // const SizedBox(
-              //   width: 20,
-              // ),
-              Expanded(
-                child: Column(
-                  children: [
-                    Text(
-                      arabicText,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 30,
-                          fontFamily: bloc.arabicFontFamily,
-                          fontWeight: FontWeight.w500),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Text(
-                      translationText,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20,
-                        fontFamily: bloc.urduFontFamily,
+                const SizedBox(
+                  width: 20,
+                ),
+                Text(
+                  "QURAN",
+                  style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700),
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () => AppShare.image(
+                    context: context,
+                    bloc: bloc,
+                    title: "Surah $surahNameEnglish ($verseRef)",
+                    arabicText: arabicText,
+                    translationText: translationText,
+                    translatorName: "ترجمہ: کنزالایمان",
+                  ),
+                  icon:
+                      Icon(Icons.share, color: Theme.of(context).primaryColor),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  surahNameArabic,
+                  style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: 20,
+                      fontFamily: bloc.arabicFontFamily,
+                      fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(
+                  width: 10,
+                ),
+                Text(
+                  verseRef,
+                  style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              children: [
+                // const SizedBox(
+                //   width: 20,
+                // ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text(
+                        arabicText,
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 30,
+                            fontFamily: bloc.arabicFontFamily,
+                            fontWeight: FontWeight.w500),
                       ),
-                    ),
-                  ],
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        translationText,
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontFamily: bloc.urduFontFamily,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ]),
+              ],
+            ),
+          ]),
+        ),
       ),
     );
   }

@@ -61,7 +61,7 @@ class SurahHeaderCard extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 // Surah Info Row
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -70,33 +70,7 @@ class SurahHeaderCard extends StatelessWidget {
                     children: [
                       // Left Group: Order & Type
                       // Right Group (via RTL): Name & Index
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            metadata.index,
-                            textAlign: TextAlign.right,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            metadata.name,
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: theme.arabicFontFamily,
-                            ),
-                          ),
-                        ],
-                      ),
 
-                      // Left Group (via RTL): Type & Order
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -119,11 +93,39 @@ class SurahHeaderCard extends StatelessWidget {
                           ),
                         ],
                       ),
+
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            metadata.index,
+                            textAlign: TextAlign.right,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            metadata.name,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: theme.arabicFontFamily,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // Left Group (via RTL): Type & Order
                     ],
                   ),
                 ),
                 const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 4.0),
+                  padding: EdgeInsets.symmetric(vertical: 2.0),
                   child: Divider(
                       color: Colors.white54,
                       thickness: 1,
@@ -131,15 +133,18 @@ class SurahHeaderCard extends StatelessWidget {
                       endIndent: 20),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontFamily: theme.arabicFontFamily,
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontFamily: theme.arabicFontFamily,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 ),
               ],
