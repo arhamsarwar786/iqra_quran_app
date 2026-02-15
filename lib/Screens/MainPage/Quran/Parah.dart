@@ -59,13 +59,15 @@ class _ParahState extends State<Parah> {
                   .loadString("assets/extraction/quran2026.json"),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator(color: bloc.selectedTheme));
+                  return Center(
+                      child:
+                          CircularProgressIndicator(color: bloc.selectedTheme));
                 }
 
                 // Parse the JSON and group by paraId
                 final quranData = json.decode(snapshot.data.toString()) as List;
                 Map<String, List<Map<String, dynamic>>> paraGroups = {};
-                
+
                 for (var item in quranData) {
                   String paraId = item["paraId"]?.toString() ?? "0";
                   if (!paraGroups.containsKey(paraId)) {
@@ -92,19 +94,20 @@ class _ParahState extends State<Parah> {
                     itemBuilder: (context, index) {
                       int paraNumber = paraNumbers[index];
                       int ayatCount = paraGroups[paraNumber.toString()]!.length;
-                      String paraName = index < parahNames.length 
-                          ? parahNames[index] 
+                      String paraName = index < parahNames.length
+                          ? parahNames[index]
                           : 'Para $paraNumber';
 
                       return InkWell(
                         onTap: () {
-                          push(context,
-                           ParaArabicScreen(
-                            para: null,
-                            ayatInPara: ayatCount,
-                                        parahCount: paraNumber.toString(),
-                                        parahname: paraName,)
-                                        );
+                          push(
+                              context,
+                              ParaArabicScreen(
+                                para: null,
+                                ayatInPara: ayatCount,
+                                parahCount: paraNumber.toString(),
+                                parahname: paraName,
+                              ));
                           // Navigator.push(
                           //     context,
                           //     MaterialPageRoute(
@@ -136,7 +139,8 @@ class _ParahState extends State<Parah> {
                                         child: Center(
                                             child: Text(
                                           (index + 1).toString(),
-                                          style: const TextStyle(color: Colors.white),
+                                          style: const TextStyle(
+                                              color: Colors.white),
                                         )),
                                       ),
                                     ),
