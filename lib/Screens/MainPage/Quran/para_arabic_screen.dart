@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../../Models/aya_list_model.dart';
 import '../../../Models/para_model.dart' as ParaModel;
 import '../../../Models/ruko_model.dart';
+import '../../../Models/surah_metadata_model.dart';
 import '../../../Widgets/surah_header_card.dart';
 import '../../../Widgets/quran_sign_widget.dart';
 import '../../../Utils/bottom_sheet_preview.dart';
@@ -33,6 +34,9 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
   List<Widget> paraArabicScreenWidget = [];
   List<Aya> listAyat = [];
+  SurahMetadata? firstSurahMetadata;
+  SurahMetadata? currentSurahMetadata;
+  Map<String, GlobalKey> surahHeaderKeys = {};
 
   Future<List> loadParaView() async {
     final provider = context.read<QuranDataProvider>();
@@ -48,6 +52,10 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     var quranProvider = context.read<QuranDataProvider>();
 
     paraArabicScreenWidget.clear();
+    surahHeaderKeys.clear();
+    firstSurahMetadata = null;
+    currentSurahMetadata = null;
+
     List<TextSpan> textSpanChildren = [];
     String? currentSurahId;
 
@@ -72,7 +80,20 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
         final metadata =
             quranProvider.getSurahMetadata(int.tryParse(aya.surahId!) ?? 0);
         if (metadata != null) {
-          paraArabicScreenWidget.add(SurahHeaderCard(metadata: metadata));
+          if (firstSurahMetadata == null) {
+            firstSurahMetadata = metadata;
+            currentSurahMetadata = metadata;
+          } else {
+            final key = GlobalKey();
+            surahHeaderKeys[aya.surahId!] = key;
+            paraArabicScreenWidget.add(Padding(
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              child: SurahHeaderCard(
+                key: key,
+                metadata: metadata,
+              ),
+            ));
+          }
         }
       }
 
@@ -170,6 +191,39 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     setState(() {});
   }
 
+  void _updateCurrentSurah() {
+    if (firstSurahMetadata == null) return;
+
+    SurahMetadata? bestMatch = firstSurahMetadata;
+    double threshold = 200.0; // The distance from top to switch header
+
+    // Since map iteration order might be insertion order, we can rely on it
+    // as we added Surah headers in order in viewMaker.
+    surahHeaderKeys.forEach((surahId, key) {
+      final context = key.currentContext;
+      if (context != null) {
+        final RenderBox box = context.findRenderObject() as RenderBox;
+        final position = box.localToGlobal(Offset.zero).dy;
+
+        // If the inline header has scrolled up past the threshold, it becomes the active surah
+        if (position <= threshold) {
+          final qProvider = context.read<QuranDataProvider>();
+          final metadata =
+              qProvider.getSurahMetadata(int.tryParse(surahId) ?? 0);
+          if (metadata != null) {
+            bestMatch = metadata;
+          }
+        }
+      }
+    });
+
+    if (currentSurahMetadata?.index != bestMatch?.index) {
+      setState(() {
+        currentSurahMetadata = bestMatch;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -179,11 +233,12 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     });
     _scrollViewController = ScrollController();
     _scrollViewController!.addListener(() {
+      // Standard appbar hide/show logic
       if (_scrollViewController!.position.userScrollDirection ==
           ScrollDirection.reverse) {
         if (!isScrollingDown) {
           isScrollingDown = true;
-          _showAppbar = true;
+          _showAppbar = false;
           setState(() {});
         }
       }
@@ -192,10 +247,13 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
           ScrollDirection.forward) {
         if (isScrollingDown) {
           isScrollingDown = false;
-          _showAppbar = false;
+          _showAppbar = true;
           setState(() {});
         }
       }
+
+      // Sticky header logic
+      _updateCurrentSurah();
     });
   }
 
@@ -211,35 +269,20 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     return SafeArea(child: Builder(builder: (context) {
       var bloc = context.read<ThemeProvider>();
       return Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          child: Text(listAyat.length.toString()),
-        ),
         bottomNavigationBar: isScrollingDown
             ? const SizedBox()
             : BottomNavigationBar(
                 backgroundColor: bloc.selectedTheme,
                 items: [
                   BottomNavigationBarItem(
-                      icon: InkWell(
-                          onTap: () {
-                            // push(
-                            //     context,
-                            //     SurahTranslationScreen(
-                            //       ayatCount: widget.ayatCount.toString(),
-                            //       ayatList: widget.ayat,
-                            //       suratNumber: widget.suratNumber,
-                            //       surahName: widget.surahName,
-                            //     ));
-                          },
-                          child: const Icon(Icons.book)),
+                      icon:
+                          InkWell(onTap: () {}, child: const Icon(Icons.book)),
                       label: "Translations"),
                   BottomNavigationBarItem(
                       icon: InkWell(
                           onTap: () {
                             var max =
                                 _scrollViewController!.position.maxScrollExtent;
-                            print(max);
                             double distance =
                                 max - _scrollViewController!.position.pixels;
                             double durationInSeconds = distance / 50;
@@ -256,107 +299,79 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                       icon: Icon(Icons.settings), label: "Setting")
                 ],
               ),
-        //  appBar:customAppBar(context, "${widget.surahName}"),
         body: NestedScrollView(
-          // controller: _scrollViewController,
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return [
               SliverAppBar(
                 automaticallyImplyLeading: false,
                 backgroundColor: bloc.selectedTheme,
-                expandedHeight: 160.0,
+                expandedHeight: currentSurahMetadata != null ? 166.0 : 56.0,
+                toolbarHeight: currentSurahMetadata != null ? 110.0 : 56.0,
                 floating: false,
                 pinned: true,
                 snap: false,
-                toolbarHeight: 150,
+                elevation: 0,
                 flexibleSpace: FlexibleSpaceBar(
-                  centerTitle: true,
-                  title: Container(
-                    margin: const EdgeInsets.only(top: 0),
-                    // color: Colors.blueAccent,
+                  background: SingleChildScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
                     child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Image.asset(
-                                "assets/images/borderLeft1.png",
-                                color: const Color.fromARGB(255, 255, 109, 109),
+                        AnimatedContainer(
+                          height: _showAppbar ? 56.0 : 0.0,
+                          duration: const Duration(milliseconds: 200),
+                          child: AppBar(
+                            centerTitle: true,
+                            elevation: 0,
+                            iconTheme: const IconThemeData(
+                              color: Colors.black,
+                            ),
+                            backgroundColor: Colors.white,
+                            title: Text(
+                              widget.parahname ?? 'Para ${widget.parahCount}',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: bloc.arabicFontFamily,
                               ),
                             ),
-                            Expanded(
-                              child: Image.asset(
-                                "assets/images/borderRight1.png",
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Image.asset(
-                                "assets/images/borderLeft1.png",
-                                color: Colors.white,
-                              ),
+                        if (currentSurahMetadata != null)
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 400),
+                            transitionBuilder:
+                                (Widget child, Animation<double> animation) {
+                              return FadeTransition(
+                                  opacity: animation, child: child);
+                            },
+                            child: SurahHeaderCard(
+                              key: ValueKey(currentSurahMetadata!.index),
+                              metadata: currentSurahMetadata!,
                             ),
-                            Expanded(
-                              child: Image.asset(
-                                "assets/images/borderRight1.png",
-                                color: const Color.fromARGB(255, 255, 109, 109),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
                       ],
                     ),
-                  ),
-                  background: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      AnimatedContainer(
-                        height: _showAppbar ? 56.0 : 56.0,
-                        duration: const Duration(milliseconds: 200),
-                        child: AppBar(
-                          centerTitle: true,
-                          iconTheme: const IconThemeData(
-                            color: Colors.black,
-                          ),
-                          backgroundColor: Colors.white,
-                          title: Text(
-                            widget.parahname ?? 'Para ${widget.parahCount}',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontFamily: bloc.arabicFontFamily,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ),
             ];
           },
-
           body: Directionality(
             textDirection: TextDirection.rtl,
             child: SingleChildScrollView(
               controller: _scrollViewController,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: paraArabicScreenWidget,
+              child: Container(
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: paraArabicScreenWidget,
+                ),
               ),
             ),
           ),
         ),
       );
     }));
-    // )})
   }
 }

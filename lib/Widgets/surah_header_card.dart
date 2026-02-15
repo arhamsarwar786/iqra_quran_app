@@ -12,167 +12,159 @@ class SurahHeaderCard extends StatelessWidget {
     final theme = context.watch<ThemeProvider>();
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 0),
+      height: 110,
+      margin: EdgeInsets.zero,
       decoration: BoxDecoration(
         color: theme.selectedTheme,
-        // borderRadius: BorderRadius.circular(5),
-        // border: Border.all(color: Colors.white, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 5,
-            offset: const Offset(0, 3),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Left Section: Rukus
+          Expanded(
+            flex: 2,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "رکوعاتها",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontFamily: theme.arabicFontFamily,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  metadata.rukus,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Divider
+          const VerticalDivider(
+              color: Colors.white,
+              thickness: 1,
+              width: 1,
+              indent: 10,
+              endIndent: 10),
+
+          // Center Section: Name, Order, Type, Bismillah
+          Expanded(
+            flex: 6,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 8),
+                // Surah Info Row
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        metadata.index,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        metadata.name,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: theme.arabicFontFamily,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        "(${metadata.type == 'Meccan' ? 'مكية' : 'مدنية'})",
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                          fontFamily: theme.arabicFontFamily,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        metadata.order,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 4.0),
+                  child: Divider(
+                      color: Colors.white54,
+                      thickness: 1,
+                      indent: 20,
+                      endIndent: 20),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontFamily: theme.arabicFontFamily,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Divider
+          const VerticalDivider(
+              color: Colors.white,
+              thickness: 1,
+              width: 1,
+              indent: 10,
+              endIndent: 10),
+
+          // Right Section: Ayah count
+          Expanded(
+            flex: 2,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "آياتها",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontFamily: theme.arabicFontFamily,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  metadata.ayas,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
-      ),
-      child: IntrinsicHeight(
-        child: Row(
-          children: [
-            // Left Section: Rukus
-            Expanded(
-              flex: 2,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "رکوعاتها",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontFamily: theme.arabicFontFamily,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    metadata.rukus,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Divider
-            const VerticalDivider(
-                color: Colors.white,
-                thickness: 1,
-                width: 1,
-                indent: 10,
-                endIndent: 10),
-
-            // Center Section: Name, Order, Type, Bismillah
-            Expanded(
-              flex: 6,
-              child: Column(
-                children: [
-                  const SizedBox(height: 12),
-                  // Surah Info Row
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 0.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          metadata.index,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          metadata.name,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: theme.arabicFontFamily,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          "(${metadata.type == 'Meccan' ? 'مكية' : 'مدنية'})",
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                            fontFamily: theme.arabicFontFamily,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          metadata.order,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 4.0),
-                    child: Divider(
-                        color: Colors.white54,
-                        thickness: 1,
-                        indent: 20,
-                        endIndent: 20),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(
-                      "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontFamily: theme.arabicFontFamily,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Divider
-            const VerticalDivider(
-                color: Colors.white,
-                thickness: 1,
-                width: 1,
-                indent: 10,
-                endIndent: 10),
-
-            // Right Section: Ayah count
-            Expanded(
-              flex: 2,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "آياتها",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontFamily: theme.arabicFontFamily,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    metadata.ayas,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
