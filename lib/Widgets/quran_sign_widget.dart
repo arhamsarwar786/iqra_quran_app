@@ -29,14 +29,14 @@ class QuranSignWidget extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 20),
+      margin: const EdgeInsets.symmetric(vertical: 30),
       child: Stack(
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
           // THE FRAME
           CustomPaint(
-            size: Size(MediaQuery.of(context).size.width - 40, frameHeight),
+            size: Size(MediaQuery.of(context).size.width - 50, frameHeight),
             painter: QuranSignPainter(color: color),
           ),
 
@@ -59,7 +59,7 @@ class QuranSignWidget extends StatelessWidget {
           // 2. THE LABEL (e.g., Arba/Nisf)
           if (label != null && label!.isNotEmpty)
             Positioned(
-              left: MediaQuery.of(context).size.width / 2 + (isRuko ? 50 : 35),
+              right: MediaQuery.of(context).size.width / 2 + (isRuko ? 50 : 35),
               child: Text(
                 label!,
                 style: TextStyle(
@@ -74,7 +74,7 @@ class QuranSignWidget extends StatelessWidget {
           // 3. THE MIDDLE NUMBER (Positioned to the LEFT)
           if (middleNumber != null)
             Positioned(
-              right: MediaQuery.of(context).size.width / 2 + (isRuko ? 50 : 35),
+              left: MediaQuery.of(context).size.width / 2 + (isRuko ? 0 : 35),
               child: Text(
                 middleNumber!,
                 style: TextStyle(
@@ -88,17 +88,10 @@ class QuranSignWidget extends StatelessWidget {
 
           // 4. TOP NUMBER + DOT
           Positioned(
-            top: -24,
+            top: -10,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (isRuko || topNumber != null)
-                  Container(
-                    width: 7,
-                    height: 7,
-                    decoration:
-                        BoxDecoration(color: color, shape: BoxShape.circle),
-                  ),
                 const SizedBox(height: 1),
                 if (topNumber != null)
                   Text(
@@ -117,7 +110,7 @@ class QuranSignWidget extends StatelessWidget {
 
           // 5. BOTTOM NUMBER + DOT
           Positioned(
-            bottom: -24,
+            bottom: -10,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -133,13 +126,6 @@ class QuranSignWidget extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(height: 1),
-                if (isRuko || bottomNumber != null)
-                  Container(
-                    width: 7,
-                    height: 7,
-                    decoration:
-                        BoxDecoration(color: color, shape: BoxShape.circle),
-                  ),
               ],
             ),
           ),
