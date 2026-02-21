@@ -45,5 +45,9 @@
 	<false/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>This app requires access to speech recognition for searching the Quran by voice.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app requires access to the microphone for voice search features.</string>
 </dict>
 </plist>

@@ -219,6 +219,57 @@ class QuranDataProvider extends ChangeNotifier {
     // Return a random ayat
     return smallAyats[DateTime.now().microsecond % smallAyats.length];
   }
+
+  /// Normalizes Arabic text by removing diacritics
+  String _normalizeArabic(String text) {
+    // Regular expression for Arabic diacritics
+    final diacritics = RegExp(
+        r"[\u064B-\u0652\u06D6-\u06ED\u06DF-\u06E4\u06E7-\u06E8\u06EA-\u06EB]");
+    return text.replaceAll(diacritics, "");
+  }
+
+  /// Search Quran based on filters with normalization
+  List<Aya> searchQuran(String query,
+      {bool searchArabic = true,
+      bool searchTranslation = true,
+      bool searchTafseer = true}) {
+    if (query.isEmpty) return [];
+
+    final normalizedQuery = _normalizeArabic(query.toLowerCase().trim());
+    final lowercaseQuery = query.toLowerCase().trim();
+
+    return _quranData.where((aya) {
+      bool matches = false;
+
+      if (searchArabic) {
+        // Match against normalized Arabic text or withoutArab field
+        final normalizedArabic = _normalizeArabic(aya.arabicText);
+        if (normalizedArabic.contains(normalizedQuery) ||
+            (aya.withoutArab?.contains(lowercaseQuery) ?? false)) {
+          matches = true;
+        }
+      }
+
+      if (!matches && searchTranslation) {
+        if ((aya.tarjumaIrfan?.toLowerCase().contains(lowercaseQuery) ??
+                false) ||
+            (aya.tarjumaHind?.toLowerCase().contains(lowercaseQuery) ??
+                false) ||
+            (aya.tarjumaPak?.toLowerCase().contains(lowercaseQuery) ?? false)) {
+          matches = true;
+        }
+      }
+
+      if (!matches && searchTafseer) {
+        if (aya.withoutHtmlTafseer?.toLowerCase().contains(lowercaseQuery) ??
+            false) {
+          matches = true;
+        }
+      }
+
+      return matches;
+    }).toList();
+  }
 }
 
 /// Top-level function for compute to parse JSON

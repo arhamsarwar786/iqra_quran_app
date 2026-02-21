@@ -5,9 +5,12 @@ import 'package:iqra/Provider/theme_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../widgets.dart';
+import '../../../Helper/preference/saved_preferences.dart';
 import 'Parah.dart';
 import 'Quran.dart';
 import 'Surah.dart';
+import 'Quranview.dart';
+import 'para_arabic_screen.dart';
 
 class TabBarDemo extends StatelessWidget {
   const TabBarDemo({super.key});
@@ -20,8 +23,38 @@ class TabBarDemo extends StatelessWidget {
       home: SafeArea(
         child: Scaffold(
           floatingActionButton: FloatingActionButton(
-              elevation: 10,
-              onPressed: () {},
+              onPressed: () async {
+                var lastRead = await SavedPrefernces.getLastRead();
+                if (lastRead != null) {
+                  if (lastRead["type"] == "surah") {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => QuranView(
+                                  suratNumber: lastRead["id"],
+                                  surahName: lastRead["name"],
+                                  ayatCount: lastRead["count"],
+                                  initialScrollOffset:
+                                      lastRead["scrollOffset"]?.toDouble(),
+                                )));
+                  } else if (lastRead["type"] == "para") {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ParaArabicScreen(
+                                  parahCount: lastRead["id"].toString(),
+                                  parahname: lastRead["name"],
+                                  ayatInPara:
+                                      int.tryParse(lastRead["count"] ?? "0"),
+                                  initialScrollOffset:
+                                      lastRead["scrollOffset"]?.toDouble(),
+                                )));
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text("No reading history found.")));
+                }
+              },
               backgroundColor: Colors.white,
               child: Container(
                 height: 45,

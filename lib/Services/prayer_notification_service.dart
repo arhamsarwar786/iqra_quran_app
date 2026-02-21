@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
@@ -5,266 +6,231 @@ import 'package:adhan_dart/adhan_dart.dart';
 import 'package:geolocator/geolocator.dart';
 import '../Helper/preference/saved_preferences.dart';
 
+/// ─────────────────────────────────────────────────────────────────────────────
+/// Prayer key → display name helper
+/// ─────────────────────────────────────────────────────────────────────────────
+const Map<String, String> prayerDisplayNames = {
+  'fajr': 'Fajr',
+  'zuhr': 'Zuhr',
+  'asr': 'Asr',
+  'maghrib': 'Maghrib',
+  'isha': 'Isha',
+};
+
+const Map<String, int> prayerNotifIds = {
+  'fajr': 1,
+  'zuhr': 2,
+  'asr': 3,
+  'maghrib': 4,
+  'isha': 5,
+};
+
 class PrayerNotificationService {
   static final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
-  // Notification IDs for each prayer
-  static const int fajrId = 1;
-  static const int zuhrId = 2;
-  static const int asrId = 3;
-  static const int maghribId = 4;
-  static const int ishaId = 5;
+  static bool _initialized = false;
 
-  /// Initialize the notification service
+  // ─── initialise ──────────────────────────────────────────────────────────
   static Future<void> initialize() async {
+    if (_initialized) return;
     tz_data.initializeTimeZones();
 
     const AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const DarwinInitializationSettings iosSettings =
-        DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
-
     const InitializationSettings initSettings = InitializationSettings(
       android: androidSettings,
-      iOS: iosSettings,
     );
 
     await _notifications.initialize(
       initSettings,
-      onDidReceiveNotificationResponse: _onNotificationTapped,
+      onDidReceiveNotificationResponse: _onTapped,
     );
 
-    // Request permissions for iOS
-    await _notifications
-        .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-
-    // Request permissions for Android 13+
+    // Request Android 13+ notification permission
     await _notifications
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
+
+    _initialized = true;
   }
 
-  /// Handle notification tap
-  static void _onNotificationTapped(NotificationResponse response) {
-    // Handle notification tap - can navigate to prayer screen
-    print('Notification tapped: ${response.payload}');
+  static void _onTapped(NotificationResponse r) {
+    // Could navigate to PrayerTime screen
   }
 
-  /// Schedule all prayer notifications for the day
-  static Future<void> scheduleAllPrayers({
-    required Position position,
-    required String madhab,
-  }) async {
-    try {
-      // Cancel existing notifications first
-      await cancelAllNotifications();
+  // ─── build CalculationParameters from saved method + madhab ─────────────
+  static Future<CalculationParameters> _buildParams() async {
+    final method = await SavedPrefernces.getCalculationMethod();
+    final madhab = await SavedPrefernces.getMadhab();
 
-      // Get prayer times
-      Coordinates coordinates =
-          Coordinates(position.latitude, position.longitude);
-      CalculationParameters params = CalculationMethod.muslimWorldLeague();
-      params.madhab = madhab == 'hanafi' ? Madhab.hanafi : Madhab.shafi;
-
-      final DateTime nowUtc = DateTime.now().toUtc();
-      PrayerTimes prayerTimes = PrayerTimes(
-        coordinates: coordinates,
-        date: nowUtc,
-        calculationParameters: params,
-        precision: true,
-      );
-
-      // Schedule each prayer
-      await _schedulePrayerNotification(
-        id: fajrId,
-        prayerName: 'Fajr',
-        prayerTime: prayerTimes.fajr,
-      );
-
-      await _schedulePrayerNotification(
-        id: zuhrId,
-        prayerName: 'Zuhr',
-        prayerTime: prayerTimes.dhuhr,
-      );
-
-      await _schedulePrayerNotification(
-        id: asrId,
-        prayerName: 'Asr',
-        prayerTime: prayerTimes.asr,
-      );
-
-      await _schedulePrayerNotification(
-        id: maghribId,
-        prayerName: 'Maghrib',
-        prayerTime: prayerTimes.maghrib,
-      );
-
-      await _schedulePrayerNotification(
-        id: ishaId,
-        prayerName: 'Isha',
-        prayerTime: prayerTimes.isha,
-      );
-
-      print('All prayer notifications scheduled successfully');
-    } catch (e) {
-      print('Error scheduling prayer notifications: $e');
+    CalculationParameters params;
+    switch (method) {
+      case 'karachi':
+        // University of Islamic Sciences, Karachi — standard for Pakistan
+        // Fajr 18°, Isha 18°
+        params = CalculationMethod.karachi();
+        break;
+      case 'mwl':
+        params = CalculationMethod.muslimWorldLeague();
+        break;
+      case 'isna':
+        params = CalculationMethod.northAmerica();
+        break;
+      case 'egypt':
+        params = CalculationMethod.egyptian();
+        break;
+      default:
+        params = CalculationMethod.karachi();
     }
+    params.madhab = madhab == 'hanafi' ? Madhab.hanafi : Madhab.shafi;
+    return params;
   }
 
-  /// Schedule a single prayer notification
-  static Future<void> _schedulePrayerNotification({
-    required int id,
-    required String prayerName,
-    required DateTime? prayerTime,
-  }) async {
-    if (prayerTime == null) return;
+  // ─── Returns the Android notification details ────────────────────────────
+  static Future<AndroidNotificationDetails> _androidDetails(
+      String prayerName) async {
+    final customPath = await SavedPrefernces.getCustomAzanPath();
 
-    final DateTime localTime = prayerTime.toLocal();
-    final DateTime now = DateTime.now();
-
-    // Only schedule if the prayer time is in the future
-    if (localTime.isAfter(now)) {
-      final tz.TZDateTime scheduledTime =
-          tz.TZDateTime.from(localTime, tz.local);
-
-      await _notifications.zonedSchedule(
-        id,
-        'Prayer Time: $prayerName',
-        'It\'s time for $prayerName prayer. May Allah accept your prayers.',
-        scheduledTime,
-        _notificationDetails(prayerName),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        payload: prayerName,
-      );
-
-      print('Scheduled $prayerName notification for $localTime');
-    }
-  }
-
-  /// Get notification details with custom sound and styling
-  static NotificationDetails _notificationDetails(String prayerName) {
-    return NotificationDetails(
-      android: AndroidNotificationDetails(
-        'prayer_notifications',
-        'Prayer Times',
-        channelDescription: 'Notifications for daily prayer times',
+    // Use custom MP3 if the user picked one and the file still exists
+    if (customPath != null && File(customPath).existsSync()) {
+      return AndroidNotificationDetails(
+        'prayer_custom_sound',
+        'Prayer Times (Custom Sound)',
+        channelDescription: 'Adhan notifications with your custom sound',
         importance: Importance.max,
         priority: Priority.high,
         playSound: true,
+        sound: UriAndroidNotificationSound(customPath),
         enableVibration: true,
         icon: '@mipmap/ic_launcher',
         styleInformation: BigTextStyleInformation(
-          'It\'s time for $prayerName prayer. May Allah accept your prayers.',
-          contentTitle: 'Prayer Time: $prayerName',
+          'وقت نماز $prayerName آ گیا',
+          contentTitle: '🕌 $prayerName — نماز کا وقت',
         ),
-      ),
-      iOS: DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-        sound: 'default',
+      );
+    }
+
+    // Default: bundled azan.wav in res/raw
+    return AndroidNotificationDetails(
+      'prayer_notifications',
+      'Prayer Times',
+      channelDescription: 'Adhan notifications for daily prayer times',
+      importance: Importance.max,
+      priority: Priority.high,
+      playSound: true,
+      sound: const RawResourceAndroidNotificationSound('azan'),
+      enableVibration: true,
+      icon: '@mipmap/ic_launcher',
+      styleInformation: BigTextStyleInformation(
+        'وقت نماز $prayerName آ گیا',
+        contentTitle: '🕌 $prayerName — نماز کا وقت',
       ),
     );
   }
 
-  /// Cancel all scheduled notifications
+  // ─── Send a test notification immediately ────────────────────────────────
+  static Future<void> sendTestNotification() async {
+    await initialize();
+    final details = await _androidDetails('Test');
+    await _notifications.show(
+      99,
+      '🕌 Test Prayer Notification',
+      'اذان کی آواز — یہ ایک ٹیسٹ ہے',
+      NotificationDetails(android: details),
+      payload: 'test',
+    );
+  }
+
+  // ─── Schedule all enabled prayer notifications ────────────────────────────
+  static Future<void> scheduleAllPrayers({
+    required Position position,
+    required String madhab,
+  }) async {
+    await initialize();
+    await cancelAllNotifications();
+
+    final params = await _buildParams();
+    final toggles = await SavedPrefernces.getAllPrayerNotificationToggles();
+    final globalEnabled = await SavedPrefernces.getPrayerNotificationsEnabled();
+
+    if (!globalEnabled) return;
+
+    final now = DateTime.now().toUtc();
+    final coordinates = Coordinates(position.latitude, position.longitude);
+
+    final PrayerTimes pt = PrayerTimes(
+      coordinates: coordinates,
+      date: now,
+      calculationParameters: params,
+      precision: true,
+    );
+
+    final Map<String, DateTime?> times = {
+      'fajr': pt.fajr,
+      'zuhr': pt.dhuhr,
+      'asr': pt.asr,
+      'maghrib': pt.maghrib,
+      'isha': pt.isha,
+    };
+
+    for (final entry in times.entries) {
+      if (toggles[entry.key] == true && entry.value != null) {
+        await _scheduleNotification(
+          id: prayerNotifIds[entry.key]!,
+          prayerKey: entry.key,
+          prayerTime: entry.value!,
+        );
+      }
+    }
+  }
+
+  // ─── Schedule a single prayer ────────────────────────────────────────────
+  static Future<void> _scheduleNotification({
+    required int id,
+    required String prayerKey,
+    required DateTime prayerTime,
+  }) async {
+    final DateTime localTime = prayerTime.toLocal();
+    if (localTime.isBefore(DateTime.now())) return;
+
+    final tz.TZDateTime scheduled = tz.TZDateTime.from(localTime, tz.local);
+    final displayName = prayerDisplayNames[prayerKey] ?? prayerKey;
+    final details = await _androidDetails(displayName);
+
+    await _notifications.zonedSchedule(
+      id,
+      '🕌 $displayName نماز کا وقت',
+      'وقت نماز $displayName آ گیا۔ اللہ آپ کی نماز قبول فرمائے۔',
+      scheduled,
+      NotificationDetails(android: details),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      payload: prayerKey,
+    );
+  }
+
+  // ─── Cancel helpers ─────────────────────────────────────────────────────
   static Future<void> cancelAllNotifications() async {
     await _notifications.cancelAll();
-    print('All prayer notifications cancelled');
   }
 
-  /// Cancel a specific prayer notification
-  static Future<void> cancelPrayerNotification(int id) async {
-    await _notifications.cancel(id);
-    print('Cancelled notification with id: $id');
+  static Future<void> cancelPrayerNotification(String prayerKey) async {
+    final id = prayerNotifIds[prayerKey];
+    if (id != null) await _notifications.cancel(id);
   }
 
-  /// Get pending notifications (for debugging)
-  static Future<List<PendingNotificationRequest>>
-      getPendingNotifications() async {
-    return await _notifications.pendingNotificationRequests();
-  }
-
-  /// Check if notifications are enabled
-  static Future<bool> areNotificationsEnabled() async {
-    final bool? enabled = await _notifications
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.areNotificationsEnabled();
-    return enabled ?? false;
-  }
-
-  /// Reschedule notifications for tomorrow
+  // ─── Reschedule for tomorrow (called from background) ────────────────────
   static Future<void> rescheduleForTomorrow({
     required Position position,
     required String madhab,
   }) async {
-    try {
-      await cancelAllNotifications();
-
-      // Get tomorrow's prayer times
-      Coordinates coordinates =
-          Coordinates(position.latitude, position.longitude);
-      CalculationParameters params = CalculationMethod.muslimWorldLeague();
-      params.madhab = madhab == 'hanafi' ? Madhab.hanafi : Madhab.shafi;
-
-      final DateTime tomorrowUtc =
-          DateTime.now().toUtc().add(const Duration(days: 1));
-      PrayerTimes prayerTimes = PrayerTimes(
-        coordinates: coordinates,
-        date: tomorrowUtc,
-        calculationParameters: params,
-        precision: true,
-      );
-
-      // Schedule each prayer
-      await _schedulePrayerNotification(
-        id: fajrId,
-        prayerName: 'Fajr',
-        prayerTime: prayerTimes.fajr,
-      );
-
-      await _schedulePrayerNotification(
-        id: zuhrId,
-        prayerName: 'Zuhr',
-        prayerTime: prayerTimes.dhuhr,
-      );
-
-      await _schedulePrayerNotification(
-        id: asrId,
-        prayerName: 'Asr',
-        prayerTime: prayerTimes.asr,
-      );
-
-      await _schedulePrayerNotification(
-        id: maghribId,
-        prayerName: 'Maghrib',
-        prayerTime: prayerTimes.maghrib,
-      );
-
-      await _schedulePrayerNotification(
-        id: ishaId,
-        prayerName: 'Isha',
-        prayerTime: prayerTimes.isha,
-      );
-
-      print('Tomorrow\'s prayer notifications scheduled successfully');
-    } catch (e) {
-      print('Error scheduling tomorrow\'s notifications: $e');
-    }
+    await scheduleAllPrayers(position: position, madhab: madhab);
   }
+
+  static Future<List<PendingNotificationRequest>> getPendingNotifications() =>
+      _notifications.pendingNotificationRequests();
 }

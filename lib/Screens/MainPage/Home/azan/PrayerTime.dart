@@ -11,6 +11,7 @@ import '../../../../Utils/share_verse.dart';
 import '../../../../Helper/preference/saved_preferences.dart';
 import '../../../../Services/prayer_notification_service.dart';
 import '../qibal/qibla.dart';
+import '../../Drawer/setting_screen.dart';
 
 class PrayerTime extends StatefulWidget {
   const PrayerTime({Key? key}) : super(key: key);
@@ -25,7 +26,15 @@ class _PrayerTimeState extends State<PrayerTime> {
   Map<String, dynamic>? _lastData;
   bool _showFardOnly = true;
   String _madhab = 'hanafi';
+  String _calcMethod = 'karachi';
   bool _notificationsEnabled = true;
+  Map<String, bool> _prayerToggles = {
+    'fajr': true,
+    'zuhr': true,
+    'asr': true,
+    'maghrib': true,
+    'isha': true,
+  };
   Position? _currentPosition;
 
   @override
@@ -33,6 +42,7 @@ class _PrayerTimeState extends State<PrayerTime> {
     super.initState();
     _initializeNotifications();
     _initMadhab();
+    _loadPrayerToggles();
     _prayerCacheFuture = _getPrayerData();
     // Update every second for the clock, calculations are light
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -51,14 +61,44 @@ class _PrayerTimeState extends State<PrayerTime> {
   }
 
   Future<void> _initMadhab() async {
-    String m = await SavedPrefernces.getMadhab();
+    final String m = await SavedPrefernces.getMadhab();
+    final String c = await SavedPrefernces.getCalculationMethod();
     if (mounted) {
       setState(() {
         _madhab = m;
+        _calcMethod = c;
         _refreshData();
       });
     }
   }
+
+  Future<void> _loadPrayerToggles() async {
+    final toggles = await SavedPrefernces.getAllPrayerNotificationToggles();
+    if (mounted) setState(() => _prayerToggles = toggles);
+  }
+
+  Future<void> _togglePrayerNotif(String prayerKey, bool value) async {
+    await SavedPrefernces.setPrayerNotificationEnabled(prayerKey, value);
+    setState(() => _prayerToggles[prayerKey] = value);
+    if (_currentPosition != null) {
+      await PrayerNotificationService.scheduleAllPrayers(
+        position: _currentPosition!,
+        madhab: _madhab,
+      );
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(value
+            ? '🔔 ${_capitalize(prayerKey)} notification ON'
+            : '🔕 ${_capitalize(prayerKey)} notification OFF'),
+        duration: const Duration(seconds: 2),
+        backgroundColor: value ? Colors.green.shade600 : Colors.grey.shade700,
+      ));
+    }
+  }
+
+  String _capitalize(String s) =>
+      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 
   @override
   void dispose() {
@@ -111,10 +151,26 @@ class _PrayerTimeState extends State<PrayerTime> {
       locationName = "Location Detected";
     }
 
-    // Calculation logic
+    // Calculation — use saved method (default: Karachi = authentic for Pakistan)
     Coordinates coordinates =
         Coordinates(position.latitude, position.longitude);
-    CalculationParameters params = CalculationMethod.muslimWorldLeague();
+
+    CalculationParameters params;
+    switch (_calcMethod) {
+      case 'mwl':
+        params = CalculationMethod.muslimWorldLeague();
+        break;
+      case 'isna':
+        params = CalculationMethod.northAmerica();
+        break;
+      case 'egypt':
+        params = CalculationMethod.egyptian();
+        break;
+      case 'karachi':
+      default:
+        // University of Islamic Sciences, Karachi — standard for Pakistan
+        params = CalculationMethod.karachi();
+    }
     params.madhab = _madhab == 'hanafi' ? Madhab.hanafi : Madhab.shafi;
 
     // Debug: Print madhab being used
@@ -192,7 +248,7 @@ class _PrayerTimeState extends State<PrayerTime> {
     // Store position for notification scheduling
     _currentPosition = position;
 
-    // Schedule notifications if enabled
+    // Schedule notifications if enabled (with current method + madhab)
     if (_notificationsEnabled) {
       await PrayerNotificationService.scheduleAllPrayers(
         position: position,
@@ -221,14 +277,24 @@ class _PrayerTimeState extends State<PrayerTime> {
             children: [
               const Text("PRAYER TIME",
                   style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                      fontSize: 16)),
-              Text(DateFormat("h:mm:ss a").format(DateTime.now()),
-                  style: TextStyle(
-                      fontSize: 12,
-                      color: themeProvider.selectedTheme,
-                      fontWeight: FontWeight.bold)),
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 2.0,
+                      fontSize: 18)),
+              Container(
+                margin: const EdgeInsets.only(top: 2),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
+                decoration: BoxDecoration(
+                  color: themeProvider.selectedTheme.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(DateFormat("h:mm:ss a").format(DateTime.now()),
+                    style: TextStyle(
+                        fontSize: 11,
+                        color: themeProvider.selectedTheme,
+                        letterSpacing: 1,
+                        fontWeight: FontWeight.bold)),
+              ),
             ],
           ),
           centerTitle: true,
@@ -255,6 +321,12 @@ class _PrayerTimeState extends State<PrayerTime> {
             IconButton(
               onPressed: () => push(context, const DirectionTOQiblah()),
               icon: Icon(Icons.compass_calibration_rounded,
+                  color: themeProvider.selectedTheme),
+            ),
+            IconButton(
+              tooltip: 'Settings',
+              onPressed: () => push(context, const SettingScreen()),
+              icon: Icon(Icons.settings_outlined,
                   color: themeProvider.selectedTheme),
             )
           ],
@@ -361,74 +433,131 @@ class _PrayerTimeState extends State<PrayerTime> {
                           gradient: LinearGradient(
                             colors: [
                               themeProvider.selectedTheme,
-                              themeProvider.selectedTheme.withOpacity(0.8)
+                              themeProvider.selectedTheme.withOpacity(0.9),
+                              themeProvider.selectedTheme.withOpacity(0.85)
                             ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(40),
                           boxShadow: [
                             BoxShadow(
                                 color: themeProvider.selectedTheme
-                                    .withOpacity(0.3),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10))
+                                    .withOpacity(0.4),
+                                blurRadius: 25,
+                                offset: const Offset(0, 15))
                           ],
                         ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.location_on_rounded,
-                                    color: Colors.white70, size: 18),
-                                const SizedBox(width: 8),
-                                Text(data["location"],
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16)),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            Text(label,
-                                style: TextStyle(
-                                    color: Colors.white.withOpacity(0.8),
-                                    fontSize: 13,
-                                    letterSpacing: 0.8,
-                                    fontWeight: FontWeight.w500)),
-                            const SizedBox(height: 12),
-                            Text(timeStr,
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 48,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: -1)),
-                            const SizedBox(height: 16),
-                            GestureDetector(
-                              onTap: () =>
-                                  push(context, const DirectionTOQiblah()),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 8),
-                                decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.15),
-                                    borderRadius: BorderRadius.circular(40)),
-                                child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.explore_outlined,
-                                          color: Colors.white, size: 16),
-                                      SizedBox(width: 8),
-                                      Text("Check Qibla Direction",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500)),
-                                    ]),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(40),
+                          child: Stack(
+                            children: [
+                              // Subtle background decoration
+                              Positioned(
+                                right: -40,
+                                top: -40,
+                                child: Icon(
+                                  Icons.mosque_rounded,
+                                  size: 200,
+                                  color: Colors.white.withOpacity(0.1),
+                                ),
                               ),
-                            )
-                          ],
+                              Positioned(
+                                left: -20,
+                                bottom: -20,
+                                child: Icon(
+                                  Icons.nights_stay_rounded,
+                                  size: 100,
+                                  color: Colors.white.withOpacity(0.05),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(28.0),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(Icons.location_on_rounded,
+                                            color: Colors.white, size: 16),
+                                        const SizedBox(width: 8),
+                                        Text(data["location"].toUpperCase(),
+                                            style: TextStyle(
+                                                color: Colors.white
+                                                    .withOpacity(0.9),
+                                                fontWeight: FontWeight.w800,
+                                                letterSpacing: 2.0,
+                                                fontSize: 12)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 25),
+                                    Text(label.toUpperCase(),
+                                        style: TextStyle(
+                                            color:
+                                                Colors.white.withOpacity(0.7),
+                                            fontSize: 11,
+                                            letterSpacing: 2.0,
+                                            fontWeight: FontWeight.bold)),
+                                    const SizedBox(height: 10),
+                                    ShaderMask(
+                                      shaderCallback: (bounds) =>
+                                          const LinearGradient(
+                                        colors: [
+                                          Colors.white,
+                                          Color(0xFFE0E0E0)
+                                        ],
+                                      ).createShader(bounds),
+                                      child: Text(timeStr,
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 60,
+                                              fontFamily: 'Roboto',
+                                              fontWeight: FontWeight.w900,
+                                              letterSpacing: -2)),
+                                    ),
+                                    const SizedBox(height: 25),
+                                    GestureDetector(
+                                      onTap: () => push(
+                                          context, const DirectionTOQiblah()),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 24, vertical: 12),
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(40),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black
+                                                    .withOpacity(0.15),
+                                                blurRadius: 15,
+                                              )
+                                            ]),
+                                        child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(Icons.explore_outlined,
+                                                  color: themeProvider
+                                                      .selectedTheme,
+                                                  size: 20),
+                                              const SizedBox(width: 12),
+                                              Text("QIBLA DIRECTION",
+                                                  style: TextStyle(
+                                                      color: themeProvider
+                                                          .selectedTheme,
+                                                      fontSize: 13,
+                                                      letterSpacing: 1.5,
+                                                      fontWeight:
+                                                          FontWeight.w900)),
+                                            ]),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -452,112 +581,6 @@ class _PrayerTimeState extends State<PrayerTime> {
                               _madhabChip(
                                   "Shafi / Standard", "shafi", themeProvider),
                             ],
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Notification Toggle
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: themeProvider.selectedTheme
-                                            .withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Icon(
-                                        Icons.notifications_active_rounded,
-                                        color: themeProvider.selectedTheme,
-                                        size: 20,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    const Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Prayer Notifications",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15,
-                                            color: Color(0xFF2D3436),
-                                          ),
-                                        ),
-                                        SizedBox(height: 2),
-                                        Text(
-                                          "Get notified at prayer times",
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                Switch(
-                                  value: _notificationsEnabled,
-                                  activeColor: themeProvider.selectedTheme,
-                                  onChanged: (value) async {
-                                    setState(() {
-                                      _notificationsEnabled = value;
-                                    });
-                                    await SavedPrefernces
-                                        .setPrayerNotificationsEnabled(value);
-
-                                    if (value && _currentPosition != null) {
-                                      // Schedule notifications
-                                      await PrayerNotificationService
-                                          .scheduleAllPrayers(
-                                        position: _currentPosition!,
-                                        madhab: _madhab,
-                                      );
-                                      if (mounted) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                                'Prayer notifications enabled'),
-                                            duration: Duration(seconds: 2),
-                                          ),
-                                        );
-                                      }
-                                    } else {
-                                      // Cancel notifications
-                                      await PrayerNotificationService
-                                          .cancelAllNotifications();
-                                      if (mounted) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                                'Prayer notifications disabled'),
-                                            duration: Duration(seconds: 2),
-                                          ),
-                                        );
-                                      }
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
                           ),
                           const SizedBox(height: 16),
                         ],
@@ -627,49 +650,52 @@ class _PrayerTimeState extends State<PrayerTime> {
                               dateTime.isBefore(now) && !activeNow;
 
                           return Container(
-                            margin: const EdgeInsets.symmetric(vertical: 6),
+                            margin: const EdgeInsets.only(bottom: 12),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: activeNow
+                                  ? Colors.white
+                                  : Colors.white.withOpacity(0.9),
                               borderRadius: BorderRadius.circular(22),
                               border: Border.all(
-                                  color: activeNow
-                                      ? themeProvider.selectedTheme
-                                      : Colors.transparent,
-                                  width: 2),
+                                color: activeNow
+                                    ? themeProvider.selectedTheme
+                                        .withOpacity(0.3)
+                                    : Colors.transparent,
+                                width: 2,
+                              ),
                               boxShadow: [
-                                activeNow
-                                    ? BoxShadow(
-                                        color: themeProvider.selectedTheme
-                                            .withOpacity(0.15),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 4))
-                                    : BoxShadow(
-                                        color: Colors.black.withOpacity(0.02),
-                                        blurRadius: 5,
-                                        offset: const Offset(0, 2))
+                                BoxShadow(
+                                    color: activeNow
+                                        ? themeProvider.selectedTheme
+                                            .withOpacity(0.15)
+                                        : Colors.black.withOpacity(0.03),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 5))
                               ],
                             ),
                             child: ListTile(
                               contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 8),
+                                  horizontal: 18, vertical: 8),
                               leading: Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                     color: activeNow
                                         ? themeProvider.selectedTheme
-                                        : const Color(0xFFF1F2F6),
+                                        : themeProvider.selectedTheme
+                                            .withOpacity(0.08),
                                     shape: BoxShape.circle),
                                 child: Icon(_getPrayerIcon(name),
                                     color: activeNow
                                         ? Colors.white
-                                        : const Color(0xFF747D8C),
+                                        : themeProvider.selectedTheme
+                                            .withOpacity(0.7),
                                     size: 22),
                               ),
                               title: Row(
                                 children: [
                                   Text(name,
                                       style: TextStyle(
-                                          fontWeight: FontWeight.bold,
+                                          fontWeight: FontWeight.w900,
                                           fontSize: 17,
                                           color: isPassed
                                               ? const Color(0xFFA4B0BE)
@@ -678,38 +704,75 @@ class _PrayerTimeState extends State<PrayerTime> {
                                     const SizedBox(width: 8),
                                     Container(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 6, vertical: 2),
+                                          horizontal: 8, vertical: 3),
                                       decoration: BoxDecoration(
-                                          color: themeProvider.selectedTheme
-                                              .withOpacity(0.1),
+                                          color: Colors.orange.withOpacity(0.1),
                                           borderRadius:
-                                              BorderRadius.circular(4)),
-                                      child: Text("Optional",
+                                              BorderRadius.circular(6)),
+                                      child: const Text("NAFL",
                                           style: TextStyle(
-                                              color:
-                                                  themeProvider.selectedTheme,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.bold)),
+                                              color: Colors.orange,
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w900,
+                                              letterSpacing: 1)),
                                     )
                                   ]
                                 ],
                               ),
                               subtitle: activeNow
-                                  ? Text("• Active Now",
+                                  ? Text("• CURRENT PRAYER",
                                       style: TextStyle(
                                           color: themeProvider.selectedTheme,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold))
+                                          fontSize: 10,
+                                          letterSpacing: 0.5,
+                                          fontWeight: FontWeight.w900))
                                   : null,
-                              trailing: Text(prayer["time"],
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                      color: activeNow
-                                          ? themeProvider.selectedTheme
-                                          : (isPassed
-                                              ? const Color(0xFFA4B0BE)
-                                              : const Color(0xFF57606F)))),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (isFard) ...[
+                                    GestureDetector(
+                                      onTap: () {
+                                        final key = name.toLowerCase();
+                                        final current =
+                                            _prayerToggles[key] ?? true;
+                                        _togglePrayerNotif(key, !current);
+                                      },
+                                      child: AnimatedSwitcher(
+                                        duration:
+                                            const Duration(milliseconds: 250),
+                                        child: Icon(
+                                          (_prayerToggles[name.toLowerCase()] ??
+                                                  true)
+                                              ? Icons
+                                                  .notifications_active_rounded
+                                              : Icons
+                                                  .notifications_off_outlined,
+                                          key: ValueKey(_prayerToggles[
+                                              name.toLowerCase()]),
+                                          color: (_prayerToggles[
+                                                      name.toLowerCase()] ??
+                                                  true)
+                                              ? themeProvider.selectedTheme
+                                              : Colors.grey.shade300,
+                                          size: 22,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 15),
+                                  ],
+                                  Text(prayer["time"],
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 18,
+                                          fontFamily: 'Roboto',
+                                          color: activeNow
+                                              ? themeProvider.selectedTheme
+                                              : (isPassed
+                                                  ? const Color(0xFFA4B0BE)
+                                                  : const Color(0xFF57606F)))),
+                                ],
+                              ),
                             ),
                           );
                         },
@@ -812,10 +875,11 @@ class _PrayerTimeState extends State<PrayerTime> {
   }
 
   String _formatDuration(Duration duration) {
-    if (duration.isNegative) return "00h 00m";
+    if (duration.isNegative) return "00:00:00";
     int hours = duration.inHours;
     int minutes = duration.inMinutes.remainder(60);
-    return "${hours.toString().padLeft(2, '0')}h ${minutes.toString().padLeft(2, '0')}m";
+    int seconds = duration.inSeconds.remainder(60);
+    return "${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}";
   }
 
   IconData _getPrayerIcon(String name) {

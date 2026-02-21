@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import '../../../Models/aya_list_model.dart';
 import '../../../Widgets/surah_header_card.dart';
 import '../../../Widgets/quran_sign_widget.dart';
+import '../../../Helper/preference/saved_preferences.dart';
 import '../../../Utils/bottom_sheet_preview.dart';
 import '../Drawer/setting_screen.dart';
 
@@ -21,11 +22,13 @@ class QuranView extends StatefulWidget {
       this.ayatCount,
       this.surahName,
       this.suratNumber,
-      this.targetAyatNumber});
+      this.targetAyatNumber,
+      this.initialScrollOffset});
   final String? ayatCount;
   final int? suratNumber;
   final String? surahName;
   final int? targetAyatNumber;
+  final double? initialScrollOffset;
   @override
   State<QuranView> createState() => _QuranViewState();
 }
@@ -37,6 +40,10 @@ class _QuranViewState extends State<QuranView> {
   bool _showAppbar = true;
   bool isScrollingDown = true;
   GlobalKey? _targetKey;
+  bool _hasInitialScrolled = false;
+  bool isAutoScrolling = false;
+  bool _isScrollPaused = false;
+  double autoScrollSpeed = 1.0;
 
   List<Widget> quranViewWidget = [];
 
@@ -53,9 +60,8 @@ class _QuranViewState extends State<QuranView> {
 
       currentBatchAyatNumbers.add(aya.ayatNumberInt);
 
-      // Add text span
-      bool isTargetAyat = widget.targetAyatNumber != null &&
-          aya.ayatNumberInt == widget.targetAyatNumber;
+      bool isTargetAyat =
+          _highlightedAyah != null && aya.ayatNumberInt == _highlightedAyah;
 
       textSpanChildren.add(
         TextSpan(
@@ -85,8 +91,8 @@ class _QuranViewState extends State<QuranView> {
         if (textSpanChildren.isNotEmpty) {
           GlobalKey? keyForThisBlock;
           // Check if target ayat is in this block
-          if (widget.targetAyatNumber != null &&
-              currentBatchAyatNumbers.contains(widget.targetAyatNumber)) {
+          if (_highlightedAyah != null &&
+              currentBatchAyatNumbers.contains(_highlightedAyah)) {
             keyForThisBlock = GlobalKey();
             _targetKey = keyForThisBlock;
           }
@@ -155,8 +161,8 @@ class _QuranViewState extends State<QuranView> {
     if (textSpanChildren.isNotEmpty) {
       GlobalKey? keyForThisBlock;
       // Check if target ayat is in this last block
-      if (widget.targetAyatNumber != null &&
-          currentBatchAyatNumbers.contains(widget.targetAyatNumber)) {
+      if (_highlightedAyah != null &&
+          currentBatchAyatNumbers.contains(_highlightedAyah)) {
         keyForThisBlock = GlobalKey();
         _targetKey = keyForThisBlock;
       }
@@ -175,26 +181,59 @@ class _QuranViewState extends State<QuranView> {
 
     setState(() {});
 
-    // Trigger scroll if target key is set
-    if (_targetKey != null) {
+    if (widget.initialScrollOffset != null && !_hasInitialScrolled) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollViewController!.hasClients) {
+          // Delay briefly to allow proper layout
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (_scrollViewController!.hasClients) {
+              _scrollViewController!.jumpTo(widget.initialScrollOffset!);
+            }
+          });
+        }
+        _hasInitialScrolled = true;
+      });
+    } else if (_targetKey != null) {
+      // Trigger scroll if target key is set
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_targetKey!.currentContext != null) {
           Scrollable.ensureVisible(
             _targetKey!.currentContext!,
-            duration: const Duration(seconds: 1),
-            curve: Curves.easeInOut,
+            duration: Duration.zero, // Instant jump like last read
             alignment: 0.1, // Align slightly from top
           );
+
+          // Clear highlight after 3 seconds
+          Future.delayed(const Duration(seconds: 3), () {
+            if (mounted) {
+              setState(() {
+                _highlightedAyah = null;
+                viewMaker(); // Re-render to remove background color
+              });
+            }
+          });
         }
       });
     }
   }
 
+  int? _highlightedAyah;
+
   @override
   void initState() {
     super.initState();
+    _highlightedAyah = widget.targetAyatNumber;
     final provider = context.read<QuranDataProvider>();
     listAyat = provider.getAyatsBySurah(widget.suratNumber ?? 0);
+
+    // Save as last read
+    SavedPrefernces.setLastRead({
+      "type": "surah",
+      "id": widget.suratNumber,
+      "name": widget.surahName,
+      "count": widget.ayatCount,
+    });
+
     viewMaker();
     _scrollViewController = ScrollController();
     _scrollViewController!.addListener(() {
@@ -215,6 +254,64 @@ class _QuranViewState extends State<QuranView> {
           setState(() {});
         }
       }
+    });
+  }
+
+  void _startAutoScroll() {
+    if (!isAutoScrolling) return;
+    final ctrl = _scrollViewController!;
+    final remaining = ctrl.position.maxScrollExtent - ctrl.position.pixels;
+    if (remaining <= 0) {
+      setState(() {
+        isAutoScrolling = false;
+        _showAppbar = true;
+        isScrollingDown = false;
+      });
+      return;
+    }
+    final duration = remaining / (30.0 * autoScrollSpeed);
+    ctrl
+        .animateTo(
+      ctrl.position.maxScrollExtent,
+      duration: Duration(milliseconds: (duration * 1000).toInt()),
+      curve: Curves.linear,
+    )
+        .then((_) {
+      if (isAutoScrolling &&
+          ctrl.position.pixels >= ctrl.position.maxScrollExtent) {
+        setState(() {
+          isAutoScrolling = false;
+          _showAppbar = true;
+          isScrollingDown = false;
+        });
+      }
+    });
+    setState(() {
+      _showAppbar = false;
+      isScrollingDown = true;
+    });
+  }
+
+  void _pauseAutoScrollForTouch() {
+    if (!isAutoScrolling) return;
+    _scrollViewController!.jumpTo(_scrollViewController!.position.pixels);
+    _isScrollPaused = true;
+  }
+
+  void _resumeAutoScrollAfterTouch() {
+    if (!isAutoScrolling || !_isScrollPaused) return;
+    _isScrollPaused = false;
+    _startAutoScroll();
+  }
+
+  /// Only called by the Stop button — fully cancels auto-scroll.
+  void _stopAutoScroll() {
+    _scrollViewController!.jumpTo(_scrollViewController!.position.pixels);
+    setState(() {
+      isAutoScrolling = false;
+      _isScrollPaused = false;
+      _showAppbar = true;
+      isScrollingDown = false;
     });
   }
 
@@ -255,21 +352,40 @@ class _QuranViewState extends State<QuranView> {
                       BottomNavigationBarItem(
                           icon: InkWell(
                               onTap: () {
-                                var max = _scrollViewController!
-                                    .position.maxScrollExtent;
-                                double distance = max -
-                                    _scrollViewController!.position.pixels;
-                                double durationInSeconds = distance / 50;
-
-                                _scrollViewController!.animateTo(
-                                    _scrollViewController!
-                                        .position.maxScrollExtent,
-                                    duration: Duration(
-                                        seconds: durationInSeconds.toInt()),
-                                    curve: Curves.linear);
+                                if (isAutoScrolling) {
+                                  // Already scrolling — open dialog to change speed or stop
+                                  showDialog(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text('Auto Scroll'),
+                                      content: const Text(
+                                          'Auto scroll is running. Do you want to stop?'),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () => Navigator.pop(ctx),
+                                            child: const Text('Continue')),
+                                        TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(ctx);
+                                              _stopAutoScroll();
+                                            },
+                                            child: const Text('Stop',
+                                                style: TextStyle(
+                                                    color: Colors.red))),
+                                      ],
+                                    ),
+                                  );
+                                } else {
+                                  setState(() => isAutoScrolling = true);
+                                  _startAutoScroll();
+                                }
                               },
-                              child: const Icon(Icons.fit_screen_outlined)),
-                          label: "Auto Scrol"),
+                              child: Icon(
+                                isAutoScrolling
+                                    ? Icons.stop_circle_outlined
+                                    : Icons.fit_screen_outlined,
+                              )),
+                          label: isAutoScrolling ? 'Stop' : 'Auto Scroll'),
                       BottomNavigationBarItem(
                           icon: InkWell(
                             onTap: () {
@@ -280,13 +396,10 @@ class _QuranViewState extends State<QuranView> {
                           label: "Setting")
                     ],
                   ),
-            body: GestureDetector(
-              onVerticalDragStart: (details) {
-                // Need to implement auto-scroll stopping if it exists, but QuranView might not have it fully implemented yet?
-                // Checking previous context, it seems only simple scroll was there. Let's add the gesture detector anyway as good practice if auto-scroll is added.
-                // Wait, looking at file history, QuranView DOES have auto-scroll logic added previously?
-                // Actually, let's just wrap it.
-              },
+            body: Listener(
+              onPointerDown: (_) => _pauseAutoScrollForTouch(),
+              onPointerUp: (_) => _resumeAutoScrollAfterTouch(),
+              onPointerCancel: (_) => _resumeAutoScrollAfterTouch(),
               child: NestedScrollView(
                 headerSliverBuilder:
                     (BuildContext context, bool innerBoxIsScrolled) {
@@ -355,14 +468,23 @@ class _QuranViewState extends State<QuranView> {
                   padding: const EdgeInsets.only(top: 20, bottom: 20),
                   child: Directionality(
                     textDirection: TextDirection.rtl,
-                    child: SingleChildScrollView(
-                      controller: _scrollViewController,
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 15, vertical: 10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: quranViewWidget,
+                    child: NotificationListener<ScrollEndNotification>(
+                      onNotification: (scrollEnd) {
+                        if (scrollEnd.metrics.axis == Axis.vertical) {
+                          SavedPrefernces.updateLastReadOffset(
+                              scrollEnd.metrics.pixels);
+                        }
+                        return false;
+                      },
+                      child: SingleChildScrollView(
+                        controller: _scrollViewController,
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: quranViewWidget,
+                          ),
                         ),
                       ),
                     ),

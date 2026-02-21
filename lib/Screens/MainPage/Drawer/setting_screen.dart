@@ -1,5 +1,9 @@
-
+// ignore_for_file: use_build_context_synchronously
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:iqra/Helper/preference/saved_preferences.dart';
+import 'package:iqra/Services/prayer_notification_service.dart';
 import 'package:iqra/Utils/customThemes.dart';
 import 'package:iqra/Utils/utils.dart';
 import 'package:iqra/widgets.dart';
@@ -16,8 +20,35 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
-  var value = "kgf";
-  var color;
+  // ── notification state ─────────────────────────────────────────────────
+  bool _globalNotif = true;
+  Map<String, bool> _prayerToggles = {
+    'fajr': true,
+    'zuhr': true,
+    'asr': true,
+    'maghrib': true,
+    'isha': true,
+  };
+  String? _customAzanPath;
+  String _calcMethod = 'karachi';
+
+  bool _notifLoading = true;
+  bool _testLoading = false;
+
+  static const Map<String, String> _calcMethodLabels = {
+    'karachi': 'Karachi / Pakistan (Recommended)',
+    'mwl': 'Muslim World League',
+    'isna': 'ISNA (North America)',
+    'egypt': 'Egyptian General Authority',
+  };
+
+  static const Map<String, String> _prayerDisplayNames = {
+    'fajr': 'Fajr',
+    'zuhr': 'Zuhr',
+    'asr': 'Asr',
+    'maghrib': 'Maghrib',
+    'isha': 'Isha',
+  };
 
   @override
   void initState() {
@@ -26,335 +57,518 @@ class _SettingScreenState extends State<SettingScreen> {
     for (var i = 12; i <= 50; i++) {
       arabicFontSize.add(i.toDouble());
     }
-    print(arabicFontSize);
+    _loadNotifSettings();
   }
 
+  Future<void> _loadNotifSettings() async {
+    final global = await SavedPrefernces.getPrayerNotificationsEnabled();
+    final toggles = await SavedPrefernces.getAllPrayerNotificationToggles();
+    final path = await SavedPrefernces.getCustomAzanPath();
+    final method = await SavedPrefernces.getCalculationMethod();
+    if (mounted) {
+      setState(() {
+        _globalNotif = global;
+        _prayerToggles = toggles;
+        _customAzanPath = path;
+        _calcMethod = method;
+        _notifLoading = false;
+      });
+    }
+  }
+
+  Future<void> _pickCustomAzan() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['mp3', 'wav', 'ogg', 'aac'],
+      allowMultiple: false,
+    );
+    if (result != null && result.files.single.path != null) {
+      final path = result.files.single.path!;
+      await SavedPrefernces.setCustomAzanPath(path);
+      setState(() => _customAzanPath = path);
+      snackBar(context, '✅ Custom azan sound saved');
+    }
+  }
+
+  Future<void> _resetDefaultSound() async {
+    await SavedPrefernces.setCustomAzanPath(null);
+    setState(() => _customAzanPath = null);
+    snackBar(context, 'Reset to default azan sound');
+  }
+
+  Future<void> _sendTest() async {
+    setState(() => _testLoading = true);
+    try {
+      await PrayerNotificationService.sendTestNotification();
+      snackBar(context, '🔔 Test notification sent!');
+    } catch (e) {
+      snackBar(context, 'Error: $e');
+    } finally {
+      if (mounted) setState(() => _testLoading = false);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return Builder(builder: (context) {
-      var bloc = context.read<ThemeProvider>();
-      print(bloc.arabicFontSize);
+      final bloc = context.read<ThemeProvider>();
       return Scaffold(
         backgroundColor: bloc.selectedSecondary,
         appBar: AppBar(
-          title: const Text("Setting"),
+          title: const Text('Settings'),
           backgroundColor: Theme.of(context).primaryColor,
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
           child: SingleChildScrollView(
             child: Column(
-              // mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Card(
-                  child: Container(
-                    // height: 100,
-                    width: size.width,
-                    padding: const EdgeInsets.all(10),
-                    child: Column(
-                      children: [
-                        Text(
-                          "Theme Section",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 20,
-                              color: bloc.selectedTheme),
-                        ),
-                      Divider(
-                          color: bloc.selectedTheme,
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              "Theme",
-                              style: MyTextStyle.heading3,
+                // ── THEME ──────────────────────────────────────────────────
+                _sectionCard(
+                  bloc: bloc,
+                  title: 'Theme',
+                  child: Row(
+                    children: [
+                      Text('Theme', style: MyTextStyle.heading3),
+                      const Spacer(),
+                      _styledDropdown(
+                        bloc: bloc,
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton(
+                            hint: Padding(
+                              padding: const EdgeInsets.only(left: 5),
+                              child: Text('Allah',
+                                  style: TextStyle(color: bloc.selectedTheme)),
                             ),
-                            const Spacer(),
-                            Container(
-                              // height: 40,
-                              width: 150,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(
-                                      width: 1, color: bloc.selectedTheme)),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                   hint: Padding(
-                                    padding: const EdgeInsets.only(left: 5),
-                                    child: Text("Allah",style: TextStyle(
-                                      color: bloc.selectedTheme
-                                    ),),
-                                  ),   
-                                  icon: const Icon(Icons.keyboard_arrow_down),
-                                  items: themeList.map((items) {
-                                    return DropdownMenuItem(
-                                      value: items,
-                                      child: Text(
-                                        "Allah",
-                                        style: TextStyle(
-                                            color: items['primary']?.toColor(),
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (Map? newValue) async {
-                                    var theme = ThemeModel.fromJson(newValue!);
-                                    ThemeProvider themeProvider =
-                                        Provider.of<ThemeProvider>(context,
-                                            listen: false);
-                                    themeProvider.changeTheme(theme.toJson());
-                                    snackBar(context, 'Theme Changed');
-                                    setState(() {});
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Card(
-                  child: Container(
-                    // height: 240,
-                    width: size.width,
-                    padding: const EdgeInsets.all(10),
-                    child: Column(
-                      children: [
-                        Text(
-                          "Arabic Font",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 20,
-                              color: bloc.selectedTheme),
-                        ),
-                        Divider(
-                          color: bloc.selectedTheme,
-                        ),
-                        // Row(
-                        //   children: [
-                        //     Text(
-                        //       "Arabic Font",
-                        //       style: MyTextStyle.heading3,
-                        //     ),
-                        //     const Spacer(),
-                        //     Container(
-                        //       height: 40,
-                        //       width: 200,
-                        //       decoration: BoxDecoration(
-                        //           borderRadius: BorderRadius.circular(5),
-                        //           border: Border.all(
-                        //               width: 1, color: bloc.selectedTheme)),
-                        //       child: DropdownButtonHideUnderline(
-                        //         child: DropdownButton(                                  
-                        //            hint: Padding(
-                        //             padding: const EdgeInsets.only(left: 5),
-                        //             child: Text(bloc.arabicFontFamily),
-                        //           ),   
-                        //           icon: const Icon(Icons.keyboard_arrow_down),
-                        //           items: arabicFontFamily.map((items) {
-                        //             return DropdownMenuItem(
-                        //               value: items,
-                        //               child: Text(
-                        //                 items,
-                        //                 style: MyTextStyle.heading3,
-                        //               ),
-                        //             );
-                        //           }).toList(),
-                        //           onChanged: true ? null : (newValue) async {
-                                    
-                        //             bloc.changeArabicFamily(newValue);
-                        //             snackBar(context, '$newValue Arabic Family Changed!');
-                        //             setState(() {});
-                        //           },
-                        //         ),
-                        //       ),
-                        //     ),
-                       
-                        //   ],
-                        // ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              "Font Size",
-                              style: MyTextStyle.heading3,
-                            ),
-                            const Spacer(),
-                            Container(
-                              height: 40,
-                              width: 150,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(
-                                      width: 1, color: bloc.selectedTheme)),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                   hint: Padding(
-                                    padding: const EdgeInsets.only(left: 5),
-                                    child: Text("${bloc.arabicFontSize.toInt()}"),
-                                  ),   
-                                  icon: const Icon(Icons.keyboard_arrow_down),
-                                  items: arabicFontSize.map((items) {
-                                    return DropdownMenuItem(
-                                      value: items,
-                                      child: Text(
-                                        "${items.toInt()}",
-                                        style: MyTextStyle.heading3,
-                                      ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (newValue) async {
-                                    bloc.changeArabicFont(newValue);
-                                    snackBar(context, 'Arabic Font Changed!');
-                                    setState(() {});
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        FittedBox(
-                          child: Text(
-                            " ذٰلِكَ الۡڪِتٰبُ لَا رَيۡبَ ۛۚ  ۖ فِيۡهِ ۛۚ هُدًى لِّلۡمُتَّقِيۡنَۙ‏",
-                            style: TextStyle(fontSize: bloc.arabicFontSize,fontFamily: bloc.arabicFontFamily),
+                            icon: const Icon(Icons.keyboard_arrow_down),
+                            items: themeList.map((items) {
+                              return DropdownMenuItem(
+                                value: items,
+                                child: Text('Allah',
+                                    style: TextStyle(
+                                        color: items['primary']?.toColor(),
+                                        fontWeight: FontWeight.bold)),
+                              );
+                            }).toList(),
+                            onChanged: (Map? newValue) async {
+                              final theme = ThemeModel.fromJson(newValue!);
+                              final tp = Provider.of<ThemeProvider>(context,
+                                  listen: false);
+                              tp.changeTheme(theme.toJson());
+                              snackBar(context, 'Theme Changed');
+                              setState(() {});
+                            },
                           ),
-                        )
-                      ],
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 
-
-  ///////////////////////////////// URDU BLOCK 
-                Card(
-                  child: Container(
-                    // height: 240,
-                    width: size.width,
-                    padding: const EdgeInsets.all(10),
-                    child: Column(
-                      children: [
-                        Text(
-                          "Urdu Font",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 20,
-                              color: bloc.selectedTheme),
-                        ),
-                          Divider(
-                          color: bloc.selectedTheme,
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              "Urdu Font",
-                              style: MyTextStyle.heading3,
-                            ),
-                            const Spacer(),
-                            Container(
-                              height: 40,
-                              width: 150,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(
-                                      width: 1, color: bloc.selectedTheme)),
-                              child: DropdownButtonHideUnderline(                                
-                                child: DropdownButton(
-                                  hint: Padding(
-                                    padding: const EdgeInsets.only(left: 5),
-                                    child: Text(bloc.urduFontFamily),
-                                  ),                                  
-                                  icon: const Icon(Icons.keyboard_arrow_down),
-                                  items: urduFontFamily.map((items) {
-                                    return DropdownMenuItem(
-                                      value: items,
-                                      child: Text(
-                                        items,
-                                        style: MyTextStyle.heading3,
-                                      ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (newValue) async {
-                                    
-                                    bloc.changeUrduFamily(newValue);
-                                    snackBar(context, 'Urdu Family Changed!');
-                                    setState(() {});
-                                  },
+                // ── ARABIC FONT ────────────────────────────────────────────
+                _sectionCard(
+                  bloc: bloc,
+                  title: 'Arabic Font',
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Text('Font Size', style: MyTextStyle.heading3),
+                          const Spacer(),
+                          _styledDropdown(
+                            bloc: bloc,
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton(
+                                hint: Padding(
+                                  padding: const EdgeInsets.only(left: 5),
+                                  child: Text('${bloc.arabicFontSize.toInt()}'),
                                 ),
+                                icon: const Icon(Icons.keyboard_arrow_down),
+                                items: arabicFontSize.map((items) {
+                                  return DropdownMenuItem(
+                                    value: items,
+                                    child: Text('${items.toInt()}',
+                                        style: MyTextStyle.heading3),
+                                  );
+                                }).toList(),
+                                onChanged: (newValue) async {
+                                  bloc.changeArabicFont(newValue);
+                                  snackBar(context, 'Arabic Font Changed!');
+                                  setState(() {});
+                                },
                               ),
                             ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              "Font Size",
-                              style: MyTextStyle.heading3,
-                            ),
-                            const Spacer(),
-                            Container(
-                              height: 40,
-                              width: 150,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(
-                                      width: 1, color: bloc.selectedTheme)),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                   hint: Padding(
-                                    padding: const EdgeInsets.only(left: 5),
-                                    child: Text("${bloc.urduFontSize.toInt()}"),
-                                  ),   
-                                  icon: const Icon(Icons.keyboard_arrow_down),
-                                  items: arabicFontSize.map((items) {
-                                    return DropdownMenuItem(
-                                      value: items,
-                                      child: Text(
-                                        "${items.toInt()}",
-                                        style: MyTextStyle.heading3,
-                                      ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (newValue) async {
-                                    bloc.changeUrduFont(newValue);
-                                    snackBar(context, 'Urdu Font Changed!');
-                                    setState(() {});
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        FittedBox(
-                          child: Text(
-                            "تمام تعریف اللہ کے لیے ہے",
-                            style: TextStyle(fontSize: bloc.urduFontSize,fontFamily: bloc.urduFontFamily),
                           ),
-                        )
-                      ],
-                    ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      FittedBox(
+                        child: Text(
+                          'ذٰلِكَ الۡڪِتٰبُ لَا رَيۡبَ',
+                          style: TextStyle(
+                              fontSize: bloc.arabicFontSize,
+                              fontFamily: bloc.arabicFontFamily),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                
 
+                // ── URDU FONT ──────────────────────────────────────────────
+                _sectionCard(
+                  bloc: bloc,
+                  title: 'Urdu Font',
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Text('Urdu Font', style: MyTextStyle.heading3),
+                          const Spacer(),
+                          _styledDropdown(
+                            bloc: bloc,
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton(
+                                hint: Padding(
+                                  padding: const EdgeInsets.only(left: 5),
+                                  child: Text(bloc.urduFontFamily),
+                                ),
+                                icon: const Icon(Icons.keyboard_arrow_down),
+                                items: urduFontFamily.map((items) {
+                                  return DropdownMenuItem(
+                                    value: items,
+                                    child: Text(items,
+                                        style: MyTextStyle.heading3),
+                                  );
+                                }).toList(),
+                                onChanged: (newValue) async {
+                                  bloc.changeUrduFamily(newValue);
+                                  snackBar(context, 'Urdu Family Changed!');
+                                  setState(() {});
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Text('Font Size', style: MyTextStyle.heading3),
+                          const Spacer(),
+                          _styledDropdown(
+                            bloc: bloc,
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton(
+                                hint: Padding(
+                                  padding: const EdgeInsets.only(left: 5),
+                                  child: Text('${bloc.urduFontSize.toInt()}'),
+                                ),
+                                icon: const Icon(Icons.keyboard_arrow_down),
+                                items: arabicFontSize.map((items) {
+                                  return DropdownMenuItem(
+                                    value: items,
+                                    child: Text('${items.toInt()}',
+                                        style: MyTextStyle.heading3),
+                                  );
+                                }).toList(),
+                                onChanged: (newValue) async {
+                                  bloc.changeUrduFont(newValue);
+                                  snackBar(context, 'Urdu Font Changed!');
+                                  setState(() {});
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      FittedBox(
+                        child: Text(
+                          'تمام تعریف اللہ کے لیے ہے',
+                          style: TextStyle(
+                              fontSize: bloc.urduFontSize,
+                              fontFamily: bloc.urduFontFamily),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ── PRAYER NOTIFICATIONS ───────────────────────────────────
+                _sectionCard(
+                  bloc: bloc,
+                  title: 'Prayer Notifications (Android)',
+                  child: _notifLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // ─ Master toggle ──
+                            _switchRow(
+                              label: 'Enable Prayer Notifications',
+                              subtitle: 'Master switch for all azan alerts',
+                              value: _globalNotif,
+                              color: bloc.selectedTheme,
+                              onChanged: (v) async {
+                                await SavedPrefernces
+                                    .setPrayerNotificationsEnabled(v);
+                                setState(() => _globalNotif = v);
+                                snackBar(
+                                    context,
+                                    v
+                                        ? 'Notifications enabled'
+                                        : 'Notifications disabled');
+                              },
+                            ),
+
+                            if (_globalNotif) ...[
+                              const Divider(height: 24),
+
+                              // ─ Calculation method ──
+                              Text('Calculation Method',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: bloc.selectedTheme)),
+                              const SizedBox(height: 4),
+                              Text(
+                                '• Karachi: used by all major Pakistani apps\n'
+                                '• Hanafi vs Shafi Asr difference (~1 hr) is correct by Islamic law',
+                                style: TextStyle(
+                                    fontSize: 11, color: Colors.grey[600]),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: bloc.selectedTheme, width: 1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 2),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    value: _calcMethod,
+                                    isExpanded: true,
+                                    items: _calcMethodLabels.entries
+                                        .map((e) => DropdownMenuItem(
+                                              value: e.key,
+                                              child: Text(e.value,
+                                                  style: const TextStyle(
+                                                      fontSize: 14)),
+                                            ))
+                                        .toList(),
+                                    onChanged: (v) async {
+                                      if (v == null) return;
+                                      await SavedPrefernces
+                                          .setCalculationMethod(v);
+                                      setState(() => _calcMethod = v);
+                                      snackBar(context,
+                                          'Calculation method updated — open Prayer Times to recalculate');
+                                    },
+                                  ),
+                                ),
+                              ),
+
+                              const Divider(height: 24),
+
+                              // ─ Per-prayer toggles ──
+                              Text('Notify for each prayer:',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: bloc.selectedTheme)),
+                              const SizedBox(height: 4),
+                              ..._prayerDisplayNames.entries.map((e) {
+                                return _switchRow(
+                                  label: e.value,
+                                  value: _prayerToggles[e.key] ?? true,
+                                  color: bloc.selectedTheme,
+                                  onChanged: (v) async {
+                                    await SavedPrefernces
+                                        .setPrayerNotificationEnabled(e.key, v);
+                                    setState(() => _prayerToggles[e.key] = v);
+                                  },
+                                );
+                              }),
+
+                              const Divider(height: 24),
+
+                              // ─ Azan sound ──
+                              Text('Azan Sound',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: bloc.selectedTheme)),
+                              const SizedBox(height: 4),
+                              if (_customAzanPath != null) ...[
+                                Row(
+                                  children: [
+                                    const Icon(Icons.music_note,
+                                        size: 16, color: Colors.green),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        File(_customAzanPath!).existsSync()
+                                            ? '📁 ${_customAzanPath!.split('/').last}'
+                                            : '⚠️ File not found — reset to default',
+                                        style: const TextStyle(fontSize: 12),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                              ] else
+                                Text(
+                                  'Default: built-in short azan sound',
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.grey[600]),
+                                ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton.icon(
+                                      icon: const Icon(Icons.upload_file),
+                                      label: const Text('Upload MP3'),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: bloc.selectedTheme,
+                                        side: BorderSide(
+                                            color: bloc.selectedTheme),
+                                      ),
+                                      onPressed: _pickCustomAzan,
+                                    ),
+                                  ),
+                                  if (_customAzanPath != null) ...[
+                                    const SizedBox(width: 8),
+                                    OutlinedButton.icon(
+                                      icon: const Icon(Icons.restore),
+                                      label: const Text('Default'),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: Colors.red,
+                                        side:
+                                            const BorderSide(color: Colors.red),
+                                      ),
+                                      onPressed: _resetDefaultSound,
+                                    ),
+                                  ],
+                                ],
+                              ),
+
+                              const Divider(height: 24),
+
+                              // ─ Test button ──
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  icon: _testLoading
+                                      ? const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white))
+                                      : const Icon(Icons.notifications_active),
+                                  label: Text(_testLoading
+                                      ? 'Sending...'
+                                      : '🔔 Send Test Notification'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: bloc.selectedTheme,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                  ),
+                                  onPressed: _testLoading ? null : _sendTest,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                ),
+
+                const SizedBox(height: 20),
               ],
             ),
           ),
         ),
       );
     });
+  }
+
+  // ── helper widgets ────────────────────────────────────────────────────────
+
+  Widget _sectionCard({
+    required ThemeProvider bloc,
+    required String title,
+    required Widget child,
+  }) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title,
+                style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                    color: bloc.selectedTheme)),
+            Divider(color: bloc.selectedTheme),
+            const SizedBox(height: 4),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _styledDropdown({required ThemeProvider bloc, required Widget child}) {
+    return Container(
+      width: 160,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(width: 1, color: bloc.selectedTheme)),
+      child: child,
+    );
+  }
+
+  Widget _switchRow({
+    required String label,
+    String? subtitle,
+    required bool value,
+    required Color color,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: const TextStyle(fontWeight: FontWeight.w500)),
+                if (subtitle != null)
+                  Text(subtitle,
+                      style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+              ],
+            ),
+          ),
+          Switch(
+            value: value,
+            activeColor: color,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
   }
 }

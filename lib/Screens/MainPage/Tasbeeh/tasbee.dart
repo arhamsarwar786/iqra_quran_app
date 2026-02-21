@@ -165,8 +165,8 @@ class _MyWidgetState extends State<Tasbih> {
                           right: 0,
                           child: BouncingButton(
                             onPress: () async {
-                              player.setAsset('assets/sound/beep.wav');
                               value.increment();
+                              player.seek(Duration.zero);
                               player.play();
                             },
                             child: CircleAvatar(

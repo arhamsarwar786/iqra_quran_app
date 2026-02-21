@@ -444,7 +444,8 @@ class AppShare {
                               shareText += '\n\nReference: ${refs.join(", ")}';
                             }
 
-                            shareText += '\n\nDownload IQRA QURAN App';
+                            shareText +=
+                                '\n\nDownload IQRA QURAN App: https://play.google.com/store/apps/details?id=com.devsinntechnologies.iqraquran';
 
                             Share.shareXFiles(
                               [XFile(file.path)],
@@ -739,7 +740,7 @@ class AppShare {
                         Navigator.pop(context);
                         Share.shareXFiles([XFile(file.path)],
                             text:
-                                "Daily Prayer Times for $location\n$date\n\nDownload IQRA QURAN App");
+                                "Daily Prayer Times for $location\n$date\n\nDownload IQRA QURAN App: https://play.google.com/store/apps/details?id=com.devsinntechnologies.iqraquran");
                       },
                       icon: const Icon(Icons.share, size: 18),
                       label: const Text("Share Now"),

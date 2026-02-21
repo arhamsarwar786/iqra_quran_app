@@ -112,4 +112,83 @@ class SavedPrefernces {
     final pref = await SharedPreferences.getInstance();
     return pref.getBool('prayer_notifications_enabled') ?? true;
   }
+
+  ///// Prayer Notifications — per-prayer toggles
+  static const List<String> prayerKeys = [
+    'fajr',
+    'zuhr',
+    'asr',
+    'maghrib',
+    'isha'
+  ];
+
+  static Future<void> setPrayerNotificationEnabled(
+      String prayer, bool enabled) async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.setBool('notif_$prayer', enabled);
+  }
+
+  static Future<bool> getPrayerNotificationEnabled(String prayer) async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getBool('notif_$prayer') ?? true;
+  }
+
+  /// Returns a map like {'fajr': true, 'zuhr': false, ...}
+  static Future<Map<String, bool>> getAllPrayerNotificationToggles() async {
+    final pref = await SharedPreferences.getInstance();
+    return {
+      for (final k in prayerKeys) k: pref.getBool('notif_$k') ?? true,
+    };
+  }
+
+  ///// Custom Azan Sound
+  static Future<void> setCustomAzanPath(String? path) async {
+    final pref = await SharedPreferences.getInstance();
+    if (path == null) {
+      await pref.remove('custom_azan_path');
+    } else {
+      await pref.setString('custom_azan_path', path);
+    }
+  }
+
+  static Future<String?> getCustomAzanPath() async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getString('custom_azan_path');
+  }
+
+  ///// Calculation Method
+  static Future<void> setCalculationMethod(String method) async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.setString('calc_method', method);
+  }
+
+  static Future<String> getCalculationMethod() async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getString('calc_method') ?? 'karachi';
+  }
+
+  ///// Last Read Tracking
+  static setLastRead(Map<String, dynamic> lastReadData) async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.setString('lastRead', jsonEncode(lastReadData));
+  }
+
+  static Future<Map<String, dynamic>?> getLastRead() async {
+    final pref = await SharedPreferences.getInstance();
+    String? data = pref.getString('lastRead');
+    if (data != null) {
+      return jsonDecode(data);
+    }
+    return null;
+  }
+
+  static updateLastReadOffset(double offset) async {
+    final pref = await SharedPreferences.getInstance();
+    String? data = pref.getString('lastRead');
+    if (data != null) {
+      Map<String, dynamic> lastReadData = jsonDecode(data);
+      lastReadData['scrollOffset'] = offset;
+      await pref.setString('lastRead', jsonEncode(lastReadData));
+    }
+  }
 }

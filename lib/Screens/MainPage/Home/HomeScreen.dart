@@ -2,14 +2,17 @@ import 'package:iqra/Models/aya_list_model.dart';
 import 'package:iqra/Models/surah_metadata_model.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
-import 'package:iqra/Screens/MainPage/Quran/Quranview.dart';
+import 'package:iqra/Screens/MainPage/Quran/para_arabic_screen.dart';
+import 'package:iqra/Screens/MainPage/Search/SearchScreen.dart';
 import 'package:iqra/Screens/MainPage/Dua/dua_screen.dart';
 import 'package:iqra/Screens/MainPage/Home/azan/PrayerTime.dart';
 import 'package:iqra/Screens/MainPage/Home/qibal/qibla.dart';
 import 'package:iqra/Screens/MainPage/Tasbeeh/tasbee.dart';
 import 'package:iqra/Utils/share_verse.dart';
+import 'package:iqra/Helper/preference/saved_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:adhan_dart/adhan_dart.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:hijri/hijri_calendar.dart';
@@ -21,9 +24,8 @@ import 'NameofAllah.dart';
 import 'NameofMohammad.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import "package:timezone/data/latest.dart" as tz;
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-
+import 'dart:async';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -50,7 +52,6 @@ class _HomeState extends State<Home> {
     super.initState();
   }
 
-  final HijriCalendar _today = HijriCalendar.fromDate(DateTime.now());
   Aya? _randomAyat;
 
   List<String> imageName = [
@@ -143,8 +144,7 @@ class _HomeState extends State<Home> {
                       ),
                       Positioned(
                         bottom: 0,
-                        child: SearchInQuaran(
-                            today: _today, size: size, bloc: bloc),
+                        child: SearchInQuaran(size: size, bloc: bloc),
                       ),
                     ],
                   ),
@@ -433,7 +433,7 @@ class _HomeState extends State<Home> {
   // quranDailyVerse //
   Widget quranDailyVerse(BuildContext context, Size size, ThemeProvider bloc) {
     if (_randomAyat == null) {
-      return const SizedBox(); // Or a skeleton loader
+      return CircularProgressIndicator(); // Or a skeleton loader
     }
 
     final int surahId = int.tryParse(_randomAyat!.surahId ?? "1") ?? 1;
@@ -454,13 +454,14 @@ class _HomeState extends State<Home> {
       child: InkWell(
         borderRadius: BorderRadius.circular(30),
         onTap: () {
+          final String paraId = _randomAyat!.paraId ?? "1";
           push(
             context,
-            QuranView(
-              suratNumber: surahId,
-              surahName: surahNameArabic,
-              ayatCount: surah?.ayas ?? "0",
+            ParaArabicScreen(
+              parahCount: paraId,
+              parahname: "Para $paraId",
               targetAyatNumber: int.tryParse(_randomAyat!.ayatNumber ?? "0"),
+              targetSurahNumber: surahId,
             ),
           );
         },
@@ -738,243 +739,352 @@ class _HomeState extends State<Home> {
   }
 }
 
-class SearchInQuaran extends StatelessWidget {
-  SearchInQuaran({Key? key, this.today, this.size, this.bloc})
-      : super(key: key);
-  final HijriCalendar? today;
+class SearchInQuaran extends StatefulWidget {
+  const SearchInQuaran({Key? key, this.size, this.bloc}) : super(key: key);
   final Size? size;
   final ThemeProvider? bloc;
 
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: size!.width,
-      // padding: EdgeInsets.symmetric(horizontal: 10),
-      // color: Colors.red,
-      child: Builder(builder: (context) {
-        return Card(
-          elevation: 5,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          color: bloc!.selectedSecondary,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20),
-            child: Column(
-              children: [
-                // CupertinoSearchTextField(
-                //   borderRadius: BorderRadius.circular(20.0),
-                //   backgroundColor: Colors.white,
-                //   placeholder: "Search in Quran",
-                //   prefixIcon: Image.asset(
-                //     "assets/images/searchIcon.png",
-                //     fit: BoxFit.cover,
-                //     // height: 20,
-                //     // width: 20,
-                //   ),
-                // ),
+  State<SearchInQuaran> createState() => _SearchInQuaranState();
+}
 
-                const SizedBox(
-                  height: 10,
+class _SearchInQuaranState extends State<SearchInQuaran> {
+  Timer? _timer;
+  String _prevPrayer = "Loading...";
+  String _nextPrayer = "Loading...";
+  DateTime? _nextPrayerTime;
+  DateTime _now = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrayerTimes();
+    // Run every second for real-time countdown
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) {
+        setState(() => _now = DateTime.now());
+        // Reload prayer times only every minute to save resources
+        if (_now.second == 0) {
+          _loadPrayerTimes();
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadPrayerTimes() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return;
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) return;
+      }
+      if (permission == LocationPermission.deniedForever) return;
+
+      Position position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.medium,
+          timeLimit: const Duration(seconds: 10),
+        );
+      } catch (_) {
+        final last = await Geolocator.getLastKnownPosition();
+        if (last == null) return;
+        position = last;
+      }
+
+      final coordinates = Coordinates(position.latitude, position.longitude);
+      final calcMethod = await SavedPrefernces.getCalculationMethod();
+      final madhab = await SavedPrefernces.getMadhab();
+
+      CalculationParameters params;
+      switch (calcMethod) {
+        case 'mwl':
+          params = CalculationMethod.muslimWorldLeague();
+          break;
+        case 'isna':
+          params = CalculationMethod.northAmerica();
+          break;
+        case 'egypt':
+          params = CalculationMethod.egyptian();
+          break;
+        case 'karachi':
+        default:
+          params = CalculationMethod.karachi();
+      }
+      params.madhab = madhab == 'hanafi' ? Madhab.hanafi : Madhab.shafi;
+
+      final now = DateTime.now().toUtc();
+      final pt = PrayerTimes(
+        coordinates: coordinates,
+        date: now,
+        calculationParameters: params,
+        precision: true,
+      );
+
+      final prayers = <Map<String, dynamic>>[];
+      void add(String name, DateTime? t) {
+        if (t == null) return;
+        prayers.add({"name": name, "time": t.toLocal()});
+      }
+
+      add("Fajr", pt.fajr);
+      add("Zuhr", pt.dhuhr);
+      add("Asr", pt.asr);
+      add("Maghrib", pt.maghrib);
+      add("Isha", pt.isha);
+      prayers.sort(
+          (a, b) => (a["time"] as DateTime).compareTo(b["time"] as DateTime));
+
+      final nowLocal = DateTime.now();
+      Map<String, dynamic>? prev;
+      Map<String, dynamic>? next;
+
+      for (final p in prayers) {
+        final t = p["time"] as DateTime;
+        if (t.isBefore(nowLocal)) {
+          prev = p;
+        } else if (next == null) {
+          next = p;
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _now = nowLocal;
+          _prevPrayer = prev?["name"] ?? prayers.last["name"];
+          _nextPrayer = next?["name"] ?? prayers.first["name"];
+          _nextPrayerTime = next?["time"] ??
+              prayers.first["time"].add(const Duration(days: 1));
+        });
+      }
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bloc = widget.bloc!;
+    final size = widget.size!;
+    final today = HijriCalendar.fromDate(_now);
+
+    String countdown = "";
+    if (_nextPrayerTime != null) {
+      final diff = _nextPrayerTime!.difference(_now);
+      if (!diff.isNegative) {
+        int h = diff.inHours;
+        int m = diff.inMinutes.remainder(60);
+        int s = diff.inSeconds.remainder(60);
+        countdown =
+            "${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}";
+      }
+    }
+
+    return Container(
+      width: size.width,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              bloc.selectedTheme,
+              bloc.selectedTheme.withOpacity(0.85),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: bloc.selectedTheme.withOpacity(0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: Stack(
+            children: [
+              // Mosque background decoration
+              Positioned(
+                right: -30,
+                bottom: -20,
+                child: Icon(
+                  Icons.mosque_rounded,
+                  size: 180,
+                  color: Colors.white.withOpacity(0.1),
                 ),
-                FittedBox(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.calendar_month,
-                                color: bloc!.selectedTheme,
-                              ),
-                              const SizedBox(
-                                width: 5,
-                              ),
-                              Text(
-                                "Date",
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: size!.height / 96,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const SizedBox(
-                                height: 20,
-                                width: 20,
-                              ),
-                              const SizedBox(
-                                width: 5,
-                              ),
-                              Text(
-                                DateFormat('EEEE, d MMM, yyyy')
-                                    .format(DateTime.now()),
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.normal,
-                                  // fontStyle: FontStyle.italic
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: size!.height / 96,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const SizedBox(
-                                height: 20,
-                                width: 20,
-                              ),
-                              const SizedBox(
-                                width: 5,
-                              ),
-                              Text(
-                                today!.toFormat("dd MMMM yyyy"),
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.normal,
-                                  // fontStyle: FontStyle.italic
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      /////////////////////////////////////
-                      Container(
-                        margin: const EdgeInsets.only(left: 10),
-                        color: Theme.of(context).primaryColor,
-                        height: size!.height / 8,
-                        width: 2,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    // Search Bar
+                    InkWell(
+                      onTap: () => push(context, const SearchScreen()),
+                      child: Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(15),
+                          border:
+                              Border.all(color: Colors.white.withOpacity(0.2)),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        child: Row(
                           children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.arrow_left_sharp,
-                                  color: bloc!.selectedTheme,
-                                  size: 30,
-                                ),
-                                const SizedBox(
-                                  width: 2,
-                                ),
-                                Text(
-                                  "Previous",
-                                  style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
+                            const Icon(Icons.search_rounded,
+                                color: Colors.white, size: 20),
+                            const SizedBox(width: 12),
+                            Text(
+                              "Search Quran...",
+                              style: TextStyle(
+                                  color: Colors.white.withOpacity(0.8),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500),
                             ),
-                            SizedBox(
-                              height: size!.height / 96,
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const SizedBox(
-                                  height: 12,
-                                  width: 12,
-                                ),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                Text(
-                                  "Fajar",
-                                  style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
-                                    fontWeight: FontWeight.normal,
-                                    // fontStyle: FontStyle.italic
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: size!.height / 96,
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.arrow_right_sharp,
-                                  color: bloc!.selectedTheme,
-                                  size: 30,
-                                ),
-                                const SizedBox(
-                                  width: 2,
-                                ),
-                                Text(
-                                  "Next",
-                                  style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
-                                    fontWeight: FontWeight.w600,
-                                    // fontStyle: FontStyle.italic
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: size!.height / 96,
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const SizedBox(
-                                  height: 12,
-                                  width: 12,
-                                ),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                Text(
-                                  "Duhar",
-                                  style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
-                                    fontWeight: FontWeight.normal,
-                                    // fontStyle: FontStyle.italic
-                                  ),
-                                ),
-                              ],
-                            ),
+                            const Spacer(),
+                            Icon(Icons.mic_none_rounded,
+                                color: Colors.white.withOpacity(0.9), size: 18),
                           ],
                         ),
                       ),
-                      const SizedBox(
-                        width: 20,
+                    ),
+                    const SizedBox(height: 25),
+                    // Content Row
+                    IntrinsicHeight(
+                      child: Row(
+                        children: [
+                          // Left: Date
+                          Expanded(
+                            flex: 11,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.calendar_today_rounded,
+                                        size: 14,
+                                        color: Colors.white.withOpacity(0.7)),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      "TODAY",
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 1.5,
+                                        color: Colors.white.withOpacity(0.7),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  DateFormat('EEEE, d MMM').format(_now),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  today.toFormat("dd MMMM yyyy"),
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.8),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Vertical Divider
+                          Container(
+                            width: 1,
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 15, vertical: 5),
+                            color: Colors.white.withOpacity(0.2),
+                          ),
+                          // Right: Prayer
+                          Expanded(
+                            flex: 13,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.access_time_rounded,
+                                        size: 14,
+                                        color: Colors.white.withOpacity(0.7)),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      "UPCOMING: $_nextPrayer",
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 0.5,
+                                        color: Colors.white.withOpacity(0.9),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                ShaderMask(
+                                  shaderCallback: (bounds) =>
+                                      const LinearGradient(
+                                    colors: [Colors.white, Color(0xFFE0E0E0)],
+                                  ).createShader(bounds),
+                                  child: Text(
+                                    countdown,
+                                    style: const TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w900,
+                                      fontFamily: 'Roboto',
+                                      letterSpacing: -1,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    Text(
+                                      "Prev: ",
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.white.withOpacity(0.6)),
+                                    ),
+                                    Text(
+                                      _prevPrayer,
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white.withOpacity(0.9)),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
-      }),
+        ),
+      ),
     );
   }
 }

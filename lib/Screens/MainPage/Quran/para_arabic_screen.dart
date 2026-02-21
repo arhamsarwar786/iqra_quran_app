@@ -15,15 +15,26 @@ import '../../../Widgets/surah_header_card.dart';
 import '../../../Widgets/quran_sign_widget.dart';
 import '../../../Utils/bottom_sheet_preview.dart';
 import '../../../Widgets/auto_scroll_speed_dialog.dart';
+import '../../../Helper/preference/saved_preferences.dart';
 import '../Drawer/setting_screen.dart';
 
 class ParaArabicScreen extends StatefulWidget {
   const ParaArabicScreen(
-      {super.key, this.para, this.ayatInPara, this.parahCount, this.parahname});
+      {super.key,
+      this.para,
+      this.ayatInPara,
+      this.parahCount,
+      this.parahname,
+      this.targetAyatNumber,
+      this.targetSurahNumber,
+      this.initialScrollOffset});
   final String? parahCount;
   final int? ayatInPara;
   final ParaModel.Para? para;
   final String? parahname;
+  final int? targetAyatNumber;
+  final int? targetSurahNumber;
+  final double? initialScrollOffset;
   @override
   State<ParaArabicScreen> createState() => _ParaArabicScreenState();
 }
@@ -34,6 +45,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   bool _showAppbar = true;
   bool isScrollingDown = true;
   bool isAutoScrolling = false;
+  bool _isScrollPaused = false; // finger is on screen while auto-scroll active
   double autoScrollSpeed = 1.0;
 
   List<Widget> paraArabicScreenWidget = [];
@@ -41,6 +53,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   SurahMetadata? firstSurahMetadata;
   SurahMetadata? currentSurahMetadata;
   Map<String, GlobalKey> surahHeaderKeys = {};
+  bool _hasInitialScrolled = false;
 
   Future<List> loadParaView() async {
     final provider = context.read<QuranDataProvider>();
@@ -61,14 +74,20 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     currentSurahMetadata = null;
 
     List<TextSpan> textSpanChildren = [];
+    List<int> currentBatchAyats = []; // Track ayats in current block
     String? currentSurahId;
 
     for (var aya in listAyat) {
-      // Check for Surah change
       if (currentSurahId != aya.surahId) {
-        // Flush current text block before showing Surah card
         if (textSpanChildren.isNotEmpty) {
+          GlobalKey? keyForThisBlock;
+          if (_highlightedAyah != null &&
+              currentBatchAyats.contains(_highlightedAyah)) {
+            keyForThisBlock = GlobalKey();
+            _targetKey = keyForThisBlock;
+          }
           paraArabicScreenWidget.add(RichText(
+            key: keyForThisBlock,
             text: TextSpan(
               children: List.from(textSpanChildren),
               style: TextStyle(
@@ -78,6 +97,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
             ),
           ));
           textSpanChildren.clear();
+          currentBatchAyats.clear();
         }
 
         currentSurahId = aya.surahId;
@@ -104,11 +124,21 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       if (aya.ayatNumber == "0")
         continue; // Skip Bismillah since it's in the card
 
+      currentBatchAyats.add(aya.ayatNumberInt);
       // Add the ayah text (already contains inline numbers and markers)
+      bool isTargetAyat = _highlightedAyah != null &&
+          aya.ayatNumberInt == _highlightedAyah &&
+          (widget.targetSurahNumber == null ||
+              aya.surahId == widget.targetSurahNumber.toString());
+
       textSpanChildren.add(
         TextSpan(
           text: "${(aya.arabicText).trim()} ",
-          style: const TextStyle(color: Colors.black),
+          style: TextStyle(
+            color: Colors.black,
+            backgroundColor:
+                isTargetAyat ? bloc.selectedTheme.withOpacity(0.3) : null,
+          ),
           recognizer: TapGestureRecognizer()
             ..onTap = () {
               SHEET.bottomSheetPreview(context, aya, bloc);
@@ -127,7 +157,14 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       if (isSajda || isManzil || isRuoEnd || isArba || isNisf || isSalsa) {
         // Flush current text block
         if (textSpanChildren.isNotEmpty) {
+          GlobalKey? keyForThisBlock;
+          if (_highlightedAyah != null &&
+              currentBatchAyats.contains(_highlightedAyah)) {
+            keyForThisBlock = GlobalKey();
+            _targetKey = keyForThisBlock;
+          }
           paraArabicScreenWidget.add(RichText(
+            key: keyForThisBlock,
             text: TextSpan(
               children: List.from(textSpanChildren),
               style: TextStyle(
@@ -137,6 +174,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
             ),
           ));
           textSpanChildren.clear();
+          currentBatchAyats.clear();
         }
 
         // Determine consolidated content for the sign widget
@@ -188,7 +226,15 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
     // Flush any remaining ayahs
     if (textSpanChildren.isNotEmpty) {
+      GlobalKey? keyForThisBlock;
+      if (_highlightedAyah != null &&
+          currentBatchAyats.contains(_highlightedAyah)) {
+        keyForThisBlock = GlobalKey();
+        _targetKey = keyForThisBlock;
+      }
+
       paraArabicScreenWidget.add(RichText(
+        key: keyForThisBlock,
         text: TextSpan(
           children: textSpanChildren,
           style: TextStyle(
@@ -200,7 +246,43 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     }
 
     setState(() {});
+
+    // Trigger scroll if target key is set
+    if (widget.initialScrollOffset != null && !_hasInitialScrolled) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollViewController!.hasClients) {
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (_scrollViewController!.hasClients) {
+              _scrollViewController!.jumpTo(widget.initialScrollOffset!);
+            }
+          });
+        }
+        _hasInitialScrolled = true;
+      });
+    } else if (_targetKey != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_targetKey!.currentContext != null) {
+          Scrollable.ensureVisible(
+            _targetKey!.currentContext!,
+            duration: Duration.zero,
+            alignment: 0.1,
+          );
+
+          Future.delayed(const Duration(seconds: 3), () {
+            if (mounted) {
+              setState(() {
+                _highlightedAyah = null;
+                viewMaker();
+              });
+            }
+          });
+        }
+      });
+    }
   }
+
+  int? _highlightedAyah;
+  GlobalKey? _targetKey;
 
   void _updateCurrentSurah() {
     if (firstSurahMetadata == null) return;
@@ -238,6 +320,16 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   @override
   void initState() {
     super.initState();
+    _highlightedAyah = widget.targetAyatNumber;
+
+    // Save as last read
+    SavedPrefernces.setLastRead({
+      "type": "para",
+      "id": widget.parahCount,
+      "name": widget.parahname,
+      "count": widget.ayatInPara?.toString(),
+    });
+
     loadParaView().then((val) {
       listAyat = List<Aya>.from(val);
       viewMaker();
@@ -317,10 +409,28 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     });
   }
 
+  /// Called by user's finger going DOWN — pause the ongoing animation
+  void _pauseAutoScrollForTouch() {
+    if (!isAutoScrolling) return;
+    // Stop the in-flight animation by jumping to the current position.
+    // isAutoScrolling stays true so we know to resume on finger-up.
+    _scrollViewController!.jumpTo(_scrollViewController!.position.pixels);
+    _isScrollPaused = true;
+  }
+
+  /// Called when the user lifts finger — resume from where we paused.
+  void _resumeAutoScrollAfterTouch() {
+    if (!isAutoScrolling || !_isScrollPaused) return;
+    _isScrollPaused = false;
+    _startAutoScroll();
+  }
+
+  /// Only called by the STOP button — fully cancels auto-scroll.
   void _stopAutoScroll() {
     _scrollViewController!.jumpTo(_scrollViewController!.position.pixels);
     setState(() {
       isAutoScrolling = false;
+      _isScrollPaused = false;
       _showAppbar = true;
       isScrollingDown = false;
     });
@@ -390,12 +500,12 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                       label: "Setting")
                 ],
               ),
-        body: GestureDetector(
-          onVerticalDragStart: (details) {
-            if (isAutoScrolling) {
-              _stopAutoScroll();
-            }
-          },
+        body: Listener(
+          // Listener fires for ALL touch events — more reliable than GestureDetector
+          // for grabbing the screen while an animation is running.
+          onPointerDown: (_) => _pauseAutoScrollForTouch(),
+          onPointerUp: (_) => _resumeAutoScrollAfterTouch(),
+          onPointerCancel: (_) => _resumeAutoScrollAfterTouch(),
           child: NestedScrollView(
             headerSliverBuilder:
                 (BuildContext context, bool innerBoxIsScrolled) {
@@ -462,14 +572,23 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
               padding: const EdgeInsets.only(top: 5, bottom: 20),
               child: Directionality(
                 textDirection: TextDirection.rtl,
-                child: SingleChildScrollView(
-                  controller: _scrollViewController,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                        horizontal: 15, vertical: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: paraArabicScreenWidget,
+                child: NotificationListener<ScrollEndNotification>(
+                  onNotification: (scrollEnd) {
+                    if (scrollEnd.metrics.axis == Axis.vertical) {
+                      SavedPrefernces.updateLastReadOffset(
+                          scrollEnd.metrics.pixels);
+                    }
+                    return false;
+                  },
+                  child: SingleChildScrollView(
+                    controller: _scrollViewController,
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: paraArabicScreenWidget,
+                      ),
                     ),
                   ),
                 ),
