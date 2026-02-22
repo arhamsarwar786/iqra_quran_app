@@ -17,6 +17,7 @@ import '../../../Utils/bottom_sheet_preview.dart';
 import '../../../Widgets/auto_scroll_speed_dialog.dart';
 import '../../../Helper/preference/saved_preferences.dart';
 import '../Drawer/setting_screen.dart';
+import 'translation/parah_translation_screen.dart';
 
 class ParaArabicScreen extends StatefulWidget {
   const ParaArabicScreen(
@@ -141,7 +142,8 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
           ),
           recognizer: TapGestureRecognizer()
             ..onTap = () {
-              SHEET.bottomSheetPreview(context, aya, bloc);
+              SHEET.bottomSheetPreview(
+                  context, listAyat, listAyat.indexOf(aya), bloc);
             },
         ),
       );
@@ -450,55 +452,90 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       return Scaffold(
         bottomNavigationBar: isScrollingDown
             ? const SizedBox()
-            : BottomNavigationBar(
-                backgroundColor: bloc.selectedTheme,
-                selectedItemColor: Colors.white,
-                unselectedItemColor: Colors.white,
-                items: [
-                  BottomNavigationBarItem(
-                      icon: InkWell(
-                          onTap: () {},
-                          child: const Icon(Icons.book, color: Colors.white)),
-                      label: "Translations"),
-                  BottomNavigationBarItem(
-                      icon: InkWell(
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AutoScrollSpeedDialog(
-                                currentSpeedFactor: autoScrollSpeed,
-                                isScrolling: isAutoScrolling,
-                                onSpeedChanged: (val) {
-                                  autoScrollSpeed = val;
-                                },
-                                onStart: () {
-                                  setState(() {
-                                    isAutoScrolling = true;
-                                  });
-                                  _startAutoScroll();
-                                },
-                                onStop: () {
-                                  _stopAutoScroll();
-                                },
-                              ),
-                            );
+            : Theme(
+                data: Theme.of(context).copyWith(
+                  canvasColor: bloc.selectedTheme,
+                ),
+                child: BottomNavigationBar(
+                  backgroundColor: bloc.selectedTheme,
+                  selectedItemColor: Colors.white,
+                  unselectedItemColor: Colors.white.withOpacity(0.7),
+                  currentIndex: 0,
+                  type: BottomNavigationBarType.fixed,
+                  selectedFontSize: 12,
+                  unselectedFontSize: 12,
+                  onTap: (index) {
+                    if (index == 0) {
+                      push(
+                          context,
+                          ParahTranslationScreen(
+                            parahCount: widget.parahCount,
+                            parahname: widget.parahname,
+                            ayatInPara: widget.ayatInPara,
+                            para: widget.para,
+                          ));
+                    } else if (index == 1) {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AutoScrollSpeedDialog(
+                          currentSpeedFactor: autoScrollSpeed,
+                          isScrolling: isAutoScrolling,
+                          onSpeedChanged: (val) {
+                            autoScrollSpeed = val;
                           },
-                          child: Icon(
-                            isAutoScrolling
-                                ? Icons.stop_circle_outlined
-                                : Icons.fit_screen_outlined,
-                            color: Colors.white,
-                          )),
-                      label: isAutoScrolling ? "Stop" : "Auto Scroll"),
-                  BottomNavigationBarItem(
-                      icon: InkWell(
-                        onTap: () {
-                          push(context, const SettingScreen());
-                        },
-                        child: const Icon(Icons.settings, color: Colors.white),
+                          onStart: () {
+                            setState(() {
+                              isAutoScrolling = true;
+                            });
+                            _startAutoScroll();
+                          },
+                          onStop: () {
+                            _stopAutoScroll();
+                          },
+                        ),
+                      );
+                    } else if (index == 2) {
+                      push(context, const SettingScreen());
+                    }
+                  },
+                  items: [
+                    BottomNavigationBarItem(
+                      icon: Padding(
+                        padding: const EdgeInsets.only(bottom: 4.0),
+                        child: Icon(
+                          Icons.menu_book_rounded,
+                          color: Colors.white,
+                          size: 26,
+                        ),
                       ),
-                      label: "Setting")
-                ],
+                      label: "Translation",
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Padding(
+                        padding: const EdgeInsets.only(bottom: 4.0),
+                        child: Icon(
+                          isAutoScrolling
+                              ? Icons.stop_circle_rounded
+                              : Icons.fit_screen_rounded,
+                          color: Colors.white,
+                          size: 26,
+                        ),
+                      ),
+                      label: isAutoScrolling ? "Stop" : "Auto Scroll",
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Padding(
+                        padding: const EdgeInsets.only(bottom: 4.0),
+                        child: Icon(
+                          Icons.settings_rounded,
+                          color: Colors.white,
+                          size: 26,
+                        ),
+                      ),
+                      label: "Setting",
+                    ),
+                  ],
+                ),
               ),
         body: Listener(
           // Listener fires for ALL touch events — more reliable than GestureDetector

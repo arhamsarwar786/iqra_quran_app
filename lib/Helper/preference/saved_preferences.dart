@@ -191,4 +191,15 @@ class SavedPrefernces {
       await pref.setString('lastRead', jsonEncode(lastReadData));
     }
   }
+
+  ///// Translation Selection
+  static setSelectedTranslation(String? type) async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.setString('selectedTranslation', type ?? 'irfan');
+  }
+
+  static Future<String> getSelectedTranslation() async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getString('selectedTranslation') ?? 'irfan';
+  }
 }

@@ -16,7 +16,7 @@ class ThemeProvider extends ChangeNotifier {
   var arabicFontSize = 30.0;
   // Urdu
   String urduFontFamily = "nastaleeq";
-var urduFontSize = 25.0;
+  var urduFontSize = 25.0;
 
   getSelectedTheme() async {
     var theme = await SavedPrefernces.getTheme();
@@ -88,5 +88,20 @@ var urduFontSize = 25.0;
   changeUrduFamily(data) {
     SavedPrefernces.setUrduFontFamily(data);
     getSelectedUrduFamily();
+  }
+
+  /// Translation
+  String selectedTranslation =
+      "irfan"; // irfan or hind (irfan is Irfan-ul-Quran)
+
+  getSelectedTranslation() async {
+    var data = await SavedPrefernces.getSelectedTranslation();
+    selectedTranslation = data;
+    notifyListeners();
+  }
+
+  changeTranslation(data) {
+    SavedPrefernces.setSelectedTranslation(data);
+    getSelectedTranslation();
   }
 }
