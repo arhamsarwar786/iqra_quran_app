@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:hijri/hijri_calendar.dart';
 import '../../../widgets.dart';
 import '../Drawer/Drawerr Screen.dart';
+import '../Drawer/About Us.dart';
 import '../Khalima/kalma_screen.dart';
 import '../main_screen.dart';
 import 'NameofAllah.dart';
@@ -110,7 +111,9 @@ class _HomeState extends State<Home> {
                 icon: const Icon(Icons.menu)),
             actions: [
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  push(context, const Aboutus());
+                },
                 child: Image.asset("assets/images/infoIcon.png"),
               ),
               // IconButton(onPressed: (){

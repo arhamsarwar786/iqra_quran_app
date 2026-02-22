@@ -1,0 +1,86 @@
+{
+    "greeting": {
+        "en": "Assalamu Alaikum wa Rahmatullahi wa Barakatuh",
+        "ur": "السلام علیکم و رحمتہ اللہ و برکاتہ"
+    },
+    "intro": {
+        "en": "Welcome to IQRA QURAN, an Islamic mobile application designed to provide essential religious content in a structured, accessible, and easy-to-use digital format. The app is inspired by the Qur’anic command:",
+        "ur": "اقراء قرآن میں خوش آمدید، ایک اسلامی موبائل ایپلی کیشن جو ضروری مذہبی مواد کو ایک منظم، قابل رسائی اور استعمال میں آسان ڈیجیٹل فارمیٹ میں فراہم کرنے کے لیے بنائی گئی ہے۔ یہ ایپلی کیشن قرآنی حکم سے متاثر ہے:"
+    },
+    "quotes": [
+        {
+            "en": "“Read in the name of your Lord who created.”",
+            "ur": "“پڑھ اپنے رب کے نام سے جس نے پیدا کیا۔”",
+            "ref_en": "(Qur’an 96:1)",
+            "ref_ur": "(القرآن 96:1)"
+        },
+        {
+            "en": "“Allah intends for you ease and does not intend for you hardship.”",
+            "ur": "“اللہ تمہارے لیے آسانی چاہتا ہے اور تمہارے لیے سختی نہیں چاہتا۔”",
+            "ref_en": "(Qur’an 2:185)",
+            "ref_ur": "(القرآن 2:185)"
+        },
+        {
+            "en": "“This is a Book We have revealed to you so that people may reflect upon its verses.”",
+            "ur": "“یہ ایک ایسی کتاب ہے جو ہم نے آپ کی طرف نازل کی ہے تاکہ لوگ اس کی آیات پر غور کریں۔”",
+            "ref_en": "(Qur’an 38:29)",
+            "ref_ur": "(القرآن 38:29)"
+        },
+        {
+            "en": "“And to Allah belong the most beautiful names, so call upon Him by them.”",
+            "ur": "“اور اللہ ہی کے لیے بہترین نام ہیں، پس اسے ان کے ذریعے پکارو۔”",
+            "ref_en": "(Qur’an 7:180)",
+            "ref_ur": "(القرآن 7:180)"
+        },
+        {
+            "en": "“Establish prayer for My remembrance.”",
+            "ur": "“میری یاد کے لیے نماز قائم کرو۔”",
+            "ref_en": "(Qur’an 20:14)",
+            "ref_ur": "(القرآن 20:14)"
+        }
+    ],
+    "general_content": {
+        "en": "IQRA QURAN brings together commonly used Islamic resources in one place to support daily learning, reflection, and worship. The application is carefully designed to serve users who are seeking organized Islamic content for personal reference and practice.",
+        "ur": "اقراء قرآن روزانہ سیکھنے، غور و فکر اور عبادت میں مدد کے لیے عام طور پر استعمال ہونے والے اسلامی وسائل کو ایک جگہ جمع کرتا ہے۔ ایپلی کیشن کو ان صارفین کے لیے احتیاط سے ڈیزائن کیا گیا ہے جو ذاتی حوالہ اور مشق کے لیے منظم اسلامی مواد کے خواہاں ہیں۔"
+    },
+    "sections": [
+        {
+            "title_en": "User-Friendly Interface",
+            "title_ur": "صارف دوست انٹرفیس",
+            "content_en": "A key focus of IQRA QURAN is its user-friendly interface. The app features a clean layout, simple navigation, and clearly labeled sections so users of all age groups can use it comfortably without technical difficulty. The design prioritizes ease of access and readability, helping users find relevant content quickly and efficiently.",
+            "content_ur": "اقراء قرآن کی ایک اہم توجہ اس کا صارف دوست انٹرفیس ہے۔ ایپلیکیشن میں ایک صاف ستھرا ڈیزائن، سادہ نیویگیشن، اور واضح طور پر لیبل والے سیکشنز شامل ہیں تاکہ تمام عمر کے صارفین اسے تکنیکی دشواری کے بغیر آرام سے استعمال کر سکیں۔ ڈیزائن رسائی اور پڑھنے کی آسانی کو ترجیح دیتا ہے، جس سے صارفین کو متعلقہ مواد جلدی اور مؤثر طریقے سے تلاش کرنے میں مدد ملتی ہے۔"
+        },
+        {
+            "title_en": "100% Offline Access",
+            "title_ur": "100% آف لائن رسائی",
+            "content_en": "IQRA QURAN works 100% offline, allowing users to access its core features without an internet connection. This makes the app practical for use while traveling or in areas with limited connectivity, reflecting the principle of ease mentioned in the Qur’an:",
+            "content_ur": "اقراء قرآن 100% آف لائن کام کرتا ہے، جس سے صارفین انٹرنیٹ کنکشن کے بغیر اس کی بنیادی خصوصیات تک رسائی حاصل کر سکتے ہیں۔ یہ ایپ سفر کے دوران یا محدود کنیکٹیویٹی والے علاقوں میں استعمال کے لیے عملی بناتی ہے، جو قرآن میں ذکر کردہ آسانی کے اصول کی عکاسی کرتی ہے:"
+        },
+        {
+            "title_en": "Core Features",
+            "title_ur": "بنیادی خصوصیات",
+            "content_1_en": "The app includes Qur’an translations to assist users in understanding the meaning of the verses and reflecting upon them, as mentioned:",
+            "content_1_ur": "ایپ میں قرآن کے تراجم شامل ہیں تاکہ صارفین کو آیات کے معنی سمجھنے اور ان پر غور کرنے میں مدد ملے، جیسا کہ ذکر کیا گیا ہے:",
+            "content_2_en": "IQRA QURAN also provides the Names of Allah (Asma-ul-Husna) and the Names and attributes of Prophet Muhammad ﷺ, presented for educational and remembrance purposes, in line with:",
+            "content_2_ur": "اقراء قرآن اللہ کے نام (اسماء الحسنیٰ) اور حضرت محمد ﷺ के نام اور صفات بھی فراہم کرتا ہے، جو تعلیمی اور ذکر کے مقاصد کے لیے پیش کیے گئے ہیں، اس کے مطابق:",
+            "content_3_en": "To support daily religious routines, IQRA QURAN offers prayer time information, a structured Namaz section, a collection of daily and Masnoon Duas, and a Tasbih feature for dhikr. These tools are designed to help users stay organized and consistent in their personal practices:",
+            "content_3_ur": "روزانہ کی مذہبی روٹین کو سہارا دینے کے لیے، اقراء قرآن نماز کے اوقات کی معلومات، ایک منظم نماز کا سیکشن، روزانہ اور مسنون دعاؤں کا مجموعہ، اور ذکر کے لیے تسبیح کی خصوصیت پیش کرتا ہے۔ یہ ٹولز صارفین کو ان کے ذاتی اعمال میں باقاعدگی برقرار رکھنے میں مدد دینے کے لیے بنائے گئے ہیں:"
+        }
+    ],
+    "mission": {
+        "title_en": "Our Mission",
+        "title_ur": "ہمارا مشن",
+        "content_en": "Our mission is to provide reliable Islamic content in a simple and accessible digital form, making it easier for users to engage with daily religious practices. IQRA QURAN aims to support learning, remembrance, and consistency by offering essential features in one offline-ready application with a user-friendly design.",
+        "content_ur": "ہمارا مشن ایک سادہ اور قابل رسائی ڈیجیٹل فارمیٹ میں قابل اعتبار اسلامی مواد فراہم کرنا ہے، جس سے صارفین کے لیے روزانہ کے مذہبی اعمال کے ساتھ جڑنا آسان ہو جائے۔ اقراء قرآن صارف دوست ڈیزائن کے ساتھ ایک آف لائن ایپلی کیشن میں ضروری خصوصیات پیش کر کے سیکھنے، ذکر اور مستقل مزاجی میں مدد کرنا چاہتا ہے۔"
+    },
+    "vision": {
+        "title_en": "Our Vision",
+        "title_ur": "ہمارا وژن",
+        "content_en": "Our vision is to become a trusted Islamic companion app that serves users globally by combining authenticity, simplicity, and accessibility. We aim to continuously improve IQRA QURAN by enhancing usability, expanding beneficial features, and maintaining respect for Islamic values while meeting modern app standards.",
+        "content_ur": "ہمارا وژن ایک قابل اعتماد اسلامی ایپلی کیشن بننا ہے جو سچائی، سادگی اور رسائی کو یکجا کر کے عالمی سطح پر صارفین کی خدمت کرے۔ ہمارا مقصد استعمال میں آسانی کو بہتر بنا کر، فائدہ مند خصوصیات کو بڑھا کر، اور جدید ایپ کے معیار کو پورا کرتے ہوئے اسلامی اقدار کے احترام کو برقرار رکھتے ہوئے اقراء قرآن کو مسلسل بہتر بنانا ہے۔"
+    },
+    "footer": {
+        "en": "All content within IQRA QURAN is presented respectfully and clearly, with the intention of being informative, supportive, and easy to reference.",
+        "ur": "اقراء قرآن کے اندر تمام مواد احترام اور واضح طور پر پیش کیا گیا ہے، جس کا مقصد معلوماتی، معاون اور حوالہ دینے میں آسان ہونا ہے۔"
+    }
+}
