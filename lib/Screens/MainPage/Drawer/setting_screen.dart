@@ -320,17 +320,10 @@ class _SettingScreenState extends State<SettingScreen> {
                                             style: TextStyle(fontSize: 13)),
                                       )),
                                   DropdownMenuItem(
-                                      value: "hind",
+                                      value: "furqan",
                                       child: Padding(
                                         padding: EdgeInsets.only(left: 8.0),
-                                        child: Text("Tarjuma-e-Hind",
-                                            style: TextStyle(fontSize: 13)),
-                                      )),
-                                  DropdownMenuItem(
-                                      value: "pak",
-                                      child: Padding(
-                                        padding: EdgeInsets.only(left: 8.0),
-                                        child: Text("Tarjuma-e-Pak",
+                                        child: Text("Furqan-ul-Hameed",
                                             style: TextStyle(fontSize: 13)),
                                       )),
                                 ],
@@ -377,9 +370,7 @@ class _SettingScreenState extends State<SettingScreen> {
                             Text(
                               bloc.selectedTranslation == "irfan"
                                   ? "(یہ) وہ عظیم کتاب ہے جس میں کسی شک کی گنجائش نہیں، (یہ) پرہیزگاروں کے لیے ہدایت ہے۔"
-                                  : bloc.selectedTranslation == "hind"
-                                      ? "یہ وہ کتاب ہے جس میں کوئی شک نہیں، ہدایت ہے ان لوگوں کے لیے جو تقویٰ اختیار کریں۔"
-                                      : "یہ وہ کتاب (عظیم) ہے جس میں کوئی بھی شک (کی جگہ) نہیں، یہ ہدایت ہے تقویٰ والوں کے لیے۔",
+                                  : "یہ وہ کتاب ہے جس میں کوئی شک نہیں، (یہ) ہدایت ہے تقویٰ والوں کے لیے۔",
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 fontSize: bloc.urduFontSize - 5,

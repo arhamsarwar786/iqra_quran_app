@@ -14,6 +14,7 @@ import '../../../Widgets/surah_header_card.dart';
 import '../../../Widgets/quran_sign_widget.dart';
 import '../../../Helper/preference/saved_preferences.dart';
 import '../../../Utils/bottom_sheet_preview.dart';
+import '../../../Widgets/auto_scroll_speed_dialog.dart';
 import '../Drawer/setting_screen.dart';
 
 class QuranView extends StatefulWidget {
@@ -73,7 +74,8 @@ class _QuranViewState extends State<QuranView> {
           ),
           recognizer: TapGestureRecognizer()
             ..onTap = () {
-              SHEET.bottomSheetPreview(context, aya, bloc);
+              SHEET.bottomSheetPreview(
+                  context, listAyat, listAyat.indexOf(aya), bloc);
             },
         ),
       );
@@ -332,69 +334,101 @@ class _QuranViewState extends State<QuranView> {
             backgroundColor: Colors.white,
             bottomNavigationBar: isScrollingDown
                 ? const SizedBox()
-                : BottomNavigationBar(
-                    backgroundColor: bloc.selectedTheme,
-                    items: [
-                      BottomNavigationBarItem(
-                          icon: InkWell(
-                              onTap: () {
-                                push(
-                                    context,
-                                    SurahTranslationScreen(
-                                      ayatCount: widget.ayatCount.toString(),
-                                      ayatList: listAyat,
-                                      suratNumber: widget.suratNumber,
-                                      surahName: widget.surahName,
-                                    ));
-                              },
-                              child: const Icon(Icons.book)),
-                          label: "Translation"),
-                      BottomNavigationBarItem(
-                          icon: InkWell(
-                              onTap: () {
+                : Theme(
+                    data: Theme.of(context).copyWith(
+                      canvasColor: bloc.selectedTheme,
+                    ),
+                    child: BottomNavigationBar(
+                      backgroundColor: bloc.selectedTheme,
+                      elevation: 10,
+                      selectedItemColor: Colors.white,
+                      unselectedItemColor: Colors.white,
+                      selectedFontSize: 12,
+                      unselectedFontSize: 12,
+                      selectedLabelStyle: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                      unselectedLabelStyle:
+                          const TextStyle(color: Colors.white),
+                      currentIndex: 0,
+                      type: BottomNavigationBarType.fixed,
+                      onTap: (index) {
+                        if (index == 0) {
+                          push(
+                              context,
+                              SurahTranslationScreen(
+                                ayatCount: widget.ayatCount.toString(),
+                                ayatList: listAyat,
+                                suratNumber: widget.suratNumber,
+                                surahName: widget.surahName,
+                              ));
+                        } else if (index == 1) {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AutoScrollSpeedDialog(
+                              currentSpeedFactor: autoScrollSpeed,
+                              isScrolling: isAutoScrolling,
+                              onSpeedChanged: (val) {
+                                setState(() {
+                                  autoScrollSpeed = val;
+                                });
                                 if (isAutoScrolling) {
-                                  // Already scrolling — open dialog to change speed or stop
-                                  showDialog(
-                                    context: context,
-                                    builder: (ctx) => AlertDialog(
-                                      title: const Text('Auto Scroll'),
-                                      content: const Text(
-                                          'Auto scroll is running. Do you want to stop?'),
-                                      actions: [
-                                        TextButton(
-                                            onPressed: () => Navigator.pop(ctx),
-                                            child: const Text('Continue')),
-                                        TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(ctx);
-                                              _stopAutoScroll();
-                                            },
-                                            child: const Text('Stop',
-                                                style: TextStyle(
-                                                    color: Colors.red))),
-                                      ],
-                                    ),
-                                  );
-                                } else {
-                                  setState(() => isAutoScrolling = true);
+                                  _stopAutoScroll();
                                   _startAutoScroll();
                                 }
                               },
-                              child: Icon(
-                                isAutoScrolling
-                                    ? Icons.stop_circle_outlined
-                                    : Icons.fit_screen_outlined,
-                              )),
-                          label: isAutoScrolling ? 'Stop' : 'Auto Scroll'),
-                      BottomNavigationBarItem(
-                          icon: InkWell(
-                            onTap: () {
-                              push(context, const SettingScreen());
-                            },
-                            child: const Icon(Icons.settings),
+                              onStart: () {
+                                setState(() {
+                                  isAutoScrolling = true;
+                                });
+                                _startAutoScroll();
+                              },
+                              onStop: () {
+                                _stopAutoScroll();
+                              },
+                            ),
+                          );
+                        } else if (index == 2) {
+                          push(context, const SettingScreen());
+                        }
+                      },
+                      items: [
+                        const BottomNavigationBarItem(
+                          icon: Padding(
+                            padding: EdgeInsets.only(bottom: 4.0),
+                            child: Icon(
+                              Icons.menu_book_rounded,
+                              color: Colors.white,
+                              size: 26,
+                            ),
                           ),
-                          label: "Setting")
-                    ],
+                          label: "Translation",
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Padding(
+                            padding: const EdgeInsets.only(bottom: 4.0),
+                            child: Icon(
+                              isAutoScrolling
+                                  ? Icons.stop_circle_rounded
+                                  : Icons.fit_screen_rounded,
+                              color: Colors.white,
+                              size: 26,
+                            ),
+                          ),
+                          label: isAutoScrolling ? 'Stop' : 'Auto Scroll',
+                        ),
+                        const BottomNavigationBarItem(
+                          icon: Padding(
+                            padding: EdgeInsets.only(bottom: 4.0),
+                            child: Icon(
+                              Icons.settings_rounded,
+                              color: Colors.white,
+                              size: 26,
+                            ),
+                          ),
+                          label: "Setting",
+                        )
+                      ],
+                    ),
                   ),
             body: Listener(
               onPointerDown: (_) => _pauseAutoScrollForTouch(),

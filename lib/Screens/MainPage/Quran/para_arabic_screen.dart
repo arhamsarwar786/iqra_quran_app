@@ -458,12 +458,16 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                 ),
                 child: BottomNavigationBar(
                   backgroundColor: bloc.selectedTheme,
+                  elevation: 10,
                   selectedItemColor: Colors.white,
-                  unselectedItemColor: Colors.white.withOpacity(0.7),
-                  currentIndex: 0,
-                  type: BottomNavigationBarType.fixed,
+                  unselectedItemColor: Colors.white,
                   selectedFontSize: 12,
                   unselectedFontSize: 12,
+                  selectedLabelStyle: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                  unselectedLabelStyle: const TextStyle(color: Colors.white),
+                  currentIndex: 0,
+                  type: BottomNavigationBarType.fixed,
                   onTap: (index) {
                     if (index == 0) {
                       push(
@@ -481,7 +485,14 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                           currentSpeedFactor: autoScrollSpeed,
                           isScrolling: isAutoScrolling,
                           onSpeedChanged: (val) {
-                            autoScrollSpeed = val;
+                            setState(() {
+                              autoScrollSpeed = val;
+                            });
+                            // If currently scrolling, we need to restart with new speed
+                            if (isAutoScrolling) {
+                              _stopAutoScroll();
+                              _startAutoScroll();
+                            }
                           },
                           onStart: () {
                             setState(() {
@@ -499,9 +510,9 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                     }
                   },
                   items: [
-                    BottomNavigationBarItem(
+                    const BottomNavigationBarItem(
                       icon: Padding(
-                        padding: const EdgeInsets.only(bottom: 4.0),
+                        padding: EdgeInsets.only(bottom: 4.0),
                         child: Icon(
                           Icons.menu_book_rounded,
                           color: Colors.white,
@@ -523,9 +534,9 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                       ),
                       label: isAutoScrolling ? "Stop" : "Auto Scroll",
                     ),
-                    BottomNavigationBarItem(
+                    const BottomNavigationBarItem(
                       icon: Padding(
-                        padding: const EdgeInsets.only(bottom: 4.0),
+                        padding: EdgeInsets.only(bottom: 4.0),
                         child: Icon(
                           Icons.settings_rounded,
                           color: Colors.white,
