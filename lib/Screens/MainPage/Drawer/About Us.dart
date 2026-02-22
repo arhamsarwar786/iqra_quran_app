@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../Provider/theme_provider.dart';
 import '../../../widgets.dart';
 import '../../../Utils/customThemes.dart';
@@ -280,6 +282,64 @@ class _AboutusState extends State<Aboutus> {
                                   text: aboutData!['vision']
                                       [isUrdu ? 'content_ur' : 'content_en'],
                                 ),
+                                const SizedBox(height: 40),
+                                // Social Media Section
+                                Center(
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        isUrdu
+                                            ? "ہم سے جڑیں"
+                                            : "Connect With Us",
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: bloc.selectedTheme,
+                                          fontFamily: isUrdu
+                                              ? bloc.urduFontFamily
+                                              : null,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 20),
+                                      Wrap(
+                                        spacing: 20,
+                                        runSpacing: 20,
+                                        alignment: WrapAlignment.center,
+                                        children: [
+                                          _socialIcon(
+                                            icon: FontAwesomeIcons.youtube,
+                                            color: const Color(0xFFFF0000),
+                                            url:
+                                                "https://www.youtube.com/channel/UCLbonUX0SC9KU7bXx0wqCSQ",
+                                          ),
+                                          _socialIcon(
+                                            icon: FontAwesomeIcons.facebook,
+                                            color: const Color(0xFF1877F2),
+                                            url:
+                                                "https://www.facebook.com/THEIQRAQURANOFFICIAL/",
+                                          ),
+                                          _socialIcon(
+                                            icon: FontAwesomeIcons.instagram,
+                                            color: const Color(0xFFE4405F),
+                                            url:
+                                                "https://www.instagram.com/theiqraquranofficial/",
+                                          ),
+                                          _socialIcon(
+                                            icon: FontAwesomeIcons.whatsapp,
+                                            color: const Color(0xFF25D366),
+                                            url:
+                                                "https://whatsapp.com/channel/0029Vb6rYwPEKyZH8LlJqm2l",
+                                          ),
+                                          _socialIcon(
+                                            icon: FontAwesomeIcons.twitter,
+                                            color: Colors.black,
+                                            url: "https://x.com/IqraThe91544",
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
                                 const SizedBox(height: 50),
                                 Center(
                                   child: Column(
@@ -490,5 +550,51 @@ class _AboutusState extends State<Aboutus> {
         ],
       ),
     );
+  }
+
+  Widget _socialIcon({
+    required IconData icon,
+    required Color color,
+    required String url,
+  }) {
+    return GestureDetector(
+      onTap: () => _launchURL(url),
+      child: Container(
+        height: 50,
+        width: 50,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.2),
+              blurRadius: 10,
+              spreadRadius: 2,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: Border.all(color: color.withOpacity(0.1), width: 1.5),
+        ),
+        child: Icon(
+          icon,
+          color: color,
+          size: 24,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    try {
+      // Using launchUrl directly as canLaunchUrl often returns false
+      // on newer Android versions without complex manifest queries.
+      await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication,
+      );
+    } catch (e) {
+      debugPrint("Error launching URL: $e");
+    }
   }
 }

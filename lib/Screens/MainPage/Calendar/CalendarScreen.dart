@@ -212,41 +212,82 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     final isToday = DateUtils.isSameDay(date, DateTime.now());
 
                     return Container(
-                      margin: const EdgeInsets.all(2),
+                      margin: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
-                        border: isToday
-                            ? Border.all(color: Colors.white, width: 2)
-                            : null,
-                        borderRadius: BorderRadius.circular(8),
+                        color: isToday
+                            ? color.withOpacity(0.4)
+                            : Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isToday
+                              ? Colors.white
+                              : Colors.white.withOpacity(0.1),
+                          width: isToday ? 1.5 : 0.5,
+                        ),
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: Stack(
                         children: [
-                          Text(
-                            "$dayNumber",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                          // Gregorian Date (English)
+                          Positioned(
+                            top: 6,
+                            left: 8,
+                            child: Text(
+                              "$dayNumber",
+                              style: TextStyle(
+                                color: isToday
+                                    ? Colors.white
+                                    : Colors.white.withOpacity(0.9),
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: -0.5,
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 5),
-                          Container(
-                            height: 28,
-                            width: 28,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Text(
-                                "${hijri.hDay}",
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+
+                          // Hijri Date (Arabic)
+                          Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const SizedBox(height: 10),
+                                Container(
+                                  height: 32,
+                                  width: 32,
+                                  decoration: BoxDecoration(
+                                    color: isToday
+                                        ? Colors.white
+                                        : color.withOpacity(0.8),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.3),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      "${hijri.hDay}",
+                                      style: TextStyle(
+                                        color: isToday ? color : Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  "Hijri",
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.5),
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],

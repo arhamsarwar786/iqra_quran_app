@@ -154,6 +154,8 @@ class _HomeState extends State<Home> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 5),
+
                 prayerQiblaList(context, size, bloc),
                 const SizedBox(height: 10),
                 screensList(context, size, bloc),
@@ -477,132 +479,135 @@ class _HomeState extends State<Home> {
       translatorName = "Kanz-ul-Irfan";
     }
 
-    return Card(
-      elevation: 5,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(30),
-        onTap: () {
-          final String paraId = _randomAyat!.paraId ?? "1";
-          push(
-            context,
-            ParaArabicScreen(
-              parahCount: paraId,
-              parahname: "Para $paraId",
-              targetAyatNumber: int.tryParse(_randomAyat!.ayatNumber ?? "0"),
-              targetSurahNumber: surahId,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Card(
+        elevation: 5,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(30),
+          onTap: () {
+            final String paraId = _randomAyat!.paraId ?? "1";
+            push(
+              context,
+              ParaArabicScreen(
+                parahCount: paraId,
+                parahname: "Para $paraId",
+                targetAyatNumber: int.tryParse(_randomAyat!.ayatNumber ?? "0"),
+                targetSurahNumber: surahId,
+              ),
+            );
+          },
+          child: Container(
+            padding:
+                const EdgeInsets.only(top: 20, left: 10, right: 10, bottom: 20),
+            width: size.width,
+            decoration: BoxDecoration(
+              // color: bloc.selectedSecondary, // Moved to Card for InkWell
+              borderRadius: BorderRadius.circular(30),
             ),
-          );
-        },
-        child: Container(
-          padding:
-              const EdgeInsets.only(top: 20, left: 10, right: 10, bottom: 20),
-          width: size.width,
-          decoration: BoxDecoration(
-            // color: bloc.selectedSecondary, // Moved to Card for InkWell
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: Column(children: [
-            Row(
-              children: [
-                Container(
-                  height: 26,
-                  width: 18,
-                  decoration: BoxDecoration(
-                      image: DecorationImage(
-                          image: AssetImage(
-                              "assets/images/quran${bloc.iconNumber}.png"),
-                          fit: BoxFit.fill)),
-                ),
-                const SizedBox(
-                  width: 20,
-                ),
-                Text(
-                  "QURAN",
-                  style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700),
-                ),
-                const Spacer(),
-                IconButton(
-                  onPressed: () => AppShare.image(
-                    context: context,
-                    bloc: bloc,
-                    title: surahNameEnglish,
-                    arabicTitle: surahNameArabic,
-                    arabicText: arabicText,
-                    translationText: translationText,
-                    translatorName: translatorName,
-                    paraNumber: _randomAyat!.paraId,
-                    surahNumber: _randomAyat!.surahId,
-                    ayatNumber: _randomAyat!.ayatNumber,
+            child: Column(children: [
+              Row(
+                children: [
+                  Container(
+                    height: 26,
+                    width: 18,
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: AssetImage(
+                                "assets/images/quran${bloc.iconNumber}.png"),
+                            fit: BoxFit.fill)),
                   ),
-                  icon:
-                      Icon(Icons.share, color: Theme.of(context).primaryColor),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  surahNameArabic,
-                  style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontSize: 20,
-                      fontFamily: bloc.arabicFontFamily,
-                      fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Text(
-                  verseRef,
-                  style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700),
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Row(
-              children: [
-                // const SizedBox(
-                //   width: 20,
-                // ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Text(
-                        arabicText,
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 30,
-                            fontFamily: bloc.arabicFontFamily,
-                            fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        translationText,
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                          fontFamily: bloc.urduFontFamily,
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  Text(
+                    "QURAN",
+                    style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => AppShare.image(
+                      context: context,
+                      bloc: bloc,
+                      title: surahNameEnglish,
+                      arabicTitle: surahNameArabic,
+                      arabicText: arabicText,
+                      translationText: translationText,
+                      translatorName: translatorName,
+                      paraNumber: _randomAyat!.paraId,
+                      surahNumber: _randomAyat!.surahId,
+                      ayatNumber: _randomAyat!.ayatNumber,
+                    ),
+                    icon: Icon(Icons.share,
+                        color: Theme.of(context).primaryColor),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    surahNameArabic,
+                    style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontSize: 20,
+                        fontFamily: bloc.arabicFontFamily,
+                        fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Text(
+                    verseRef,
+                    style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Row(
+                children: [
+                  // const SizedBox(
+                  //   width: 20,
+                  // ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Text(
+                          arabicText,
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 30,
+                              fontFamily: bloc.arabicFontFamily,
+                              fontWeight: FontWeight.w500),
                         ),
-                      ),
-                    ],
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          translationText,
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                            fontFamily: bloc.urduFontFamily,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ]),
+                ],
+              ),
+            ]),
+          ),
         ),
       ),
     );
@@ -923,18 +928,18 @@ class _SearchInQuaranState extends State<SearchInQuaran> {
 
     return Container(
       width: size.width,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      // padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
               bloc.selectedTheme,
-              bloc.selectedTheme.withOpacity(0.85),
+              bloc.selectedTheme,
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(30),
+          // borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
               color: bloc.selectedTheme.withOpacity(0.3),
