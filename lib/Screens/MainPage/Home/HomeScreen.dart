@@ -147,6 +147,21 @@ class _HomeState extends State<Home> {
                           );
                         },
                       ),
+                      // Overlay with secondary color light on top
+                      Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              bloc.selectedTheme.withOpacity(0.3),
+                              bloc.selectedTheme.withOpacity(0.1),
+                              // Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
                       Positioned(
                         bottom: 0,
                         child: SearchInQuaran(size: size, bloc: bloc),
@@ -208,36 +223,7 @@ class _HomeState extends State<Home> {
                                 fit: BoxFit.fill)),
                       ),
                       Text(
-                        "Calender",
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                InkWell(
-                  onTap: () {
-                    // provider.screenIndex = 2;
-                    // pushUntil(context, MainScreen());
-                    push(context, KhalimaScreen());
-                  },
-                  child: Column(
-                    children: [
-                      Container(
-                        height: 25,
-                        width: 24,
-                        decoration: BoxDecoration(
-                            image: DecorationImage(
-                          image: AssetImage(
-                              "assets/images/kalma${int.parse(bloc.iconNumber)}.png"),
-                          // fit: BoxFit.fill
-                        )),
-                      ),
-                      Text(
-                        "KHALIMA",
+                        "Calender".toUpperCase(),
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
@@ -270,6 +256,33 @@ class _HomeState extends State<Home> {
                       ),
                       Text(
                         "TASBEEH",
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    push(context, KhalimaScreen());
+                  },
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 25,
+                        width: 24,
+                        decoration: BoxDecoration(
+                            image: DecorationImage(
+                          image: AssetImage(
+                              "assets/images/kalma${int.parse(bloc.iconNumber)}.png"),
+                          // fit: BoxFit.fill
+                        )),
+                      ),
+                      Text(
+                        "Kalima".toUpperCase(),
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,

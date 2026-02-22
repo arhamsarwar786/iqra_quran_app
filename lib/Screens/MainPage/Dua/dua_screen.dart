@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iqra/Provider/theme_provider.dart';
-import 'package:iqra/Screens/MainPage/Dua/dua_view.dart';
+import 'package:iqra/Utils/kalma_dua_sheet.dart';
 import 'package:iqra/Utils/constants.dart';
 import 'package:iqra/Utils/dua_data.dart';
 import 'package:provider/provider.dart';
@@ -36,13 +36,14 @@ class DuaScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => DuaView(
-                                    arabic: duaData[index]['arabic'],
-                                    urdu: duaData[index]['urdu'],
-                                  )));
+                      final items = duaData
+                          .map((d) => KDSData(
+                                title: d['title'] ?? "Dua",
+                                arabic: d['arabic'] ?? "",
+                                translation: d['urdu'] ?? "",
+                              ))
+                          .toList();
+                      KalmaDuaSHEET.show(context, items, index, "Dua");
                     },
                     child: Container(
                       margin:
@@ -69,6 +70,7 @@ class DuaScreen extends StatelessWidget {
                                 '${duaData[index]['title']}',
                                 textDirection: TextDirection.rtl,
                                 style: TextStyle(
+                                    fontWeight: FontWeight.bold,
                                     fontFamily: bloc.urduFontFamily,
                                     fontSize: 20,
                                     color: MyColors.whiteColor),

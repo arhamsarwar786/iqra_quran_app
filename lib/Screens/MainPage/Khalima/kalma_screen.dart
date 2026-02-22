@@ -2,15 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:iqra/Provider/theme_provider.dart';
-import 'package:iqra/Screens/MainPage/Khalima/kalma_view.dart';
+import 'package:iqra/Utils/kalma_dua_sheet.dart';
 import 'package:iqra/Screens/MainPage/Khalima/khalimas_list.dart';
-import 'package:iqra/Screens/MainPage/Khalima/widgets.dart';
 import 'package:iqra/Utils/constants.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Models/khalimas_model.dart';
-import '../../../widgets.dart';
-import '../main_screen.dart';
 
 class KhalimaScreen extends StatelessWidget {
   final List<KhalimasModel>? khalimaList;
@@ -29,14 +26,14 @@ class KhalimaScreen extends StatelessWidget {
       return Scaffold(
         backgroundColor: bloc.selectedSecondary,
         // floatingActionButton: floatinButton(context),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
         // extendBodyBehindAppBar: true,
         // bottomNavigationBar: BottomBarApp(bloc),
         appBar: AppBar(
           backgroundColor: bloc.selectedTheme,
-          title: const Text(
-            "Kalma",
+          title: Text(
+            "Kalima".toUpperCase(),
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
           ),
           centerTitle: true,
@@ -59,76 +56,67 @@ class KhalimaScreen extends StatelessWidget {
           height: size.height,
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Center(
-            child: GridView.builder(
-                shrinkWrap: true,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 3.3 / 2.5,
-                ),
-                itemCount: khalimaList!.length,
+            child: ListView.builder(
+                itemCount: khalimaList.length,
                 itemBuilder: (context, index) {
-                  KhalimasModel khalima = khalimaList![index];
-                  return GestureDetector(
+                  KhalimasModel khalima = khalimaList[index];
+                  return InkWell(
                     onTap: () {
-                      push(context, KhalimaView(khalima));
+                      final items = khalimaList
+                          .map((k) => KDSData(
+                                title: k.meaning!,
+                                subtitle: k.title ?? "",
+                                arabic: k.arabic ?? "",
+                                translation: k.translation ?? "",
+                              ))
+                          .toList();
+                      KalmaDuaSHEET.show(context, items, index, "KALIMA");
                     },
-                    child: Stack(
-                      children: [
-                        Container(
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            boxShadow: kElevationToShadow[4],
-                            borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 0, right: 0, top: 10),
+                      padding: const EdgeInsets.all(15),
+                      constraints: const BoxConstraints(minHeight: 80),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Icon(
+                            Icons.chevron_left_outlined,
+                            size: 30,
+                            color: MyColors.whiteColor,
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                khalima.title!,
-                                style: TextStyle(
-                                  color: MyColors.whiteColor,
-                                  // fontSize: 20,
-
-                                  fontWeight: FontWeight.w900,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '${khalima.title}',
+                                  textDirection: TextDirection.rtl,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: bloc.urduFontFamily,
+                                      fontSize: 22,
+                                      color: MyColors.whiteColor),
                                 ),
-                              ),
-                              Text(
-                                khalima.meaning!,
-                                style: TextStyle(
-                                  fontFamily: "alQalam",
-                                  color: MyColors.whiteColor,
-                                  // fontSize: 20,
-
-                                  fontWeight: FontWeight.normal,
-                                ),
-                              )
-                            ],
+                                if (khalima.meaning != null)
+                                  Text(
+                                    '${khalima.meaning}',
+                                    textDirection: TextDirection.rtl,
+                                    style: TextStyle(
+                                        fontFamily: bloc.urduFontFamily,
+                                        fontSize: 16,
+                                        color: MyColors.whiteColor
+                                            .withOpacity(0.8)),
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const CustomBorders(
-                          image: "ktopleft.png",
-                          top: 10,
-                          left: 10,
-                        ),
-                        const CustomBorders(
-                          image: "ktopright.png",
-                          top: 10,
-                          right: 10,
-                        ),
-                        const CustomBorders(
-                          image: "kbottomleft.png",
-                          bottom: 10,
-                          left: 10,
-                        ),
-                        const CustomBorders(
-                          image: "kbottomright.png",
-                          bottom: 10,
-                          right: 10,
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 }),

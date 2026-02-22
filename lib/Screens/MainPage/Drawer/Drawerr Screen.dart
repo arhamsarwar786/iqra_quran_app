@@ -48,7 +48,7 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
   ];
   final List _navigationSc = [
     const Favorite(),
-    const TabBarDemo(),
+    TabBarDemo(),
     KhalimaScreen(),
     const DuaScreen(),
     const Tasbih(),

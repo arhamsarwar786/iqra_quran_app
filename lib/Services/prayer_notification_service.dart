@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
@@ -92,28 +91,7 @@ class PrayerNotificationService {
   // ─── Returns the Android notification details ────────────────────────────
   static Future<AndroidNotificationDetails> _androidDetails(
       String prayerName) async {
-    final customPath = await SavedPrefernces.getCustomAzanPath();
-
-    // Use custom MP3 if the user picked one and the file still exists
-    if (customPath != null && File(customPath).existsSync()) {
-      return AndroidNotificationDetails(
-        'prayer_custom_sound',
-        'Prayer Times (Custom Sound)',
-        channelDescription: 'Adhan notifications with your custom sound',
-        importance: Importance.max,
-        priority: Priority.high,
-        playSound: true,
-        sound: UriAndroidNotificationSound(customPath),
-        enableVibration: true,
-        icon: '@mipmap/ic_launcher',
-        styleInformation: BigTextStyleInformation(
-          'وقت نماز $prayerName آ گیا',
-          contentTitle: '🕌 $prayerName — نماز کا وقت',
-        ),
-      );
-    }
-
-    // Default: bundled azan.wav in res/raw
+    // Bundled azan.mp3 in res/raw
     return AndroidNotificationDetails(
       'prayer_notifications',
       'Prayer Times',

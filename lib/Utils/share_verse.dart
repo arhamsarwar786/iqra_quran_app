@@ -30,19 +30,20 @@ class AppShare {
     // --- 1. Pre-calculate Heights ---
 
     // Header Content Height Calculation
-    const double headerBaseHeight = 420.0; // Fixed large header height
+    const double headerBaseHeight = 450.0; // Fixed large header height
 
     final titlePainter = TextPainter(
       text: TextSpan(
         text: title.toUpperCase(),
-        style: const TextStyle(
+        style: TextStyle(
           color: Colors.white,
-          fontSize: 65,
+          fontSize: 40, // Reduced from 100
           fontWeight: FontWeight.w900,
-          fontFamily: 'Roboto',
+          fontFamily: bloc.urduFontFamily,
           letterSpacing: 1.5,
         ),
       ),
+      textAlign: TextAlign.center,
       textDirection: ui.TextDirection.ltr,
     );
     titlePainter.layout(maxWidth: 900);
@@ -54,11 +55,12 @@ class AppShare {
           text: arabicTitle,
           style: TextStyle(
             color: Colors.white.withOpacity(0.95),
-            fontSize: 70,
+            fontSize: 100, // Increased from 70
             fontFamily: bloc.arabicFontFamily,
           ),
         ),
         textDirection: ui.TextDirection.rtl,
+        textAlign: TextAlign.center,
       );
       arabicTitlePainter.layout(maxWidth: 900);
     }
@@ -147,44 +149,70 @@ class AppShare {
         Rect.fromLTWH(0, 0, size.width, headerBaseHeight), headerPaint);
 
     // Draw Titles
+    final bool isQuran = surahNumber != null && surahNumber != "null";
+
     if (arabicTitlePainter != null) {
-      arabicTitlePainter.paint(
-          canvas,
-          Offset(centerX - (arabicTitlePainter.width / 2),
-              80)); // Arabic Name on top
-      titlePainter.paint(
-          canvas,
-          Offset(
-              centerX - (titlePainter.width / 2), 180)); // English Name below
+      if (isQuran) {
+        // For Quran: Arabic Surah Name on top, English Name below
+        arabicTitlePainter.paint(
+            canvas,
+            Offset(centerX - (arabicTitlePainter.width / 2),
+                60)); // Arabic Name on top
+        titlePainter.paint(
+            canvas,
+            Offset(
+                centerX - (titlePainter.width / 2), 260)); // English Name below
+      } else {
+        // For Kalma/Dua: Arabic Name on top, English Title below
+        arabicTitlePainter.paint(
+            canvas,
+            Offset(centerX - (arabicTitlePainter.width / 2),
+                60)); // Arabic Name on top
+        titlePainter.paint(
+            canvas,
+            Offset(
+                centerX - (titlePainter.width / 2), 260)); // English Name below
+      }
     } else {
       titlePainter.paint(
           canvas, Offset(centerX - (titlePainter.width / 2), 150));
     }
 
     // --- Reference Box ---
-    final refBoxPaint = Paint()..color = Colors.white.withOpacity(0.15);
-    final refRect = Rect.fromCenter(
-        center: Offset(centerX, headerBaseHeight - 70), width: 800, height: 70);
-    canvas.drawRRect(
-        ui.RRect.fromRectAndRadius(refRect, const Radius.circular(35)),
-        refBoxPaint);
+    final List<String> refParts = [];
+    if (paraNumber != null && paraNumber != "null")
+      refParts.add("Para: $paraNumber");
+    if (surahNumber != null && surahNumber != "null")
+      refParts.add("Surah: $surahNumber");
+    if (ayatNumber != null && ayatNumber != "null")
+      refParts.add("Verse: $ayatNumber");
 
-    final refText =
-        "Para: $paraNumber   •   Surah: $surahNumber   •   Verse: $ayatNumber";
-    final refPainter = TextPainter(
-      text: TextSpan(
-        text: refText,
-        style: const TextStyle(
-            color: Colors.white,
-            fontSize: 30,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Roboto'),
-      ),
-      textDirection: ui.TextDirection.ltr,
-    );
-    refPainter.layout();
-    refPainter.paint(canvas,
-        Offset(centerX - (refPainter.width / 2), headerBaseHeight - 90));
+    if (refParts.isNotEmpty) {
+      final String refText = refParts.join("   •   ");
+      final refBoxPaint = Paint()..color = Colors.white.withOpacity(0.15);
+      final refRect = Rect.fromCenter(
+          center: Offset(centerX, headerBaseHeight - 70),
+          width: 800,
+          height: 70);
+      canvas.drawRRect(
+          ui.RRect.fromRectAndRadius(refRect, const Radius.circular(35)),
+          refBoxPaint);
+
+      final refPainter = TextPainter(
+        text: TextSpan(
+          text: refText,
+          style: const TextStyle(
+              color: Colors.white,
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Roboto'),
+        ),
+        textDirection: ui.TextDirection.ltr,
+      );
+      refPainter.layout();
+      refPainter.paint(canvas,
+          Offset(centerX - (refPainter.width / 2), headerBaseHeight - 90));
+    }
 
     // --- Content Drawing ---
     double currentY = headerBaseHeight + topPadding;
@@ -246,6 +274,7 @@ class AppShare {
             text: 'IQRA QURAN\n',
             style: TextStyle(
                 color: bloc.selectedTheme,
+                // fontFamily: bloc.urduFontFamily,
                 fontSize: 44,
                 fontWeight: FontWeight.w900,
                 height: 1.2),
@@ -332,8 +361,12 @@ class AppShare {
                     ElevatedButton.icon(
                       onPressed: () {
                         Navigator.pop(context);
+                        String reference = "";
+                        if (surahNumber != null && surahNumber != "null") {
+                          reference = " (Surah: $title, Verse: $ayatNumber)";
+                        }
                         String shareText =
-                            '$title\n\n$arabicText\n\n$translationText\n\nDownload IQRA QURAN: https://play.google.com/store/apps/details?id=com.devsinntechnologies.iqraquran';
+                            '${title.toUpperCase()}$reference\n\n$arabicText\n\n$translationText\n\nDownload IQRA QURAN: https://play.google.com/store/apps/details?id=com.devsinntechnologies.iqraquran';
                         Share.shareXFiles([XFile(file.path)], text: shareText);
                       },
                       icon: const Icon(Icons.share_rounded, size: 18),
@@ -623,5 +656,21 @@ class AppShare {
             .showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
+  }
+
+  static void text({
+    required String title,
+    required String arabicText,
+    required String translationText,
+    String? surahNumber,
+    String? ayatNumber,
+  }) {
+    String reference = "";
+    if (surahNumber != null && surahNumber != "null") {
+      reference = " (Surah: $title, Verse: $ayatNumber)";
+    }
+    String shareText =
+        '${title.toUpperCase()}$reference\n\n$arabicText\n\n$translationText\n\nDownload IQRA QURAN: https://play.google.com/store/apps/details?id=com.devsinntechnologies.iqraquran';
+    Share.share(shareText);
   }
 }

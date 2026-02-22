@@ -134,7 +134,7 @@ floatinButton(context) {
       mainAxisSize: MainAxisSize.min,
       children: [
         GestureDetector(
-          onTap: () => push(context, const TabBarDemo()),
+          onTap: () => push(context, TabBarDemo()),
           child: Container(
             height: 75,
             width: 75,

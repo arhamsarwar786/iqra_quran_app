@@ -6,6 +6,8 @@ import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Screens/MainPage/Quran/Quranview.dart';
 import 'package:provider/provider.dart';
 
+import 'package:iqra/Screens/MainPage/Quran/para_arabic_screen.dart';
+
 class Favorite extends StatefulWidget {
   const Favorite({super.key});
 
@@ -78,20 +80,37 @@ class _FavoriteState extends State<Favorite> {
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => QuranView(
-                          suratNumber:
-                              int.tryParse(data.surahCount.toString()) ?? 1,
-                          surahName: data.suratName,
-                          ayatCount: data.suraVerses.toString(),
+                    if (data.isPara == true) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ParaArabicScreen(
+                            para: null,
+                            ayatInPara:
+                                int.tryParse(data.suraVerses.toString()) ?? 0,
+                            parahCount: data.surahCount.toString(),
+                            parahname: data.suratName,
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => QuranView(
+                            suratNumber:
+                                int.tryParse(data.surahCount.toString()) ?? 1,
+                            surahName: data.suratName,
+                            ayatCount: data.suraVerses.toString(),
+                          ),
+                        ),
+                      );
+                    }
                   },
                   leading: Container(
-                    padding: const EdgeInsets.all(12),
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: themeProvider.selectedTheme.withOpacity(0.1),
                       shape: BoxShape.circle,
@@ -105,32 +124,41 @@ class _FavoriteState extends State<Favorite> {
                     ),
                   ),
                   title: Text(
-                    data.suratName ?? "Unknown Surah",
-                    style: const TextStyle(
-                      fontSize: 16,
+                    data.suratName ??
+                        (data.isPara == true
+                            ? "Unknown Para"
+                            : "Unknown Surah"),
+                    style: TextStyle(
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
+                      fontFamily: themeProvider.arabicFontFamily,
                     ),
                   ),
                   subtitle: Text(
-                    "Verses: ${data.suraVerses}",
+                    data.isPara == true
+                        ? "Ayat: ${data.suraVerses}"
+                        : "Verses: ${data.suraVerses}",
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 13,
                       color: Colors.grey[600],
                     ),
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        data.urduSuratName ?? "",
-                        style: TextStyle(
-                          fontFamily: themeProvider.arabicFontFamily,
-                          fontSize: 18,
-                          color: themeProvider.selectedTheme,
+                      if (data.urduSuratName != null &&
+                          data.urduSuratName.toString().trim().isNotEmpty) ...[
+                        Text(
+                          data.urduSuratName,
+                          style: TextStyle(
+                            fontFamily: themeProvider.arabicFontFamily,
+                            fontSize: 18,
+                            color: themeProvider.selectedTheme,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
+                        const SizedBox(width: 8),
+                      ],
                       IconButton(
                         onPressed: () async {
                           setState(() {
@@ -138,7 +166,8 @@ class _FavoriteState extends State<Favorite> {
                           });
                           await SavedPreferences.setFav(list);
                         },
-                        icon: const Icon(Icons.favorite, color: Colors.red),
+                        icon: Icon(Icons.favorite,
+                            color: themeProvider.selectedTheme),
                       ),
                     ],
                   ),

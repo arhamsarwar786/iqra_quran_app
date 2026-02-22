@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:iqra/splash_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -12,29 +13,52 @@ class MaterialScreen extends StatefulWidget {
 }
 
 class _MaterialScreenState extends State<MaterialScreen> {
-
   @override
   Widget build(BuildContext context) {
-      Provider.of<ThemeProvider>(context).getSelectedTheme();
-    return  MaterialApp(
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final primaryMaterialColor =
+        ThemeProvider.createMaterialColor(themeProvider.selectedTheme);
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: themeProvider.selectedTheme,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: themeProvider.selectedSecondary,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: false,
-          // primarySwatch: MaterialColor(myColor.value, {myColor.value:myColor}),
-          primaryColor: Provider.of<ThemeProvider>(context).selectedTheme,
-          // colorScheme: ColorScheme.fromSwatch().copyWith(
-          //   primary: myColor       
-          //      ),
-          // colorScheme: ColorScheme.fromSwatch().copyWith(
-          //   // primary: primayColor,
-          //   primary: myColor
-          //   // secondary: secondaryColor
-          // ),
-          // primarySwatch: ,
+          primarySwatch: primaryMaterialColor,
+          primaryColor: themeProvider.selectedTheme,
+          scaffoldBackgroundColor: themeProvider.selectedSecondary,
+          canvasColor: themeProvider.selectedSecondary,
+          highlightColor: themeProvider.selectedTheme.withOpacity(0.1),
+          splashColor: themeProvider.selectedTheme.withOpacity(0.1),
           fontFamily: 'kgf',
+          colorScheme: ColorScheme.fromSwatch(
+            primarySwatch: primaryMaterialColor,
+          ).copyWith(
+            primary: themeProvider.selectedTheme,
+            secondary: themeProvider.selectedTheme,
+            background: themeProvider.selectedSecondary,
+            surface: themeProvider.selectedSecondary,
+          ),
+          appBarTheme: AppBarTheme(
+            backgroundColor: themeProvider.selectedTheme,
+            elevation: 0,
+            centerTitle: true,
+            titleTextStyle: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            iconTheme: const IconThemeData(color: Colors.white),
+          ),
         ),
-        // onGenerateRoute: _appRoutes.onGeneratedRoute,
         home: const SplashScreen(),
-        // home: const Demo(),
-      );
+      ),
+    );
   }
 }

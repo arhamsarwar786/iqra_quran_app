@@ -13,60 +13,69 @@ import 'Quranview.dart';
 import 'para_arabic_screen.dart';
 
 class TabBarDemo extends StatelessWidget {
-  const TabBarDemo({super.key});
+  Future<void> _handleLastRead(BuildContext context) async {
+    final lastRead = await SavedPrefernces.getLastRead();
+
+    if (lastRead == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No reading history found.")),
+      );
+      return;
+    }
+
+    final type = lastRead["type"];
+    final id = lastRead["id"];
+    final name = lastRead["name"];
+    final count = lastRead["count"];
+    final scrollOffset = (lastRead["scrollOffset"] as num?)?.toDouble();
+
+    Widget? destination;
+
+    if (type == "surah") {
+      destination = QuranView(
+        suratNumber: id,
+        surahName: name,
+        ayatCount: count,
+        initialScrollOffset: scrollOffset,
+      );
+    } else if (type == "para") {
+      destination = ParaArabicScreen(
+        parahCount: id.toString(),
+        parahname: name,
+        ayatInPara: int.tryParse(count?.toString() ?? "0"),
+        initialScrollOffset: scrollOffset,
+      );
+    }
+
+    if (destination != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => destination!),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     var themeProvider = context.read<ThemeProvider>();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: SafeArea(
         child: Scaffold(
-          floatingActionButton: FloatingActionButton(
-              onPressed: () async {
-                var lastRead = await SavedPrefernces.getLastRead();
-                if (lastRead != null) {
-                  if (lastRead["type"] == "surah") {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => QuranView(
-                                  suratNumber: lastRead["id"],
-                                  surahName: lastRead["name"],
-                                  ayatCount: lastRead["count"],
-                                  initialScrollOffset:
-                                      lastRead["scrollOffset"]?.toDouble(),
-                                )));
-                  } else if (lastRead["type"] == "para") {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ParaArabicScreen(
-                                  parahCount: lastRead["id"].toString(),
-                                  parahname: lastRead["name"],
-                                  ayatInPara:
-                                      int.tryParse(lastRead["count"] ?? "0"),
-                                  initialScrollOffset:
-                                      lastRead["scrollOffset"]?.toDouble(),
-                                )));
-                  }
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("No reading history found.")));
-                }
-              },
-              backgroundColor: Colors.white,
-              child: Container(
-                height: 45,
-                width: 45,
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: AssetImage("assets/images/book.png"),
-                        fit: BoxFit.cover)),
-              )),
+          floatingActionButton: FloatingActionButton.extended(
+            foregroundColor: Colors.white,
+            backgroundColor: themeProvider.selectedTheme,
+            icon: const Icon(Icons.menu_book),
+            label: const Text(
+              "Last Read",
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            onPressed: () => _handleLastRead(context),
+          ),
           appBar: mainScreenAppBarPush(context, "Recite Quran"),
           body: DefaultTabController(
-            length: 3,
+            length: 2,
             child: Column(
               children: <Widget>[
                 Container(
@@ -126,9 +135,9 @@ class TabBarDemo extends StatelessWidget {
                           ),
                         ),
                         child: TabBarView(
-                          children: const [
-                            Surah(),
-                            Parah(),
+                          children: [
+                            const Surah(),
+                            const Parah(),
                           ],
                         ),
                       ),

@@ -72,15 +72,26 @@ class _MainScreenState extends State<MainScreen> {
 ////BottomApp Bar created by Abdul Wahab//////
 class BottomBarApp extends StatelessWidget {
   final ThemeProvider? bloc;
-  final isShow;
-  const BottomBarApp({super.key, this.bloc, this.isShow = true});
+  final bool isShow;
+  final bool hasNotch;
+  const BottomBarApp({
+    super.key,
+    this.bloc,
+    this.isShow = true,
+    this.hasNotch = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
       color: bloc!.selectedSecondary,
       elevation: 0,
-      shape: const CircularNotchedRectangle(),
+      shape: hasNotch
+          ? const AutomaticNotchedShape(
+              RoundedRectangleBorder(),
+              CircleBorder(),
+            )
+          : null,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 40),
         height: 60,

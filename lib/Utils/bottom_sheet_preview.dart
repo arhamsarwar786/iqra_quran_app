@@ -5,7 +5,7 @@ import 'package:iqra/Provider/theme_provider.dart';
 import 'package:provider/provider.dart';
 import '../Models/aya_list_model.dart';
 import '../Models/surah_metadata_model.dart';
-import 'share_verse.dart';
+import 'share_quran.dart';
 
 class SHEET {
   static bottomSheetPreview(BuildContext context, List<Aya> ayats,
@@ -247,15 +247,14 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
                         ),
                         const SizedBox(height: 40),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             SHEET._actionButton(
                               context,
-                              icon: Icons.share_outlined,
-                              label: "Share Ayat",
+                              icon: Icons.share,
+                              label: "Share",
                               onTap: () {
-                                Navigator.pop(context);
-                                AppShare.image(
+                                QuranShare.image(
                                   context: context,
                                   bloc: bloc,
                                   title: surah?.tname ?? "",
@@ -270,6 +269,21 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
                               },
                               color: bloc.selectedTheme,
                             ),
+                            // SHEET._actionButton(
+                            //   context,
+                            //   icon: Icons.text_snippet_outlined,
+                            //   label: "Share Text",
+                            //   onTap: () {
+                            //     AppShare.text(
+                            //       title: surah?.tname ?? "",
+                            //       arabicText: aya.arabicText,
+                            //       translationText: translationText,
+                            //       surahNumber: aya.surahId,
+                            //       ayatNumber: aya.ayatNumber,
+                            //     );
+                            //   },
+                            //   color: bloc.selectedTheme,
+                            // ),
                           ],
                         ),
                         const SizedBox(height: 20),
