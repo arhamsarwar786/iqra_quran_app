@@ -89,9 +89,6 @@ class TabBarDemo extends StatelessWidget {
                           EdgeInsets.only(left: 10, right: 10, bottom: 5),
                       tabs: const [
                         Tab(
-                          text: "Quran",
-                        ),
-                        Tab(
                           text: "Surah",
                         ),
                         Tab(
@@ -130,7 +127,6 @@ class TabBarDemo extends StatelessWidget {
                         ),
                         child: TabBarView(
                           children: const [
-                            Quran(),
                             Surah(),
                             Parah(),
                           ],

@@ -144,6 +144,11 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
                   translatorName = "Kanz-ul-Iman";
                 }
 
+                // Safety fallback for empty translations (e.g. Alif Lam Mim)
+                if (translationText.trim().isEmpty) {
+                  translationText = aya.tarjumaIrfan ?? aya.tarjumaPak ?? "";
+                }
+
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: SingleChildScrollView(

@@ -208,7 +208,10 @@ class QuranDataProvider extends ChangeNotifier {
 
     // Filter for small ayats, excluding Bismillah (often ayat 0) if present
     var smallAyats = _quranData.where((aya) {
-      return aya.arabicText.length < 150 && aya.ayatNumber != "0";
+      return aya.arabicText.length < 150 &&
+          aya.ayatNumber != "0" &&
+          aya.surahId != null &&
+          aya.paraId != null;
     }).toList();
 
     if (smallAyats.isEmpty) {

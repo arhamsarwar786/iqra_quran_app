@@ -4,11 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../Provider/main_provider.dart';
 import '../../Provider/theme_provider.dart';
-import '../../Utils/constants.dart';
 import '../../widgets.dart';
 import 'Dua/dua_screen.dart';
 import 'Home/HomeScreen.dart';
-import 'Quran/tabbarview.dart';
+import 'Drawer/setting_screen.dart';
+import 'Quran/Favorite.dart';
 
 List<Widget> screens = [
   const Home(),
@@ -82,7 +82,7 @@ class BottomBarApp extends StatelessWidget {
       elevation: 0,
       shape: const CircularNotchedRectangle(),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 50),
+        padding: const EdgeInsets.symmetric(horizontal: 40),
         height: 60,
         child: !isShow
             ? Container()
@@ -92,27 +92,22 @@ class BottomBarApp extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      push(context, const TabBarDemo());
+                      push(context, const Favorite());
                     },
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          height: 24,
-                          width: 18,
-                          decoration: BoxDecoration(
-                              // color: Colors.red,
-                              image: DecorationImage(
-                                  image: AssetImage(
-                                      "assets/images/Tasbi${bloc!.iconNumber}.png"),
-                                  fit: BoxFit.fill)),
+                        Icon(
+                          Icons.favorite_rounded,
+                          color: Theme.of(context).primaryColor,
+                          size: 24,
                         ),
                         Text(
-                          "Quran",
+                          "Favorite",
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: MyColors.greyColor,
+                            color: Theme.of(context).primaryColor,
                           ),
                         )
                       ],
@@ -120,26 +115,22 @@ class BottomBarApp extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      // push(context, TabBarDemo());
+                      push(context, const SettingScreen());
                     },
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          height: 26,
-                          width: 27,
-                          decoration: const BoxDecoration(
-                            image: DecorationImage(
-                                image: AssetImage("assets/images/hadees.png"),
-                                fit: BoxFit.fill),
-                          ),
+                        Icon(
+                          Icons.settings_rounded,
+                          color: Theme.of(context).primaryColor,
+                          size: 24,
                         ),
                         Text(
-                          " Hadees",
+                          "Settings",
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: MyColors.greyColor,
+                            color: Theme.of(context).primaryColor,
                           ),
                         )
                       ],

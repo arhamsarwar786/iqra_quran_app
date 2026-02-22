@@ -2,6 +2,7 @@ import 'package:iqra/Models/aya_list_model.dart';
 import 'package:iqra/Models/surah_metadata_model.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
+import 'package:iqra/Screens/MainPage/Calendar/CalendarScreen.dart';
 import 'package:iqra/Screens/MainPage/Quran/para_arabic_screen.dart';
 import 'package:iqra/Screens/MainPage/Search/SearchScreen.dart';
 import 'package:iqra/Screens/MainPage/Dua/dua_screen.dart';
@@ -10,6 +11,7 @@ import 'package:iqra/Screens/MainPage/Home/qibal/qibla.dart';
 import 'package:iqra/Screens/MainPage/Tasbeeh/tasbee.dart';
 import 'package:iqra/Utils/share_verse.dart';
 import 'package:iqra/Helper/preference/saved_preferences.dart';
+import 'package:iqra/Screens/MainPage/Quran/tabbarview.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:adhan_dart/adhan_dart.dart';
@@ -190,8 +192,7 @@ class _HomeState extends State<Home> {
               children: [
                 InkWell(
                   onTap: () {
-                    push(context, const PrayerTime());
-                    // push(context, TabBarDemo());
+                    push(context, const CalendarScreen());
                   },
                   child: Column(
                     children: [
@@ -201,11 +202,11 @@ class _HomeState extends State<Home> {
                         decoration: BoxDecoration(
                             image: DecorationImage(
                                 image: AssetImage(
-                                    "assets/images/namaz${int.parse(bloc.iconNumber)}.png"),
+                                    "assets/images/quran${bloc.iconNumber}.png"),
                                 fit: BoxFit.fill)),
                       ),
                       Text(
-                        "Last Read",
+                        "Calender",
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
@@ -436,7 +437,14 @@ class _HomeState extends State<Home> {
   // quranDailyVerse //
   Widget quranDailyVerse(BuildContext context, Size size, ThemeProvider bloc) {
     if (_randomAyat == null) {
-      return CircularProgressIndicator(); // Or a skeleton loader
+      return const SizedBox.shrink();
+    }
+
+    // Safety check: if critical details are missing, hidden the card
+    if (_randomAyat!.paraId == null ||
+        _randomAyat!.surahId == null ||
+        _randomAyat!.ayatNumber == null) {
+      return const SizedBox.shrink();
     }
 
     final int surahId = int.tryParse(_randomAyat!.surahId ?? "1") ?? 1;
@@ -444,15 +452,34 @@ class _HomeState extends State<Home> {
         Provider.of<QuranDataProvider>(context, listen: false)
             .getSurahMetadata(surahId);
 
-    final String surahNameArabic = surah?.name ?? "";
-    final String surahNameEnglish = surah?.tname ?? "";
+    if (surah == null) return const SizedBox.shrink();
+
+    final String surahNameArabic = surah.name;
+    final String surahNameEnglish = surah.tname;
     final String verseRef = "$surahId:${_randomAyat!.ayatNumber}";
     final String arabicText = _randomAyat!.arabicText;
-    final String translationText = _randomAyat!.tarjumaIrfan ?? "";
+
+    String translationText = "";
+    String translatorName = "";
+
+    if (bloc.selectedTranslation == "irfan") {
+      translationText = _randomAyat!.tarjumaIrfan ?? "";
+      translatorName = "Kanz-ul-Irfan";
+    } else {
+      translationText = _randomAyat!.tarjumaHind ?? "";
+      translatorName = "Kanz-ul-Iman";
+    }
+
+    // Fallback if empty
+    if (translationText.trim().isEmpty) {
+      translationText =
+          _randomAyat!.tarjumaIrfan ?? _randomAyat!.tarjumaPak ?? "";
+      translatorName = "Kanz-ul-Irfan";
+    }
 
     return Card(
       elevation: 5,
-      color: bloc.selectedSecondary,
+      color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: InkWell(
         borderRadius: BorderRadius.circular(30),
@@ -503,10 +530,14 @@ class _HomeState extends State<Home> {
                   onPressed: () => AppShare.image(
                     context: context,
                     bloc: bloc,
-                    title: "Surah $surahNameEnglish ($verseRef)",
+                    title: surahNameEnglish,
+                    arabicTitle: surahNameArabic,
                     arabicText: arabicText,
                     translationText: translationText,
-                    translatorName: "ترجمہ: کنزالایمان",
+                    translatorName: translatorName,
+                    paraNumber: _randomAyat!.paraId,
+                    surahNumber: _randomAyat!.surahId,
+                    ayatNumber: _randomAyat!.ayatNumber,
                   ),
                   icon:
                       Icon(Icons.share, color: Theme.of(context).primaryColor),

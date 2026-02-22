@@ -38,6 +38,12 @@ class TranlationCardSection extends StatelessWidget {
       translatorName = "Kanz-ul-Iman";
     }
 
+    // Safety fallback: If selected translation is empty (e.g. Alif Lam Mim in Iman),
+    // show the other one so the user isn't left with an empty card.
+    if (translationText.trim().isEmpty) {
+      translationText = aya.tarjumaIrfan ?? aya.tarjumaPak ?? "";
+    }
+
     return GestureDetector(
       onTap: () {
         SHEET.bottomSheetPreview(context, ayats, index, provider);
