@@ -104,9 +104,10 @@ class _ParahState extends State<Parah> {
                     child: Card(
                       color: bloc.selectedSecondary,
                       elevation: 5,
-                      child: SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.22,
-                        width: MediaQuery.of(context).size.height * 0.22,
+                      child: Container(
+                        padding: EdgeInsets.all(5),
+                        // height: MediaQuery.of(context).size.height * 0.22,
+                        // width: MediaQuery.of(context).size.height * 0.22,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -177,41 +178,7 @@ class _ParahState extends State<Parah> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Container(
-                                  height: 50,
-                                  width: 50,
-                                  decoration: const BoxDecoration(
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              "assets/images/cornerbottom.png"),
-                                          fit: BoxFit.fill)),
-                                ),
-                                InkWell(
-                                  onTap: () {
-                                    _toggleFavorite(QuranFavorite(
-                                      suratName: paraName,
-                                      urduSuratName: "",
-                                      suraVerses: ayatCount,
-                                      surahCount: paraNumber.toString(),
-                                      isPara: true,
-                                    ));
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        right: 4, bottom: 4),
-                                    child: Icon(
-                                      _isFavorite(paraNumber.toString())
-                                          ? Icons.favorite
-                                          : Icons.favorite_border,
-                                      color: _isFavorite(paraNumber.toString())
-                                          ? bloc.selectedTheme
-                                          : bloc.selectedTheme,
-                                      size: 24,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              children: [],
                             ),
                           ],
                         ),

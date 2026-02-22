@@ -140,8 +140,9 @@ class _SurahState extends State<Surah> {
                                     surah.type == 'Meccan'
                                         ? 'assets/images/kaaba.png'
                                         : 'assets/images/madni.png',
-                                    width: 24,
-                                    height: 24,
+                                    width: surah.type != 'Meccan' ? 35 : 24,
+                                    height: surah.type != 'Meccan' ? 35 : 24,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
                               ],

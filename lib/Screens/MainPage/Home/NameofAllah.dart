@@ -48,7 +48,7 @@ class _NameofAllahState extends State<NameofAllah> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     var bloc = context.watch<ThemeProvider>();
-    
+
     return Scaffold(
       appBar: appBar(bloc),
       body: isLoading
@@ -61,6 +61,10 @@ class _NameofAllahState extends State<NameofAllah> {
               height: size.height,
               width: size.width,
               decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/images/BgImage.png"),
+                  fit: BoxFit.cover,
+                ),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -83,7 +87,10 @@ class _NameofAllahState extends State<NameofAllah> {
                         backCardOffset: const Offset(0, 40),
                         padding: const EdgeInsets.all(24.0),
                         duration: const Duration(milliseconds: 300),
-                        cardBuilder: (context, index, horizontalThresholdPercentage, verticalThresholdPercentage) {
+                        cardBuilder: (context,
+                            index,
+                            horizontalThresholdPercentage,
+                            verticalThresholdPercentage) {
                           return buildNameCard(names![index], size, bloc);
                         },
                       ),
@@ -102,7 +109,8 @@ class _NameofAllahState extends State<NameofAllah> {
                         ),
                         const SizedBox(width: 40),
                         IconButton(
-                          onPressed: () => controller.swipe(CardSwiperDirection.right),
+                          onPressed: () =>
+                              controller.swipe(CardSwiperDirection.right),
                           icon: Icon(
                             Icons.arrow_forward_rounded,
                             size: 40,
@@ -172,45 +180,47 @@ class _NameofAllahState extends State<NameofAllah> {
         child: Stack(
           children: [
             // Decorative corners
-            Positioned(
-              top: 0,
-              right: 0,
-              child: Container(
-                height: 60,
-                width: 60,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage("assets/images/cornertop.png"),
-                    fit: BoxFit.fill,
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              child: Container(
-                height: 60,
-                width: 60,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage("assets/images/cornerbottom.png"),
-                    fit: BoxFit.fill,
-                  ),
-                ),
-              ),
-            ),
+            // Positioned(
+            //   top: 0,
+            //   right: 0,
+            //   child: Container(
+            //     height: 60,
+            //     width: 60,
+            //     decoration: const BoxDecoration(
+            //       image: DecorationImage(
+            //         image: AssetImage("assets/images/cornertop.png"),
+            //         fit: BoxFit.fill,
+            //       ),
+            //     ),
+            //   ),
+            // ),
+            // Positioned(
+            //   bottom: 0,
+            //   left: 0,
+            //   child: Container(
+            //     height: 60,
+            //     width: 60,
+            //     decoration: const BoxDecoration(
+            //       image: DecorationImage(
+            //         image: AssetImage("assets/images/cornerbottom.png"),
+            //         fit: BoxFit.fill,
+            //       ),
+            //     ),
+            //   ),
+            // ),
             // Content
             Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Number badge
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
@@ -240,7 +250,8 @@ class _NameofAllahState extends State<NameofAllah> {
                     const SizedBox(height: 12),
                     // Transliteration
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(15),
