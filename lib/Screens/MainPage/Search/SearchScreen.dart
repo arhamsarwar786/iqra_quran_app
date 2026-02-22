@@ -447,6 +447,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     parahCount: aya.paraId,
                     parahname: para.paraName,
                     targetAyatNumber: aya.ayatNumberInt,
+                    saveLastRead: false,
                   ));
             },
             child: Padding(

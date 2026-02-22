@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:iqra/Provider/theme_provider.dart';
+import 'package:provider/provider.dart';
 import 'Screens/MainPage/main_screen.dart';
 import 'Screens/MainPage/Quran/tabbarview.dart';
 import 'Screens/MainPage/Calendar/CalendarScreen.dart';
@@ -125,39 +127,54 @@ Widget bgImage(BuildContext context, Size size) {
 }
 
 floatinButton(context) {
-  return Container(
-    margin: const EdgeInsets.only(top: 30),
-    child: GestureDetector(
-      onTap: () => push(context, const TabBarDemo()),
-      child: Container(
-        height: 70,
-        width: 70,
-        decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).primaryColor.withOpacity(0.4),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.menu_book_rounded, color: Colors.white, size: 24),
-            Text(
-              "QURAN",
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+  final bloc = Provider.of<ThemeProvider>(context);
+  return Transform.translate(
+    offset: const Offset(0, 15), // Lift the entire assembly up by 10 pixels
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onTap: () => push(context, const TabBarDemo()),
+          child: Container(
+            height: 75,
+            width: 75,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              image: DecorationImage(
+                image: AssetImage("assets/images/iqra${bloc.iconNumber}.png"),
+                fit: BoxFit.contain,
               ),
+              // gradient: LinearGradient(
+              //   colors: [
+              //     bloc.selectedTheme,
+              //     bloc.selectedTheme.withOpacity(0.8),
+              //   ],
+              //   begin: Alignment.topLeft,
+              //   end: Alignment.bottomRight,
+              // ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: bloc.selectedTheme.withOpacity(0.4),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+        const SizedBox(height: 5), // Increased space from 6 to 10
+        Text(
+          "QURAN",
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w900,
+            color: bloc.selectedTheme,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
     ),
   );
 }

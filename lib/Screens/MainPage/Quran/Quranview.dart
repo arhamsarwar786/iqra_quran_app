@@ -18,18 +18,23 @@ import '../../../Widgets/auto_scroll_speed_dialog.dart';
 import '../Drawer/setting_screen.dart';
 
 class QuranView extends StatefulWidget {
-  const QuranView(
-      {super.key,
-      this.ayatCount,
-      this.surahName,
-      this.suratNumber,
-      this.targetAyatNumber,
-      this.initialScrollOffset});
   final String? ayatCount;
   final int? suratNumber;
   final String? surahName;
   final int? targetAyatNumber;
   final double? initialScrollOffset;
+  final bool saveLastRead;
+
+  const QuranView({
+    super.key,
+    this.ayatCount,
+    this.suratNumber,
+    this.surahName,
+    this.targetAyatNumber,
+    this.initialScrollOffset,
+    this.saveLastRead = true,
+  });
+
   @override
   State<QuranView> createState() => _QuranViewState();
 }
@@ -229,12 +234,14 @@ class _QuranViewState extends State<QuranView> {
     listAyat = provider.getAyatsBySurah(widget.suratNumber ?? 0);
 
     // Save as last read
-    SavedPrefernces.setLastRead({
-      "type": "surah",
-      "id": widget.suratNumber,
-      "name": widget.surahName,
-      "count": widget.ayatCount,
-    });
+    if (widget.saveLastRead) {
+      SavedPrefernces.setLastRead({
+        "type": "surah",
+        "id": widget.suratNumber,
+        "name": widget.surahName,
+        "count": widget.ayatCount,
+      });
+    }
 
     viewMaker();
     _scrollViewController = ScrollController();

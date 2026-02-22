@@ -496,6 +496,7 @@ class _HomeState extends State<Home> {
                 parahname: "Para $paraId",
                 targetAyatNumber: int.tryParse(_randomAyat!.ayatNumber ?? "0"),
                 targetSurahNumber: surahId,
+                saveLastRead: false,
               ),
             );
           },

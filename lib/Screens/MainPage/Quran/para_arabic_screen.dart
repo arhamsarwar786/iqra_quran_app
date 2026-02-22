@@ -20,15 +20,6 @@ import '../Drawer/setting_screen.dart';
 import 'translation/parah_translation_screen.dart';
 
 class ParaArabicScreen extends StatefulWidget {
-  const ParaArabicScreen(
-      {super.key,
-      this.para,
-      this.ayatInPara,
-      this.parahCount,
-      this.parahname,
-      this.targetAyatNumber,
-      this.targetSurahNumber,
-      this.initialScrollOffset});
   final String? parahCount;
   final int? ayatInPara;
   final ParaModel.Para? para;
@@ -36,6 +27,20 @@ class ParaArabicScreen extends StatefulWidget {
   final int? targetAyatNumber;
   final int? targetSurahNumber;
   final double? initialScrollOffset;
+  final bool saveLastRead;
+
+  const ParaArabicScreen({
+    super.key,
+    this.para,
+    this.ayatInPara,
+    this.parahCount,
+    this.parahname,
+    this.targetAyatNumber,
+    this.targetSurahNumber,
+    this.initialScrollOffset,
+    this.saveLastRead = true,
+  });
+
   @override
   State<ParaArabicScreen> createState() => _ParaArabicScreenState();
 }
@@ -324,13 +329,15 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     super.initState();
     _highlightedAyah = widget.targetAyatNumber;
 
-    // Save as last read
-    SavedPrefernces.setLastRead({
-      "type": "para",
-      "id": widget.parahCount,
-      "name": widget.parahname,
-      "count": widget.ayatInPara?.toString(),
-    });
+    // Save as last read only if requested
+    if (widget.saveLastRead) {
+      SavedPrefernces.setLastRead({
+        "type": "para",
+        "id": widget.parahCount,
+        "name": widget.parahname,
+        "count": widget.ayatInPara?.toString(),
+      });
+    }
 
     loadParaView().then((val) {
       listAyat = List<Aya>.from(val);
