@@ -92,10 +92,15 @@ class ThemeProvider extends ChangeNotifier {
 
   /// Translation
   String selectedTranslation =
-      "irfan"; // irfan or hind (irfan is Irfan-ul-Quran)
+      "irfan"; // irfan or hind (irfan: Kanz-ul-Irfan, hind: Kanz-ul-Iman)
 
   getSelectedTranslation() async {
     var data = await SavedPrefernces.getSelectedTranslation();
+    // Migrate old keys to standard 'hind' key
+    if (data == "furqan" || data == "iman") {
+      data = "hind";
+      SavedPrefernces.setSelectedTranslation(data);
+    }
     selectedTranslation = data;
     notifyListeners();
   }

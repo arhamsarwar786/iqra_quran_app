@@ -392,8 +392,8 @@ class _QuranViewState extends State<QuranView> {
                         }
                       },
                       items: [
-                        const BottomNavigationBarItem(
-                          icon: Padding(
+                        BottomNavigationBarItem(
+                          icon: const Padding(
                             padding: EdgeInsets.only(bottom: 4.0),
                             child: Icon(
                               Icons.menu_book_rounded,
@@ -401,7 +401,9 @@ class _QuranViewState extends State<QuranView> {
                               size: 26,
                             ),
                           ),
-                          label: "Translation",
+                          label: bloc.selectedTranslation == "irfan"
+                              ? "Kanz-ul-Irfan"
+                              : "Kanz-ul-Iman",
                         ),
                         BottomNavigationBarItem(
                           icon: Padding(

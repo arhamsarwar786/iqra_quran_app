@@ -32,10 +32,10 @@ class TranlationCardSection extends StatelessWidget {
 
     if (provider.selectedTranslation == "irfan") {
       translationText = aya.tarjumaIrfan ?? "";
-      translatorName = "عرفان القرآن";
+      translatorName = "Kanz-ul-Irfan";
     } else {
-      translationText = aya.tarjumaPak ?? "";
-      translatorName = "کنز الایمان";
+      translationText = aya.tarjumaHind ?? "";
+      translatorName = "Kanz-ul-Iman";
     }
 
     return GestureDetector(

@@ -309,21 +309,24 @@ class _SettingScreenState extends State<SettingScreen> {
                             bloc: bloc,
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
-                                value: bloc.selectedTranslation,
+                                value: (bloc.selectedTranslation == "irfan" ||
+                                        bloc.selectedTranslation == "hind")
+                                    ? bloc.selectedTranslation
+                                    : "irfan",
                                 isExpanded: true,
                                 items: const [
                                   DropdownMenuItem(
                                       value: "irfan",
                                       child: Padding(
                                         padding: EdgeInsets.only(left: 8.0),
-                                        child: Text("Irfan-ul-Quran",
+                                        child: Text("Kanz-ul-Irfan",
                                             style: TextStyle(fontSize: 13)),
                                       )),
                                   DropdownMenuItem(
-                                      value: "furqan",
+                                      value: "hind",
                                       child: Padding(
                                         padding: EdgeInsets.only(left: 8.0),
-                                        child: Text("Furqan-ul-Hameed",
+                                        child: Text("Kanz-ul-Iman",
                                             style: TextStyle(fontSize: 13)),
                                       )),
                                 ],
@@ -369,8 +372,20 @@ class _SettingScreenState extends State<SettingScreen> {
                             const Divider(height: 25),
                             Text(
                               bloc.selectedTranslation == "irfan"
+                                  ? "Kanz-ul-Irfan"
+                                  : "Kanz-ul-Iman",
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: bloc.selectedTheme,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              bloc.selectedTranslation == "irfan"
                                   ? "(یہ) وہ عظیم کتاب ہے جس میں کسی شک کی گنجائش نہیں، (یہ) پرہیزگاروں کے لیے ہدایت ہے۔"
-                                  : "یہ وہ کتاب ہے جس میں کوئی شک نہیں، (یہ) ہدایت ہے تقویٰ والوں کے لیے۔",
+                                  : "وہ بلند رتبہ کتاب جس میں کوئی شک کی جگہ نہیں، ہدایت ہے ڈر والوں کو۔",
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 fontSize: bloc.urduFontSize - 5,

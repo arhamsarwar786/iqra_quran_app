@@ -511,8 +511,8 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                     }
                   },
                   items: [
-                    const BottomNavigationBarItem(
-                      icon: Padding(
+                    BottomNavigationBarItem(
+                      icon: const Padding(
                         padding: EdgeInsets.only(bottom: 4.0),
                         child: Icon(
                           Icons.menu_book_rounded,
@@ -520,7 +520,9 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                           size: 26,
                         ),
                       ),
-                      label: "Translation",
+                      label: bloc.selectedTranslation == "irfan"
+                          ? "Kanz-ul-Irfan"
+                          : "Kanz-ul-Iman",
                     ),
                     BottomNavigationBarItem(
                       icon: Padding(

@@ -138,10 +138,10 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
 
                 if (bloc.selectedTranslation == "irfan") {
                   translationText = aya.tarjumaIrfan ?? "";
-                  translatorName = "عرفان القرآن";
+                  translatorName = "Kanz-ul-Irfan";
                 } else {
-                  translationText = aya.tarjumaPak ?? "";
-                  translatorName = "کنز الایمان";
+                  translationText = aya.tarjumaHind ?? "";
+                  translatorName = "Kanz-ul-Iman";
                 }
 
                 return Padding(
