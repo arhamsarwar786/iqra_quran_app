@@ -1,97 +1,143 @@
 import "package:flutter/material.dart";
-import 'package:iqra/Utils/constants.dart';
-import 'package:iqra/Utils/customThemes.dart';
-
+import 'package:iqra/Provider/quran_data_provider.dart';
+import 'package:iqra/Utils/bottom_sheet_preview.dart';
 import 'package:iqra/Utils/share_verse.dart';
-
+import 'package:provider/provider.dart';
+import '../Models/aya_list_model.dart';
+import '../Models/surah_metadata_model.dart';
 import '../Provider/theme_provider.dart';
-import '../Screens/MainPage/Khalima/widgets.dart';
 
 class TranlationCardSection extends StatelessWidget {
-  final ThemeProvider? provider;
-  final urdu, arabic;
-  final String? surahName;
-  final String? ayatNumber;
-  final String? paraNumber;
-  final String? surahNumber;
-  const TranlationCardSection(
-      {super.key,
-      this.provider,
-      this.arabic,
-      this.urdu,
-      this.surahName,
-      this.ayatNumber,
-      this.paraNumber,
-      this.surahNumber});
+  final ThemeProvider provider;
+  final List<Aya> ayats;
+  final int index;
+
+  const TranlationCardSection({
+    super.key,
+    required this.provider,
+    required this.ayats,
+    required this.index,
+  });
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    return Card(
-      child: SizedBox(
-        width: size.width,
-        child: Stack(alignment: Alignment.center, children: [
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 50, horizontal: 20),
-            alignment: Alignment.center,
-            constraints: const BoxConstraints(minHeight: 250),
-            color: MyColors.whiteColor,
-            width: size.width,
-            child: Column(
+    final aya = ayats[index];
+    final quranProvider =
+        Provider.of<QuranDataProvider>(context, listen: false);
+    final int surahId = int.tryParse(aya.surahId ?? "1") ?? 1;
+    final SurahMetadata? surah = quranProvider.getSurahMetadata(surahId);
+
+    String translationText = "";
+    String translatorName = "";
+
+    if (provider.selectedTranslation == "irfan") {
+      translationText = aya.tarjumaIrfan ?? "";
+      translatorName = "عرفان القرآن";
+    } else {
+      translationText = aya.tarjumaPak ?? "";
+      translatorName = "کنز الایمان";
+    }
+
+    return GestureDetector(
+      onTap: () {
+        SHEET.bottomSheetPreview(context, ayats, index, provider);
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: provider.selectedTheme.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+          border: Border.all(color: provider.selectedTheme.withOpacity(0.1)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "$arabic",
-                  style: MyTextStyle.heading3.copyWith(
-                      fontSize: provider!.arabicFontSize,
-                      fontFamily: provider!.arabicFontFamily),
-                  textDirection: TextDirection.rtl,
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: provider.selectedTheme.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    "Verse ${aya.surahId}:${aya.ayatNumber}",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: provider.selectedTheme,
+                    ),
+                  ),
                 ),
-                const Text("ترجمہ: کنزالایمان"),
-                Text("$urdu",
-                    style: MyTextStyle.heading3.copyWith(
-                        fontSize: provider!.urduFontSize,
-                        fontFamily: provider!.urduFontFamily),
-                    textDirection: TextDirection.rtl),
+                IconButton(
+                  onPressed: () {
+                    AppShare.image(
+                      context: context,
+                      bloc: provider,
+                      title: surah?.tname ?? "Surah",
+                      arabicTitle: surah?.name ?? "",
+                      arabicText: aya.arabicText,
+                      translationText: translationText,
+                      translatorName: translatorName,
+                      paraNumber: aya.paraId,
+                      surahNumber: aya.surahId,
+                      ayatNumber: aya.ayatNumber,
+                    );
+                  },
+                  icon: Icon(Icons.share_outlined,
+                      color: provider.selectedTheme, size: 20),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
               ],
             ),
-          ),
-          CustomBorders(
-            color: provider!.selectedTheme,
-            image: "ktopright.png",
-            top: 5,
-            right: 5,
-          ),
-          CustomBorders(
-            color: provider!.selectedTheme,
-            image: "kbottomleft.png",
-            bottom: 5,
-            left: 5,
-          ),
-          Positioned(
-              top: 5,
-              left: 5,
-              child: IconButton(
-                onPressed: () {
-                  AppShare.image(
-                    context: context,
-                    bloc: provider!,
-                    title: surahName ?? "Surah",
-                    paraNumber: paraNumber,
-                    surahNumber: surahNumber,
-                    ayatNumber: ayatNumber,
-                    arabicText: arabic.toString(),
-                    translationText: urdu.toString(),
-                    translatorName: "ترجمہ: کنزالایمان",
-                  );
-                  // myShare(text: "$arabic\n\n$urdu");
-                },
-                icon: Icon(
-                  Icons.share,
-                  size: 30,
-                  color: provider!.selectedTheme,
-                ),
-              )),
-        ]),
+            const SizedBox(height: 15),
+            Text(
+              aya.arabicText,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: provider.arabicFontSize - 4,
+                fontFamily: provider.arabicFontFamily,
+                color: Colors.black,
+                height: 1.6,
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 15),
+              child: Divider(thickness: 0.5),
+            ),
+            Text(
+              translatorName,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: provider.selectedTheme,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              translationText,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: provider.urduFontSize - 5,
+                fontFamily: provider.urduFontFamily,
+                color: Colors.black87,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

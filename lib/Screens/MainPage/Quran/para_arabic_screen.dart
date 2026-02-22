@@ -477,6 +477,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                             parahname: widget.parahname,
                             ayatInPara: widget.ayatInPara,
                             para: widget.para,
+                            ayatList: listAyat,
                           ));
                     } else if (index == 1) {
                       showDialog(
