@@ -2,28 +2,25 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class SavedPreferences {
-  static setFav(items)async{
+  static setFav(items) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setString("quranFav", jsonEncode(items));
+    await pref.setString("quranFav", jsonEncode(items));
   }
 
-  static getFav()async{
+  static getFav() async {
     var data;
     SharedPreferences pref = await SharedPreferences.getInstance();
     var res = pref.getString("quranFav");
-    if(res != null){
+    if (res != null) {
       data = jsonDecode(res);
     }
     return data;
   }
 
-
-  static clearFavPreference()async{
+  static clearFavPreference() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.clear();
+    await pref.clear();
     print("ALL CLEARED");
   }
-
 }

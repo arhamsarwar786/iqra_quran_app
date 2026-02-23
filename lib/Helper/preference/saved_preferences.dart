@@ -5,8 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SavedPrefernces {
   static setTheme(theme) async {
     final pref = await SharedPreferences.getInstance();
-    pref.reload();
-    pref.setString('theme', jsonEncode(theme));
+    await pref.setString('theme', jsonEncode(theme));
   }
 
   static getTheme() async {
@@ -23,8 +22,7 @@ class SavedPrefernces {
   ///// Arabic Font Family
   static setArabicFontFamily(theme) async {
     final pref = await SharedPreferences.getInstance();
-    pref.reload();
-    pref.setString('arabicFamily', jsonEncode(theme));
+    await pref.setString('arabicFamily', jsonEncode(theme));
   }
 
   static getArabicFontFamily() async {
@@ -41,8 +39,7 @@ class SavedPrefernces {
   ///// Arabic Font Size
   static setArabicFontSize(theme) async {
     final pref = await SharedPreferences.getInstance();
-    pref.reload();
-    pref.setString('arabicSize', jsonEncode(theme));
+    await pref.setString('arabicSize', jsonEncode(theme));
   }
 
   static getArabicFontSize() async {
@@ -59,8 +56,7 @@ class SavedPrefernces {
   ///// Urdu Font Size
   static setUrduFontSize(theme) async {
     final pref = await SharedPreferences.getInstance();
-    pref.reload();
-    pref.setString('urduSize', jsonEncode(theme));
+    await pref.setString('urduSize', jsonEncode(theme));
   }
 
   static getUrduFontSize() async {
@@ -76,8 +72,7 @@ class SavedPrefernces {
 
   static setUrduFontFamily(theme) async {
     final pref = await SharedPreferences.getInstance();
-    pref.reload();
-    pref.setString('urduFamily', jsonEncode(theme));
+    await pref.setString('urduFamily', jsonEncode(theme));
   }
 
   static getUrduFontFamily() async {

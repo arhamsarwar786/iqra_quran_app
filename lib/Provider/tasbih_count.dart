@@ -20,15 +20,15 @@ class TasbeeCount extends ChangeNotifier {
     await prefs.setInt(_countKey, count);
   }
 
-  void increment() {
+  Future<void> increment() async {
     count++;
-    _saveCount();
+    await _saveCount();
     notifyListeners();
   }
 
-  void resetCount() {
+  Future<void> resetCount() async {
     count = 0;
-    _saveCount();
+    await _saveCount();
     notifyListeners();
   }
 

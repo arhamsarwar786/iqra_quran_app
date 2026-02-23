@@ -165,7 +165,7 @@ class _MyWidgetState extends State<Tasbih> {
                           right: 0,
                           child: BouncingButton(
                             onPress: () async {
-                              value.increment();
+                              await value.increment();
                               player.seek(Duration.zero);
                               player.play();
                             },
@@ -187,8 +187,8 @@ class _MyWidgetState extends State<Tasbih> {
                                       title: "Want to Delete?",
                                       decription:
                                           "Are you sure you want to clear user data.",
-                                      onTab: () {
-                                    value.resetCount();
+                                      onTab: () async {
+                                    await value.resetCount();
                                     pop(context);
                                   });
                                 },
