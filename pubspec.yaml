@@ -51,7 +51,8 @@ dependencies:
   objectbox_flutter_libs:
   shared_preferences: 
   just_audio: 
-  share_plus: 
+  share_plus: 10.1.4
+  package_info_plus: 8.1.1
   path_provider:
   flutter_card_swiper: ^7.0.1
   flutter_localization: ^0.1.14
@@ -59,7 +60,7 @@ dependencies:
   file:
   flutter_local_notifications: ^17.0.0
   file_picker: ^8.0.0
-  speech_to_text: ^6.1.1
+  speech_to_text: ^7.3.0
   permission_handler: ^11.0.1
   url_launcher: ^6.1.7
   font_awesome_flutter: 10.1.0

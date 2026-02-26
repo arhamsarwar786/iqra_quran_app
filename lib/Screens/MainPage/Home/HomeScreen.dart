@@ -860,18 +860,37 @@ class _SearchInQuaranState extends State<SearchInQuaran> {
 
       CalculationParameters params;
       switch (calcMethod) {
+        case 'karachi':
+          params = CalculationMethodParameters.karachi();
+          break;
         case 'mwl':
-          params = CalculationMethod.muslimWorldLeague();
+          params = CalculationMethodParameters.muslimWorldLeague();
           break;
         case 'isna':
-          params = CalculationMethod.northAmerica();
+          params = CalculationMethodParameters.northAmerica();
           break;
         case 'egypt':
-          params = CalculationMethod.egyptian();
+          params = CalculationMethodParameters.egyptian();
           break;
-        case 'karachi':
+        case 'makkah':
+        case 'umm_al_qura':
+          params = CalculationMethodParameters.ummAlQura();
+          break;
+        case 'dubai':
+          params = CalculationMethodParameters.dubai();
+          break;
+        case 'turkey':
+        case 'turkiye':
+          params = CalculationMethodParameters.turkiye();
+          break;
+        case 'tehran':
+          params = CalculationMethodParameters.tehran();
+          break;
+        case 'singapore':
+          params = CalculationMethodParameters.singapore();
+          break;
         default:
-          params = CalculationMethod.karachi();
+          params = CalculationMethodParameters.karachi();
       }
       params.madhab = madhab == 'hanafi' ? Madhab.hanafi : Madhab.shafi;
 

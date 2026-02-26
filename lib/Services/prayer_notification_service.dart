@@ -3,6 +3,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:adhan_dart/adhan_dart.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:lat_lng_to_timezone/lat_lng_to_timezone.dart' as tz_lookup;
 import '../Helper/preference/saved_preferences.dart';
 
 /// ─────────────────────────────────────────────────────────────────────────────
@@ -68,21 +69,36 @@ class PrayerNotificationService {
     CalculationParameters params;
     switch (method) {
       case 'karachi':
-        // University of Islamic Sciences, Karachi — standard for Pakistan
-        // Fajr 18°, Isha 18°
-        params = CalculationMethod.karachi();
+        params = CalculationMethodParameters.karachi();
         break;
       case 'mwl':
-        params = CalculationMethod.muslimWorldLeague();
+        params = CalculationMethodParameters.muslimWorldLeague();
         break;
       case 'isna':
-        params = CalculationMethod.northAmerica();
+        params = CalculationMethodParameters.northAmerica();
         break;
       case 'egypt':
-        params = CalculationMethod.egyptian();
+        params = CalculationMethodParameters.egyptian();
+        break;
+      case 'makkah':
+      case 'umm_al_qura':
+        params = CalculationMethodParameters.ummAlQura();
+        break;
+      case 'dubai':
+        params = CalculationMethodParameters.dubai();
+        break;
+      case 'turkey':
+      case 'turkiye':
+        params = CalculationMethodParameters.turkiye();
+        break;
+      case 'tehran':
+        params = CalculationMethodParameters.tehran();
+        break;
+      case 'singapore':
+        params = CalculationMethodParameters.singapore();
         break;
       default:
-        params = CalculationMethod.karachi();
+        params = CalculationMethodParameters.karachi();
     }
     params.madhab = madhab == 'hanafi' ? Madhab.hanafi : Madhab.shafi;
     return params;
@@ -136,31 +152,51 @@ class PrayerNotificationService {
 
     if (!globalEnabled) return;
 
-    final now = DateTime.now().toUtc();
+    final now = DateTime.now();
     final coordinates = Coordinates(position.latitude, position.longitude);
 
-    final PrayerTimes pt = PrayerTimes(
-      coordinates: coordinates,
-      date: now,
-      calculationParameters: params,
-      precision: true,
-    );
+    // 1. Get Timezone and set it as local
+    String tzName =
+        tz_lookup.latLngToTimezoneString(position.latitude, position.longitude);
+    try {
+      tz.setLocalLocation(tz.getLocation(tzName));
+    } catch (_) {
+      // Fallback if zone not found
+    }
 
-    final Map<String, DateTime?> times = {
-      'fajr': pt.fajr,
-      'zuhr': pt.dhuhr,
-      'asr': pt.asr,
-      'maghrib': pt.maghrib,
-      'isha': pt.isha,
-    };
+    // 2. Schedule for today and tomorrow to cover the next 24 hours
+    List<DateTime> days = [
+      now,
+      now.add(const Duration(days: 1)),
+    ];
 
-    for (final entry in times.entries) {
-      if (toggles[entry.key] == true && entry.value != null) {
-        await _scheduleNotification(
-          id: prayerNotifIds[entry.key]!,
-          prayerKey: entry.key,
-          prayerTime: entry.value!,
-        );
+    for (DateTime day in days) {
+      final PrayerTimes pt = PrayerTimes(
+        coordinates: coordinates,
+        date: day,
+        calculationParameters: params,
+        precision: true,
+      );
+
+      final Map<String, DateTime?> times = {
+        'fajr': pt.fajr,
+        'zuhr': pt.dhuhr,
+        'asr': pt.asr,
+        'maghrib': pt.maghrib,
+        'isha': pt.isha,
+      };
+
+      for (final entry in times.entries) {
+        if (toggles[entry.key] == true && entry.value != null) {
+          // Unique ID for tomorrow's notifications to avoid overwriting today's
+          // Today: 1-5, Tomorrow: 11-15 (or similar offset)
+          int dayOffset = (day == days[0]) ? 0 : 10;
+          await _scheduleNotification(
+            id: prayerNotifIds[entry.key]! + dayOffset,
+            prayerKey: entry.key,
+            prayerTime: entry.value!,
+          );
+        }
       }
     }
   }
@@ -171,10 +207,10 @@ class PrayerNotificationService {
     required String prayerKey,
     required DateTime prayerTime,
   }) async {
-    final DateTime localTime = prayerTime.toLocal();
-    if (localTime.isBefore(DateTime.now())) return;
+    // prayerTime is UTC from adhan_dart
+    if (prayerTime.isBefore(DateTime.now())) return;
 
-    final tz.TZDateTime scheduled = tz.TZDateTime.from(localTime, tz.local);
+    final tz.TZDateTime scheduled = tz.TZDateTime.from(prayerTime, tz.local);
     final displayName = prayerDisplayNames[prayerKey] ?? prayerKey;
     final details = await _androidDetails(displayName);
 

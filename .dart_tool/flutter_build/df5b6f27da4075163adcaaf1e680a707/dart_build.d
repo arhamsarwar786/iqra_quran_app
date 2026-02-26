@@ -1,1 +1,1 @@
- /Users/as-macbook/Documents/GitHub/iqra_quran_app/.dart_tool/flutter_build/df5b6f27da4075163adcaaf1e680a707/dart_build_result.json: 
+ /Users/as-macbook/Documents/GitHub/iqra_quran_app/.dart_tool/flutter_build/df5b6f27da4075163adcaaf1e680a707/dart_build_result.json:  /Users/as-macbook/Documents/GitHub/iqra_quran_app/.dart_tool/package_config.json /Users/as-macbook/Documents/GitHub/iqra_quran_app/pubspec.yaml /Users/as-macbook/Documents/flutter-sdk/3.38.7/bin/cache/dart-sdk/version

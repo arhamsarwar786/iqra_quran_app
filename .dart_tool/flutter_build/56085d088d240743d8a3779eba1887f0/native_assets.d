@@ -1,1 +1,0 @@
- /Users/as-macbook/Documents/GitHub/iqra_quran_app/.dart_tool/flutter_build/56085d088d240743d8a3779eba1887f0/native_assets.yaml: 
