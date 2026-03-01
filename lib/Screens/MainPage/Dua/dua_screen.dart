@@ -20,8 +20,8 @@ class DuaScreen extends StatelessWidget {
           title: const Text("Dua"),
           centerTitle: true,
           leading: IconButton(
-            onPressed: () => Scaffold.of(context).openDrawer(),
-            icon: const Icon(Icons.menu),
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.arrow_back),
           ),
         ),
         body: SafeArea(

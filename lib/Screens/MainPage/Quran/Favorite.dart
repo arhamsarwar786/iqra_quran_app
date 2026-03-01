@@ -49,8 +49,9 @@ class _FavoriteState extends State<Favorite> {
         elevation: 0,
         backgroundColor: Colors.transparent,
         leading: IconButton(
-          onPressed: () => Scaffold.of(context).openDrawer(),
-          icon: Icon(Icons.menu, color: themeProvider.selectedTheme, size: 24),
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back,
+              color: themeProvider.selectedTheme, size: 24),
         ),
         centerTitle: true,
         title: Text(

@@ -91,8 +91,8 @@ class _SettingScreenState extends State<SettingScreen> {
       backgroundColor: bloc.selectedSecondary,
       appBar: AppBar(
         leading: IconButton(
-          onPressed: () => Scaffold.of(context).openDrawer(),
-          icon: const Icon(Icons.menu),
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back),
         ),
         title: const Text('Settings'),
         backgroundColor: Theme.of(context).primaryColor,
