@@ -53,12 +53,12 @@ class TranlationCardSection extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: provider.selectedTheme.withOpacity(0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
           border: Border.all(color: provider.selectedTheme.withOpacity(0.1)),
@@ -66,68 +66,103 @@ class TranlationCardSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // ── Header Row ──────────────────────────────────────────
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton(
-                  onPressed: () {
-                    AppShare.image(
-                      context: context,
-                      bloc: provider,
-                      title: surah?.tname ?? "Surah",
-                      arabicTitle: surah?.name ?? "",
-                      arabicText: aya.arabicText,
-                      translationText: translationText,
-                      translatorName: translatorName,
-                      paraNumber: aya.paraId,
-                      surahNumber: aya.surahId,
-                      ayatNumber: aya.ayatNumber,
-                    );
-                  },
-                  icon: Icon(Icons.share_outlined,
-                      color: provider.selectedTheme, size: 20),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
+                Row(
+                  children: [
+                    Container(
+                      height: 30,
+                      width: 30,
+                      decoration: BoxDecoration(
+                          color: provider.selectedTheme,
+                          borderRadius: BorderRadius.circular(100),
+                          image: DecorationImage(
+                              image: AssetImage("assets/images/iqra-white.png"),
+                              fit: BoxFit.fill)),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      "QURAN",
+                      style: TextStyle(
+                        color: provider.selectedTheme,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          AppShare.image(
+                            context: context,
+                            bloc: provider,
+                            title: surah?.tname ?? "Surah",
+                            arabicTitle: surah?.name ?? "",
+                            arabicText: aya.arabicText,
+                            translationText: translationText,
+                            translatorName: translatorName,
+                            paraNumber: aya.paraId,
+                            surahNumber: aya.surahId,
+                            ayatNumber: aya.ayatNumber,
+                          );
+                        },
+                        icon: Icon(Icons.share,
+                            color: provider.selectedTheme, size: 20),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                      const SizedBox(width: 20),
+                      Flexible(
+                        child: Text(
+                          surah?.name ?? "",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: provider.selectedTheme,
+                            fontSize: 20,
+                            fontFamily: provider.arabicFontFamily,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: 20),
+
+            // ── Arabic Text ─────────────────────────────────────────
             Text(
               aya.arabicText,
               textAlign: TextAlign.right,
               style: TextStyle(
-                fontSize: provider.arabicFontSize - 4,
+                fontSize: 28,
                 fontFamily: provider.arabicFontFamily,
-                color: provider.selectedTheme,
-                height: 1.6,
+                color: Colors.black,
+                fontWeight: FontWeight.w500,
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 15),
-              child: Divider(thickness: 0.5),
-            ),
-            Text(
-              translatorName,
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: provider.selectedTheme,
-              ),
-            ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 15),
+
+            // ── Translation ─────────────────────────────────────────
             Text(
               translationText,
               textAlign: TextAlign.right,
               style: TextStyle(
-                fontSize: provider.urduFontSize - 5,
+                fontSize: 18,
                 fontFamily: provider.urduFontFamily,
                 color: Colors.black87,
-                height: 1.5,
               ),
             ),
-            const SizedBox(height: 15),
-            // ── Source pill: Para · Surah · Verse numbers ──────
+            const SizedBox(height: 20),
+
+            // ── Source Pill ─────────────────────────────────────────
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -135,7 +170,6 @@ class TranlationCardSection extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   decoration: BoxDecoration(
-                    // color: provider.selectedTheme,
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: Text(

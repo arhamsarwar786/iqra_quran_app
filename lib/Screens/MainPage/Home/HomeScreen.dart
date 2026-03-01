@@ -539,9 +539,11 @@ class _HomeState extends State<Home> {
                             height: 30,
                             width: 30,
                             decoration: BoxDecoration(
+                                color: bloc.selectedTheme,
+                                borderRadius: BorderRadius.circular(100),
                                 image: DecorationImage(
                                     image: AssetImage(
-                                        "assets/images/iqra${bloc.iconNumber}.png"),
+                                        "assets/images/iqra-white.png"),
                                     fit: BoxFit.fill)),
                           ),
                           const SizedBox(width: 10),
@@ -576,7 +578,7 @@ class _HomeState extends State<Home> {
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
                             ),
-                            const SizedBox(width: 5),
+                            const SizedBox(width: 20),
                             Flexible(
                               child: Text(
                                 surahNameArabic,

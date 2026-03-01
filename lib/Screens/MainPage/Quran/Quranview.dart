@@ -436,58 +436,58 @@ class _QuranViewState extends State<QuranView> {
                     (BuildContext context, bool innerBoxIsScrolled) {
                   return [
                     SliverAppBar(
-                      automaticallyImplyLeading: false,
-                      backgroundColor: bloc.selectedTheme,
-                      expandedHeight: (metadata != null ? 110.0 : 0.0) +
-                          (_showAppbar ? 56.0 : 0.0),
-                      toolbarHeight: metadata != null
-                          ? 110.0
-                          : (_showAppbar ? 56.0 : 56.0),
+                      backgroundColor:
+                          metadata != null ? bloc.selectedTheme : Colors.white,
+                      expandedHeight: metadata != null ? 166.0 : 56.0,
+                      toolbarHeight: metadata != null ? 166.0 : 56.0,
                       floating: false,
                       pinned: true,
-                      snap: false,
                       elevation: 0,
-                      flexibleSpace: FlexibleSpaceBar(
-                        background: SingleChildScrollView(
-                          physics: const NeverScrollableScrollPhysics(),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              AnimatedContainer(
-                                height: _showAppbar ? 56.0 : 0.0,
-                                duration: const Duration(milliseconds: 200),
-                                child: AppBar(
-                                  centerTitle: true,
-                                  elevation: 0,
-                                  iconTheme: const IconThemeData(
-                                    color: Colors.black,
-                                  ),
-                                  backgroundColor: Colors.white,
-                                  title: Text(
-                                    '${widget.surahName}',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontFamily: bloc.arabicFontFamily,
-                                    ),
-                                  ),
+                      flexibleSpace: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          AnimatedContainer(
+                            height: _showAppbar ? 56.0 : 0.0,
+                            duration: const Duration(milliseconds: 200),
+                            child: AppBar(
+                              automaticallyImplyLeading: false,
+                              centerTitle: true,
+                              elevation: 0,
+                              iconTheme: const IconThemeData(
+                                color: Colors.black,
+                              ),
+                              backgroundColor: Colors.white,
+                              title: Text(
+                                '${widget.surahName}',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontFamily: bloc.arabicFontFamily,
                                 ),
                               ),
-                              if (metadata != null)
-                                AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 400),
-                                  transitionBuilder: (Widget child,
-                                      Animation<double> animation) {
-                                    return FadeTransition(
-                                        opacity: animation, child: child);
-                                  },
-                                  child: SurahHeaderCard(
-                                    key: ValueKey(metadata.index),
-                                    metadata: metadata,
-                                  ),
-                                ),
-                            ],
+                              leading: IconButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                icon: const Icon(Icons.arrow_back),
+                              ),
+                            ),
                           ),
-                        ),
+                          if (metadata != null)
+                            Expanded(
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 400),
+                                transitionBuilder: (Widget child,
+                                    Animation<double> animation) {
+                                  return FadeTransition(
+                                      opacity: animation, child: child);
+                                },
+                                child: SurahHeaderCard(
+                                  key: ValueKey(metadata.index),
+                                  metadata: metadata,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ];

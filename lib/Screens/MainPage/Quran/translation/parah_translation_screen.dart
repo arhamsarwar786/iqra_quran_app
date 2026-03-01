@@ -29,7 +29,7 @@ class _ParahTranslationScreenState extends State<ParahTranslationScreen> {
   Widget build(BuildContext context) {
     var bloc = context.read<ThemeProvider>();
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7),
+      backgroundColor: bloc.selectedSecondary,
       appBar: AppBar(
         title: Text(
           "${widget.parahname} Translation",

@@ -579,8 +579,16 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
             color: Colors.white,
             child: Directionality(
               textDirection: TextDirection.rtl,
-              child: CustomScrollView(
-                controller: _scrollViewController,
+              child: NotificationListener<ScrollEndNotification>(
+                onNotification: (scrollEnd) {
+                  if (scrollEnd.metrics.axis == Axis.vertical) {
+                    SavedPrefernces.updateLastReadOffset(
+                        scrollEnd.metrics.pixels);
+                  }
+                  return false;
+                },
+                child: CustomScrollView(
+                  controller: _scrollViewController,
                 slivers: [
                   SliverAppBar(
                     automaticallyImplyLeading: false,
@@ -639,18 +647,9 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                   SliverPadding(
                     padding: const EdgeInsets.only(
                         top: 5, bottom: 20, left: 15, right: 15),
-                    sliver: NotificationListener<ScrollEndNotification>(
-                      onNotification: (scrollEnd) {
-                        if (scrollEnd.metrics.axis == Axis.vertical) {
-                          SavedPrefernces.updateLastReadOffset(
-                              scrollEnd.metrics.pixels);
-                        }
-                        return false;
-                      },
-                      child: SliverList(
-                        delegate: SliverChildListDelegate(
-                          paraArabicScreenWidget,
-                        ),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate(
+                        paraArabicScreenWidget,
                       ),
                     ),
                   ),

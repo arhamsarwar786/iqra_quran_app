@@ -25,7 +25,7 @@ class _SurahTranslationScreenState extends State<SurahTranslationScreen> {
   Widget build(BuildContext context) {
     var bloc = context.read<ThemeProvider>();
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7), // Neutral modern background
+      backgroundColor: bloc.selectedSecondary,
       appBar: AppBar(
         title: Text(
           "${widget.surahName} Translation",
