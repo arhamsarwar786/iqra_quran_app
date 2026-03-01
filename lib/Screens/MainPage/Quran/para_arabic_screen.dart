@@ -137,6 +137,21 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
           (widget.targetSurahNumber == null ||
               aya.surahId == widget.targetSurahNumber.toString());
 
+      if (isTargetAyat && textSpanChildren.isNotEmpty) {
+        paraArabicScreenWidget.add(RichText(
+          text: TextSpan(
+            children: List.from(textSpanChildren),
+            style: TextStyle(
+                fontSize: bloc.arabicFontSize,
+                fontFamily: bloc.arabicFontFamily,
+                color: Colors.black),
+          ),
+        ));
+        textSpanChildren.clear();
+        currentBatchAyats.clear();
+        currentBatchAyats.add(aya.ayatNumberInt); // re-add for the new block
+      }
+
       textSpanChildren.add(
         TextSpan(
           text: "${(aya.arabicText).trim()} ",
@@ -161,7 +176,13 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       bool isNisf = aya.hasNisf;
       bool isSalsa = aya.hasSalsa;
 
-      if (isSajda || isManzil || isRuoEnd || isArba || isNisf || isSalsa) {
+      if (isSajda ||
+          isManzil ||
+          isRuoEnd ||
+          isArba ||
+          isNisf ||
+          isSalsa ||
+          isTargetAyat) {
         // Flush current text block
         if (textSpanChildren.isNotEmpty) {
           GlobalKey? keyForThisBlock;
@@ -272,10 +293,10 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
           Scrollable.ensureVisible(
             _targetKey!.currentContext!,
             duration: Duration.zero,
-            alignment: 0.1,
+            alignment: 0.4,
           );
 
-          Future.delayed(const Duration(seconds: 3), () {
+          Future.delayed(const Duration(seconds: 7), () {
             if (mounted) {
               setState(() {
                 _highlightedAyah = null;
