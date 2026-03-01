@@ -32,5 +32,11 @@ class TasbeeCount extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setValue(int val) async {
+    count = val;
+    await _saveCount();
+    notifyListeners();
+  }
+
   int get currentStep => count;
 }

@@ -6,6 +6,9 @@ import 'package:iqra/Screens/MainPage/Tasbeeh/tasheeh_list_screen.dart';
 import 'package:iqra/widgets.dart';
 import 'package:provider/provider.dart';
 import '../../../Provider/tasbih_count.dart';
+import 'package:iqra/Models/tasbeeh_model.dart';
+import 'package:iqra/Provider/tasbeeh_provider.dart';
+import 'package:iqra/main.dart';
 
 class TasbeeDetail extends StatefulWidget {
   const TasbeeDetail({super.key});
@@ -184,12 +187,37 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
                       minSize: size.width,
                       color: Theme.of(context).primaryColor,
                       onPressed: () {
-                        if (countController.text.isEmpty) {
+                        if (nameController.text.isEmpty ||
+                            countController.text.isEmpty) {
                           value.checkValidate(true);
                         } else {
                           value.checkValidate(false);
-                          // tasbihProvider
-                          //     .setValue(int.parse(countController.text));
+
+                          var tasbeehProv = context.read<TasbeehProvider>();
+                          var tasbihCountProv = context.read<TasbeeCount>();
+
+                          // Check if we are opening an existing custom one by title
+                          var previous = objectbox
+                              .getTodayTasbih(nameController.text.trim());
+
+                          // Convert to TasbeehModel (Session runner struct)
+                          TasbeehModel customTasbeeh = TasbeehModel(
+                            arabic: nameController.text.trim(),
+                            urduMeaning: "Custom Tasbeeh",
+                          );
+
+                          tasbeehProv.setSelectedTasbeeh(customTasbeeh);
+
+                          // Set starting count for the session
+                          int requestedCount =
+                              int.tryParse(countController.text) ?? 0;
+
+                          if (previous != null && requestedCount == 0) {
+                            tasbihCountProv.setValue(previous.count ?? 0);
+                          } else {
+                            tasbihCountProv.setValue(requestedCount);
+                          }
+
                           push(
                             context,
                             Tasbih(),

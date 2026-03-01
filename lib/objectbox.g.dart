@@ -22,7 +22,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(1, 9147271546381087750),
     name: 'TasbihModel',
-    lastPropertyId: const obx_int.IdUid(3, 2343131469187212872),
+    lastPropertyId: const obx_int.IdUid(4, 4966189823697517235),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -41,6 +41,12 @@ final _entities = <obx_int.ModelEntity>[
         id: const obx_int.IdUid(3, 2343131469187212872),
         name: 'count',
         type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 4966189823697517235),
+        name: 'date',
+        type: 9,
         flags: 0,
       ),
     ],
@@ -118,10 +124,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final virdhOffset = object.virdh == null
             ? null
             : fbb.writeString(object.virdh!);
-        fbb.startTable(4);
+        final dateOffset = object.date == null
+            ? null
+            : fbb.writeString(object.date!);
+        fbb.startTable(5);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, virdhOffset);
         fbb.addInt64(2, object.count);
+        fbb.addOffset(3, dateOffset);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -142,10 +152,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
           rootOffset,
           8,
         );
+        final dateParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 10);
         final object = TasbihModel(
           id: idParam,
           virdh: virdhParam,
           count: countParam,
+          date: dateParam,
         );
 
         return object;
@@ -171,5 +185,10 @@ class TasbihModel_ {
   /// See [TasbihModel.count].
   static final count = obx.QueryIntegerProperty<TasbihModel>(
     _entities[0].properties[2],
+  );
+
+  /// See [TasbihModel.date].
+  static final date = obx.QueryStringProperty<TasbihModel>(
+    _entities[0].properties[3],
   );
 }

@@ -76,6 +76,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
     paraArabicScreenWidget.clear();
     surahHeaderKeys.clear();
+    _targetKey = null; // Clear old target key
     firstSurahMetadata = null;
     currentSurahMetadata = null;
 
@@ -156,9 +157,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
         TextSpan(
           text: "${(aya.arabicText).trim()} ",
           style: TextStyle(
-            color: Colors.black,
-            backgroundColor:
-                isTargetAyat ? bloc.selectedTheme.withOpacity(0.3) : null,
+            color: isTargetAyat ? bloc.selectedTheme : Colors.black,
           ),
           recognizer: TapGestureRecognizer()
             ..onTap = () {
@@ -292,18 +291,9 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
         if (_targetKey!.currentContext != null) {
           Scrollable.ensureVisible(
             _targetKey!.currentContext!,
-            duration: Duration.zero,
-            alignment: 0.4,
+            duration: Duration.zero, // Instant jump like QuranView
+            alignment: 0.1, // Near top for better visibility
           );
-
-          Future.delayed(const Duration(seconds: 7), () {
-            if (mounted) {
-              setState(() {
-                _highlightedAyah = null;
-                viewMaker();
-              });
-            }
-          });
         }
       });
     }
@@ -596,49 +586,47 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                       (_showAppbar ? 56.0 : 0.0),
                   toolbarHeight: currentSurahMetadata != null
                       ? 110.0
-                      : (_showAppbar ? 56.0 : 56.0),
+                      : (_showAppbar ? 56.0 : 0.0),
                   floating: false,
                   pinned: true,
-                  flexibleSpace: FlexibleSpaceBar(
-                    background: SingleChildScrollView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          AnimatedContainer(
-                            height: _showAppbar ? 56.0 : 0.0,
-                            duration: const Duration(milliseconds: 200),
-                            child: AppBar(
-                              centerTitle: true,
-                              elevation: 0,
-                              iconTheme: const IconThemeData(
+                  flexibleSpace: SingleChildScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        AnimatedContainer(
+                          height: _showAppbar ? 56.0 : 0.0,
+                          duration: const Duration(milliseconds: 200),
+                          child: AppBar(
+                            centerTitle: true,
+                            elevation: 0,
+                            iconTheme: const IconThemeData(
+                              color: Colors.black,
+                            ),
+                            backgroundColor: Colors.white,
+                            title: Text(
+                              widget.parahname ?? 'Para ${widget.parahCount}',
+                              style: TextStyle(
                                 color: Colors.black,
-                              ),
-                              backgroundColor: Colors.white,
-                              title: Text(
-                                widget.parahname ?? 'Para ${widget.parahCount}',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: bloc.arabicFontFamily,
-                                ),
+                                fontFamily: bloc.arabicFontFamily,
                               ),
                             ),
                           ),
-                          if (currentSurahMetadata != null)
-                            AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 400),
-                              transitionBuilder:
-                                  (Widget child, Animation<double> animation) {
-                                return FadeTransition(
-                                    opacity: animation, child: child);
-                              },
-                              child: SurahHeaderCard(
-                                key: ValueKey(currentSurahMetadata!.index),
-                                metadata: currentSurahMetadata!,
-                              ),
+                        ),
+                        if (currentSurahMetadata != null)
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 400),
+                            transitionBuilder:
+                                (Widget child, Animation<double> animation) {
+                              return FadeTransition(
+                                  opacity: animation, child: child);
+                            },
+                            child: SurahHeaderCard(
+                              key: ValueKey(currentSurahMetadata!.index),
+                              metadata: currentSurahMetadata!,
                             ),
-                        ],
-                      ),
+                          ),
+                      ],
                     ),
                   ),
                 ),

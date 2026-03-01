@@ -56,8 +56,6 @@ class _HomeState extends State<Home> {
     super.initState();
   }
 
-  Aya? _randomAyat;
-
   List<String> imageName = [
     "Rectangle 3.png",
     "Rectangle 4.png",
@@ -76,15 +74,8 @@ class _HomeState extends State<Home> {
     var bloc = context.watch<ThemeProvider>();
     var quranProvider = context.watch<QuranDataProvider>();
 
-    // Load random ayat once when data is available
-    if (_randomAyat == null && quranProvider.isLoaded) {
-      // Use a post-frame callback or just set it if we are confident it won't cause loops.
-      // Since this is inside build, setting a local state variable without setState is tricky if we want it to persist.
-      // Better to just store it in a member variable.
-      // However, modifying state during build is generally bad.
-      // But since this is a one-time init, it acts like a lazy loader.
-      _randomAyat = quranProvider.getRandomSmallAyat();
-    }
+    Aya? _randomAyat = quranProvider.currentRandomAyat;
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -172,7 +163,7 @@ class _HomeState extends State<Home> {
               const SizedBox(height: 10),
               screensList(context, size, bloc),
               const SizedBox(height: 10),
-              quranDailyVerse(context, size, bloc),
+              quranDailyVerse(context, size, bloc, _randomAyat),
               const SizedBox(height: 10),
               namesAllahProphet(context, size, bloc),
               const SizedBox(height: 80),
@@ -446,19 +437,22 @@ class _HomeState extends State<Home> {
   }
 
   // quranDailyVerse //
-  Widget quranDailyVerse(BuildContext context, Size size, ThemeProvider bloc) {
-    if (_randomAyat == null) {
-      return const SizedBox.shrink();
+  Widget quranDailyVerse(
+      BuildContext context, Size size, ThemeProvider bloc, Aya? randomAyat) {
+    if (randomAyat == null) {
+      return CircularProgressIndicator(
+        backgroundColor: bloc.selectedTheme,
+      );
     }
 
     // Safety check: if critical details are missing, hidden the card
-    if (_randomAyat!.paraId == null ||
-        _randomAyat!.surahId == null ||
-        _randomAyat!.ayatNumber == null) {
+    if (randomAyat.paraId == null ||
+        randomAyat.surahId == null ||
+        randomAyat.ayatNumber == null) {
       return const SizedBox.shrink();
     }
 
-    final int surahId = int.tryParse(_randomAyat!.surahId ?? "1") ?? 1;
+    final int surahId = int.tryParse(randomAyat.surahId ?? "1") ?? 1;
     final SurahMetadata? surah =
         Provider.of<QuranDataProvider>(context, listen: false)
             .getSurahMetadata(surahId);
@@ -467,24 +461,23 @@ class _HomeState extends State<Home> {
 
     final String surahNameArabic = surah.name;
     final String surahNameEnglish = surah.tname;
-    final String verseRef = "$surahId:${_randomAyat!.ayatNumber}";
-    final String arabicText = _randomAyat!.arabicText;
+    final String verseRef = "$surahId:${randomAyat.ayatNumber}";
+    final String arabicText = randomAyat.arabicText;
 
     String translationText = "";
     String translatorName = "";
 
     if (bloc.selectedTranslation == "irfan") {
-      translationText = _randomAyat!.tarjumaIrfan ?? "";
+      translationText = randomAyat.tarjumaIrfan ?? "";
       translatorName = "Kanz-ul-Irfan";
     } else {
-      translationText = _randomAyat!.tarjumaHind ?? "";
+      translationText = randomAyat.tarjumaHind ?? "";
       translatorName = "Kanz-ul-Iman";
     }
 
     // Fallback if empty
     if (translationText.trim().isEmpty) {
-      translationText =
-          _randomAyat!.tarjumaIrfan ?? _randomAyat!.tarjumaPak ?? "";
+      translationText = randomAyat.tarjumaIrfan ?? randomAyat.tarjumaPak ?? "";
       translatorName = "Kanz-ul-Irfan";
     }
 
@@ -497,13 +490,13 @@ class _HomeState extends State<Home> {
         child: InkWell(
           borderRadius: BorderRadius.circular(30),
           onTap: () {
-            final String paraId = _randomAyat!.paraId ?? "1";
+            final String paraId = randomAyat.paraId ?? "1";
             push(
               context,
               ParaArabicScreen(
                 parahCount: paraId,
                 parahname: "Para $paraId",
-                targetAyatNumber: int.tryParse(_randomAyat!.ayatNumber ?? "0"),
+                targetAyatNumber: int.tryParse(randomAyat.ayatNumber ?? "0"),
                 targetSurahNumber: surahId,
                 saveLastRead: false,
               ),
@@ -517,106 +510,143 @@ class _HomeState extends State<Home> {
               // color: bloc.selectedSecondary, // Moved to Card for InkWell
               borderRadius: BorderRadius.circular(30),
             ),
-            child: Column(children: [
-              Row(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 800),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.0, 0.05),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: Column(
+                key: ValueKey(verseRef),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    height: 26,
-                    width: 18,
-                    decoration: BoxDecoration(
-                        image: DecorationImage(
-                            image: AssetImage(
-                                "assets/images/quran${bloc.iconNumber}.png"),
-                            fit: BoxFit.fill)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            height: 30,
+                            width: 30,
+                            decoration: BoxDecoration(
+                                image: DecorationImage(
+                                    image: AssetImage(
+                                        "assets/images/iqra${bloc.iconNumber}.png"),
+                                    fit: BoxFit.fill)),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            "QURAN",
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700),
+                          ),
+                        ],
+                      ),
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              onPressed: () => AppShare.image(
+                                context: context,
+                                bloc: bloc,
+                                title: surahNameEnglish,
+                                arabicTitle: surahNameArabic,
+                                arabicText: arabicText,
+                                translationText: translationText,
+                                translatorName: translatorName,
+                                paraNumber: randomAyat.paraId,
+                                surahNumber: randomAyat.surahId,
+                                ayatNumber: randomAyat.ayatNumber,
+                              ),
+                              icon: Icon(Icons.share,
+                                  color: Theme.of(context).primaryColor),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: Text(
+                                surahNameArabic,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontSize: 20,
+                                    fontFamily: bloc.arabicFontFamily,
+                                    fontWeight: FontWeight.w700),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(
-                    width: 20,
-                  ),
+                  const SizedBox(height: 20),
                   Text(
-                    "QURAN",
+                    arabicText,
+                    textAlign: TextAlign.right,
                     style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () => AppShare.image(
-                      context: context,
-                      bloc: bloc,
-                      title: surahNameEnglish,
-                      arabicTitle: surahNameArabic,
-                      arabicText: arabicText,
-                      translationText: translationText,
-                      translatorName: translatorName,
-                      paraNumber: _randomAyat!.paraId,
-                      surahNumber: _randomAyat!.surahId,
-                      ayatNumber: _randomAyat!.ayatNumber,
-                    ),
-                    icon: Icon(Icons.share,
-                        color: Theme.of(context).primaryColor),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    surahNameArabic,
-                    style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontSize: 20,
+                        color: Colors.black,
+                        fontSize: 28, // slight reduction to fit better
                         fontFamily: bloc.arabicFontFamily,
-                        fontWeight: FontWeight.w700),
+                        fontWeight: FontWeight.w500),
                   ),
-                  const SizedBox(
-                    width: 10,
-                  ),
+                  const SizedBox(height: 15),
                   Text(
-                    verseRef,
+                    translationText,
+                    textAlign: TextAlign.right,
                     style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700),
+                      color: Colors.black87,
+                      fontSize: 18,
+                      fontFamily: bloc.urduFontFamily,
+                    ),
                   ),
-                ],
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Row(
-                children: [
-                  // const SizedBox(
-                  //   width: 20,
-                  // ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Text(
-                          arabicText,
-                          textAlign: TextAlign.right,
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 30,
-                              fontFamily: bloc.arabicFontFamily,
-                              fontWeight: FontWeight.w500),
+                  const SizedBox(height: 14),
+                  // ── Source pill: Para · Surah · Verse numbers ──────
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: bloc.selectedTheme,
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: bloc.selectedTheme.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Text(
-                          translationText,
-                          textAlign: TextAlign.right,
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20,
-                            fontFamily: bloc.urduFontFamily,
+                        child: Text(
+                          "Para: ${randomAyat.paraId}  •  Surah: ${randomAyat.surahId}  •  Verse: ${randomAyat.ayatNumber}",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ]),
+            ),
           ),
         ),
       ),

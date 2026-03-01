@@ -67,24 +67,8 @@ class TranlationCardSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: provider.selectedTheme.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    "Verse ${aya.surahId}:${aya.ayatNumber}",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: provider.selectedTheme,
-                    ),
-                  ),
-                ),
                 IconButton(
                   onPressed: () {
                     AppShare.image(
@@ -114,7 +98,7 @@ class TranlationCardSection extends StatelessWidget {
               style: TextStyle(
                 fontSize: provider.arabicFontSize - 4,
                 fontFamily: provider.arabicFontFamily,
-                color: Colors.black,
+                color: provider.selectedTheme,
                 height: 1.6,
               ),
             ),
@@ -141,6 +125,37 @@ class TranlationCardSection extends StatelessWidget {
                 color: Colors.black87,
                 height: 1.5,
               ),
+            ),
+            const SizedBox(height: 15),
+            // ── Source pill: Para · Surah · Verse numbers ──────
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: provider.selectedTheme,
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: provider.selectedTheme.withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    "Para: ${aya.paraId}  •  Surah: ${aya.surahId}  •  Verse: ${aya.ayatNumber}",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

@@ -154,36 +154,49 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 5),
+                        Center(
+                          child: Text(
+                            surah?.name ?? "",
+                            style: TextStyle(
+                              fontFamily: bloc.arabicFontFamily,
+                              fontSize: 30,
+                              color: bloc.selectedTheme,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        // ── Source pill: Para · Surah · Verse numbers ──────
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
+                                  horizontal: 20, vertical: 8),
                               decoration: BoxDecoration(
-                                color: bloc.selectedTheme.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
+                                color: bloc.selectedTheme,
+                                borderRadius: BorderRadius.circular(30),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: bloc.selectedTheme.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
                               child: Text(
-                                "Verse $surahId:${aya.ayatNumber}",
-                                style: TextStyle(
+                                "Para: ${aya.paraId}  •  Surah: ${aya.surahId}  •  Verse: ${aya.ayatNumber}",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.bold,
-                                  color: bloc.selectedTheme,
-                                  fontSize: 14,
+                                  letterSpacing: 0.5,
                                 ),
-                              ),
-                            ),
-                            Text(
-                              surah?.name ?? "",
-                              style: TextStyle(
-                                fontFamily: bloc.arabicFontFamily,
-                                fontSize: 24,
-                                color: bloc.selectedTheme,
                               ),
                             ),
                           ],
                         ),
+
                         const Divider(height: 40),
                         Directionality(
                           textDirection: TextDirection.rtl,

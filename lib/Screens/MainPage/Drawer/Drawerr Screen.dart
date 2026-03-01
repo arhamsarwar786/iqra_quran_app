@@ -10,9 +10,9 @@ import '../Dua/dua_screen.dart';
 import '../Khalima/kalma_screen.dart';
 import '../Quran/Favorite.dart';
 import '../Quran/tabbarview.dart';
-import '../Tasbeeh/tasbee_detail.dart';
 import 'About Us.dart';
 import 'ContactUs.dart';
+import 'package:iqra/Utils/sadqa_dialog.dart';
 
 // import 'contactUs.dart';
 
@@ -30,9 +30,10 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
     'Kalima',
     'Dua',
     'Tasbeeh',
-    'Contact Us',
+    // 'Contact Us',
     'About Us',
     'Setting',
+    'Donate 🤍',
     'Share',
   ];
   static const _icons = [
@@ -41,10 +42,11 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
     Icons.list,
     Icons.handshake,
     Icons.ads_click,
-    Icons.contacts_sharp,
+    // Icons.contacts_sharp,
     Icons.info_outline_rounded,
     Icons.settings,
-    Icons.share
+    Icons.volunteer_activism_rounded,
+    Icons.share,
   ];
   final List _navigationSc = [
     const Favorite(),
@@ -52,7 +54,7 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
     KhalimaScreen(),
     const DuaScreen(),
     const Tasbih(),
-    const Contactus(),
+    // const Contactus(),
     const Aboutus(),
     const SettingScreen(),
   ];
@@ -105,89 +107,105 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
     final size = MediaQuery.of(context).size;
     return Builder(builder: (context) {
       var bloc = context.read<ThemeProvider>();
-      return Container(
-        width: size.width * 0.7,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            bottomRight: Radius.circular(30),
-            topRight: Radius.circular(30),
+      return SafeArea(
+        bottom: false,
+        child: Container(
+          width: size.width * 0.7,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              bottomRight: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
           ),
-        ),
-        child: Column(
-          children: [
-            Consumer<ThemeProvider>(builder: (context, provider, child) {
-              return SizedBox(
-                width: double.infinity,
-                child: Container(
-                  height: 200,
+          child: Column(
+            children: [
+              // ── Logo Header ─────────────────────────────────────────────
+              Consumer<ThemeProvider>(builder: (context, provider, child) {
+                return Container(
+                  width: double.infinity,
+                  height: 180,
                   padding: const EdgeInsets.all(20),
-                  // width: MediaQuery.of(context).size.width * 0.60,
                   child: Image.asset(
                     "assets/images/iqra${provider.iconNumber}.png",
                     fit: BoxFit.fitHeight,
                   ),
-                ),
-              );
-            }),
-            ListView.builder(
-                shrinkWrap: true,
-                itemCount: _menuTitles.length,
-                itemBuilder: (context, i) {
-                  return SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        AnimatedBuilder(
-                          animation: _staggeredController,
-                          builder: (context, child) {
-                            final animationPercent = Curves.easeOut.transform(
-                              _itemSlideIntervals[i]
-                                  .transform(_staggeredController.value),
-                            );
-                            final opacity = animationPercent;
-                            final slideDistance = (1 - animationPercent) * 150;
-
-                            return Opacity(
-                              opacity: opacity,
-                              child: Transform.translate(
-                                offset: Offset(slideDistance, 0),
-                                child: child,
-                              ),
-                            );
+                );
+              }),
+              const Divider(height: 1, thickness: 1),
+              // ── Scrollable Menu ──────────────────────────────────────────
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.only(top: 6, bottom: 20),
+                  itemCount: _menuTitles.length,
+                  itemBuilder: (context, i) {
+                    return AnimatedBuilder(
+                      animation: _staggeredController,
+                      builder: (context, child) {
+                        final animationPercent = Curves.easeOut.transform(
+                          _itemSlideIntervals[i]
+                              .transform(_staggeredController.value),
+                        );
+                        final opacity = animationPercent.clamp(0.0, 1.0);
+                        final slideDistance = (1 - animationPercent) * 150;
+                        return Opacity(
+                          opacity: opacity,
+                          child: Transform.translate(
+                            offset: Offset(slideDistance, 0),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        child: ListTile(
+                          dense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 2),
+                          leading: Icon(
+                            _icons[i],
+                            color: i == 7
+                                ? bloc.selectedTheme
+                                : bloc.selectedTheme,
+                            size: 24,
+                          ),
+                          selectedTileColor: const Color(0xff00164C),
+                          onTap: () {
+                            // Index 8 = Donate → show Sadqa Jariya dialog
+                            if (i == 7) {
+                              Navigator.of(context).pop();
+                              Future.delayed(
+                                const Duration(milliseconds: 250),
+                                () => SadqaDialog.show(context),
+                              );
+                            } else if (i < _navigationSc.length) {
+                              push(context, _navigationSc[i]);
+                            }
                           },
-                          child: Card(
-                            elevation: 3,
-                            child: ListTile(
-                              dense: true,
-                              leading: SizedBox(
-                                height: 30,
-                                width: 30,
-                                child: Icon(
-                                  _icons[i],
-                                  color: bloc.selectedTheme,
-                                ),
-                              ),
-                              selectedTileColor: const Color(0xff00164C),
-                              onTap: () {
-                                push(context, _navigationSc[i]);
-                              },
-                              title: Text(
-                                _menuTitles[i],
-                                textAlign: TextAlign.left,
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  color: Color(0xff00164C),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                          title: Text(
+                            _menuTitles[i],
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: i == 8
+                                  ? bloc.selectedTheme
+                                  : const Color(0xff00164C),
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  );
-                }),
-          ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       );
     });

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -23,6 +24,9 @@ class QuranDataProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool _isLoaded = false;
 
+  Aya? _currentRandomAyat;
+  Timer? _backgroundTimer;
+
   List<Aya> get quranData => _quranData;
   List<ParaMetadata> get paraMetadata => _paraMetadata;
   List<RukoModel> get rukoData => _rukoData;
@@ -32,6 +36,7 @@ class QuranDataProvider extends ChangeNotifier {
   Map<String, int> get paraRukuCounts => _paraRukuCounts;
   bool get isLoading => _isLoading;
   bool get isLoaded => _isLoaded;
+  Aya? get currentRandomAyat => _currentRandomAyat;
 
   /// Loads the Quran data from assets/extraction/quran2026.json
   /// This should be called once, preferably at app startup.
@@ -116,6 +121,7 @@ class QuranDataProvider extends ChangeNotifier {
           'Quran Data Bank: Calculated ruku counts for ${_paraRukuCounts.length} paras.');
 
       _isLoaded = true;
+      _startBackgroundVerseTimer();
       notifyListeners();
       debugPrint('Quran Data Bank: Initialization complete.');
     } catch (e, stack) {
@@ -221,6 +227,18 @@ class QuranDataProvider extends ChangeNotifier {
 
     // Return a random ayat
     return smallAyats[DateTime.now().microsecond % smallAyats.length];
+  }
+
+  void _startBackgroundVerseTimer() {
+    if (_backgroundTimer != null) return;
+
+    // Set initial random verse
+    _currentRandomAyat = getRandomSmallAyat();
+
+    _backgroundTimer = Timer.periodic(const Duration(seconds: 150), (timer) {
+      _currentRandomAyat = getRandomSmallAyat();
+      notifyListeners();
+    });
   }
 
   /// Normalizes Arabic text by removing diacritics

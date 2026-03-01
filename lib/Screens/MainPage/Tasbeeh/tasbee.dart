@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:iqra/Provider/tasbeeh_provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
@@ -7,7 +8,6 @@ import 'package:iqra/components/bounce_button.dart';
 import 'package:iqra/widgets.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
-import '../../../Models/tasbih_model.dart';
 import '../../../Provider/tasbih_count.dart';
 import '../../../main.dart';
 import 'digital_font.dart';
@@ -57,14 +57,12 @@ class _MyWidgetState extends State<Tasbih> {
           IconButton(
               onPressed: () async {
                 if (selectedTasbeeh != null) {
-                  var user = TasbihModel(
-                      virdh: selectedTasbeeh.arabic ?? '',
-                      count: tasbihProvider.currentStep.toInt());
-                  await objectbox.insertUser(user);
+                  await objectbox.saveDailyTasbih(selectedTasbeeh.arabic ?? '',
+                      tasbihProvider.currentStep.toInt());
                 }
                 push(context, const TasbihInfo());
               },
-              icon: const Icon(Icons.favorite)),
+              icon: const Icon(Icons.history)),
         ],
       ),
       body: SafeArea(
@@ -73,50 +71,81 @@ class _MyWidgetState extends State<Tasbih> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             selectedTasbeeh != null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          selectedTasbeeh.arabic ?? '',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontFamily: themeProvider.arabicFontFamily,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            shadows: const [
-                              Shadow(
-                                  offset: Offset(0.5, 0.5),
-                                  blurRadius: 3,
-                                  color: Colors.black12),
-                            ],
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 0.0),
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(
+                            0.2), // Glassmorphism white transparent
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: Colors.white.withOpacity(0.4), width: 1.5),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 15,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 4),
+                          )
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  selectedTasbeeh.arabic ?? '',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontFamily: themeProvider.arabicFontFamily,
+                                    fontSize: 34,
+                                    fontWeight: FontWeight.bold,
+                                    shadows: const [
+                                      Shadow(
+                                          offset: Offset(0.5, 0.5),
+                                          blurRadius: 3,
+                                          color: Colors.black12),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  selectedTasbeeh.transliteration ?? '',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: themeProvider.urduFontFamily,
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.8),
+                                    fontSize: 20,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  selectedTasbeeh.urduMeaning ?? '',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: themeProvider.urduFontFamily,
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.9),
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        // const SizedBox(height: 3),
-                        Text(
-                          selectedTasbeeh.transliteration ?? '',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: themeProvider.urduFontFamily,
-                            color:
-                                Theme.of(context).primaryColor.withOpacity(0.7),
-                            fontSize: 20,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                        // const SizedBox(height: 2),
-                        Text(
-                          selectedTasbeeh.urduMeaning ?? '',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: themeProvider.urduFontFamily,
-                            color:
-                                Theme.of(context).primaryColor.withOpacity(0.8),
-                            fontSize: 20,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   )
                 : const SizedBox.shrink(),

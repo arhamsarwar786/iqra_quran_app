@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:9147271546381087750",
-      "lastPropertyId": "3:2343131469187212872",
+      "lastPropertyId": "4:4966189823697517235",
       "name": "TasbihModel",
       "properties": [
         {
@@ -23,6 +23,11 @@
           "id": "3:2343131469187212872",
           "name": "count",
           "type": 6
+        },
+        {
+          "id": "4:4966189823697517235",
+          "name": "date",
+          "type": 9
         }
       ],
       "relations": []

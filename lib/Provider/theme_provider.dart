@@ -8,7 +8,7 @@ class ThemeProvider extends ChangeNotifier {
   Color selectedTheme = const Color(0xff227C9E);
   Color selectedSecondary = const Color(0xffF2FCFF);
   Color selectedBackground = Colors.white;
-  String iconNumber = "1";
+  String iconNumber = "2";
 
   ThemeProvider() {
     _init();

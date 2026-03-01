@@ -73,9 +73,7 @@ class _QuranViewState extends State<QuranView> {
         TextSpan(
           text: "${(aya.arabicText).trim()} ",
           style: TextStyle(
-            color: Colors.black,
-            backgroundColor:
-                isTargetAyat ? bloc.selectedTheme.withOpacity(0.3) : null,
+            color: isTargetAyat ? bloc.selectedTheme : Colors.black,
           ),
           recognizer: TapGestureRecognizer()
             ..onTap = () {
@@ -209,16 +207,6 @@ class _QuranViewState extends State<QuranView> {
             duration: Duration.zero, // Instant jump like last read
             alignment: 0.1, // Align slightly from top
           );
-
-          // Clear highlight after 3 seconds
-          Future.delayed(const Duration(seconds: 3), () {
-            if (mounted) {
-              setState(() {
-                _highlightedAyah = null;
-                viewMaker(); // Re-render to remove background color
-              });
-            }
-          });
         }
       });
     }

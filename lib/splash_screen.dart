@@ -106,7 +106,7 @@ class _SplashScreenState extends State<SplashScreen>
                       fontSize: 15),
                 ),
                 SizedBox(
-                  height: 30,
+                  height: 200,
                 )
               ]),
             ),
