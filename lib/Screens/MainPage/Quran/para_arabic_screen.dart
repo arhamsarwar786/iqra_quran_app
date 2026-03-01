@@ -575,29 +575,30 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
           onPointerDown: (_) => _pauseAutoScrollForTouch(),
           onPointerUp: (_) => _resumeAutoScrollAfterTouch(),
           onPointerCancel: (_) => _resumeAutoScrollAfterTouch(),
-          child: NestedScrollView(
-            headerSliverBuilder:
-                (BuildContext context, bool innerBoxIsScrolled) {
-              return [
-                SliverAppBar(
-                  automaticallyImplyLeading: false,
-                  backgroundColor: bloc.selectedTheme,
-                  expandedHeight: (currentSurahMetadata != null ? 110.0 : 0.0) +
-                      (_showAppbar ? 56.0 : 0.0),
-                  toolbarHeight: currentSurahMetadata != null
-                      ? 110.0
-                      : (_showAppbar ? 56.0 : 0.0),
-                  floating: false,
-                  pinned: true,
-                  flexibleSpace: SingleChildScrollView(
-                    physics: const NeverScrollableScrollPhysics(),
-                    child: Column(
+          child: Container(
+            color: Colors.white,
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: CustomScrollView(
+                controller: _scrollViewController,
+                slivers: [
+                  SliverAppBar(
+                    automaticallyImplyLeading: false,
+                    backgroundColor: currentSurahMetadata != null
+                        ? bloc.selectedTheme
+                        : Colors.white,
+                    expandedHeight: currentSurahMetadata != null ? 166.0 : 56.0,
+                    toolbarHeight: currentSurahMetadata != null ? 166.0 : 56.0,
+                    floating: false,
+                    pinned: true,
+                    flexibleSpace: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         AnimatedContainer(
                           height: _showAppbar ? 56.0 : 0.0,
                           duration: const Duration(milliseconds: 200),
                           child: AppBar(
+                            automaticallyImplyLeading: false,
                             centerTitle: true,
                             elevation: 0,
                             iconTheme: const IconThemeData(
@@ -611,54 +612,49 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                                 fontFamily: bloc.arabicFontFamily,
                               ),
                             ),
+                            leading: IconButton(
+                              onPressed: () => Navigator.pop(context),
+                              icon: const Icon(Icons.arrow_back),
+                            ),
                           ),
                         ),
                         if (currentSurahMetadata != null)
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 400),
-                            transitionBuilder:
-                                (Widget child, Animation<double> animation) {
-                              return FadeTransition(
-                                  opacity: animation, child: child);
-                            },
-                            child: SurahHeaderCard(
-                              key: ValueKey(currentSurahMetadata!.index),
-                              metadata: currentSurahMetadata!,
+                          Expanded(
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 400),
+                              transitionBuilder:
+                                  (Widget child, Animation<double> animation) {
+                                return FadeTransition(
+                                    opacity: animation, child: child);
+                              },
+                              child: SurahHeaderCard(
+                                key: ValueKey(currentSurahMetadata!.index),
+                                metadata: currentSurahMetadata!,
+                              ),
                             ),
                           ),
                       ],
                     ),
                   ),
-                ),
-              ];
-            },
-            body: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-              ),
-              padding: const EdgeInsets.only(top: 5, bottom: 20),
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: NotificationListener<ScrollEndNotification>(
-                  onNotification: (scrollEnd) {
-                    if (scrollEnd.metrics.axis == Axis.vertical) {
-                      SavedPrefernces.updateLastReadOffset(
-                          scrollEnd.metrics.pixels);
-                    }
-                    return false;
-                  },
-                  child: SingleChildScrollView(
-                    controller: _scrollViewController,
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: paraArabicScreenWidget,
+                  SliverPadding(
+                    padding: const EdgeInsets.only(
+                        top: 5, bottom: 20, left: 15, right: 15),
+                    sliver: NotificationListener<ScrollEndNotification>(
+                      onNotification: (scrollEnd) {
+                        if (scrollEnd.metrics.axis == Axis.vertical) {
+                          SavedPrefernces.updateLastReadOffset(
+                              scrollEnd.metrics.pixels);
+                        }
+                        return false;
+                      },
+                      child: SliverList(
+                        delegate: SliverChildListDelegate(
+                          paraArabicScreenWidget,
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
           ),

@@ -140,9 +140,9 @@ floatinButton(context) {
             width: 75,
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: bloc.selectedTheme,
               image: DecorationImage(
-                image: AssetImage("assets/images/iqra${bloc.iconNumber}.png"),
+                image: AssetImage("assets/images/iqra-white.png"),
                 fit: BoxFit.contain,
               ),
               shape: BoxShape.circle,

@@ -622,23 +622,23 @@ class _HomeState extends State<Home> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 8),
                         decoration: BoxDecoration(
-                          color: bloc.selectedTheme,
+                          // color: bloc.selectedTheme.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(30),
                           boxShadow: [
-                            BoxShadow(
-                              color: bloc.selectedTheme.withOpacity(0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
+                            // BoxShadow(
+                            //   color: bloc.selectedTheme.withOpacity(0.1),
+                            //   blurRadius: 10,
+                            //   offset: const Offset(0, 4),
+                            // ),
                           ],
                         ),
                         child: Text(
                           "Para: ${randomAyat.paraId}  •  Surah: ${randomAyat.surahId}  •  Verse: ${randomAyat.ayatNumber}",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
+                          style: TextStyle(
+                            color: bloc.selectedTheme,
+                            fontSize: 15,
                             fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
+                            letterSpacing: 0.3,
                           ),
                         ),
                       ),
@@ -971,7 +971,8 @@ class _SearchInQuaranState extends State<SearchInQuaran> {
   Widget build(BuildContext context) {
     final bloc = widget.bloc!;
     final size = widget.size!;
-    final today = HijriCalendar.fromDate(_now);
+    final today =
+        HijriCalendar.fromDate(_now.add(Duration(days: bloc.hijriOffset)));
 
     String countdown = "";
     if (_nextPrayerTime != null) {

@@ -29,6 +29,7 @@ class ThemeProvider extends ChangeNotifier {
     await getSelectedUrduFont();
     await getSelectedUrduFamily();
     await getSelectedTranslation();
+    await getHijriOffset();
   }
 
   static MaterialColor createMaterialColor(Color color) {
@@ -145,5 +146,66 @@ class ThemeProvider extends ChangeNotifier {
   changeTranslation(data) {
     SavedPrefernces.setSelectedTranslation(data);
     getSelectedTranslation();
+  }
+
+  /// Hijri Offset
+  int hijriOffset = 0;
+  bool isHijriManual = false;
+
+  getHijriOffset() async {
+    isHijriManual = await SavedPrefernces.getHijriManual();
+    int savedOffset = await SavedPrefernces.getHijriOffset();
+
+    if (!isHijriManual) {
+      String? lastCountry = await SavedPrefernces.getLastCountry();
+      if (lastCountry != null) {
+        _applyRegionalOffset(lastCountry);
+      } else {
+        // Timezone heuristic for first-time use OR when location is unavailable
+        final hours = DateTime.now().timeZoneOffset.inHours;
+        if (hours >= 5) {
+          hijriOffset = -1; // Best guess for Pakistan/India/Bangladesh
+        } else {
+          hijriOffset = 0;
+        }
+      }
+    } else {
+      hijriOffset = savedOffset;
+    }
+    notifyListeners();
+  }
+
+  changeHijriOffset(int data) async {
+    isHijriManual = true;
+    await SavedPrefernces.setHijriManual(true);
+    await SavedPrefernces.setHijriOffset(data);
+    hijriOffset = data;
+    notifyListeners();
+  }
+
+  /// Auto-adjust Hijri based on location/country
+  void updateHijriAutoAdjust(String country) {
+    if (isHijriManual) return;
+    SavedPrefernces.setLastCountry(country);
+    _applyRegionalOffset(country);
+  }
+
+  void _applyRegionalOffset(String country) {
+    int newOffset = 0;
+    final c = country.toLowerCase();
+
+    // Pakistan, India, Bangladesh are usually 1 day behind Saudi (Umm al-Qura)
+    if (c.contains('pakistan') ||
+        c.contains('india') ||
+        c.contains('bangladesh')) {
+      newOffset = -1;
+    }
+    // Add more regions here if known patterns exist
+
+    if (hijriOffset != newOffset) {
+      hijriOffset = newOffset;
+      SavedPrefernces.setHijriOffset(newOffset);
+      notifyListeners();
+    }
   }
 }

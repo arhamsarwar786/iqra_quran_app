@@ -35,12 +35,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
     });
   }
 
-  String _getHijriRange() {
+  String _getHijriRange(ThemeProvider themeProvider) {
     final firstDay = DateTime(_viewDate.year, _viewDate.month, 1);
     final lastDay = DateTime(_viewDate.year, _viewDate.month + 1, 0);
 
-    final hFirst = HijriCalendar.fromDate(firstDay);
-    final hLast = HijriCalendar.fromDate(lastDay);
+    final hFirst = HijriCalendar.fromDate(
+        firstDay.add(Duration(days: themeProvider.hijriOffset)));
+    final hLast = HijriCalendar.fromDate(
+        lastDay.add(Duration(days: themeProvider.hijriOffset)));
 
     String getFullMonth(int m) {
       final names = {
@@ -57,7 +59,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
         11: "Zilqad-tul-Haram",
         12: "Zil-Hajj-tul-Haram",
       };
-      return names[m] ?? HijriCalendar.fromDate(DateTime.now()).longMonthName;
+      return names[m] ??
+          HijriCalendar.fromDate(
+                  DateTime.now().add(Duration(days: themeProvider.hijriOffset)))
+              .longMonthName;
     }
 
     if (hFirst.hMonth == hLast.hMonth) {
@@ -141,7 +146,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       borderRadius: BorderRadius.circular(100),
                     ),
                     child: Text(
-                      _getHijriRange(),
+                      _getHijriRange(themeProvider),
                       style: TextStyle(
                         color: color,
                         fontWeight: FontWeight.bold,
@@ -210,7 +215,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
                       final date =
                           DateTime(_viewDate.year, _viewDate.month, dayNumber);
-                      final hijri = HijriCalendar.fromDate(date);
+                      final hijri = HijriCalendar.fromDate(
+                          date.add(Duration(days: themeProvider.hijriOffset)));
                       final isToday = DateUtils.isSameDay(date, DateTime.now());
 
                       return Container(

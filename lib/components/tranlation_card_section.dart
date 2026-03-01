@@ -135,23 +135,16 @@ class TranlationCardSection extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   decoration: BoxDecoration(
-                    color: provider.selectedTheme,
+                    // color: provider.selectedTheme,
                     borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: provider.selectedTheme.withOpacity(0.3),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
                   child: Text(
                     "Para: ${aya.paraId}  •  Surah: ${aya.surahId}  •  Verse: ${aya.ayatNumber}",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
+                    style: TextStyle(
+                      color: provider.selectedTheme,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
+                      letterSpacing: 0.3,
                     ),
                   ),
                 ),

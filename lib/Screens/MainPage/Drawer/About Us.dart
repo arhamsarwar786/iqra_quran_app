@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../../Provider/theme_provider.dart';
 import '../../../widgets.dart';
 import '../../../Utils/customThemes.dart';
@@ -19,11 +20,20 @@ class _AboutusState extends State<Aboutus> {
   bool isUrdu = false;
   Map<String, dynamic>? aboutData;
   bool isLoading = true;
+  String _version = "";
 
   @override
   void initState() {
     super.initState();
     loadAboutData();
+    _initPackageInfo();
+  }
+
+  Future<void> _initPackageInfo() async {
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      _version = "${packageInfo.version}+${packageInfo.buildNumber}";
+    });
   }
 
   Future<void> loadAboutData() async {
@@ -368,7 +378,7 @@ class _AboutusState extends State<Aboutus> {
                                         ),
                                         const SizedBox(height: 5),
                                         Text(
-                                          "Version 1.0.0",
+                                          "Version $_version",
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: Colors.grey[600],

@@ -197,4 +197,35 @@ class SavedPrefernces {
     final pref = await SharedPreferences.getInstance();
     return pref.getString('selectedTranslation') ?? 'irfan';
   }
+
+  ///// Hijri Offset
+  static setHijriOffset(int offset) async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.setInt('hijri_offset', offset);
+  }
+
+  static Future<int> getHijriOffset() async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getInt('hijri_offset') ?? 0;
+  }
+
+  static setHijriManual(bool isManual) async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.setBool('hijri_manual', isManual);
+  }
+
+  static Future<bool> getHijriManual() async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getBool('hijri_manual') ?? false;
+  }
+
+  static setLastCountry(String country) async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.setString('last_country', country);
+  }
+
+  static Future<String?> getLastCountry() async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getString('last_country');
+  }
 }

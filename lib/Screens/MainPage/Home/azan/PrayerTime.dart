@@ -146,6 +146,12 @@ class _PrayerTimeState extends State<PrayerTime> {
         Placemark place = placemarks[0];
         locationName =
             "${place.locality ?? place.subAdministrativeArea}, ${place.country}";
+
+        // 🕋 Auto-adjust Hijri based on country
+        if (mounted) {
+          final bloc = Provider.of<ThemeProvider>(context, listen: false);
+          bloc.updateHijriAutoAdjust(place.country ?? "");
+        }
       }
     } catch (e) {
       locationName = "Location Detected";

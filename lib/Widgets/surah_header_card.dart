@@ -12,7 +12,6 @@ class SurahHeaderCard extends StatelessWidget {
     final theme = context.watch<ThemeProvider>();
 
     return Container(
-      height: 110,
       margin: EdgeInsets.zero,
       decoration: BoxDecoration(
         color: theme.selectedTheme,
