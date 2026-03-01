@@ -48,336 +48,344 @@ class _AboutusState extends State<Aboutus> {
     Size size = MediaQuery.of(context).size;
     final bloc = context.read<ThemeProvider>();
 
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage("assets/images/BgImage.png"),
-              fit: BoxFit.cover,
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/BgImage.png"),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-        ),
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          iconSize: 20,
-          color: Theme.of(context).primaryColor,
-          icon: const Icon(Icons.arrow_back),
-        ),
-        centerTitle: true,
-        title: Text(
-          "About Us",
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
+          backgroundColor: Colors.transparent,
+          leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            iconSize: 20,
             color: Theme.of(context).primaryColor,
+            icon: const Icon(Icons.arrow_back),
           ),
+          centerTitle: true,
+          title: Text(
+            "About Us",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 15.0),
+              child: Center(child: _customLanguageSwitch(bloc)),
+            ),
+          ],
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 15.0),
-            child: Center(child: _customLanguageSwitch(bloc)),
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          bgImage(context, size),
-          isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : aboutData == null
-                  ? const Center(child: Text("Error loading content"))
-                  : Column(
-                      children: [
-                        Expanded(
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 10),
-                            child: Column(
-                              crossAxisAlignment: isUrdu
-                                  ? CrossAxisAlignment.end
-                                  : CrossAxisAlignment.start,
-                              children: [
-                                Center(
-                                  child: Hero(
-                                    tag: 'app_logo',
-                                    child: Consumer<ThemeProvider>(
-                                        builder: (context, provider, child) {
-                                      return Container(
-                                        padding: const EdgeInsets.all(15),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color:
-                                                  Colors.black.withOpacity(0.1),
-                                              blurRadius: 10,
-                                              spreadRadius: 2,
+        body: Stack(
+          children: [
+            bgImage(context, size),
+            isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : aboutData == null
+                    ? const Center(child: Text("Error loading content"))
+                    : Column(
+                        children: [
+                          Expanded(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 10),
+                              child: Column(
+                                crossAxisAlignment: isUrdu
+                                    ? CrossAxisAlignment.end
+                                    : CrossAxisAlignment.start,
+                                children: [
+                                  Center(
+                                    child: Hero(
+                                      tag: 'app_logo',
+                                      child: Consumer<ThemeProvider>(
+                                          builder: (context, provider, child) {
+                                        return Container(
+                                          padding: const EdgeInsets.all(15),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            shape: BoxShape.circle,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black
+                                                    .withOpacity(0.1),
+                                                blurRadius: 10,
+                                                spreadRadius: 2,
+                                              ),
+                                            ],
+                                          ),
+                                          child: Image.asset(
+                                            "assets/images/iqra${provider.iconNumber}.png",
+                                            height: 100,
+                                          ),
+                                        );
+                                      }),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 30),
+                                  Text(
+                                    aboutData!['greeting']
+                                        [isUrdu ? 'ur' : 'en'],
+                                    textAlign: isUrdu
+                                        ? TextAlign.right
+                                        : TextAlign.left,
+                                    style: isUrdu
+                                        ? MyTextStyle.heading2.copyWith(
+                                            color: bloc.selectedTheme,
+                                            fontFamily: bloc.urduFontFamily,
+                                            fontSize: 24)
+                                        : MyTextStyle.heading2.copyWith(
+                                            color: bloc.selectedTheme),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  _contentSection(
+                                    isUrdu: isUrdu,
+                                    bloc: bloc,
+                                    text: aboutData!['intro']
+                                        [isUrdu ? 'ur' : 'en'],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  _quoteSection(
+                                    isUrdu: isUrdu,
+                                    bloc: bloc,
+                                    quote: aboutData!['quotes'][0]
+                                        [isUrdu ? 'ur' : 'en'],
+                                    ref: aboutData!['quotes'][0]
+                                        [isUrdu ? 'ref_ur' : 'ref_en'],
+                                  ),
+                                  const SizedBox(height: 15),
+                                  _contentSection(
+                                    isUrdu: isUrdu,
+                                    bloc: bloc,
+                                    text: aboutData!['general_content']
+                                        [isUrdu ? 'ur' : 'en'],
+                                  ),
+                                  const SizedBox(height: 25),
+                                  _contentHeader(
+                                      isUrdu: isUrdu,
+                                      bloc: bloc,
+                                      header: aboutData!['sections'][0]
+                                          [isUrdu ? 'title_ur' : 'title_en']),
+                                  _contentSection(
+                                    isUrdu: isUrdu,
+                                    bloc: bloc,
+                                    text: aboutData!['sections'][0]
+                                        [isUrdu ? 'content_ur' : 'content_en'],
+                                  ),
+                                  const SizedBox(height: 25),
+                                  _contentHeader(
+                                      isUrdu: isUrdu,
+                                      bloc: bloc,
+                                      header: aboutData!['sections'][1]
+                                          [isUrdu ? 'title_ur' : 'title_en']),
+                                  _contentSection(
+                                    isUrdu: isUrdu,
+                                    bloc: bloc,
+                                    text: aboutData!['sections'][1]
+                                        [isUrdu ? 'content_ur' : 'content_en'],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  _quoteSection(
+                                    isUrdu: isUrdu,
+                                    bloc: bloc,
+                                    quote: aboutData!['quotes'][1]
+                                        [isUrdu ? 'ur' : 'en'],
+                                    ref: aboutData!['quotes'][1]
+                                        [isUrdu ? 'ref_ur' : 'ref_en'],
+                                  ),
+                                  const SizedBox(height: 25),
+                                  _contentHeader(
+                                      isUrdu: isUrdu,
+                                      bloc: bloc,
+                                      header: aboutData!['sections'][2]
+                                          [isUrdu ? 'title_ur' : 'title_en']),
+                                  _contentSection(
+                                    isUrdu: isUrdu,
+                                    bloc: bloc,
+                                    text: aboutData!['sections'][2][isUrdu
+                                        ? 'content_1_ur'
+                                        : 'content_1_en'],
+                                  ),
+                                  _quoteSection(
+                                    isUrdu: isUrdu,
+                                    bloc: bloc,
+                                    quote: aboutData!['quotes'][2]
+                                        [isUrdu ? 'ur' : 'en'],
+                                    ref: aboutData!['quotes'][2]
+                                        [isUrdu ? 'ref_ur' : 'ref_en'],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  _contentSection(
+                                    isUrdu: isUrdu,
+                                    bloc: bloc,
+                                    text: aboutData!['sections'][2][isUrdu
+                                        ? 'content_2_ur'
+                                        : 'content_2_en'],
+                                  ),
+                                  _quoteSection(
+                                    isUrdu: isUrdu,
+                                    bloc: bloc,
+                                    quote: aboutData!['quotes'][3]
+                                        [isUrdu ? 'ur' : 'en'],
+                                    ref: aboutData!['quotes'][3]
+                                        [isUrdu ? 'ref_ur' : 'ref_en'],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  _contentSection(
+                                    isUrdu: isUrdu,
+                                    bloc: bloc,
+                                    text: aboutData!['sections'][2][isUrdu
+                                        ? 'content_3_ur'
+                                        : 'content_3_en'],
+                                  ),
+                                  _quoteSection(
+                                    isUrdu: isUrdu,
+                                    bloc: bloc,
+                                    quote: aboutData!['quotes'][4]
+                                        [isUrdu ? 'ur' : 'en'],
+                                    ref: aboutData!['quotes'][4]
+                                        [isUrdu ? 'ref_ur' : 'ref_en'],
+                                  ),
+                                  const SizedBox(height: 15),
+                                  _contentSection(
+                                    isUrdu: isUrdu,
+                                    bloc: bloc,
+                                    text: aboutData!['footer']
+                                        [isUrdu ? 'ur' : 'en'],
+                                  ),
+                                  const SizedBox(height: 30),
+                                  Divider(
+                                      color:
+                                          bloc.selectedTheme.withOpacity(0.3)),
+                                  const SizedBox(height: 15),
+                                  _contentHeader(
+                                      isUrdu: isUrdu,
+                                      bloc: bloc,
+                                      header: aboutData!['mission']
+                                          [isUrdu ? 'title_ur' : 'title_en']),
+                                  _contentSection(
+                                    isUrdu: isUrdu,
+                                    bloc: bloc,
+                                    text: aboutData!['mission']
+                                        [isUrdu ? 'content_ur' : 'content_en'],
+                                  ),
+                                  const SizedBox(height: 25),
+                                  _contentHeader(
+                                      isUrdu: isUrdu,
+                                      bloc: bloc,
+                                      header: aboutData!['vision']
+                                          [isUrdu ? 'title_ur' : 'title_en']),
+                                  _contentSection(
+                                    isUrdu: isUrdu,
+                                    bloc: bloc,
+                                    text: aboutData!['vision']
+                                        [isUrdu ? 'content_ur' : 'content_en'],
+                                  ),
+                                  const SizedBox(height: 40),
+                                  // Social Media Section
+                                  Center(
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          isUrdu
+                                              ? "ہم سے جڑیں"
+                                              : "Connect With Us",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: bloc.selectedTheme,
+                                            fontFamily: isUrdu
+                                                ? bloc.urduFontFamily
+                                                : null,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 20),
+                                        Wrap(
+                                          spacing: 20,
+                                          runSpacing: 20,
+                                          alignment: WrapAlignment.center,
+                                          children: [
+                                            _socialIcon(
+                                              icon: FontAwesomeIcons.youtube,
+                                              color: const Color(0xFFFF0000),
+                                              url:
+                                                  "https://www.youtube.com/channel/UCLbonUX0SC9KU7bXx0wqCSQ",
+                                            ),
+                                            _socialIcon(
+                                              icon: FontAwesomeIcons.facebook,
+                                              color: const Color(0xFF1877F2),
+                                              url:
+                                                  "https://www.facebook.com/THEIQRAQURANOFFICIAL/",
+                                            ),
+                                            _socialIcon(
+                                              icon: FontAwesomeIcons.instagram,
+                                              color: const Color(0xFFE4405F),
+                                              url:
+                                                  "https://www.instagram.com/theiqraquranofficial/",
+                                            ),
+                                            _socialIcon(
+                                              icon: FontAwesomeIcons.whatsapp,
+                                              color: const Color(0xFF25D366),
+                                              url:
+                                                  "https://whatsapp.com/channel/0029Vb6rYwPEKyZH8LlJqm2l",
+                                            ),
+                                            _socialIcon(
+                                              icon: FontAwesomeIcons.twitter,
+                                              color: Colors.black,
+                                              url: "https://x.com/IqraThe91544",
+                                            ),
+                                            _socialIcon(
+                                              icon: FontAwesomeIcons.tiktok,
+                                              color: Colors.black,
+                                              url:
+                                                  "https://www.tiktok.com/@theiqraquranofficial",
                                             ),
                                           ],
                                         ),
-                                        child: Image.asset(
-                                          "assets/images/iqra${provider.iconNumber}.png",
-                                          height: 100,
-                                        ),
-                                      );
-                                    }),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 30),
-                                Text(
-                                  aboutData!['greeting'][isUrdu ? 'ur' : 'en'],
-                                  textAlign:
-                                      isUrdu ? TextAlign.right : TextAlign.left,
-                                  style: isUrdu
-                                      ? MyTextStyle.heading2.copyWith(
-                                          color: bloc.selectedTheme,
-                                          fontFamily: bloc.urduFontFamily,
-                                          fontSize: 24)
-                                      : MyTextStyle.heading2
-                                          .copyWith(color: bloc.selectedTheme),
-                                ),
-                                const SizedBox(height: 20),
-                                _contentSection(
-                                  isUrdu: isUrdu,
-                                  bloc: bloc,
-                                  text: aboutData!['intro']
-                                      [isUrdu ? 'ur' : 'en'],
-                                ),
-                                const SizedBox(height: 10),
-                                _quoteSection(
-                                  isUrdu: isUrdu,
-                                  bloc: bloc,
-                                  quote: aboutData!['quotes'][0]
-                                      [isUrdu ? 'ur' : 'en'],
-                                  ref: aboutData!['quotes'][0]
-                                      [isUrdu ? 'ref_ur' : 'ref_en'],
-                                ),
-                                const SizedBox(height: 15),
-                                _contentSection(
-                                  isUrdu: isUrdu,
-                                  bloc: bloc,
-                                  text: aboutData!['general_content']
-                                      [isUrdu ? 'ur' : 'en'],
-                                ),
-                                const SizedBox(height: 25),
-                                _contentHeader(
-                                    isUrdu: isUrdu,
-                                    bloc: bloc,
-                                    header: aboutData!['sections'][0]
-                                        [isUrdu ? 'title_ur' : 'title_en']),
-                                _contentSection(
-                                  isUrdu: isUrdu,
-                                  bloc: bloc,
-                                  text: aboutData!['sections'][0]
-                                      [isUrdu ? 'content_ur' : 'content_en'],
-                                ),
-                                const SizedBox(height: 25),
-                                _contentHeader(
-                                    isUrdu: isUrdu,
-                                    bloc: bloc,
-                                    header: aboutData!['sections'][1]
-                                        [isUrdu ? 'title_ur' : 'title_en']),
-                                _contentSection(
-                                  isUrdu: isUrdu,
-                                  bloc: bloc,
-                                  text: aboutData!['sections'][1]
-                                      [isUrdu ? 'content_ur' : 'content_en'],
-                                ),
-                                const SizedBox(height: 10),
-                                _quoteSection(
-                                  isUrdu: isUrdu,
-                                  bloc: bloc,
-                                  quote: aboutData!['quotes'][1]
-                                      [isUrdu ? 'ur' : 'en'],
-                                  ref: aboutData!['quotes'][1]
-                                      [isUrdu ? 'ref_ur' : 'ref_en'],
-                                ),
-                                const SizedBox(height: 25),
-                                _contentHeader(
-                                    isUrdu: isUrdu,
-                                    bloc: bloc,
-                                    header: aboutData!['sections'][2]
-                                        [isUrdu ? 'title_ur' : 'title_en']),
-                                _contentSection(
-                                  isUrdu: isUrdu,
-                                  bloc: bloc,
-                                  text: aboutData!['sections'][2][
-                                      isUrdu ? 'content_1_ur' : 'content_1_en'],
-                                ),
-                                _quoteSection(
-                                  isUrdu: isUrdu,
-                                  bloc: bloc,
-                                  quote: aboutData!['quotes'][2]
-                                      [isUrdu ? 'ur' : 'en'],
-                                  ref: aboutData!['quotes'][2]
-                                      [isUrdu ? 'ref_ur' : 'ref_en'],
-                                ),
-                                const SizedBox(height: 10),
-                                _contentSection(
-                                  isUrdu: isUrdu,
-                                  bloc: bloc,
-                                  text: aboutData!['sections'][2][
-                                      isUrdu ? 'content_2_ur' : 'content_2_en'],
-                                ),
-                                _quoteSection(
-                                  isUrdu: isUrdu,
-                                  bloc: bloc,
-                                  quote: aboutData!['quotes'][3]
-                                      [isUrdu ? 'ur' : 'en'],
-                                  ref: aboutData!['quotes'][3]
-                                      [isUrdu ? 'ref_ur' : 'ref_en'],
-                                ),
-                                const SizedBox(height: 10),
-                                _contentSection(
-                                  isUrdu: isUrdu,
-                                  bloc: bloc,
-                                  text: aboutData!['sections'][2][
-                                      isUrdu ? 'content_3_ur' : 'content_3_en'],
-                                ),
-                                _quoteSection(
-                                  isUrdu: isUrdu,
-                                  bloc: bloc,
-                                  quote: aboutData!['quotes'][4]
-                                      [isUrdu ? 'ur' : 'en'],
-                                  ref: aboutData!['quotes'][4]
-                                      [isUrdu ? 'ref_ur' : 'ref_en'],
-                                ),
-                                const SizedBox(height: 15),
-                                _contentSection(
-                                  isUrdu: isUrdu,
-                                  bloc: bloc,
-                                  text: aboutData!['footer']
-                                      [isUrdu ? 'ur' : 'en'],
-                                ),
-                                const SizedBox(height: 30),
-                                Divider(
-                                    color: bloc.selectedTheme.withOpacity(0.3)),
-                                const SizedBox(height: 15),
-                                _contentHeader(
-                                    isUrdu: isUrdu,
-                                    bloc: bloc,
-                                    header: aboutData!['mission']
-                                        [isUrdu ? 'title_ur' : 'title_en']),
-                                _contentSection(
-                                  isUrdu: isUrdu,
-                                  bloc: bloc,
-                                  text: aboutData!['mission']
-                                      [isUrdu ? 'content_ur' : 'content_en'],
-                                ),
-                                const SizedBox(height: 25),
-                                _contentHeader(
-                                    isUrdu: isUrdu,
-                                    bloc: bloc,
-                                    header: aboutData!['vision']
-                                        [isUrdu ? 'title_ur' : 'title_en']),
-                                _contentSection(
-                                  isUrdu: isUrdu,
-                                  bloc: bloc,
-                                  text: aboutData!['vision']
-                                      [isUrdu ? 'content_ur' : 'content_en'],
-                                ),
-                                const SizedBox(height: 40),
-                                // Social Media Section
-                                Center(
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        isUrdu
-                                            ? "ہم سے جڑیں"
-                                            : "Connect With Us",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: bloc.selectedTheme,
-                                          fontFamily: isUrdu
-                                              ? bloc.urduFontFamily
-                                              : null,
+                                  const SizedBox(height: 50),
+                                  Center(
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          "IQRA QURAN",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: bloc.selectedTheme,
+                                            letterSpacing: 1.2,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 20),
-                                      Wrap(
-                                        spacing: 20,
-                                        runSpacing: 20,
-                                        alignment: WrapAlignment.center,
-                                        children: [
-                                          _socialIcon(
-                                            icon: FontAwesomeIcons.youtube,
-                                            color: const Color(0xFFFF0000),
-                                            url:
-                                                "https://www.youtube.com/channel/UCLbonUX0SC9KU7bXx0wqCSQ",
+                                        const SizedBox(height: 5),
+                                        Text(
+                                          "Version 1.0.0",
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey[600],
                                           ),
-                                          _socialIcon(
-                                            icon: FontAwesomeIcons.facebook,
-                                            color: const Color(0xFF1877F2),
-                                            url:
-                                                "https://www.facebook.com/THEIQRAQURANOFFICIAL/",
-                                          ),
-                                          _socialIcon(
-                                            icon: FontAwesomeIcons.instagram,
-                                            color: const Color(0xFFE4405F),
-                                            url:
-                                                "https://www.instagram.com/theiqraquranofficial/",
-                                          ),
-                                          _socialIcon(
-                                            icon: FontAwesomeIcons.whatsapp,
-                                            color: const Color(0xFF25D366),
-                                            url:
-                                                "https://whatsapp.com/channel/0029Vb6rYwPEKyZH8LlJqm2l",
-                                          ),
-                                          _socialIcon(
-                                            icon: FontAwesomeIcons.twitter,
-                                            color: Colors.black,
-                                            url: "https://x.com/IqraThe91544",
-                                          ),
-                                          _socialIcon(
-                                            icon: FontAwesomeIcons.tiktok,
-                                            color: Colors.black,
-                                            url:
-                                                "https://www.tiktok.com/@theiqraquranofficial",
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 50),
-                                Center(
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        "IQRA QURAN",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: bloc.selectedTheme,
-                                          letterSpacing: 1.2,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 5),
-                                      Text(
-                                        "Version 1.0.0",
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 40),
-                              ],
+                                  const SizedBox(height: 40),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-        ],
+                        ],
+                      ),
+          ],
+        ),
       ),
     );
   }

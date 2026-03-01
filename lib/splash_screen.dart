@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:iqra/Screens/MainPage/main_screen.dart';
 import 'package:iqra/Utils/constants.dart';
 
-
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -21,10 +20,10 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void initState() {
-    super.initState();    
+    super.initState();
     Timer(const Duration(seconds: 5), () {
-      Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (_) => const MainScreen()));
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainScreen()));
     });
     super.initState();
     controller =
@@ -58,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: primayColor,
+        backgroundColor: Color(0xff0E323F),
         body: Stack(
           alignment: Alignment.center,
           children: [
@@ -72,17 +71,22 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                       fit: BoxFit.fitWidth)),
             ),
-            
             const Align(
               alignment: Alignment.bottomCenter,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-              children:[
-                Text("Developed By: ",style: TextStyle(fontWeight: FontWeight.bold ,color: Colors.white),),
-                Text("Dev'sinn Technologies",style: TextStyle(color: Colors.white),),
-                SizedBox(height: 30,)
-              ]
-              ),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Text(
+                  "Developed By: ",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                Text(
+                  "Dev'sinn Technologies",
+                  style: TextStyle(color: Colors.white),
+                ),
+                SizedBox(
+                  height: 30,
+                )
+              ]),
             ),
           ],
         ),

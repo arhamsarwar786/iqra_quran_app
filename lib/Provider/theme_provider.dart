@@ -5,7 +5,7 @@ import 'package:iqra/controller/methods.dart';
 
 class ThemeProvider extends ChangeNotifier {
   // Color selectedTheme = Color(0xff227C9E);0E323F
-  Color selectedTheme = const Color(0xff0E323F);
+  Color selectedTheme = const Color(0xff227C9E);
   Color selectedSecondary = const Color(0xffF2FCFF);
   Color selectedBackground = Colors.white;
   String iconNumber = "1";
