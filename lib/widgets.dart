@@ -145,14 +145,6 @@ floatinButton(context) {
                 image: AssetImage("assets/images/iqra${bloc.iconNumber}.png"),
                 fit: BoxFit.contain,
               ),
-              // gradient: LinearGradient(
-              //   colors: [
-              //     bloc.selectedTheme,
-              //     bloc.selectedTheme.withOpacity(0.8),
-              //   ],
-              //   begin: Alignment.topLeft,
-              //   end: Alignment.bottomRight,
-              // ),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
@@ -174,6 +166,7 @@ floatinButton(context) {
             letterSpacing: 0.5,
           ),
         ),
+        const SizedBox(height: 10),
       ],
     ),
   );

@@ -98,8 +98,7 @@ class _HomeState extends State<Home> {
         floatingActionButton: floatinButton(context),
         bottomNavigationBar: BottomBarApp(bloc: bloc),
         extendBodyBehindAppBar: true,
-        extendBody:
-            true, // Allow body to extend behind bottom bar for immersive feel if needed, or closer to bottom
+        // Allow body to extend behind bottom bar for immersive feel if needed, or closer to bottom
         // backgroundColor: Colors.red,
         key: Home.scaffoldKey,
         drawer: const Darwerr(),
@@ -169,7 +168,6 @@ class _HomeState extends State<Home> {
                 ),
               ),
               const SizedBox(height: 5),
-
               prayerQiblaList(context, size, bloc),
               const SizedBox(height: 10),
               screensList(context, size, bloc),
@@ -177,7 +175,7 @@ class _HomeState extends State<Home> {
               quranDailyVerse(context, size, bloc),
               const SizedBox(height: 10),
               namesAllahProphet(context, size, bloc),
-              const SizedBox(height: 80), // Added spacing for bottom bar
+              const SizedBox(height: 80),
             ],
           ),
         ),
