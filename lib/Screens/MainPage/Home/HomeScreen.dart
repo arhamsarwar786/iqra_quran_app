@@ -85,98 +85,101 @@ class _HomeState extends State<Home> {
       // But since this is a one-time init, it acts like a lazy loader.
       _randomAyat = quranProvider.getRandomSmallAyat();
     }
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-      systemNavigationBarColor: bloc.selectedSecondary,
-      systemNavigationBarIconBrightness: Brightness.dark,
-    ));
-    return Scaffold(
-      backgroundColor: bloc.selectedSecondary,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: floatinButton(context),
-      bottomNavigationBar: BottomBarApp(bloc: bloc),
-      extendBodyBehindAppBar: true,
-      extendBody:
-          true, // Allow body to extend behind bottom bar for immersive feel if needed, or closer to bottom
-      // backgroundColor: Colors.red,
-      key: Home.scaffoldKey,
-      drawer: const Darwerr(),
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-            onPressed: () => Home.scaffoldKey.currentState!.openDrawer(),
-            icon: const Icon(Icons.menu)),
-        actions: [
-          GestureDetector(
-            onTap: () {
-              push(context, const Aboutus());
-            },
-            child: Image.asset("assets/images/infoIcon.png"),
-          ),
-          // IconButton(onPressed: (){
-
-          // }, icon:const Icon(Icons.notifications)),
-        ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: bloc.selectedTheme,
+        systemNavigationBarIconBrightness: Brightness.light,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(
-              height: 330,
-              child: Stack(
-                children: [
-                  CarouselSlider.builder(
-                    itemCount: imageName.length,
-                    options: CarouselOptions(
-                      height: 200,
-                      viewportFraction: 1.01,
-                      scrollDirection: Axis.horizontal,
-                      autoPlay: true,
+      child: Scaffold(
+        backgroundColor: bloc.selectedSecondary,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: floatinButton(context),
+        bottomNavigationBar: BottomBarApp(bloc: bloc),
+        extendBodyBehindAppBar: true,
+        extendBody:
+            true, // Allow body to extend behind bottom bar for immersive feel if needed, or closer to bottom
+        // backgroundColor: Colors.red,
+        key: Home.scaffoldKey,
+        drawer: const Darwerr(),
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+              onPressed: () => Home.scaffoldKey.currentState!.openDrawer(),
+              icon: const Icon(Icons.menu)),
+          actions: [
+            GestureDetector(
+              onTap: () {
+                push(context, const Aboutus());
+              },
+              child: Image.asset("assets/images/infoIcon.png"),
+            ),
+            // IconButton(onPressed: (){
+
+            // }, icon:const Icon(Icons.notifications)),
+          ],
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(
+                height: 330,
+                child: Stack(
+                  children: [
+                    CarouselSlider.builder(
+                      itemCount: imageName.length,
+                      options: CarouselOptions(
+                        height: 200,
+                        viewportFraction: 1.01,
+                        scrollDirection: Axis.horizontal,
+                        autoPlay: true,
+                      ),
+                      itemBuilder: (context, index, pageViewIndex) {
+                        return Image(
+                          image:
+                              AssetImage("assets/images/${imageName[index]}"),
+                          width: size.width,
+                          fit: BoxFit.fitWidth,
+                        );
+                      },
                     ),
-                    itemBuilder: (context, index, pageViewIndex) {
-                      return Image(
-                        image: AssetImage("assets/images/${imageName[index]}"),
-                        width: size.width,
-                        fit: BoxFit.fitWidth,
-                      );
-                    },
-                  ),
-                  // Overlay with secondary color light on top
-                  Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          bloc.selectedTheme.withOpacity(0.3),
-                          bloc.selectedTheme.withOpacity(0.1),
-                          // Colors.transparent,
-                        ],
+                    // Overlay with secondary color light on top
+                    Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            bloc.selectedTheme.withOpacity(0.3),
+                            bloc.selectedTheme.withOpacity(0.1),
+                            // Colors.transparent,
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    child: SearchInQuaran(size: size, bloc: bloc),
-                  ),
-                ],
+                    Positioned(
+                      bottom: 0,
+                      child: SearchInQuaran(size: size, bloc: bloc),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 5),
+              const SizedBox(height: 5),
 
-            prayerQiblaList(context, size, bloc),
-            const SizedBox(height: 10),
-            screensList(context, size, bloc),
-            const SizedBox(height: 10),
-            quranDailyVerse(context, size, bloc),
-            const SizedBox(height: 10),
-            namesAllahProphet(context, size, bloc),
-            const SizedBox(height: 80), // Added spacing for bottom bar
-          ],
+              prayerQiblaList(context, size, bloc),
+              const SizedBox(height: 10),
+              screensList(context, size, bloc),
+              const SizedBox(height: 10),
+              quranDailyVerse(context, size, bloc),
+              const SizedBox(height: 10),
+              namesAllahProphet(context, size, bloc),
+              const SizedBox(height: 80), // Added spacing for bottom bar
+            ],
+          ),
         ),
       ),
     );

@@ -4,7 +4,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iqra/Screens/MainPage/main_screen.dart';
+import 'package:iqra/Screens/Permission/permission_screen.dart';
 import 'package:iqra/Utils/constants.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -32,10 +34,16 @@ class _SplashScreenState extends State<SplashScreen>
       systemNavigationBarIconBrightness: Brightness.light,
     ));
 
-    Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 3), () async {
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const MainScreen()));
+        final status = await Permission.location.status;
+        if (status.isGranted) {
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const MainScreen()));
+        } else {
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const PermissionScreen()));
+        }
       }
     });
 
