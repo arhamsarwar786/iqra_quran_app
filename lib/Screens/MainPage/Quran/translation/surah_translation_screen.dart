@@ -36,16 +36,18 @@ class _SurahTranslationScreenState extends State<SurahTranslationScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        itemCount: widget.ayatList?.length ?? 0,
-        itemBuilder: (context, i) {
-          return TranlationCardSection(
-            provider: bloc,
-            ayats: widget.ayatList!,
-            index: i,
-          );
-        },
+      body: SafeArea(
+        child: ListView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          itemCount: widget.ayatList?.length ?? 0,
+          itemBuilder: (context, i) {
+            return TranlationCardSection(
+              provider: bloc,
+              ayats: widget.ayatList!,
+              index: i,
+            );
+          },
+        ),
       ),
     );
   }

@@ -36,18 +36,20 @@ class _ParahScreenState extends State<ParahScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: widget.ayatList == null
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              itemCount: widget.ayatList!.length,
-              itemBuilder: (context, i) {
-                return TranlationCardSection(
-                  provider: bloc,
-                  ayats: widget.ayatList!,
-                  index: i,
-                );
-              }),
+      body: SafeArea(
+        child: widget.ayatList == null
+            ? const Center(child: CircularProgressIndicator())
+            : ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                itemCount: widget.ayatList!.length,
+                itemBuilder: (context, i) {
+                  return TranlationCardSection(
+                    provider: bloc,
+                    ayats: widget.ayatList!,
+                    index: i,
+                  );
+                }),
+      ),
     );
   }
 }

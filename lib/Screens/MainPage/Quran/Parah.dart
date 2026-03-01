@@ -78,8 +78,9 @@ class _ParahState extends State<Parah> {
                 itemCount: paraMetadata.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 2 / 2,
-                  mainAxisSpacing: 20,
+                  childAspectRatio: 1, // 2/2 is 1
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
                 ),
                 itemBuilder: (context, index) {
                   var paraItem = paraMetadata[index];

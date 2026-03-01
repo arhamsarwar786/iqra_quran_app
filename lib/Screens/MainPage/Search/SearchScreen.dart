@@ -252,16 +252,18 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: customAppBar(context, "SEARCH QURAN"),
-      body: Column(
-        children: [
-          const SizedBox(height: 10),
-          _buildSearchField(theme),
-          _buildFilterChips(theme),
-          const SizedBox(height: 10),
-          Expanded(
-            child: _buildResultsList(theme, quranProvider),
-          ),
-        ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            _buildSearchField(theme),
+            _buildFilterChips(theme),
+            const SizedBox(height: 10),
+            Expanded(
+              child: _buildResultsList(theme, quranProvider),
+            ),
+          ],
+        ),
       ),
     );
   }

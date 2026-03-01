@@ -100,205 +100,208 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          // Header Navigation
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            color: color,
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      onPressed: _previousMonth,
-                      icon: const Icon(Icons.arrow_circle_left_outlined,
-                          color: Colors.white, size: 35),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header Navigation
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              color: color,
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        onPressed: _previousMonth,
+                        icon: const Icon(Icons.arrow_circle_left_outlined,
+                            color: Colors.white, size: 35),
+                      ),
+                      Text(
+                        DateFormat('MMMM yyyy').format(_viewDate),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: _nextMonth,
+                        icon: const Icon(Icons.arrow_circle_right_outlined,
+                            color: Colors.white, size: 35),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 25, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(100),
                     ),
-                    Text(
-                      DateFormat('MMMM yyyy').format(_viewDate),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
+                    child: Text(
+                      _getHijriRange(),
+                      style: TextStyle(
+                        color: color,
                         fontWeight: FontWeight.bold,
+                        fontSize: 14,
                       ),
                     ),
-                    IconButton(
-                      onPressed: _nextMonth,
-                      icon: const Icon(Icons.arrow_circle_right_outlined,
-                          color: Colors.white, size: 35),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(100),
                   ),
-                  child: Text(
-                    _getHijriRange(),
-                    style: TextStyle(
-                      color: color,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          // Day Headers
-          Container(
-            color: color.withOpacity(0.9),
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              children: _weekDays
-                  .map((day) => Expanded(
-                        child: Center(
-                          child: Text(
-                            day,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ))
-                  .toList(),
-            ),
-          ),
-
-          // Calendar Grid with Backdrop Image
-          Expanded(
-            child: Stack(
-              children: [
-                // Background Image
-                Positioned.fill(
-                  child: Opacity(
-                    opacity: 0.3,
-                    child: Image.asset(
-                      'assets/images/masjid1.png', // Using available masjid image
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-
-                // Grid
-                GridView.builder(
-                  padding: const EdgeInsets.all(4),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 7,
-                    childAspectRatio: 0.65,
-                  ),
-                  itemCount: rows * 7,
-                  itemBuilder: (context, index) {
-                    final dayNumber = index - startingWeekday + 1;
-                    final isValidDay =
-                        dayNumber > 0 && dayNumber <= daysInMonth;
-
-                    if (!isValidDay) {
-                      return const SizedBox.shrink();
-                    }
-
-                    final date =
-                        DateTime(_viewDate.year, _viewDate.month, dayNumber);
-                    final hijri = HijriCalendar.fromDate(date);
-                    final isToday = DateUtils.isSameDay(date, DateTime.now());
-
-                    return Container(
-                      margin: const EdgeInsets.all(3),
-                      decoration: BoxDecoration(
-                        color: isToday
-                            ? color.withOpacity(0.4)
-                            : Colors.white.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isToday
-                              ? Colors.white
-                              : Colors.white.withOpacity(0.1),
-                          width: isToday ? 1.5 : 0.5,
-                        ),
-                      ),
-                      child: Stack(
-                        children: [
-                          // Gregorian Date (English)
-                          Positioned(
-                            top: 6,
-                            left: 8,
+            // Day Headers
+            Container(
+              color: color.withOpacity(0.9),
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: _weekDays
+                    .map((day) => Expanded(
+                          child: Center(
                             child: Text(
-                              "$dayNumber",
-                              style: TextStyle(
-                                color: isToday
-                                    ? Colors.white
-                                    : Colors.white.withOpacity(0.9),
-                                fontSize: 13,
+                              day,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                letterSpacing: -0.5,
                               ),
                             ),
                           ),
+                        ))
+                    .toList(),
+              ),
+            ),
 
-                          // Hijri Date (Arabic)
-                          Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const SizedBox(height: 10),
-                                Container(
-                                  height: 32,
-                                  width: 32,
-                                  decoration: BoxDecoration(
-                                    color: isToday
-                                        ? Colors.white
-                                        : color.withOpacity(0.8),
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.3),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      "${hijri.hDay}",
-                                      style: TextStyle(
-                                        color: isToday ? color : Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w900,
+            // Calendar Grid with Backdrop Image
+            Expanded(
+              child: Stack(
+                children: [
+                  // Background Image
+                  Positioned.fill(
+                    child: Opacity(
+                      opacity: 0.3,
+                      child: Image.asset(
+                        'assets/images/masjid1.png', // Using available masjid image
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+
+                  // Grid
+                  GridView.builder(
+                    padding: const EdgeInsets.all(4),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 7,
+                      childAspectRatio: 0.65,
+                    ),
+                    itemCount: rows * 7,
+                    itemBuilder: (context, index) {
+                      final dayNumber = index - startingWeekday + 1;
+                      final isValidDay =
+                          dayNumber > 0 && dayNumber <= daysInMonth;
+
+                      if (!isValidDay) {
+                        return const SizedBox.shrink();
+                      }
+
+                      final date =
+                          DateTime(_viewDate.year, _viewDate.month, dayNumber);
+                      final hijri = HijriCalendar.fromDate(date);
+                      final isToday = DateUtils.isSameDay(date, DateTime.now());
+
+                      return Container(
+                        margin: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: isToday
+                              ? color.withOpacity(0.4)
+                              : Colors.white.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isToday
+                                ? Colors.white
+                                : Colors.white.withOpacity(0.1),
+                            width: isToday ? 1.5 : 0.5,
+                          ),
+                        ),
+                        child: Stack(
+                          children: [
+                            // Gregorian Date (English)
+                            Positioned(
+                              top: 6,
+                              left: 8,
+                              child: Text(
+                                "$dayNumber",
+                                style: TextStyle(
+                                  color: isToday
+                                      ? Colors.white
+                                      : Colors.white.withOpacity(0.9),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                            ),
+
+                            // Hijri Date (Arabic)
+                            Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const SizedBox(height: 10),
+                                  Container(
+                                    height: 32,
+                                    width: 32,
+                                    decoration: BoxDecoration(
+                                      color: isToday
+                                          ? Colors.white
+                                          : color.withOpacity(0.8),
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.3),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        "${hijri.hDay}",
+                                        style: TextStyle(
+                                          color: isToday ? color : Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w900,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  "Hijri",
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.5),
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.5,
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    "Hijri",
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.5),
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ],
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

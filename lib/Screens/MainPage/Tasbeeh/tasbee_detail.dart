@@ -31,12 +31,15 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
     var size = MediaQuery.of(context).size;
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Theme.of(context).primaryColor,
-      isExtended: true,
-      child: const Icon(Icons.add),
-        onPressed: (){
-          Navigator.push(context, MaterialPageRoute(builder: (context)=> const TasheehListScreen())); 
-      }),
+          backgroundColor: Theme.of(context).primaryColor,
+          isExtended: true,
+          child: const Icon(Icons.add),
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const TasheehListScreen()));
+          }),
       backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
@@ -55,90 +58,39 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              "Time to count tasbih",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Divider(
-              color: Theme.of(context).primaryColor,
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            const Text(
-              "Title Tasbih",
-              style: TextStyle(),
-            ),
-            PhysicalModel(
-              shadowColor: Colors.white,
-              color: Colors.white,
-              elevation: 10.0,
-              borderRadius: BorderRadius.circular(10),
-              child: TextField(
-                controller: nameController,
-                keyboardType: TextInputType.text,
-                cursorColor: Theme.of(context).primaryColor,
-                autofocus: false,
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.only(left: 10),
-                  errorBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.red),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Theme.of(context).primaryColor),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  disabledBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Theme.of(context).primaryColor),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  border: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Theme.of(context).primaryColor),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Theme.of(context).primaryColor),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "Time to count tasbih",
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const Text(
-              "Count",
-              style: TextStyle(),
-            ),
-            PhysicalModel(
-              shadowColor: Colors.white,
-              color: Colors.white,
-              elevation: 10.0,
-              borderRadius: BorderRadius.circular(10),
-              child: Consumer<FormValidate>(builder: (context, value, child) {
-                return TextField(
-                  controller: countController,
-                  keyboardType: TextInputType.number,
+              Divider(
+                color: Theme.of(context).primaryColor,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              const Text(
+                "Title Tasbih",
+                style: TextStyle(),
+              ),
+              PhysicalModel(
+                shadowColor: Colors.white,
+                color: Colors.white,
+                elevation: 10.0,
+                borderRadius: BorderRadius.circular(10),
+                child: TextField(
+                  controller: nameController,
+                  keyboardType: TextInputType.text,
                   cursorColor: Theme.of(context).primaryColor,
                   autofocus: false,
                   decoration: InputDecoration(
-                    errorText: value.validateValue == true
-                        ? "Enter correct value"
-                        : null,
-                    contentPadding: const EdgeInsets.only(left: 10.0),
-                    fillColor: Colors.white,
-                    filled: true,
+                    contentPadding: const EdgeInsets.only(left: 10),
                     errorBorder: OutlineInputBorder(
                       borderSide: const BorderSide(color: Colors.red),
                       borderRadius: BorderRadius.circular(10.0),
@@ -164,47 +116,99 @@ class _TasbeeDetailState extends State<TasbeeDetail> {
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
-                );
-              }),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            SizedBox(
-              height: 50,
-              child: Align(
-                alignment: Alignment.center,
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              const Text(
+                "Count",
+                style: TextStyle(),
+              ),
+              PhysicalModel(
+                shadowColor: Colors.white,
+                color: Colors.white,
+                elevation: 10.0,
+                borderRadius: BorderRadius.circular(10),
                 child: Consumer<FormValidate>(builder: (context, value, child) {
-                  return CupertinoButton(
-                    minSize: size.width,
-                    color: Theme.of(context).primaryColor,
-                    onPressed: () {
-                      if (countController.text.isEmpty) {
-                        value.checkValidate(true);
-                      } else {
-                        value.checkValidate(false);
-                        // tasbihProvider
-                        //     .setValue(int.parse(countController.text));
-                        push(
-                          context,
-                          Tasbih(
-                         
-                          ),
-                        );
-                      }
-                    },
-                    child: const Text(
-                      "Start",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
+                  return TextField(
+                    controller: countController,
+                    keyboardType: TextInputType.number,
+                    cursorColor: Theme.of(context).primaryColor,
+                    autofocus: false,
+                    decoration: InputDecoration(
+                      errorText: value.validateValue == true
+                          ? "Enter correct value"
+                          : null,
+                      contentPadding: const EdgeInsets.only(left: 10.0),
+                      fillColor: Colors.white,
+                      filled: true,
+                      errorBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.red),
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: Theme.of(context).primaryColor),
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      disabledBorder: OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: Theme.of(context).primaryColor),
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: Theme.of(context).primaryColor),
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: Theme.of(context).primaryColor),
+                        borderRadius: BorderRadius.circular(10.0),
                       ),
                     ),
                   );
                 }),
               ),
-            )
-          ],
+              const SizedBox(
+                height: 20,
+              ),
+              SizedBox(
+                height: 50,
+                child: Align(
+                  alignment: Alignment.center,
+                  child:
+                      Consumer<FormValidate>(builder: (context, value, child) {
+                    return CupertinoButton(
+                      minSize: size.width,
+                      color: Theme.of(context).primaryColor,
+                      onPressed: () {
+                        if (countController.text.isEmpty) {
+                          value.checkValidate(true);
+                        } else {
+                          value.checkValidate(false);
+                          // tasbihProvider
+                          //     .setValue(int.parse(countController.text));
+                          push(
+                            context,
+                            Tasbih(),
+                          );
+                        }
+                      },
+                      child: const Text(
+                        "Start",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

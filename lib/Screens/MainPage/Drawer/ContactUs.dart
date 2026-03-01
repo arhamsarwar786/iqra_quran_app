@@ -15,20 +15,22 @@ class _ContactusState extends State<Contactus> {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: mainScreenAppBarPush(context, "Contact us"),
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          bgImage(context, size),
-          Text(
-            "COMING SOON",
-            style: TextStyle(
-                color: Theme.of(context).primaryColor,
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                height: 1.3,
-                decorationThickness: 2.0),
-          ),
-        ],
+      body: SafeArea(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            bgImage(context, size),
+            Text(
+              "COMING SOON",
+              style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  height: 1.3,
+                  decorationThickness: 2.0),
+            ),
+          ],
+        ),
       ),
     );
   }

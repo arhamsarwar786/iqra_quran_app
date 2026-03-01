@@ -60,83 +60,88 @@ class _PQuranViewState extends State<PQuranView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: customAppBar(context, "${widget.parahname}"),
-        body: FutureBuilder(
-            future: DefaultAssetBundle.of(context)
-                .loadString("assets/quran_kareem/urdu_translation/quran.json"),
-            builder: (context, snapshot) {
-              var quran = json.decode(snapshot.data.toString());
-              if (snapshot.hasData) {
-                var a = 0;
-                for (int i = 0; i < num.length; i++) {
-                  a = a + num[i];
-                  prevriousSuraIndex.add(a);
-                }
-                for (int i = 0; i <= 113; i++) {
-                  data.add(
-                    quran["quran"]["sura"][i]["name"],
-                  );
-                  urdudata.add(" ");
-                  a = a + widget.ayatInSura![i];
+      appBar: customAppBar(context, "${widget.parahname}"),
+      body: SafeArea(
+        child: FutureBuilder(
+          future: DefaultAssetBundle.of(context)
+              .loadString("assets/quran_kareem/urdu_translation/quran.json"),
+          builder: (context, snapshot) {
+            var quran = json.decode(snapshot.data.toString());
+            if (snapshot.hasData) {
+              var a = 0;
+              for (int i = 0; i < num.length; i++) {
+                a = a + num[i];
+                prevriousSuraIndex.add(a);
+              }
+              for (int i = 0; i <= 113; i++) {
+                data.add(
+                  quran["quran"]["sura"][i]["name"],
+                );
+                urdudata.add(" ");
+                a = a + widget.ayatInSura![i];
 
-                  for (int j = 1; j <= widget.ayatInSura![i]; j++) {
-                    data.add(
-                      quran["quran"]["sura"][i]["aya"][j - 1]["text"],
-                    );
-                    urdudata.add(
-                      quran["sura"][i]["aya"][j - 1]["text"],
-                    );
-                  }
+                for (int j = 1; j <= widget.ayatInSura![i]; j++) {
+                  data.add(
+                    quran["quran"]["sura"][i]["aya"][j - 1]["text"],
+                  );
+                  urdudata.add(
+                    quran["sura"][i]["aya"][j - 1]["text"],
+                  );
                 }
               }
-              return Container(
-                  // height: size.height / 1.85,
-                  child: (snapshot.hasData)
-                      ? ListView.builder(
-                          itemCount:
-                              num[(int.parse(widget.parahCount.toString()))],
-                          // itemCount: int.parse(_num[int.parse(
-                          //         widget.parahCount.toString()) -
-                          //     1]),
-                          itemBuilder: (context, index) {
-                            return Card(
-                              elevation: 3,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: ListTile(
-                                  subtitle: Text(
-                                    // "$index",
-                                    urdudata[(index +
-                                        prevriousSuraIndex[(int.parse(
-                                                widget.parahCount.toString())) -
-                                            1])],
-                                    textAlign: TextAlign.right,
+            }
+            return Container(
+              // height: size.height / 1.85,
+              child: (snapshot.hasData)
+                  ? ListView.builder(
+                      itemCount: num[(int.parse(widget.parahCount.toString()))],
+                      // itemCount: int.parse(_num[int.parse(
+                      //         widget.parahCount.toString()) -
+                      //     1]),
+                      itemBuilder: (context, index) {
+                        return Card(
+                          elevation: 3,
+                          child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10)),
+                            child: ListTile(
+                              subtitle: Text(
+                                // "$index",
+                                urdudata[(index +
+                                    prevriousSuraIndex[(int.parse(
+                                            widget.parahCount.toString())) -
+                                        1])],
+                                textAlign: TextAlign.right,
 
-                                    style: const TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w400),
-                                  ),
-                                  title: Text(
-                                    (data[(index +
-                                        prevriousSuraIndex[(int.parse(
-                                                widget.parahCount.toString())) -
-                                            1])]),
-                                    textAlign: TextAlign.right,
-                                    style: const TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 30,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                ),
+                                style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w400),
                               ),
-                            );
-                          })
-                      : const Center(
-                          child: CircularProgressIndicator(
-                          color: Colors.black,
-                        )));
-            }));
+                              title: Text(
+                                (data[(index +
+                                    prevriousSuraIndex[(int.parse(
+                                            widget.parahCount.toString())) -
+                                        1])]),
+                                textAlign: TextAlign.right,
+                                style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ),
+                        );
+                      })
+                  : const Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.black,
+                      ),
+                    ),
+            );
+          },
+        ),
+      ),
+    );
   }
 }

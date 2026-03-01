@@ -16,25 +16,27 @@ class _DirectionTOQiblahState extends State<DirectionTOQiblah> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: mainScreenAppBarPush(context, "Direction to Qiblah"),
-      body: FutureBuilder(
-        future: _deviceSupport,
-        builder: (_, AsyncSnapshot<bool?> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: Text("Error: ${snapshot.error.toString()}"),
-            );
-          }
+      body: SafeArea(
+        child: FutureBuilder(
+          future: _deviceSupport,
+          builder: (_, AsyncSnapshot<bool?> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: Text("Error: ${snapshot.error.toString()}"),
+              );
+            }
 
-          if (snapshot.data == true) {
-            return const QiblahCompass();
-          } else {
-            return const Center(
-                child: Text("Compass sensor not supported on this device"));
-          }
-        },
+            if (snapshot.data == true) {
+              return const QiblahCompass();
+            } else {
+              return const Center(
+                  child: Text("Compass sensor not supported on this device"));
+            }
+          },
+        ),
       ),
     );
   }

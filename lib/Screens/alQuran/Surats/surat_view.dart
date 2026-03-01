@@ -17,9 +17,9 @@ class SuratView extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Translation"),
       ),
-      body: SingleChildScrollView(
-        child:Consumer<MyProvider>(
-          builder: (context,provider,child) {
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Consumer<MyProvider>(builder: (context, provider, child) {
             QuranKareemUrduModel? quran = provider.fetchTransSurat();
             return Column(
               children: [
@@ -28,9 +28,13 @@ class SuratView extends StatelessWidget {
                   width: size.width,
                   alignment: Alignment.center,
                   height: 50,
-                  margin:const EdgeInsets.only(bottom: 5),
-                  padding:const EdgeInsets.all(5),
-                  child: Text(quran.name.toString(),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 30),),
+                  margin: const EdgeInsets.only(bottom: 5),
+                  padding: const EdgeInsets.all(5),
+                  child: Text(
+                    quran.name.toString(),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 30),
+                  ),
                 ),
                 ListView.builder(
                     physics: const NeverScrollableScrollPhysics(),
@@ -43,29 +47,29 @@ class SuratView extends StatelessWidget {
                           Container(
                             height: 300,
                             width: size.width,
-                            decoration:const BoxDecoration(
-                              
+                            decoration: const BoxDecoration(
                                 image: DecorationImage(
                                     image: AssetImage("assets/images/bg.png"),
                                     fit: BoxFit.cover)),
                           ),
                           Center(
                               child: Container(
-                                padding: const EdgeInsets.all(50),
-                                child: Text(
-                            data.arabicText!,
-                            style: const TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
-                          ),
-                              )),
-
-                                 Center(
+                            padding: const EdgeInsets.all(50),
+                            child: Text(
+                              data.arabicText!,
+                              style: const TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                          )),
+                          Center(
                               child: Container(
-                                padding: const EdgeInsets.only(top: 100,left: 50),
-                                child: Text(
-                            data.translation!,
-                            style: const TextStyle(fontSize: 20,fontWeight: FontWeight.w400),
-                          ),
-                              )),
+                            padding: const EdgeInsets.only(top: 100, left: 50),
+                            child: Text(
+                              data.translation!,
+                              style: const TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.w400),
+                            ),
+                          )),
                           Positioned(
                             right: 0,
                             top: 0,
@@ -94,7 +98,7 @@ class SuratView extends StatelessWidget {
                     }),
               ],
             );
-          }
+          }),
         ),
       ),
     );

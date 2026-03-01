@@ -19,67 +19,72 @@ class DuaScreen extends StatelessWidget {
           backgroundColor: bloc.selectedTheme,
           title: const Text("Dua"),
           centerTitle: true,
-          // actions: [IconButton(onPressed: () {}, icon: Icon(Icons.search))],
-        ),
-        body: Container(
-          height: size.height,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage("assets/images/BgImage.png"),
-              fit: BoxFit.cover,
-            ),
+          leading: IconButton(
+            onPressed: () => Scaffold.of(context).openDrawer(),
+            icon: const Icon(Icons.menu),
           ),
-          child: Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: ListView.builder(
-                itemCount: duaData.length,
-                itemBuilder: (context, index) {
-                  return InkWell(
-                    onTap: () {
-                      final items = duaData
-                          .map((d) => KDSData(
-                                title: d['title'] ?? "Dua",
-                                arabic: d['arabic'] ?? "",
-                                translation: d['urdu'] ?? "",
-                              ))
-                          .toList();
-                      KalmaDuaSHEET.show(context, items, index, "Dua");
-                    },
-                    child: Container(
-                      margin:
-                          const EdgeInsets.only(left: 10, right: 10, top: 10),
-                      padding: const EdgeInsets.all(15),
-                      constraints: const BoxConstraints(minHeight: 80),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Theme.of(context).primaryColor,
+        ),
+        body: SafeArea(
+          child: Container(
+            height: size.height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/BgImage.png"),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: ListView.builder(
+                  itemCount: duaData.length,
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onTap: () {
+                        final items = duaData
+                            .map((d) => KDSData(
+                                  title: d['title'] ?? "Dua",
+                                  arabic: d['arabic'] ?? "",
+                                  translation: d['urdu'] ?? "",
+                                ))
+                            .toList();
+                        KalmaDuaSHEET.show(context, items, index, "Dua");
+                      },
+                      child: Container(
+                        margin:
+                            const EdgeInsets.only(left: 10, right: 10, top: 10),
+                        padding: const EdgeInsets.all(15),
+                        constraints: const BoxConstraints(minHeight: 80),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Icon(
+                              Icons.chevron_left_outlined,
+                              size: 30,
+                              color: MyColors.whiteColor,
+                            ),
+                            Container(
+                                alignment: Alignment.centerRight,
+                                width: size.width * 0.75,
+                                child: Text(
+                                  '${duaData[index]['title']}',
+                                  textDirection: TextDirection.rtl,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: bloc.urduFontFamily,
+                                      fontSize: 20,
+                                      color: MyColors.whiteColor),
+                                )),
+                          ],
+                        ),
                       ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Icon(
-                            Icons.chevron_left_outlined,
-                            size: 30,
-                            color: MyColors.whiteColor,
-                          ),
-                          Container(
-                              alignment: Alignment.centerRight,
-                              width: size.width * 0.75,
-                              child: Text(
-                                '${duaData[index]['title']}',
-                                textDirection: TextDirection.rtl,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: bloc.urduFontFamily,
-                                    fontSize: 20,
-                                    color: MyColors.whiteColor),
-                              )),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
+            ),
           ),
         ),
       );

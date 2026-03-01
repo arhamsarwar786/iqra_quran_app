@@ -109,8 +109,6 @@ class _SurahState extends State<Surah> {
                       ),
                       child: Container(
                         padding: EdgeInsets.all(5),
-                        // height: MediaQuery.of(context).size.height * 0.22,
-                        // width: MediaQuery.of(context).size.height * 0.22,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -159,13 +157,6 @@ class _SurahState extends State<Surah> {
                                         fontSize: 30,
                                         fontWeight: FontWeight.w500),
                                   ),
-                                ),
-                                Text(
-                                  surah.ename,
-                                  style: const TextStyle(
-                                      color: Colors.black54,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500),
                                 ),
                                 const SizedBox(height: 4),
                                 Row(

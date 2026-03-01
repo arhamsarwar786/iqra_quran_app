@@ -44,82 +44,85 @@ class KhalimaScreen extends StatelessWidget {
               },
               icon: const Icon(Icons.arrow_back)),
         ),
-        body: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage("assets/images/BgImage.png"),
-              fit: BoxFit.cover,
+        body: SafeArea(
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/BgImage.png"),
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          alignment: Alignment.center,
-          width: size.width,
-          height: size.height,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Center(
-            child: ListView.builder(
-                itemCount: khalimaList.length,
-                itemBuilder: (context, index) {
-                  KhalimasModel khalima = khalimaList[index];
-                  return InkWell(
-                    onTap: () {
-                      final items = khalimaList
-                          .map((k) => KDSData(
-                                title: k.meaning!,
-                                subtitle: k.title ?? "",
-                                arabic: k.arabic ?? "",
-                                translation: k.translation ?? "",
-                              ))
-                          .toList();
-                      KalmaDuaSHEET.show(context, items, index, "KALIMA");
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(left: 0, right: 0, top: 10),
-                      padding: const EdgeInsets.all(15),
-                      constraints: const BoxConstraints(minHeight: 80),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Icon(
-                            Icons.chevron_left_outlined,
-                            size: 30,
-                            color: MyColors.whiteColor,
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  '${khalima.title}',
-                                  textDirection: TextDirection.rtl,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: bloc.urduFontFamily,
-                                      fontSize: 22,
-                                      color: MyColors.whiteColor),
-                                ),
-                                if (khalima.meaning != null)
+            alignment: Alignment.center,
+            width: size.width,
+            height: size.height,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Center(
+              child: ListView.builder(
+                  itemCount: khalimaList.length,
+                  itemBuilder: (context, index) {
+                    KhalimasModel khalima = khalimaList[index];
+                    return InkWell(
+                      onTap: () {
+                        final items = khalimaList
+                            .map((k) => KDSData(
+                                  title: k.meaning!,
+                                  subtitle: k.title ?? "",
+                                  arabic: k.arabic ?? "",
+                                  translation: k.translation ?? "",
+                                ))
+                            .toList();
+                        KalmaDuaSHEET.show(context, items, index, "KALIMA");
+                      },
+                      child: Container(
+                        margin:
+                            const EdgeInsets.only(left: 0, right: 0, top: 10),
+                        padding: const EdgeInsets.all(15),
+                        constraints: const BoxConstraints(minHeight: 80),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Icon(
+                              Icons.chevron_left_outlined,
+                              size: 30,
+                              color: MyColors.whiteColor,
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
                                   Text(
-                                    '${khalima.meaning}',
+                                    '${khalima.title}',
                                     textDirection: TextDirection.rtl,
                                     style: TextStyle(
+                                        fontWeight: FontWeight.bold,
                                         fontFamily: bloc.urduFontFamily,
-                                        fontSize: 16,
-                                        color: MyColors.whiteColor
-                                            .withOpacity(0.8)),
+                                        fontSize: 22,
+                                        color: MyColors.whiteColor),
                                   ),
-                              ],
+                                  if (khalima.meaning != null)
+                                    Text(
+                                      '${khalima.meaning}',
+                                      textDirection: TextDirection.rtl,
+                                      style: TextStyle(
+                                          fontFamily: bloc.urduFontFamily,
+                                          fontSize: 16,
+                                          color: MyColors.whiteColor
+                                              .withOpacity(0.8)),
+                                    ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
+            ),
           ),
         ),
       );

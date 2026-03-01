@@ -9,8 +9,6 @@ import '../../../main.dart';
 class TasbihInfo extends StatefulWidget {
   const TasbihInfo({super.key});
 
-
-
   @override
   State<TasbihInfo> createState() => _TasbihInfoState();
 }
@@ -23,19 +21,19 @@ class _TasbihInfoState extends State<TasbihInfo> {
     streamUsers = objectbox.getUsers();
   }
 
-@override
+  @override
   void dispose() {
     super.dispose();
     objectbox.closedStore();
-  }  
+  }
 
   @override
   Widget build(BuildContext context) {
-var tasbihProvider= Provider.of<TasbeeCount>(context,listen: false);
+    var tasbihProvider = Provider.of<TasbeeCount>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor:  Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).primaryColor,
         centerTitle: true,
         leading: IconButton(
             onPressed: () {
@@ -52,61 +50,65 @@ var tasbihProvider= Provider.of<TasbeeCount>(context,listen: false);
           ),
         ),
       ),
-      body: StreamBuilder<List<TasbihModel>>(
-          stream: streamUsers,
-          builder: (context, snapshot) {
-           
-            if (!snapshot.hasData) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            else{
-            final users = snapshot.data!;
-          
-            return ListView.builder(
-              itemCount: users.length,
-              // reverse: true,
-              itemBuilder: ((context, index) {
-                final user = users[index];
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0, vertical: 10.0),
-                  child: PhysicalModel(
-                    borderRadius: BorderRadius.circular(8.0),
-                    shadowColor: Colors.white,
-                    elevation: 10,
-                    color: Colors.white,
-                    child: ListTile(
-                      onTap: (){
-                        // tasbihProvider.setValue(user.count);
-                        push(context, Tasbih());
-                      },
-                      trailing: IconButton(
-                          onPressed: () {
-                            objectbox.deletetUser(user.id);
-                          
-                          }, icon: const Icon(Icons.delete),color:  Theme.of(context).primaryColor,),
-                      tileColor: Colors.white,
-                      title:  Text(user.virdh.toString(),
-                        //
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Text(
-                        "Total Count: ${user.count}",
-                        style: const TextStyle(
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ),
+      body: SafeArea(
+        child: StreamBuilder<List<TasbihModel>>(
+            stream: streamUsers,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(
+                  child: CircularProgressIndicator(),
                 );
-              }),
-            );}
-          }),
+              } else {
+                final users = snapshot.data!;
+
+                return ListView.builder(
+                  itemCount: users.length,
+                  // reverse: true,
+                  itemBuilder: ((context, index) {
+                    final user = users[index];
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20.0, vertical: 10.0),
+                      child: PhysicalModel(
+                        borderRadius: BorderRadius.circular(8.0),
+                        shadowColor: Colors.white,
+                        elevation: 10,
+                        color: Colors.white,
+                        child: ListTile(
+                          onTap: () {
+                            // tasbihProvider.setValue(user.count);
+                            push(context, Tasbih());
+                          },
+                          trailing: IconButton(
+                            onPressed: () {
+                              objectbox.deletetUser(user.id);
+                            },
+                            icon: const Icon(Icons.delete),
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          tileColor: Colors.white,
+                          title: Text(
+                            user.virdh.toString(),
+                            //
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: Text(
+                            "Total Count: ${user.count}",
+                            style: const TextStyle(
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                );
+              }
+            }),
+      ),
     );
   }
 }

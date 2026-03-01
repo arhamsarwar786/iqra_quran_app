@@ -55,80 +55,82 @@ class _NameofMohammadState extends State<NameofMohammad> {
 
     return Scaffold(
       appBar: appBar(bloc),
-      body: isLoading
-          ? Center(
-              child: CircularProgressIndicator(
-                color: bloc.selectedTheme,
-              ),
-            )
-          : Container(
-              height: size.height,
-              width: size.width,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("assets/images/BgImage.png"),
-                  fit: BoxFit.cover,
+      body: SafeArea(
+        child: isLoading
+            ? Center(
+                child: CircularProgressIndicator(
+                  color: bloc.selectedTheme,
                 ),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    bloc.selectedSecondary,
-                    Colors.white,
-                  ],
+              )
+            : Container(
+                height: size.height,
+                width: size.width,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage("assets/images/BgImage.png"),
+                    fit: BoxFit.cover,
+                  ),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      bloc.selectedSecondary,
+                      Colors.white,
+                    ],
+                  ),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: CardSwiper(
-                        controller: controller,
-                        cardsCount: namesOfMuhammad.length,
-                        isLoop: true,
-                        numberOfCardsDisplayed: 2,
-                        backCardOffset: const Offset(0, 40),
-                        padding: const EdgeInsets.all(24.0),
-                        duration: const Duration(milliseconds: 300),
-                        cardBuilder: (context,
-                            index,
-                            horizontalThresholdPercentage,
-                            verticalThresholdPercentage) {
-                          return buildNameCard(
-                              namesOfMuhammad[index], size, bloc);
-                        },
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: CardSwiper(
+                          controller: controller,
+                          cardsCount: namesOfMuhammad.length,
+                          isLoop: true,
+                          numberOfCardsDisplayed: 2,
+                          backCardOffset: const Offset(0, 40),
+                          padding: const EdgeInsets.all(24.0),
+                          duration: const Duration(milliseconds: 300),
+                          cardBuilder: (context,
+                              index,
+                              horizontalThresholdPercentage,
+                              verticalThresholdPercentage) {
+                            return buildNameCard(
+                                namesOfMuhammad[index], size, bloc);
+                          },
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          onPressed: () => controller.undo(),
-                          icon: Icon(
-                            Icons.arrow_back_rounded,
-                            size: 40,
-                            color: bloc.selectedTheme,
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            onPressed: () => controller.undo(),
+                            icon: Icon(
+                              Icons.arrow_back_rounded,
+                              size: 40,
+                              color: bloc.selectedTheme,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 40),
-                        IconButton(
-                          onPressed: () =>
-                              controller.swipe(CardSwiperDirection.right),
-                          icon: Icon(
-                            Icons.arrow_forward_rounded,
-                            size: 40,
-                            color: bloc.selectedTheme,
+                          const SizedBox(width: 40),
+                          IconButton(
+                            onPressed: () =>
+                                controller.swipe(CardSwiperDirection.right),
+                            icon: Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 40,
+                              color: bloc.selectedTheme,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                  ],
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
                 ),
               ),
-            ),
+      ),
     );
   }
 

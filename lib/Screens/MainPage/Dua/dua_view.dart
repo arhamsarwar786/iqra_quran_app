@@ -30,8 +30,7 @@ class DuaView extends StatelessWidget {
           backgroundColor: bloc.selectedTheme,
           title: const Text(
             "Dua",
-            style: TextStyle(
-                color: Colors.white, fontWeight: FontWeight.w900),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
           ),
           centerTitle: true,
           elevation: 0,
@@ -41,98 +40,100 @@ class DuaView extends StatelessWidget {
               },
               icon: const Icon(Icons.arrow_back)),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: size.width,
-                // height: size.height,
-                alignment: Alignment.center,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  boxShadow: kElevationToShadow[4],
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: SizedBox(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: size.width,
                   // height: size.height,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      Expanded(
-                        child: SingleChildScrollView(                          
-                          child: Container(
-                            height: size.height * 0.80,
-                            alignment: Alignment.center,
-                            // color: Colors.red,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  arabic!,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    height: 1.5,
-                                    fontFamily: bloc.arabicFontFamily,
-                                    color: MyColors.whiteColor,
-                                    fontSize: bloc.arabicFontSize,
-                                    fontWeight: FontWeight.w900,
+                  alignment: Alignment.center,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                    boxShadow: kElevationToShadow[4],
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: SizedBox(
+                    // height: size.height,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: Container(
+                              height: size.height * 0.80,
+                              alignment: Alignment.center,
+                              // color: Colors.red,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    arabic!,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      height: 1.5,
+                                      fontFamily: bloc.arabicFontFamily,
+                                      color: MyColors.whiteColor,
+                                      fontSize: bloc.arabicFontSize,
+                                      fontWeight: FontWeight.w900,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(
-                                  height: 40,
-                                ),
-                                Text(
-                                  urdu,
-                                  textAlign: TextAlign.center,
-                                  // maxLines: 3,
-                                  style: TextStyle(
-                                    fontFamily: bloc.urduFontFamily,
-                                    color: MyColors.whiteColor,
-                                    fontSize: bloc.urduFontSize,
-                                    fontWeight: FontWeight.normal,
+                                  const SizedBox(
+                                    height: 40,
                                   ),
-                                ),
-                              ],
+                                  Text(
+                                    urdu,
+                                    textAlign: TextAlign.center,
+                                    // maxLines: 3,
+                                    style: TextStyle(
+                                      fontFamily: bloc.urduFontFamily,
+                                      color: MyColors.whiteColor,
+                                      fontSize: bloc.urduFontSize,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                    ],
+                        const SizedBox(
+                          height: 30,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const CustomBorders(
-                image: "ktopleft.png",
-                top: 10,
-                left: 10,
-              ),
-              const CustomBorders(
-                image: "ktopright.png",
-                top: 10,
-                right: 10,
-              ),
-              const CustomBorders(
-                image: "kbottomleft.png",
-                bottom: 10,
-                left: 10,
-              ),
-              const CustomBorders(
-                image: "kbottomright.png",
-                bottom: 10,
-                right: 10,
-              ),
-            ],
+                const CustomBorders(
+                  image: "ktopleft.png",
+                  top: 10,
+                  left: 10,
+                ),
+                const CustomBorders(
+                  image: "ktopright.png",
+                  top: 10,
+                  right: 10,
+                ),
+                const CustomBorders(
+                  image: "kbottomleft.png",
+                  bottom: 10,
+                  left: 10,
+                ),
+                const CustomBorders(
+                  image: "kbottomright.png",
+                  bottom: 10,
+                  right: 10,
+                ),
+              ],
+            ),
           ),
         ),
       );
