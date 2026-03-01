@@ -21,7 +21,6 @@ class ObjectBox {
       .map((query) => query.find());
 
   insertUser(data) {
-    debugger();
     _tasbihBox.put(data);
   }
 

@@ -116,10 +116,6 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
         ),
         child: Column(
           children: [
-            IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back),
-            ),
             Consumer<ThemeProvider>(builder: (context, provider, child) {
               return SizedBox(
                 width: double.infinity,

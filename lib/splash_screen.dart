@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:iqra/Screens/MainPage/main_screen.dart';
 import 'package:iqra/Utils/constants.dart';
 
@@ -21,11 +22,23 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 5), () {
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainScreen()));
+    // Use edge-to-edge mode to allow the background to cover status and navigation bars
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      systemNavigationBarColor: Color(0xff0E323F),
+      systemNavigationBarIconBrightness: Brightness.light,
+    ));
+
+    Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const MainScreen()));
+      }
     });
-    super.initState();
+
     controller =
         AnimationController(duration: const Duration(seconds: 5), vsync: this);
     animation = Tween<double>(begin: 150, end: 300).animate(controller);
@@ -39,55 +52,58 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
+    // Restore normal UI mode when leaving splash
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+        overlays: SystemUiOverlay.values);
     controller.dispose();
     super.dispose();
   }
 
-  // @override
-  // void initState() {
-  //   // TODO: implement initState
-  //   super.initState();
-  //   Timer(Duration(seconds: 8), () {
-  //     Navigator.of(context)
-  //         .pushReplacement(MaterialPageRoute(builder: (_) => MainPage()));
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xff0E323F),
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            height: animation.value,
-            width: animation.value,
-            decoration: const BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage(
-                      'assets/images/logo.png',
-                    ),
-                    fit: BoxFit.fitWidth)),
-          ),
-          const Align(
-            alignment: Alignment.bottomCenter,
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Text(
-                "Developed By: ",
-                style:
-                    TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-              ),
-              Text(
-                "Dev'sinn Technologies",
-                style: TextStyle(color: Colors.white),
-              ),
-              SizedBox(
-                height: 30,
-              )
-            ]),
-          ),
-        ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: Color(0xff0E323F),
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: const Color(0xff0E323F),
+        body: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              height: animation.value,
+              width: animation.value,
+              decoration: const BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage(
+                        'assets/images/logo.png',
+                      ),
+                      fit: BoxFit.fitWidth)),
+            ),
+            const Align(
+              alignment: Alignment.bottomCenter,
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Text(
+                  "Developed By:  ",
+                  style: TextStyle(color: Color.fromARGB(255, 155, 155, 155)),
+                ),
+                Text(
+                  "Dev'sinnTechnologies",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 15),
+                ),
+                SizedBox(
+                  height: 30,
+                )
+              ]),
+            ),
+          ],
+        ),
       ),
     );
   }
