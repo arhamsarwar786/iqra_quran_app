@@ -291,10 +291,15 @@ class _PrayerTimeState extends State<PrayerTime> {
       child: Scaffold(
         backgroundColor: themeProvider.selectedSecondary,
         appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: themeProvider.selectedTheme),
+            onPressed: () => Navigator.pop(context),
+          ),
           title: Column(
             children: [
-              const Text("PRAYER TIME",
+              Text("PRAYER TIME",
                   style: TextStyle(
+                      color: themeProvider.selectedTheme,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 2.0,
                       fontSize: 18)),

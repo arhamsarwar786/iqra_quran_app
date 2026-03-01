@@ -10,11 +10,6 @@ import 'Home/HomeScreen.dart';
 import 'Drawer/setting_screen.dart';
 import 'Quran/Favorite.dart';
 
-List<Widget> screens = [
-  const Home(),
-  const DuaScreen(),
-];
-
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -29,13 +24,19 @@ class _MainScreenState extends State<MainScreen> {
       onWillPop: _onWillPop,
       child: Scaffold(
         body: Consumer<MyProvider>(builder: (context, provider, child) {
-          return const Home();
+          return Home();
         }),
       ),
     );
   }
 
   Future<bool> _onWillPop() async {
+    // Check if Home drawer is open using the static key
+    if (Home.scaffoldKey.currentState?.isDrawerOpen ?? false) {
+      Home.scaffoldKey.currentState?.closeDrawer();
+      return false;
+    }
+
     return (await showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -56,7 +57,13 @@ class _MainScreenState extends State<MainScreen> {
                 },
                 child: MaterialButton(
                     color: Theme.of(context).primaryColor,
-                    onPressed: () {},
+                    onPressed: () {
+                      if (Platform.isAndroid) {
+                        SystemNavigator.pop();
+                      } else if (Platform.isIOS) {
+                        exit(0);
+                      }
+                    },
                     child: const Text(
                       'Yes',
                       style: TextStyle(color: Colors.white),
@@ -83,6 +90,8 @@ class BottomBarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final myProvider = Provider.of<MyProvider>(context, listen: false);
+
     return BottomAppBar(
       color: bloc!.selectedSecondary,
       elevation: 0,

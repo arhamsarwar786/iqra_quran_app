@@ -55,41 +55,39 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Color(0xff0E323F),
-        body: Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              height: animation.value,
-              width: animation.value,
-              decoration: const BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage(
-                        'assets/images/logo.png',
-                      ),
-                      fit: BoxFit.fitWidth)),
-            ),
-            const Align(
-              alignment: Alignment.bottomCenter,
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                Text(
-                  "Developed By: ",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-                Text(
-                  "Dev'sinn Technologies",
-                  style: TextStyle(color: Colors.white),
-                ),
-                SizedBox(
-                  height: 30,
-                )
-              ]),
-            ),
-          ],
-        ),
+    return Scaffold(
+      backgroundColor: Color(0xff0E323F),
+      body: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            height: animation.value,
+            width: animation.value,
+            decoration: const BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage(
+                      'assets/images/logo.png',
+                    ),
+                    fit: BoxFit.fitWidth)),
+          ),
+          const Align(
+            alignment: Alignment.bottomCenter,
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Text(
+                "Developed By: ",
+                style:
+                    TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+              Text(
+                "Dev'sinn Technologies",
+                style: TextStyle(color: Colors.white),
+              ),
+              SizedBox(
+                height: 30,
+              )
+            ]),
+          ),
+        ],
       ),
     );
   }

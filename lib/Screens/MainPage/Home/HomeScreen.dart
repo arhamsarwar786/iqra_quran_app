@@ -35,12 +35,13 @@ import 'package:share_plus/share_plus.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
+  // Define static scaffoldKey so MainScreen can access it
+  static final GlobalKey<ScaffoldState> scaffoldKey =
+      GlobalKey<ScaffoldState>();
 
   @override
   State<Home> createState() => _HomeState();
 }
-
-final _scaffoldKey = GlobalKey<ScaffoldState>();
 
 class _HomeState extends State<Home> {
   Position? position;
@@ -72,118 +73,112 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return Builder(
-      builder: (context) {
-        var bloc = context.watch<ThemeProvider>();
-        var quranProvider = context.watch<QuranDataProvider>();
+    var bloc = context.watch<ThemeProvider>();
+    var quranProvider = context.watch<QuranDataProvider>();
 
-        // Load random ayat once when data is available
-        if (_randomAyat == null && quranProvider.isLoaded) {
-          // Use a post-frame callback or just set it if we are confident it won't cause loops.
-          // Since this is inside build, setting a local state variable without setState is tricky if we want it to persist.
-          // Better to just store it in a member variable.
-          // However, modifying state during build is generally bad.
-          // But since this is a one-time init, it acts like a lazy loader.
-          _randomAyat = quranProvider.getRandomSmallAyat();
-        }
-        SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.dark,
-          systemNavigationBarColor: bloc.selectedSecondary,
-          systemNavigationBarIconBrightness: Brightness.dark,
-        ));
-        return Scaffold(
-          backgroundColor: bloc.selectedSecondary,
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
-          floatingActionButton: floatinButton(context),
-          bottomNavigationBar: BottomBarApp(bloc: bloc),
-          extendBodyBehindAppBar: true,
-          extendBody:
-              true, // Allow body to extend behind bottom bar for immersive feel if needed, or closer to bottom
-          // backgroundColor: Colors.red,
-          key: _scaffoldKey,
-          drawer: const Darwerr(),
-          resizeToAvoidBottomInset: false,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: IconButton(
-                onPressed: () => _scaffoldKey.currentState!.openDrawer(),
-                icon: const Icon(Icons.menu)),
-            actions: [
-              GestureDetector(
-                onTap: () {
-                  push(context, const Aboutus());
-                },
-                child: Image.asset("assets/images/infoIcon.png"),
-              ),
-              // IconButton(onPressed: (){
-
-              // }, icon:const Icon(Icons.notifications)),
-            ],
+    // Load random ayat once when data is available
+    if (_randomAyat == null && quranProvider.isLoaded) {
+      // Use a post-frame callback or just set it if we are confident it won't cause loops.
+      // Since this is inside build, setting a local state variable without setState is tricky if we want it to persist.
+      // Better to just store it in a member variable.
+      // However, modifying state during build is generally bad.
+      // But since this is a one-time init, it acts like a lazy loader.
+      _randomAyat = quranProvider.getRandomSmallAyat();
+    }
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: bloc.selectedSecondary,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ));
+    return Scaffold(
+      backgroundColor: bloc.selectedSecondary,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: floatinButton(context),
+      bottomNavigationBar: BottomBarApp(bloc: bloc),
+      extendBodyBehindAppBar: true,
+      extendBody:
+          true, // Allow body to extend behind bottom bar for immersive feel if needed, or closer to bottom
+      // backgroundColor: Colors.red,
+      key: Home.scaffoldKey,
+      drawer: const Darwerr(),
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+            onPressed: () => Home.scaffoldKey.currentState!.openDrawer(),
+            icon: const Icon(Icons.menu)),
+        actions: [
+          GestureDetector(
+            onTap: () {
+              push(context, const Aboutus());
+            },
+            child: Image.asset("assets/images/infoIcon.png"),
           ),
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 330,
-                  child: Stack(
-                    children: [
-                      CarouselSlider.builder(
-                        itemCount: imageName.length,
-                        options: CarouselOptions(
-                          height: 200,
-                          viewportFraction: 1.01,
-                          scrollDirection: Axis.horizontal,
-                          autoPlay: true,
-                        ),
-                        itemBuilder: (context, index, pageViewIndex) {
-                          return Image(
-                            image:
-                                AssetImage("assets/images/${imageName[index]}"),
-                            width: size.width,
-                            fit: BoxFit.fitWidth,
-                          );
-                        },
-                      ),
-                      // Overlay with secondary color light on top
-                      Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              bloc.selectedTheme.withOpacity(0.3),
-                              bloc.selectedTheme.withOpacity(0.1),
-                              // Colors.transparent,
-                            ],
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        child: SearchInQuaran(size: size, bloc: bloc),
-                      ),
-                    ],
+          // IconButton(onPressed: (){
+
+          // }, icon:const Icon(Icons.notifications)),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(
+              height: 330,
+              child: Stack(
+                children: [
+                  CarouselSlider.builder(
+                    itemCount: imageName.length,
+                    options: CarouselOptions(
+                      height: 200,
+                      viewportFraction: 1.01,
+                      scrollDirection: Axis.horizontal,
+                      autoPlay: true,
+                    ),
+                    itemBuilder: (context, index, pageViewIndex) {
+                      return Image(
+                        image: AssetImage("assets/images/${imageName[index]}"),
+                        width: size.width,
+                        fit: BoxFit.fitWidth,
+                      );
+                    },
                   ),
-                ),
-                const SizedBox(height: 5),
-
-                prayerQiblaList(context, size, bloc),
-                const SizedBox(height: 10),
-                screensList(context, size, bloc),
-                const SizedBox(height: 10),
-                quranDailyVerse(context, size, bloc),
-                const SizedBox(height: 10),
-                namesAllahProphet(context, size, bloc),
-                const SizedBox(height: 80), // Added spacing for bottom bar
-              ],
+                  // Overlay with secondary color light on top
+                  Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          bloc.selectedTheme.withOpacity(0.3),
+                          bloc.selectedTheme.withOpacity(0.1),
+                          // Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    child: SearchInQuaran(size: size, bloc: bloc),
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
+            const SizedBox(height: 5),
+
+            prayerQiblaList(context, size, bloc),
+            const SizedBox(height: 10),
+            screensList(context, size, bloc),
+            const SizedBox(height: 10),
+            quranDailyVerse(context, size, bloc),
+            const SizedBox(height: 10),
+            namesAllahProphet(context, size, bloc),
+            const SizedBox(height: 80), // Added spacing for bottom bar
+          ],
+        ),
+      ),
     );
   }
 
