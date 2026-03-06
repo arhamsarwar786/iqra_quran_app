@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import '../Models/aya_list_model.dart';
 import '../Models/surah_metadata_model.dart';
 import 'share_quran.dart';
+import '../Screens/MainPage/Quran/verse_detail_screen.dart';
+import '../widgets.dart';
 
 class SHEET {
   static bottomSheetPreview(BuildContext context, List<Aya> ayats,
@@ -278,6 +280,22 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
                                   surahNumber: aya.surahId,
                                   ayatNumber: aya.ayatNumber,
                                   paraNumber: aya.paraId,
+                                );
+                              },
+                              color: bloc.selectedTheme,
+                            ),
+                            const SizedBox(width: 15),
+                            SHEET._actionButton(
+                              context,
+                              icon: Icons.menu_book_rounded,
+                              label: "Tafseer",
+                              onTap: () {
+                                push(
+                                  context,
+                                  VerseDetailScreen(
+                                    aya: aya,
+                                    surahMetadata: surah,
+                                  ),
                                 );
                               },
                               color: bloc.selectedTheme,

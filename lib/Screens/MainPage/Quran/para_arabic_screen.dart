@@ -351,8 +351,8 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
           renderObject.size.height > 0) {
         Scrollable.ensureVisible(
           ctx,
-          duration: const Duration(milliseconds: 600),
-          alignment: 0.5,
+          duration: Duration.zero,
+          alignment: 0.1, // Align slightly from top for better view
         );
       } else if (_scrollRetryCount < _maxScrollRetries) {
         _scrollRetryCount++;

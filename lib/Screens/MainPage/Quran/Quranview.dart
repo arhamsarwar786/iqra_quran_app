@@ -58,15 +58,50 @@ class _QuranViewState extends State<QuranView> {
 
     quranViewWidget.clear();
     List<InlineSpan> textSpanChildren = [];
-    List<int> currentBatchAyatNumbers = []; // Track ayats in current batch
+    List<int> currentBatchAyatNumbers = [];
+
+    // Helper to flush current spans into a widget
+    void flush(bool isTarget) {
+      if (textSpanChildren.isEmpty) return;
+
+      GlobalKey? key;
+      if (isTarget) {
+        key = GlobalKey();
+        _targetKey = key;
+      }
+
+      quranViewWidget.add(Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+        child: RichText(
+          key: key,
+          textAlign: TextAlign.center,
+          text: TextSpan(
+            children: List<InlineSpan>.from(textSpanChildren),
+            style: TextStyle(
+              fontSize: bloc.arabicFontSize,
+              fontFamily: bloc.arabicFontFamily,
+              color: Colors.black,
+              height: 1.8,
+            ),
+          ),
+        ),
+      ));
+      textSpanChildren.clear();
+      currentBatchAyatNumbers.clear();
+    }
 
     for (var aya in listAyat) {
       if (aya.ayatNumber == "0") continue;
 
-      currentBatchAyatNumbers.add(aya.ayatNumberInt);
-
       bool isTargetAyat =
           _highlightedAyah != null && aya.ayatNumberInt == _highlightedAyah;
+
+      // 1. Isolate target by flushing before it
+      if (isTargetAyat) {
+        flush(false);
+      }
+
+      currentBatchAyatNumbers.add(aya.ayatNumberInt);
 
       // Clean text by removing trailing bracketed numbers
       String text = aya.arabicText.trim();
@@ -116,7 +151,12 @@ class _QuranViewState extends State<QuranView> {
         ),
       );
 
-      // Check for markers at this ayah
+      // 2. Isolate target by flushing AFTER it as well
+      if (isTargetAyat) {
+        flush(true);
+      }
+
+      // Check for markers at this ayah (Signs)
       bool isSajda = aya.hasSajda;
       bool isRuoEnd = aya.hasRuko;
       bool isManzil = aya.manzil != null;
@@ -125,35 +165,7 @@ class _QuranViewState extends State<QuranView> {
       bool isSalsa = aya.hasSalsa;
 
       if (isSajda || isRuoEnd || isManzil || isArba || isNisf || isSalsa) {
-        // Flush text
-        if (textSpanChildren.isNotEmpty) {
-          GlobalKey? keyForThisBlock;
-          // Check if target ayat is in this block
-          if (_highlightedAyah != null &&
-              currentBatchAyatNumbers.contains(_highlightedAyah)) {
-            keyForThisBlock = GlobalKey();
-            _targetKey = keyForThisBlock;
-          }
-
-          quranViewWidget.add(Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-            child: RichText(
-              key: keyForThisBlock,
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                children: List<InlineSpan>.from(textSpanChildren),
-                style: TextStyle(
-                  fontSize: bloc.arabicFontSize,
-                  fontFamily: bloc.arabicFontFamily,
-                  color: Colors.black,
-                  height: 1.8,
-                ),
-              ),
-            ),
-          ));
-          textSpanChildren.clear();
-          currentBatchAyatNumbers.clear(); // Reset batch tracking
-        }
+        flush(false);
 
         // Consolidated Sign logic
         String mainSign = "";
@@ -201,32 +213,9 @@ class _QuranViewState extends State<QuranView> {
       }
     }
 
-    // Flush remaining
+    // Final flush
     if (textSpanChildren.isNotEmpty) {
-      GlobalKey? keyForThisBlock;
-      // Check if target ayat is in this last block
-      if (_highlightedAyah != null &&
-          currentBatchAyatNumbers.contains(_highlightedAyah)) {
-        keyForThisBlock = GlobalKey();
-        _targetKey = keyForThisBlock;
-      }
-
-      quranViewWidget.add(Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-        child: RichText(
-          key: keyForThisBlock,
-          textAlign: TextAlign.center,
-          text: TextSpan(
-            children: List<InlineSpan>.from(textSpanChildren),
-            style: TextStyle(
-              fontSize: bloc.arabicFontSize,
-              fontFamily: bloc.arabicFontFamily,
-              color: Colors.black,
-              height: 1.8,
-            ),
-          ),
-        ),
-      ));
+      flush(false);
     }
 
     setState(() {});

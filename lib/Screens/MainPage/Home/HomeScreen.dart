@@ -3,7 +3,7 @@ import 'package:iqra/Models/surah_metadata_model.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Screens/MainPage/Calendar/CalendarScreen.dart';
-import 'package:iqra/Screens/MainPage/Quran/para_arabic_screen.dart';
+import 'package:iqra/Screens/MainPage/Quran/Quranview.dart';
 import 'package:iqra/Screens/MainPage/Search/SearchScreen.dart';
 import 'package:iqra/Screens/MainPage/Dua/dua_screen.dart';
 import 'package:iqra/Screens/MainPage/Home/azan/PrayerTime.dart';
@@ -486,26 +486,13 @@ class _HomeState extends State<Home> {
         child: InkWell(
           borderRadius: BorderRadius.circular(30),
           onTap: () {
-            final String paraIdStr = randomAyat.paraId ?? "1";
-            final int paraNumber = int.tryParse(paraIdStr) ?? 1;
-
-            // Try to find correct para name from metadata
-            String paraName = "Para $paraNumber";
-            try {
-              final qProvider = context.read<QuranDataProvider>();
-              final meta = qProvider.paraMetadata.firstWhere(
-                (p) => p.paraId == paraNumber,
-              );
-              if (meta.paraName != null) paraName = meta.paraName!;
-            } catch (_) {}
-
             push(
               context,
-              ParaArabicScreen(
-                parahCount: paraNumber.toString(),
-                parahname: paraName,
-                targetAyatNumber: int.tryParse(randomAyat.ayatNumber ?? "0"),
-                targetSurahNumber: surahId,
+              QuranView(
+                suratNumber: surahId,
+                surahName: surahNameEnglish,
+                ayatCount: surah.ayas,
+                targetAyatNumber: randomAyat.ayatNumberInt,
                 saveLastRead: false,
               ),
             );
