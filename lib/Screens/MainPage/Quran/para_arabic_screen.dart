@@ -88,8 +88,13 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       if (currentSurahId != aya.surahId) {
         if (textSpanChildren.isNotEmpty) {
           GlobalKey? keyForThisBlock;
-          if (_highlightedAyah != null &&
-              currentBatchAyats.contains(_highlightedAyah)) {
+          // BUG FIX: also check targetSurahNumber so we don't key the wrong surah's block
+          final bool blockContainsTarget = _highlightedAyah != null &&
+              currentBatchAyats.contains(_highlightedAyah) &&
+              (widget.targetSurahNumber == null ||
+                  (int.tryParse(currentSurahId ?? "0") ?? 0) ==
+                      widget.targetSurahNumber);
+          if (blockContainsTarget) {
             keyForThisBlock = GlobalKey();
             _targetKey = keyForThisBlock;
           }
@@ -133,10 +138,11 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
       currentBatchAyats.add(aya.ayatNumberInt);
       // Add the ayah text (already contains inline numbers and markers)
+      final int ayaSurahIdIn = int.tryParse(aya.surahId ?? "0") ?? 0;
       bool isTargetAyat = _highlightedAyah != null &&
           aya.ayatNumberInt == _highlightedAyah &&
           (widget.targetSurahNumber == null ||
-              aya.surahId == widget.targetSurahNumber.toString());
+              ayaSurahIdIn == widget.targetSurahNumber);
 
       if (isTargetAyat && textSpanChildren.isNotEmpty) {
         paraArabicScreenWidget.add(RichText(
@@ -185,8 +191,13 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
         // Flush current text block
         if (textSpanChildren.isNotEmpty) {
           GlobalKey? keyForThisBlock;
-          if (_highlightedAyah != null &&
-              currentBatchAyats.contains(_highlightedAyah)) {
+          // BUG FIX: also check targetSurahNumber to avoid keying the wrong block
+          final int surahIdInt = int.tryParse(currentSurahId ?? "0") ?? 0;
+          final bool blockContainsTarget = _highlightedAyah != null &&
+              currentBatchAyats.contains(_highlightedAyah) &&
+              (widget.targetSurahNumber == null ||
+                  surahIdInt == widget.targetSurahNumber);
+          if (blockContainsTarget) {
             keyForThisBlock = GlobalKey();
             _targetKey = keyForThisBlock;
           }
@@ -254,8 +265,13 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     // Flush any remaining ayahs
     if (textSpanChildren.isNotEmpty) {
       GlobalKey? keyForThisBlock;
-      if (_highlightedAyah != null &&
-          currentBatchAyats.contains(_highlightedAyah)) {
+      // BUG FIX: also check targetSurahNumber
+      final int surahIdInt = int.tryParse(currentSurahId ?? "0") ?? 0;
+      final bool blockContainsTarget = _highlightedAyah != null &&
+          currentBatchAyats.contains(_highlightedAyah) &&
+          (widget.targetSurahNumber == null ||
+              surahIdInt == widget.targetSurahNumber);
+      if (blockContainsTarget) {
         keyForThisBlock = GlobalKey();
         _targetKey = keyForThisBlock;
       }
@@ -287,15 +303,62 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
         _hasInitialScrolled = true;
       });
     } else if (_targetKey != null) {
+      // SLIVER SCROLL FIX:
+      // SliverList renders lazily. If the target is far down, it doesn't exist yet.
+      // We must first jump to an ESTIMATED position to trigger the building of the child.
+      _scrollRetryCount = 0;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_targetKey!.currentContext != null) {
-          Scrollable.ensureVisible(
-            _targetKey!.currentContext!,
-            duration: Duration.zero, // Instant jump like QuranView
-            alignment: 0.1, // Near top for better visibility
-          );
+        if (_scrollViewController != null &&
+            _scrollViewController!.hasClients) {
+          // Find the index of the keyed widget in our children list
+          int targetIndex = paraArabicScreenWidget.indexWhere((w) {
+            return w is RichText && w.key == _targetKey;
+          });
+
+          if (targetIndex != -1) {
+            // Jump to a reasonable estimate so the SliverList builds the widget.
+            // Avg height of a text block + spacers is ~130.
+            double estimatedOffset = targetIndex * 130.0;
+            if (estimatedOffset >
+                _scrollViewController!.position.maxScrollExtent) {
+              estimatedOffset = _scrollViewController!.position.maxScrollExtent;
+            }
+            _scrollViewController!.jumpTo(estimatedOffset);
+          }
+
+          // Now that we are near, start the polling for exact snap
+          if (mounted) {
+            WidgetsBinding.instance.addPostFrameCallback(_scrollToTarget);
+          }
         }
       });
+    }
+  }
+
+  int _scrollRetryCount = 0;
+  static const int _maxScrollRetries = 60; // give up after ~1 s
+
+  void _scrollToTarget(Duration _) {
+    if (!mounted || _targetKey == null) return;
+    final ctx = _targetKey!.currentContext;
+    if (ctx != null) {
+      // Widget is in the render tree — verify it has a valid size
+      final renderObject = ctx.findRenderObject() as RenderBox?;
+      if (renderObject != null &&
+          renderObject.hasSize &&
+          renderObject.size.height > 0) {
+        Scrollable.ensureVisible(
+          ctx,
+          duration: Duration.zero,
+          alignment: 0.4, // 40% from top (centered-ish, safe from header)
+        );
+      } else if (_scrollRetryCount < _maxScrollRetries) {
+        _scrollRetryCount++;
+        WidgetsBinding.instance.addPostFrameCallback(_scrollToTarget);
+      }
+    } else if (_scrollRetryCount < _maxScrollRetries) {
+      _scrollRetryCount++;
+      WidgetsBinding.instance.addPostFrameCallback(_scrollToTarget);
     }
   }
 
@@ -468,197 +531,208 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     return SafeArea(child: Builder(builder: (context) {
       var bloc = context.read<ThemeProvider>();
       return Scaffold(
-        bottomNavigationBar: isScrollingDown
-            ? const SizedBox()
-            : Theme(
-                data: Theme.of(context).copyWith(
-                  canvasColor: bloc.selectedTheme,
-                ),
-                child: BottomNavigationBar(
-                  backgroundColor: bloc.selectedTheme,
-                  elevation: 10,
-                  selectedItemColor: Colors.white,
-                  unselectedItemColor: Colors.white,
-                  selectedFontSize: 12,
-                  unselectedFontSize: 12,
-                  selectedLabelStyle: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                  unselectedLabelStyle: const TextStyle(color: Colors.white),
-                  currentIndex: 0,
-                  type: BottomNavigationBarType.fixed,
-                  onTap: (index) {
-                    if (index == 0) {
-                      push(
-                          context,
-                          ParahTranslationScreen(
-                            parahCount: widget.parahCount,
-                            parahname: widget.parahname,
-                            ayatInPara: widget.ayatInPara,
-                            para: widget.para,
-                            ayatList: listAyat,
-                          ));
-                    } else if (index == 1) {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AutoScrollSpeedDialog(
-                          currentSpeedFactor: autoScrollSpeed,
-                          isScrolling: isAutoScrolling,
-                          onSpeedChanged: (val) {
-                            setState(() {
-                              autoScrollSpeed = val;
-                            });
-                            // If currently scrolling, we need to restart with new speed
-                            if (isAutoScrolling) {
-                              _stopAutoScroll();
+          bottomNavigationBar: isScrollingDown
+              ? const SizedBox()
+              : Theme(
+                  data: Theme.of(context).copyWith(
+                    canvasColor: bloc.selectedTheme,
+                  ),
+                  child: BottomNavigationBar(
+                    backgroundColor: bloc.selectedTheme,
+                    elevation: 10,
+                    selectedItemColor: Colors.white,
+                    unselectedItemColor: Colors.white,
+                    selectedFontSize: 12,
+                    unselectedFontSize: 12,
+                    selectedLabelStyle: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                    unselectedLabelStyle: const TextStyle(color: Colors.white),
+                    currentIndex: 0,
+                    type: BottomNavigationBarType.fixed,
+                    onTap: (index) {
+                      if (index == 0) {
+                        push(
+                            context,
+                            ParahTranslationScreen(
+                              parahCount: widget.parahCount,
+                              parahname: widget.parahname,
+                              ayatInPara: widget.ayatInPara,
+                              para: widget.para,
+                              ayatList: listAyat,
+                            ));
+                      } else if (index == 1) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AutoScrollSpeedDialog(
+                            currentSpeedFactor: autoScrollSpeed,
+                            isScrolling: isAutoScrolling,
+                            onSpeedChanged: (val) {
+                              setState(() {
+                                autoScrollSpeed = val;
+                              });
+                              // If currently scrolling, we need to restart with new speed
+                              if (isAutoScrolling) {
+                                _stopAutoScroll();
+                                _startAutoScroll();
+                              }
+                            },
+                            onStart: () {
+                              setState(() {
+                                isAutoScrolling = true;
+                              });
                               _startAutoScroll();
-                            }
-                          },
-                          onStart: () {
-                            setState(() {
-                              isAutoScrolling = true;
-                            });
-                            _startAutoScroll();
-                          },
-                          onStop: () {
-                            _stopAutoScroll();
-                          },
+                            },
+                            onStop: () {
+                              _stopAutoScroll();
+                            },
+                          ),
+                        );
+                      } else if (index == 2) {
+                        push(context, const SettingScreen());
+                      }
+                    },
+                    items: [
+                      BottomNavigationBarItem(
+                        icon: const Padding(
+                          padding: EdgeInsets.only(bottom: 4.0),
+                          child: Icon(
+                            Icons.menu_book_rounded,
+                            color: Colors.white,
+                            size: 26,
+                          ),
                         ),
-                      );
-                    } else if (index == 2) {
-                      push(context, const SettingScreen());
-                    }
-                  },
-                  items: [
-                    BottomNavigationBarItem(
-                      icon: const Padding(
-                        padding: EdgeInsets.only(bottom: 4.0),
-                        child: Icon(
-                          Icons.menu_book_rounded,
-                          color: Colors.white,
-                          size: 26,
-                        ),
+                        label: bloc.selectedTranslation == "irfan"
+                            ? "Kanz-ul-Irfan"
+                            : "Kanz-ul-Iman",
                       ),
-                      label: bloc.selectedTranslation == "irfan"
-                          ? "Kanz-ul-Irfan"
-                          : "Kanz-ul-Iman",
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Padding(
-                        padding: const EdgeInsets.only(bottom: 4.0),
-                        child: Icon(
-                          isAutoScrolling
-                              ? Icons.stop_circle_rounded
-                              : Icons.fit_screen_rounded,
-                          color: Colors.white,
-                          size: 26,
+                      BottomNavigationBarItem(
+                        icon: Padding(
+                          padding: const EdgeInsets.only(bottom: 4.0),
+                          child: Icon(
+                            isAutoScrolling
+                                ? Icons.stop_circle_rounded
+                                : Icons.fit_screen_rounded,
+                            color: Colors.white,
+                            size: 26,
+                          ),
                         ),
+                        label: isAutoScrolling ? "Stop" : "Auto Scroll",
                       ),
-                      label: isAutoScrolling ? "Stop" : "Auto Scroll",
-                    ),
-                    const BottomNavigationBarItem(
-                      icon: Padding(
-                        padding: EdgeInsets.only(bottom: 4.0),
-                        child: Icon(
-                          Icons.settings_rounded,
-                          color: Colors.white,
-                          size: 26,
+                      const BottomNavigationBarItem(
+                        icon: Padding(
+                          padding: EdgeInsets.only(bottom: 4.0),
+                          child: Icon(
+                            Icons.settings_rounded,
+                            color: Colors.white,
+                            size: 26,
+                          ),
                         ),
+                        label: "Setting",
                       ),
-                      label: "Setting",
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-        body: Listener(
-          // Listener fires for ALL touch events — more reliable than GestureDetector
-          // for grabbing the screen while an animation is running.
-          onPointerDown: (_) => _pauseAutoScrollForTouch(),
-          onPointerUp: (_) => _resumeAutoScrollAfterTouch(),
-          onPointerCancel: (_) => _resumeAutoScrollAfterTouch(),
-          child: Container(
-            color: Colors.white,
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: NotificationListener<ScrollEndNotification>(
-                onNotification: (scrollEnd) {
-                  if (scrollEnd.metrics.axis == Axis.vertical) {
-                    SavedPrefernces.updateLastReadOffset(
-                        scrollEnd.metrics.pixels);
-                  }
-                  return false;
-                },
-                child: CustomScrollView(
-                  controller: _scrollViewController,
-                slivers: [
-                  SliverAppBar(
-                    automaticallyImplyLeading: false,
-                    backgroundColor: currentSurahMetadata != null
-                        ? bloc.selectedTheme
-                        : Colors.white,
-                    expandedHeight: currentSurahMetadata != null ? 166.0 : 56.0,
-                    toolbarHeight: currentSurahMetadata != null ? 166.0 : 56.0,
-                    floating: false,
-                    pinned: true,
-                    flexibleSpace: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        AnimatedContainer(
-                          height: _showAppbar ? 56.0 : 0.0,
-                          duration: const Duration(milliseconds: 200),
-                          child: AppBar(
-                            automaticallyImplyLeading: false,
-                            centerTitle: true,
-                            elevation: 0,
-                            iconTheme: const IconThemeData(
-                              color: Colors.black,
-                            ),
-                            backgroundColor: Colors.white,
-                            title: Text(
-                              widget.parahname ?? 'Para ${widget.parahCount}',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: bloc.arabicFontFamily,
+          body: Listener(
+            // Listener fires for ALL touch events — more reliable than GestureDetector
+            // for grabbing the screen while an animation is running.
+            onPointerDown: (_) => _pauseAutoScrollForTouch(),
+            onPointerUp: (_) => _resumeAutoScrollAfterTouch(),
+            onPointerCancel: (_) => _resumeAutoScrollAfterTouch(),
+            child: Container(
+              color: Colors.white,
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: NotificationListener<ScrollEndNotification>(
+                  onNotification: (scrollEnd) {
+                    if (scrollEnd.metrics.axis == Axis.vertical) {
+                      SavedPrefernces.updateLastReadOffset(
+                          scrollEnd.metrics.pixels);
+                    }
+                    return false;
+                  },
+                  child: CustomScrollView(
+                    controller: _scrollViewController,
+                    slivers: [
+                      SliverAppBar(
+                        automaticallyImplyLeading: false,
+                        backgroundColor: currentSurahMetadata != null
+                            ? bloc.selectedTheme
+                            : Colors.white,
+                        expandedHeight:
+                            currentSurahMetadata != null ? 166.0 : 56.0,
+                        toolbarHeight:
+                            currentSurahMetadata != null ? 166.0 : 56.0,
+                        floating: false,
+                        pinned: true,
+                        flexibleSpace: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            AnimatedContainer(
+                              height: _showAppbar ? 56.0 : 0.0,
+                              duration: const Duration(milliseconds: 200),
+                              child: AppBar(
+                                automaticallyImplyLeading: false,
+                                centerTitle: true,
+                                elevation: 0,
+                                iconTheme: const IconThemeData(
+                                  color: Colors.black,
+                                ),
+                                backgroundColor: Colors.white,
+                                title: Text(
+                                  widget.parahname ??
+                                      'Para ${widget.parahCount}',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: bloc.arabicFontFamily,
+                                  ),
+                                ),
+                                leading: IconButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  icon: const Icon(Icons.arrow_back),
+                                ),
                               ),
                             ),
-                            leading: IconButton(
-                              onPressed: () => Navigator.pop(context),
-                              icon: const Icon(Icons.arrow_back),
-                            ),
+                            if (currentSurahMetadata != null)
+                              Expanded(
+                                child: ConstrainedBox(
+                                  constraints:
+                                      const BoxConstraints(minHeight: 180),
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 800),
+                                    switchInCurve: Curves.easeOut,
+                                    switchOutCurve: Curves.easeIn,
+                                    transitionBuilder: (child, animation) {
+                                      return FadeTransition(
+                                        opacity: animation,
+                                        child: child,
+                                      );
+                                    },
+                                    child: SurahHeaderCard(
+                                      key:
+                                          ValueKey(currentSurahMetadata!.index),
+                                      metadata: currentSurahMetadata!,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      SliverPadding(
+                        padding: const EdgeInsets.only(
+                            top: 5, bottom: 20, left: 15, right: 15),
+                        sliver: SliverList(
+                          delegate: SliverChildListDelegate(
+                            paraArabicScreenWidget,
                           ),
                         ),
-                        if (currentSurahMetadata != null)
-                          Expanded(
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 400),
-                              transitionBuilder:
-                                  (Widget child, Animation<double> animation) {
-                                return FadeTransition(
-                                    opacity: animation, child: child);
-                              },
-                              child: SurahHeaderCard(
-                                key: ValueKey(currentSurahMetadata!.index),
-                                metadata: currentSurahMetadata!,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  SliverPadding(
-                    padding: const EdgeInsets.only(
-                        top: 5, bottom: 20, left: 15, right: 15),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate(
-                        paraArabicScreenWidget,
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-      );
+          ));
     }));
   }
 }

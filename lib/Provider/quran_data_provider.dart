@@ -136,32 +136,42 @@ class QuranDataProvider extends ChangeNotifier {
   /// Get ayats for a specific Surah
   List<Aya> getAyatsBySurah(int surahId) {
     return _quranData
-        .where((aya) => aya.surahId == surahId.toString())
+        .where((aya) => (int.tryParse(aya.surahId ?? "0") ?? 0) == surahId)
         .toList();
   }
 
   /// Get Surah metadata by ID
   SurahMetadata? getSurahMetadata(int surahId) {
+    if (_surahMetadata.isEmpty) return null;
     try {
-      return _surahMetadata
-          .firstWhere((element) => element.index == surahId.toString());
+      return _surahMetadata.firstWhere(
+        (element) => (int.tryParse(element.index) ?? 0) == surahId,
+        orElse: () => _surahMetadata.first,
+      );
     } catch (e) {
+      if (_surahMetadata.isNotEmpty &&
+          surahId > 0 &&
+          surahId <= _surahMetadata.length) {
+        return _surahMetadata[surahId - 1];
+      }
       return null;
     }
   }
 
   /// Get ayats for a specific Para (Juz)
   List<Aya> getAyatsByPara(int paraId) {
-    return _quranData.where((aya) => aya.paraId == paraId.toString()).toList();
+    return _quranData
+        .where((aya) => (int.tryParse(aya.paraId ?? "0") ?? 0) == paraId)
+        .toList();
   }
 
   /// Get ayats by Surah and Para
   List<Aya> getAyatsBySurahAndPara(int surahId, int paraId) {
-    return _quranData
-        .where((aya) =>
-            aya.surahId == surahId.toString() &&
-            aya.paraId == paraId.toString())
-        .toList();
+    return _quranData.where((aya) {
+      int sId = int.tryParse(aya.surahId ?? "0") ?? 0;
+      int pId = int.tryParse(aya.paraId ?? "0") ?? 0;
+      return sId == surahId && pId == paraId;
+    }).toList();
   }
 
   List<RukoModel> _generateRukoFromMarkers(List<Aya> data) {

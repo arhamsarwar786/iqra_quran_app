@@ -11,7 +11,6 @@ import 'package:iqra/Screens/MainPage/Home/qibal/qibla.dart';
 import 'package:iqra/Screens/MainPage/Tasbeeh/tasbee.dart';
 import 'package:iqra/Utils/share_verse.dart';
 import 'package:iqra/Helper/preference/saved_preferences.dart';
-import 'package:iqra/Screens/MainPage/Quran/tabbarview.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:adhan_dart/adhan_dart.dart';
@@ -29,9 +28,6 @@ import 'package:carousel_slider/carousel_slider.dart';
 import "package:timezone/data/latest.dart" as tz;
 import 'package:flutter/services.dart';
 import 'dart:async';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -490,12 +486,24 @@ class _HomeState extends State<Home> {
         child: InkWell(
           borderRadius: BorderRadius.circular(30),
           onTap: () {
-            final String paraId = randomAyat.paraId ?? "1";
+            final String paraIdStr = randomAyat.paraId ?? "1";
+            final int paraNumber = int.tryParse(paraIdStr) ?? 1;
+
+            // Try to find correct para name from metadata
+            String paraName = "Para $paraNumber";
+            try {
+              final qProvider = context.read<QuranDataProvider>();
+              final meta = qProvider.paraMetadata.firstWhere(
+                (p) => p.paraId == paraNumber,
+              );
+              if (meta.paraName != null) paraName = meta.paraName!;
+            } catch (_) {}
+
             push(
               context,
               ParaArabicScreen(
-                parahCount: paraId,
-                parahname: "Para $paraId",
+                parahCount: paraNumber.toString(),
+                parahname: paraName,
                 targetAyatNumber: int.tryParse(randomAyat.ayatNumber ?? "0"),
                 targetSurahNumber: surahId,
                 saveLastRead: false,

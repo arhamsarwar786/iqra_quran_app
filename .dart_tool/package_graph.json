@@ -37,6 +37,7 @@
         "speech_to_text",
         "stream_transform",
         "timezone",
+        "upgrader",
         "url_launcher",
         "vector_math"
       ],
@@ -125,6 +126,21 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "upgrader",
+      "version": "12.5.0",
+      "dependencies": [
+        "flutter",
+        "html",
+        "http",
+        "os_detect",
+        "package_info_plus",
+        "shared_preferences",
+        "url_launcher",
+        "version",
+        "xml"
       ]
     },
     {
@@ -827,6 +843,36 @@
       ]
     },
     {
+      "name": "xml",
+      "version": "6.6.1",
+      "dependencies": [
+        "collection",
+        "meta",
+        "petitparser"
+      ]
+    },
+    {
+      "name": "version",
+      "version": "3.0.2",
+      "dependencies": []
+    },
+    {
+      "name": "os_detect",
+      "version": "2.0.3",
+      "dependencies": [
+        "meta",
+        "web"
+      ]
+    },
+    {
+      "name": "html",
+      "version": "0.15.6",
+      "dependencies": [
+        "csslib",
+        "source_span"
+      ]
+    },
+    {
       "name": "url_launcher_windows",
       "version": "3.1.5",
       "dependencies": [
@@ -1414,6 +1460,21 @@
       ]
     },
     {
+      "name": "petitparser",
+      "version": "7.0.2",
+      "dependencies": [
+        "collection",
+        "meta"
+      ]
+    },
+    {
+      "name": "csslib",
+      "version": "1.0.2",
+      "dependencies": [
+        "source_span"
+      ]
+    },
+    {
       "name": "xdg_directories",
       "version": "1.1.0",
       "dependencies": [
@@ -1471,15 +1532,6 @@
       "dependencies": []
     },
     {
-      "name": "xml",
-      "version": "6.6.1",
-      "dependencies": [
-        "collection",
-        "meta",
-        "petitparser"
-      ]
-    },
-    {
       "name": "native_toolchain_c",
       "version": "0.17.4",
       "dependencies": [
@@ -1509,14 +1561,6 @@
       "dependencies": [
         "collection",
         "hooks"
-      ]
-    },
-    {
-      "name": "petitparser",
-      "version": "7.0.2",
-      "dependencies": [
-        "collection",
-        "meta"
       ]
     }
   ],

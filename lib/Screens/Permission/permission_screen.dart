@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:iqra/Screens/MainPage/main_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../widgets.dart';
+import 'package:upgrader/upgrader.dart';
 
 class PermissionScreen extends StatefulWidget {
   const PermissionScreen({super.key});
@@ -126,108 +127,114 @@ class _PermissionScreenState extends State<PermissionScreen> {
       ),
       child: Scaffold(
         backgroundColor: const Color(0xff0E323F),
-        body: SafeArea(
-          child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 20),
-                Image.asset(
-                  'assets/images/logo.png',
-                  height: 100,
-                  width: 100,
-                ),
-                const SizedBox(height: 30),
-                const Text(
-                  "Welcome to IQRA QURAN",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+        body: UpgradeAlert(
+          showIgnore: false,
+          showLater: false,
+          barrierDismissible: false,
+          child: SafeArea(
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 20),
+                  Image.asset(
+                    'assets/images/logo.png',
+                    height: 100,
+                    width: 100,
                   ),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  "To provide you with the best experience, please allow the following permissions.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Color(0xff9B9B9B),
-                    fontSize: 14,
+                  const SizedBox(height: 30),
+                  const Text(
+                    "Welcome to IQRA QURAN",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 50),
-                _buildPermissionItem(
-                  icon: Icons.location_on_rounded,
-                  title: "Location Access",
-                  description:
-                      "Needed for accurate Prayer Times and Qibla direction.",
-                  isGranted: _locationGranted,
-                  onTap: _requestLocation,
-                ),
-                const SizedBox(height: 20),
-                _buildPermissionItem(
-                  icon: Icons.notifications_active_rounded,
-                  title: "Notifications",
-                  description:
-                      "Receive alerts for Prayer Times and daily verses.",
-                  isGranted: _notificationGranted,
-                  onTap: _requestNotification,
-                ),
-                const SizedBox(height: 20),
-                _buildPermissionItem(
-                  icon: Icons.mic_rounded,
-                  title: "Microphone Access",
-                  description: "Use voice search and speech-to-text features.",
-                  isGranted: _audioGranted,
-                  onTap: _requestMicrophone,
-                ),
-                const Spacer(),
-                if (_locationGranted && _notificationGranted && _audioGranted)
-                  GestureDetector(
-                    onTap: _handleGetStarted,
-                    child: Container(
+                  const SizedBox(height: 12),
+                  const Text(
+                    "To provide you with the best experience, please allow the following permissions.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xff9B9B9B),
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 50),
+                  _buildPermissionItem(
+                    icon: Icons.location_on_rounded,
+                    title: "Location Access",
+                    description:
+                        "Needed for accurate Prayer Times and Qibla direction.",
+                    isGranted: _locationGranted,
+                    onTap: _requestLocation,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildPermissionItem(
+                    icon: Icons.notifications_active_rounded,
+                    title: "Notifications",
+                    description:
+                        "Receive alerts for Prayer Times and daily verses.",
+                    isGranted: _notificationGranted,
+                    onTap: _requestNotification,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildPermissionItem(
+                    icon: Icons.mic_rounded,
+                    title: "Microphone Access",
+                    description:
+                        "Use voice search and speech-to-text features.",
+                    isGranted: _audioGranted,
+                    onTap: _requestMicrophone,
+                  ),
+                  const Spacer(),
+                  if (_locationGranted && _notificationGranted && _audioGranted)
+                    GestureDetector(
+                      onTap: _handleGetStarted,
+                      child: Container(
+                        height: 55,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            )
+                          ],
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          "GET STARTED",
+                          style: TextStyle(
+                            color: Color(0xff0E323F),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    Container(
                       height: 55,
                       width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          )
-                        ],
-                      ),
                       alignment: Alignment.center,
                       child: const Text(
-                        "GET STARTED",
+                        "Tap the tiles above to allow access",
                         style: TextStyle(
-                          color: Color(0xff0E323F),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
+                          color: Color(0xff9B9B9B),
+                          fontSize: 14,
                         ),
                       ),
                     ),
-                  )
-                else
-                  Container(
-                    height: 55,
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    child: const Text(
-                      "Tap the tiles above to allow access",
-                      style: TextStyle(
-                        color: Color(0xff9B9B9B),
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 20),
-              ],
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),

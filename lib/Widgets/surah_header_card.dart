@@ -13,11 +13,13 @@ class SurahHeaderCard extends StatelessWidget {
 
     return Container(
       margin: EdgeInsets.zero,
+      height:
+          110, // Added explicit height for stability in SliverAppBar / AnimatedSwitcher
       decoration: BoxDecoration(
         color: theme.selectedTheme,
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Right Section (via RTL): Ayas
           Expanded(

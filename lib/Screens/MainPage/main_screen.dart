@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../Provider/main_provider.dart';
 import '../../Provider/theme_provider.dart';
 import '../../widgets.dart';
+import 'package:upgrader/upgrader.dart';
 import 'Dua/dua_screen.dart';
 import 'Home/HomeScreen.dart';
 import 'Drawer/setting_screen.dart';
@@ -20,12 +21,17 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: Scaffold(
-        body: Consumer<MyProvider>(builder: (context, provider, child) {
-          return Home();
-        }),
+    return UpgradeAlert(
+      showIgnore: false,
+      showLater: false,
+      barrierDismissible: false,
+      child: WillPopScope(
+        onWillPop: _onWillPop,
+        child: Scaffold(
+          body: Consumer<MyProvider>(builder: (context, provider, child) {
+            return Home();
+          }),
+        ),
       ),
     );
   }

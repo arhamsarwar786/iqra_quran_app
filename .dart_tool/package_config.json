@@ -146,6 +146,12 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "csslib",
+      "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/csslib-1.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
       "name": "cupertino_icons",
       "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/cupertino_icons-1.0.8",
       "packageUri": "lib/",
@@ -392,6 +398,12 @@
       "languageVersion": "3.9"
     },
     {
+      "name": "html",
+      "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/html-0.15.6",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
       "name": "http",
       "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/http-1.6.0",
       "packageUri": "lib/",
@@ -540,6 +552,12 @@
       "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/objective_c-9.3.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
+    },
+    {
+      "name": "os_detect",
+      "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/os_detect-2.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
     },
     {
       "name": "package_config",
@@ -854,6 +872,12 @@
       "languageVersion": "3.5"
     },
     {
+      "name": "upgrader",
+      "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/upgrader-12.5.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
       "name": "url_launcher",
       "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/url_launcher-6.3.2",
       "packageUri": "lib/",
@@ -912,6 +936,12 @@
       "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/vector_math-2.2.0",
       "packageUri": "lib/",
       "languageVersion": "3.1"
+    },
+    {
+      "name": "version",
+      "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/version-3.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "vm_service",
