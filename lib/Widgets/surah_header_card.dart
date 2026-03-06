@@ -125,29 +125,31 @@ class SurahHeaderCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 2.0),
-                  child: Divider(
-                      color: Colors.white54,
-                      thickness: 1,
-                      indent: 20,
-                      endIndent: 20),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontFamily: theme.arabicFontFamily,
+                if (metadata.index != "9")
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: const Divider(
+                        color: Colors.white54,
+                        thickness: 1,
+                        indent: 20,
+                        endIndent: 20),
+                  ),
+                if (metadata.index != "9")
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontFamily: theme.arabicFontFamily,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
                     ),
                   ),
-                ),
               ],
             ),
           ),

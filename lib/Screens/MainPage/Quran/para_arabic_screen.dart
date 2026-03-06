@@ -48,7 +48,6 @@ class ParaArabicScreen extends StatefulWidget {
 class _ParaArabicScreenState extends State<ParaArabicScreen> {
   ArabicNumbers arabicNumber = ArabicNumbers();
   ScrollController? _scrollViewController;
-  bool _showAppbar = true;
   bool isScrollingDown = true;
   bool isAutoScrolling = false;
   bool _isScrollPaused = false;
@@ -89,7 +88,6 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
         if (!isScrollingDown) {
           setState(() {
             isScrollingDown = true;
-            _showAppbar = false;
           });
         }
       }
@@ -98,7 +96,6 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
         if (isScrollingDown) {
           setState(() {
             isScrollingDown = false;
-            _showAppbar = true;
           });
         }
       }
@@ -370,7 +367,6 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     if (remainingDistance <= 0) {
       setState(() {
         isAutoScrolling = false;
-        _showAppbar = true;
         isScrollingDown = false;
       });
       return;
@@ -391,14 +387,12 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
               _scrollViewController!.position.maxScrollExtent) {
         setState(() {
           isAutoScrolling = false;
-          _showAppbar = true;
           isScrollingDown = false;
         });
       }
     });
 
     setState(() {
-      _showAppbar = false;
       isScrollingDown = true;
     });
   }
@@ -420,7 +414,6 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     setState(() {
       isAutoScrolling = false;
       _isScrollPaused = false;
-      _showAppbar = true;
       isScrollingDown = false;
     });
   }
@@ -545,67 +538,75 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                     slivers: [
                       SliverAppBar(
                         automaticallyImplyLeading: false,
-                        backgroundColor: currentSurahMetadata != null
-                            ? bloc.selectedTheme
-                            : Colors.white,
-                        expandedHeight:
-                            currentSurahMetadata != null ? 166.0 : 56.0,
-                        toolbarHeight:
-                            currentSurahMetadata != null ? 166.0 : 56.0,
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        expandedHeight: isScrollingDown
+                            ? (currentSurahMetadata != null ? 110.0 : 0.0)
+                            : (currentSurahMetadata != null ? 166.0 : 56.0),
+                        toolbarHeight: currentSurahMetadata != null
+                            ? 110.0
+                            : (isScrollingDown ? 0.0 : 56.0),
                         floating: false,
                         pinned: true,
-                        flexibleSpace: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            AnimatedContainer(
-                              height: _showAppbar ? 56.0 : 0.0,
-                              duration: const Duration(milliseconds: 200),
-                              child: AppBar(
-                                automaticallyImplyLeading: false,
-                                centerTitle: true,
-                                elevation: 0,
-                                iconTheme: const IconThemeData(
-                                  color: Colors.black,
-                                ),
-                                backgroundColor: Colors.white,
-                                title: Text(
-                                  widget.parahname ??
-                                      'Para ${widget.parahCount}',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontFamily: bloc.arabicFontFamily,
-                                  ),
-                                ),
-                                leading: IconButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  icon: const Icon(Icons.arrow_back),
-                                ),
-                              ),
-                            ),
-                            if (currentSurahMetadata != null)
-                              Expanded(
-                                child: ConstrainedBox(
-                                  constraints:
-                                      const BoxConstraints(minHeight: 180),
-                                  child: AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 800),
-                                    switchInCurve: Curves.easeOut,
-                                    switchOutCurve: Curves.easeIn,
-                                    transitionBuilder: (child, animation) {
-                                      return FadeTransition(
-                                        opacity: animation,
-                                        child: child,
-                                      );
-                                    },
-                                    child: SurahHeaderCard(
-                                      key:
-                                          ValueKey(currentSurahMetadata!.index),
-                                      metadata: currentSurahMetadata!,
+                        flexibleSpace: Container(
+                          color: currentSurahMetadata != null
+                              ? bloc.selectedTheme
+                              : Colors.white,
+                          child: SingleChildScrollView(
+                            physics: const NeverScrollableScrollPhysics(),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Directionality(
+                                  textDirection: TextDirection.ltr,
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    height: isScrollingDown ? 0.0 : 56.0,
+                                    clipBehavior: Clip.hardEdge,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                    ),
+                                    child: AppBar(
+                                      automaticallyImplyLeading: false,
+                                      centerTitle: true,
+                                      elevation: 0,
+                                      iconTheme: const IconThemeData(
+                                        color: Colors.black,
+                                      ),
+                                      backgroundColor: Colors.white,
+                                      title: Text(
+                                        widget.parahname ??
+                                            'Para ${widget.parahCount}',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: bloc.arabicFontFamily,
+                                        ),
+                                      ),
+                                      leading: IconButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        icon: const Icon(Icons.arrow_back),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                          ],
+                                if (currentSurahMetadata != null)
+                                  SizedBox(
+                                    height: 110,
+                                    child: AnimatedSwitcher(
+                                      duration:
+                                          const Duration(milliseconds: 300),
+                                      switchInCurve: Curves.easeOut,
+                                      switchOutCurve: Curves.easeIn,
+                                      child: SurahHeaderCard(
+                                        key: ValueKey(
+                                            currentSurahMetadata!.index),
+                                        metadata: currentSurahMetadata!,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                       SliverPadding(
