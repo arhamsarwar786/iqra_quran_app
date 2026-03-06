@@ -58,7 +58,7 @@ class _QuranViewState extends State<QuranView> {
     var quranProvider = context.read<QuranDataProvider>();
 
     quranViewWidget.clear();
-    List<TextSpan> textSpanChildren = [];
+    List<InlineSpan> textSpanChildren = [];
     List<int> currentBatchAyatNumbers = []; // Track ayats in current batch
 
     for (var aya in listAyat) {
@@ -69,17 +69,51 @@ class _QuranViewState extends State<QuranView> {
       bool isTargetAyat =
           _highlightedAyah != null && aya.ayatNumberInt == _highlightedAyah;
 
+      // Clean text by removing trailing bracketed numbers
+      String text = aya.arabicText.trim();
+      text = text.replaceAll(RegExp(r'\s*\(\d+\)\s*$'), '');
+
       textSpanChildren.add(
         TextSpan(
-          text: "${(aya.arabicText).trim()} ",
+          text: "$text ",
           style: TextStyle(
             color: isTargetAyat ? bloc.selectedTheme : Colors.black,
+            fontWeight: isTargetAyat ? FontWeight.w700 : FontWeight.normal,
           ),
           recognizer: TapGestureRecognizer()
             ..onTap = () {
               SHEET.bottomSheetPreview(
                   context, listAyat, listAyat.indexOf(aya), bloc);
             },
+        ),
+      );
+
+      // Add decorative verse marker
+      textSpanChildren.add(
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 6),
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isTargetAyat
+                    ? bloc.selectedTheme.withOpacity(0.5)
+                    : Colors.grey.withOpacity(0.35),
+                width: 1.2,
+              ),
+            ),
+            child: Text(
+              arabicNumber.convert(aya.ayatNumberInt),
+              style: TextStyle(
+                fontSize: (bloc.arabicFontSize * 0.45).clamp(10, 16),
+                fontWeight: FontWeight.bold,
+                fontFamily: bloc.arabicFontFamily,
+                color: isTargetAyat ? bloc.selectedTheme : Colors.black54,
+              ),
+            ),
+          ),
         ),
       );
 
@@ -102,14 +136,20 @@ class _QuranViewState extends State<QuranView> {
             _targetKey = keyForThisBlock;
           }
 
-          quranViewWidget.add(RichText(
-            key: keyForThisBlock,
-            text: TextSpan(
-              children: List.from(textSpanChildren),
-              style: TextStyle(
+          quranViewWidget.add(Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+            child: RichText(
+              key: keyForThisBlock,
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                children: List<InlineSpan>.from(textSpanChildren),
+                style: TextStyle(
                   fontSize: bloc.arabicFontSize,
                   fontFamily: bloc.arabicFontFamily,
-                  color: Colors.black),
+                  color: Colors.black,
+                  height: 1.8,
+                ),
+              ),
             ),
           ));
           textSpanChildren.clear();
@@ -172,14 +212,20 @@ class _QuranViewState extends State<QuranView> {
         _targetKey = keyForThisBlock;
       }
 
-      quranViewWidget.add(RichText(
-        key: keyForThisBlock,
-        text: TextSpan(
-          children: textSpanChildren,
-          style: TextStyle(
+      quranViewWidget.add(Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+        child: RichText(
+          key: keyForThisBlock,
+          textAlign: TextAlign.center,
+          text: TextSpan(
+            children: List<InlineSpan>.from(textSpanChildren),
+            style: TextStyle(
               fontSize: bloc.arabicFontSize,
               fontFamily: bloc.arabicFontFamily,
-              color: Colors.black),
+              color: Colors.black,
+              height: 1.8,
+            ),
+          ),
         ),
       ));
     }
@@ -436,58 +482,86 @@ class _QuranViewState extends State<QuranView> {
                     (BuildContext context, bool innerBoxIsScrolled) {
                   return [
                     SliverAppBar(
+                      automaticallyImplyLeading: false,
                       backgroundColor:
                           metadata != null ? bloc.selectedTheme : Colors.white,
-                      expandedHeight: metadata != null ? 166.0 : 56.0,
-                      toolbarHeight: metadata != null ? 166.0 : 56.0,
+                      elevation: 0,
+                      expandedHeight: isScrollingDown
+                          ? (metadata != null ? 100.0 : 0.0)
+                          : (metadata != null ? 156.0 : 56.0),
+                      toolbarHeight: metadata != null
+                          ? 100.0
+                          : (isScrollingDown ? 0.0 : 56.0),
                       floating: false,
                       pinned: true,
-                      elevation: 0,
-                      flexibleSpace: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          AnimatedContainer(
-                            height: _showAppbar ? 56.0 : 0.0,
-                            duration: const Duration(milliseconds: 200),
-                            child: AppBar(
-                              automaticallyImplyLeading: false,
-                              centerTitle: true,
-                              elevation: 0,
-                              iconTheme: const IconThemeData(
-                                color: Colors.black,
-                              ),
-                              backgroundColor: Colors.white,
-                              title: Text(
-                                '${widget.surahName}',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: bloc.arabicFontFamily,
+                      flexibleSpace: Container(
+                        color: metadata != null
+                            ? bloc.selectedTheme
+                            : Colors.white,
+                        child: SafeArea(
+                          bottom: false,
+                          child: Stack(
+                            children: [
+                              // The Pinned Surah Header (Fills the pinned area)
+                              if (metadata != null)
+                                Positioned(
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  height: 100,
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 300),
+                                    child: SurahHeaderCard(
+                                      key: ValueKey(metadata.index),
+                                      metadata: metadata,
+                                    ),
+                                  ),
+                                ),
+                              // The Collapsible White Bar (Contains back button and title)
+                              Positioned(
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                height: 56,
+                                child: AnimatedOpacity(
+                                  duration: const Duration(milliseconds: 200),
+                                  opacity: isScrollingDown ? 0.0 : 1.0,
+                                  child: Container(
+                                    color: Colors.white,
+                                    child: Row(
+                                      children: [
+                                        IconButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          icon: const Icon(Icons.arrow_back,
+                                              color: Colors.black),
+                                        ),
+                                        Expanded(
+                                          child: Center(
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  right: 48.0),
+                                              child: Text(
+                                                '${widget.surahName}',
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontFamily:
+                                                      bloc.arabicFontFamily,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
-                              leading: IconButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                icon: const Icon(Icons.arrow_back),
-                              ),
-                            ),
+                            ],
                           ),
-                          if (metadata != null)
-                            Expanded(
-                              child: AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 400),
-                                transitionBuilder: (Widget child,
-                                    Animation<double> animation) {
-                                  return FadeTransition(
-                                      opacity: animation, child: child);
-                                },
-                                child: SurahHeaderCard(
-                                  key: ValueKey(metadata.index),
-                                  metadata: metadata,
-                                ),
-                              ),
-                            ),
-                        ],
+                        ),
                       ),
                     ),
                   ];
@@ -501,7 +575,8 @@ class _QuranViewState extends State<QuranView> {
                     textDirection: TextDirection.rtl,
                     child: NotificationListener<ScrollEndNotification>(
                       onNotification: (scrollEnd) {
-                        if (scrollEnd.metrics.axis == Axis.vertical) {
+                        if (widget.saveLastRead &&
+                            scrollEnd.metrics.axis == Axis.vertical) {
                           SavedPrefernces.updateLastReadOffset(
                               scrollEnd.metrics.pixels);
                         }
@@ -511,7 +586,7 @@ class _QuranViewState extends State<QuranView> {
                         controller: _scrollViewController,
                         child: Container(
                           margin: const EdgeInsets.symmetric(
-                              horizontal: 15, vertical: 10),
+                              horizontal: 12, vertical: 10),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: quranViewWidget,

@@ -125,7 +125,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
     if (listAyat.isEmpty) return;
 
-    List<TextSpan> currentSpans = [];
+    List<InlineSpan> currentSpans = [];
     String? currentSurahId;
 
     // Helper to flush blocks and assign the target key precisely
@@ -138,14 +138,21 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
         _targetKey = key;
       }
 
-      paraArabicScreenWidget.add(RichText(
-        key: key,
-        text: TextSpan(
-          children: List.from(currentSpans),
-          style: TextStyle(
+      paraArabicScreenWidget.add(Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+        child: RichText(
+          key: key,
+          textAlign: TextAlign
+              .center, // Center alignment looks much better for Quranic text in Flutter
+          text: TextSpan(
+            children: List<InlineSpan>.from(currentSpans),
+            style: TextStyle(
               fontSize: bloc.arabicFontSize,
               fontFamily: bloc.arabicFontFamily,
-              color: Colors.black),
+              color: Colors.black,
+              height: 1.8,
+            ),
+          ),
         ),
       ));
       currentSpans.clear();
@@ -184,19 +191,52 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
         flush(false);
       }
 
-      // 3. Add verse text span
+      // 3. Clean and add verse text span
+      String text = aya.arabicText.trim();
+      // Remove trailing bracketed numbers if they exist in the text
+      text = text.replaceAll(RegExp(r'\s*\(\d+\)\s*$'), '');
+
       currentSpans.add(
         TextSpan(
-          text: "${(aya.arabicText).trim()} ",
+          text: "$text ",
           style: TextStyle(
             color: isTargetAya ? bloc.selectedTheme : Colors.black,
-            fontWeight: isTargetAya ? FontWeight.w600 : FontWeight.normal,
+            fontWeight: isTargetAya ? FontWeight.w700 : FontWeight.normal,
           ),
           recognizer: TapGestureRecognizer()
             ..onTap = () {
               SHEET.bottomSheetPreview(
                   context, listAyat, listAyat.indexOf(aya), bloc);
             },
+        ),
+      );
+
+      // Append decorative Verse Marker
+      currentSpans.add(
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 6),
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isTargetAya
+                    ? bloc.selectedTheme.withOpacity(0.5)
+                    : Colors.grey.withOpacity(0.35),
+                width: 1.2,
+              ),
+            ),
+            child: Text(
+              arabicNumber.convert(aya.ayatNumberInt),
+              style: TextStyle(
+                fontSize: (bloc.arabicFontSize * 0.45).clamp(10, 16),
+                fontWeight: FontWeight.bold,
+                fontFamily: bloc.arabicFontFamily,
+                color: isTargetAya ? bloc.selectedTheme : Colors.black54,
+              ),
+            ),
+          ),
         ),
       );
 
@@ -526,7 +566,8 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                 textDirection: TextDirection.rtl,
                 child: NotificationListener<ScrollEndNotification>(
                   onNotification: (scrollEnd) {
-                    if (scrollEnd.metrics.axis == Axis.vertical) {
+                    if (widget.saveLastRead &&
+                        scrollEnd.metrics.axis == Axis.vertical) {
                       SavedPrefernces.updateLastReadOffset(
                           scrollEnd.metrics.pixels);
                     }
@@ -541,10 +582,10 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                         backgroundColor: Colors.transparent,
                         elevation: 0,
                         expandedHeight: isScrollingDown
-                            ? (currentSurahMetadata != null ? 110.0 : 0.0)
-                            : (currentSurahMetadata != null ? 166.0 : 56.0),
+                            ? (currentSurahMetadata != null ? 100.0 : 0.0)
+                            : (currentSurahMetadata != null ? 156.0 : 56.0),
                         toolbarHeight: currentSurahMetadata != null
-                            ? 110.0
+                            ? 100.0
                             : (isScrollingDown ? 0.0 : 56.0),
                         floating: false,
                         pinned: true,
@@ -552,51 +593,20 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                           color: currentSurahMetadata != null
                               ? bloc.selectedTheme
                               : Colors.white,
-                          child: SingleChildScrollView(
-                            physics: const NeverScrollableScrollPhysics(),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
+                          child: SafeArea(
+                            bottom: false,
+                            child: Stack(
                               children: [
-                                Directionality(
-                                  textDirection: TextDirection.ltr,
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    height: isScrollingDown ? 0.0 : 56.0,
-                                    clipBehavior: Clip.hardEdge,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                    ),
-                                    child: AppBar(
-                                      automaticallyImplyLeading: false,
-                                      centerTitle: true,
-                                      elevation: 0,
-                                      iconTheme: const IconThemeData(
-                                        color: Colors.black,
-                                      ),
-                                      backgroundColor: Colors.white,
-                                      title: Text(
-                                        widget.parahname ??
-                                            'Para ${widget.parahCount}',
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontFamily: bloc.arabicFontFamily,
-                                        ),
-                                      ),
-                                      leading: IconButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        icon: const Icon(Icons.arrow_back),
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                                // The Pinned Surah Header (Fills the pinned area)
                                 if (currentSurahMetadata != null)
-                                  SizedBox(
-                                    height: 110,
+                                  Positioned(
+                                    bottom: 0,
+                                    left: 0,
+                                    right: 0,
+                                    height: 100,
                                     child: AnimatedSwitcher(
                                       duration:
                                           const Duration(milliseconds: 300),
-                                      switchInCurve: Curves.easeOut,
-                                      switchOutCurve: Curves.easeIn,
                                       child: SurahHeaderCard(
                                         key: ValueKey(
                                             currentSurahMetadata!.index),
@@ -604,14 +614,57 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                                       ),
                                     ),
                                   ),
+                                // The Collapsible White Bar (Contains back button and title)
+                                Positioned(
+                                  top: 0,
+                                  left: 0,
+                                  right: 0,
+                                  height: 56,
+                                  child: AnimatedOpacity(
+                                    duration: const Duration(milliseconds: 200),
+                                    opacity: isScrollingDown ? 0.0 : 1.0,
+                                    child: Container(
+                                      color: Colors.white,
+                                      child: Row(
+                                        children: [
+                                          IconButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            icon: const Icon(Icons.arrow_back,
+                                                color: Colors.black),
+                                          ),
+                                          Expanded(
+                                            child: Center(
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 48.0),
+                                                child: Text(
+                                                  widget.parahname ??
+                                                      'Para ${widget.parahCount}',
+                                                  style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontFamily:
+                                                        bloc.arabicFontFamily,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                         ),
                       ),
                       SliverPadding(
-                        padding: const EdgeInsets.only(
-                            top: 5, bottom: 20, left: 15, right: 15),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
                         sliver: SliverList(
                           delegate: SliverChildListDelegate(
                             paraArabicScreenWidget,

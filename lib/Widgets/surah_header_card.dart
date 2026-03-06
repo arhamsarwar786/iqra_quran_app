@@ -13,8 +13,7 @@ class SurahHeaderCard extends StatelessWidget {
 
     return Container(
       margin: EdgeInsets.zero,
-      height:
-          110, // Added explicit height for stability in SliverAppBar / AnimatedSwitcher
+      height: 100, // Updated to match ParaArabicScreen's pinned height
       decoration: BoxDecoration(
         color: theme.selectedTheme,
       ),
