@@ -95,21 +95,12 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
-    - assets/sound/
-    - assets/json_data/
     - assets/json_data/name_of_Allah.json
     - assets/json_data/name_of_Muh.json
-    - assets/quran_kareem/urdu_translation/quran.json
-    - assets/extraction/quran.json
-    - assets/extraction/ruko.json
-    - assets/extraction/sajda.json
-    - assets/extraction/quran-devsinn.json
-    - assets/extraction/quran-devsinn-para.json
-    - assets/quran_kareem/urdu_translation/quranmetadata.json
-    - assets/quran_kareem/urdu_translation/final_quran.json
-    - assets/extraction/quran2026.json
     - assets/extraction/para.json
     - assets/extraction/surah.json
+    - assets/extraction/quran2026.json
+    - assets/extraction/sajda.json
     - assets/json_data/tasbeeh.json
   #   - images/a_dot_ham.jpeg
 
