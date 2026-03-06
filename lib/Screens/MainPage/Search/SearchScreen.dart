@@ -600,6 +600,7 @@ class _VoiceSearchDialogState extends State<_VoiceSearchDialog> {
 
   void _startListening() {
     widget.speech.listen(
+      localeId: "ur-PK", // Exclusively track Urdu
       onResult: (val) {
         if (!_focusNode.hasFocus) {
           setState(() {
@@ -608,6 +609,16 @@ class _VoiceSearchDialogState extends State<_VoiceSearchDialog> {
               TextPosition(offset: _controller.text.length),
             );
           });
+
+          // Automatically search when the user completes the sentence
+          if (val.finalResult && val.recognizedWords.trim().isNotEmpty) {
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                widget.onSearch(val.recognizedWords.trim());
+                Navigator.pop(context);
+              }
+            });
+          }
         }
       },
       onSoundLevelChange: (level) {
@@ -654,11 +665,12 @@ class _VoiceSearchDialogState extends State<_VoiceSearchDialog> {
             ),
             const SizedBox(height: 20),
             Text(
-              "Speak now...",
+              "اب بولیں (اردو)...",
               style: TextStyle(
                 color: theme.selectedTheme,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
+                fontFamily: theme.urduFontFamily,
               ),
             ),
             const SizedBox(height: 25),
@@ -674,12 +686,16 @@ class _VoiceSearchDialogState extends State<_VoiceSearchDialog> {
                 controller: _controller,
                 focusNode: _focusNode,
                 textAlign: TextAlign.center,
+                textDirection: TextDirection.rtl, // Right-to-Left for Urdu
                 maxLines: 3,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: theme.urduFontFamily),
                 decoration: const InputDecoration(
                   border: InputBorder.none,
-                  hintText: "Recognition will appear here...",
+                  hintText: "آپ کی آواز یہاں نظر آئے گی...",
+                  hintTextDirection: TextDirection.rtl,
                 ),
               ),
             ),

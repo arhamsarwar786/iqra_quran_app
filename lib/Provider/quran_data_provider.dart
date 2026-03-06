@@ -270,6 +270,13 @@ class QuranDataProvider extends ChangeNotifier {
     // 4. Standardize Alef Maksura (\u0649) to Yeh (\u064A)
     normalized = normalized.replaceAll("\u0649", "\u064A");
 
+    // 5. Remove ornamental characters and verse numbers (e.g., ﴰ, ﭤ, (1))
+    normalized =
+        normalized.replaceAll(RegExp(r"[\uEFB0-\uEFFF]"), ""); // Special shapes
+    normalized =
+        normalized.replaceAll(RegExp(r"\(\d+\)"), ""); // Verse numbers like (1)
+    normalized = normalized.replaceAll(RegExp(r"[0-9]"), ""); // Other numbers
+
     return normalized.trim();
   }
 
@@ -315,18 +322,21 @@ class QuranDataProvider extends ChangeNotifier {
 
       // 1. Search Arabic field
       if (searchArabic && isQueryArabic) {
-        // Use withoutArab if present (pre-normalized), otherwise compute it
-        final String textToSearch =
+        // Prioritize withoutArab if present (pre-cleaned Arabic), otherwise normalize arabicText
+        String textToSearch =
             (aya.withoutArab != null && aya.withoutArab!.isNotEmpty)
                 ? aya.withoutArab!
-                : _normalizeArabic(aya.arabicText);
+                : aya.arabicText;
+
+        // Always normalize the target text to ensure ornaments/numbers don't block matches
+        textToSearch = _normalizeArabic(textToSearch);
 
         if (textToSearch.contains(normalizedQuery)) {
-          score += 10.0; // Base score for match
+          score += 12.0; // Higher priority for Arabic match in withoutArab area
           if (textToSearch == normalizedQuery)
-            score += 30.0; // Exact match boost
+            score += 40.0; // Exact match boost
           if (textToSearch.startsWith(normalizedQuery))
-            score += 10.0; // Prefix boost
+            score += 15.0; // Prefix boost
 
           // Keyword density boost
           for (var word in queryWords) {
