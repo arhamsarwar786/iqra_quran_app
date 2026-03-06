@@ -11,12 +11,14 @@ class TranlationCardSection extends StatelessWidget {
   final ThemeProvider provider;
   final List<Aya> ayats;
   final int index;
+  final bool isHighlighted;
 
   const TranlationCardSection({
     super.key,
     required this.provider,
     required this.ayats,
     required this.index,
+    this.isHighlighted = false,
   });
 
   @override
@@ -56,12 +58,19 @@ class TranlationCardSection extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: isHighlighted
+                  ? provider.selectedTheme.withOpacity(0.2)
+                  : Colors.black.withOpacity(0.05),
+              blurRadius: isHighlighted ? 15 : 10,
+              offset: Offset(0, isHighlighted ? 6 : 4),
             ),
           ],
-          border: Border.all(color: provider.selectedTheme.withOpacity(0.1)),
+          border: Border.all(
+            color: isHighlighted
+                ? provider.selectedTheme
+                : provider.selectedTheme.withOpacity(0.1),
+            width: isHighlighted ? 2 : 1,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

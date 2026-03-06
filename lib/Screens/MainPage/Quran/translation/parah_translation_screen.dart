@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../../../Models/aya_list_model.dart';
 import '../../../../Models/para_model.dart' hide Aya;
 import '../../../../components/tranlation_card_section.dart';
+import '../../../../Provider/audio_provider.dart';
+import '../../../../Widgets/audio_controller_overlay.dart';
 
 class ParahTranslationScreen extends StatefulWidget {
   ParahTranslationScreen({
@@ -25,9 +27,37 @@ class ParahTranslationScreen extends StatefulWidget {
 }
 
 class _ParahTranslationScreenState extends State<ParahTranslationScreen> {
+  final ScrollController _scrollController = ScrollController();
+  int? _lastIndex;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToIndex(int index) {
+    if (!_scrollController.hasClients) return;
+    _scrollController.animateTo(
+      index * 220.0, // rough estimate of card height
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeInOut,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    var bloc = context.read<ThemeProvider>();
+    final bloc = context.read<ThemeProvider>();
+    final audioProvider = context.watch<AudioProvider>();
+
+    if (audioProvider.currentAyahIndex != null &&
+        audioProvider.currentAyahIndex != _lastIndex) {
+      _lastIndex = audioProvider.currentAyahIndex;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToIndex(_lastIndex!);
+      });
+    }
+
     return Scaffold(
       backgroundColor: bloc.selectedSecondary,
       appBar: AppBar(
@@ -41,19 +71,31 @@ class _ParahTranslationScreenState extends State<ParahTranslationScreen> {
         elevation: 0,
       ),
       body: SafeArea(
-        child: widget.ayatList == null
-            ? const Center(child: CircularProgressIndicator())
-            : ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                itemCount: widget.ayatList!.length,
-                itemBuilder: (context, i) {
-                  return TranlationCardSection(
-                    provider: bloc,
-                    ayats: widget.ayatList!,
-                    index: i,
-                  );
-                },
-              ),
+        child: Stack(
+          children: [
+            widget.ayatList == null
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.fromLTRB(0, 10, 0, 100),
+                    itemCount: widget.ayatList!.length,
+                    itemBuilder: (context, i) {
+                      return TranlationCardSection(
+                        provider: bloc,
+                        ayats: widget.ayatList!,
+                        index: i,
+                        isHighlighted: audioProvider.currentAyahIndex != null &&
+                            audioProvider.currentAyahIndex ==
+                                i -
+                                    (widget.ayatList![0].ayatNumber == "0"
+                                        ? 1
+                                        : 0),
+                      );
+                    },
+                  ),
+            const QuranAudioOverlay(),
+          ],
+        ),
       ),
     );
   }

@@ -18,6 +18,8 @@ import '../../../Widgets/auto_scroll_speed_dialog.dart';
 import '../../../Helper/preference/saved_preferences.dart';
 import '../Drawer/setting_screen.dart';
 import 'translation/parah_translation_screen.dart';
+import '../../../Provider/audio_provider.dart';
+import '../../../Widgets/audio_controller_overlay.dart';
 
 class ParaArabicScreen extends StatefulWidget {
   final String? parahCount;
@@ -52,6 +54,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   bool isAutoScrolling = false;
   bool _isScrollPaused = false;
   double autoScrollSpeed = 1.0;
+  int? _lastRecitedIndex;
 
   List<Widget> paraArabicScreenWidget = [];
   List<Aya> listAyat = [];
@@ -116,6 +119,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   void viewMaker() async {
     final bloc = context.read<ThemeProvider>();
     final quranProvider = context.read<QuranDataProvider>();
+    final audioProvider = context.read<AudioProvider>();
 
     paraArabicScreenWidget.clear();
     surahHeaderKeys.clear();
@@ -158,11 +162,19 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       currentSpans.clear();
     }
 
-    for (var aya in listAyat) {
+    for (var i = 0; i < listAyat.length; i++) {
+      var aya = listAyat[i];
       final int ayaSurahId = int.tryParse(aya.surahId ?? "0") ?? 0;
-      final bool isTargetAya = _highlightedAyah != null &&
-          aya.ayatNumberInt == _highlightedAyah &&
-          ayaSurahId == widget.targetSurahNumber;
+
+      // Check if this ayah is the one being recited
+      bool isReciting = audioProvider.currentAyahIndex != null &&
+          audioProvider.currentAyahIndex ==
+              i - (listAyat[0].ayatNumber == "0" ? 1 : 0);
+
+      final bool isTargetAya = isReciting ||
+          (_highlightedAyah != null &&
+              aya.ayatNumberInt == _highlightedAyah &&
+              ayaSurahId == widget.targetSurahNumber);
 
       // 1. Surah Change Detection
       if (currentSurahId != aya.surahId) {
@@ -467,7 +479,17 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(child: Builder(builder: (context) {
-      var bloc = context.read<ThemeProvider>();
+      final bloc = context.read<ThemeProvider>();
+      final audioProvider = context.watch<AudioProvider>();
+
+      // Sync highlighting with audio
+      if (audioProvider.currentAyahIndex != _lastRecitedIndex) {
+        _lastRecitedIndex = audioProvider.currentAyahIndex;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          viewMaker(); // Re-render to update highlighting
+        });
+      }
+
       return Scaffold(
           bottomNavigationBar: isScrollingDown
               ? const SizedBox()
@@ -485,7 +507,8 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                     selectedLabelStyle: const TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold),
                     unselectedLabelStyle: const TextStyle(color: Colors.white),
-                    currentIndex: 0,
+                    currentIndex:
+                        audioProvider.currentAyahIndex != null ? 1 : 0,
                     type: BottomNavigationBarType.fixed,
                     onTap: (index) {
                       if (index == 0) {
@@ -499,6 +522,18 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                               ayatList: listAyat,
                             ));
                       } else if (index == 1) {
+                        if (audioProvider.currentAyahIndex != null) {
+                          if (audioProvider.isPlaying) {
+                            audioProvider.pausePlayback();
+                          } else {
+                            audioProvider.resumePlayback();
+                          }
+                        } else {
+                          // Start playback from the beginning of the para page
+                          audioProvider.startSurahPlayback(context, listAyat,
+                              widget.parahname ?? "Para ${widget.parahCount}");
+                        }
+                      } else if (index == 2) {
                         showDialog(
                           context: context,
                           builder: (context) => AutoScrollSpeedDialog(
@@ -518,7 +553,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                             onStop: () => _stopAutoScroll(),
                           ),
                         );
-                      } else if (index == 2) {
+                      } else if (index == 3) {
                         push(context, const SettingScreen());
                       }
                     },
@@ -532,6 +567,23 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                         label: bloc.selectedTranslation == "irfan"
                             ? "Kanz-ul-Irfan"
                             : "Kanz-ul-Iman",
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Padding(
+                          padding: const EdgeInsets.only(bottom: 4.0),
+                          child: Icon(
+                            audioProvider.currentAyahIndex != null
+                                ? (audioProvider.isPlaying
+                                    ? Icons.pause_circle_filled_rounded
+                                    : Icons.play_circle_filled_rounded)
+                                : Icons.play_circle_outline_rounded,
+                            color: Colors.white,
+                            size: 26,
+                          ),
+                        ),
+                        label: audioProvider.currentAyahIndex != null
+                            ? (audioProvider.isPlaying ? 'Pause' : 'Resume')
+                            : 'Play Audio',
                       ),
                       BottomNavigationBarItem(
                         icon: Padding(
@@ -556,60 +608,65 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                     ],
                   ),
                 ),
-          body: Listener(
-            onPointerDown: (_) => _pauseAutoScrollForTouch(),
-            onPointerUp: (_) => _resumeAutoScrollAfterTouch(),
-            onPointerCancel: (_) => _resumeAutoScrollAfterTouch(),
-            child: Container(
-              color: Colors.white,
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: NotificationListener<ScrollEndNotification>(
-                  onNotification: (scrollEnd) {
-                    if (widget.saveLastRead &&
-                        scrollEnd.metrics.axis == Axis.vertical) {
-                      SavedPrefernces.updateLastReadOffset(
-                          scrollEnd.metrics.pixels);
-                    }
-                    return false;
-                  },
-                  child: CustomScrollView(
-                    controller: _scrollViewController,
-                    cacheExtent: 5000,
-                    slivers: [
-                      SliverAppBar(
-                        automaticallyImplyLeading: false,
-                        backgroundColor: Colors.transparent,
-                        elevation: 0,
-                        expandedHeight: isScrollingDown
-                            ? (currentSurahMetadata != null ? 100.0 : 0.0)
-                            : (currentSurahMetadata != null ? 156.0 : 56.0),
-                        toolbarHeight: currentSurahMetadata != null
-                            ? 100.0
-                            : (isScrollingDown ? 0.0 : 56.0),
-                        floating: false,
-                        pinned: true,
-                        flexibleSpace: CompleteQuranHeader(
-                          title:
-                              widget.parahname ?? 'Para ${widget.parahCount}',
-                          metadata: currentSurahMetadata,
-                          isScrollingDown: isScrollingDown,
-                        ),
-                      ),
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 10),
-                        sliver: SliverList(
-                          delegate: SliverChildListDelegate(
-                            paraArabicScreenWidget,
+          body: Stack(
+            children: [
+              Listener(
+                onPointerDown: (_) => _pauseAutoScrollForTouch(),
+                onPointerUp: (_) => _resumeAutoScrollAfterTouch(),
+                onPointerCancel: (_) => _resumeAutoScrollAfterTouch(),
+                child: Container(
+                  color: Colors.white,
+                  child: Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: NotificationListener<ScrollEndNotification>(
+                      onNotification: (scrollEnd) {
+                        if (widget.saveLastRead &&
+                            scrollEnd.metrics.axis == Axis.vertical) {
+                          SavedPrefernces.updateLastReadOffset(
+                              scrollEnd.metrics.pixels);
+                        }
+                        return false;
+                      },
+                      child: CustomScrollView(
+                        controller: _scrollViewController,
+                        cacheExtent: 5000,
+                        slivers: [
+                          SliverAppBar(
+                            automaticallyImplyLeading: false,
+                            backgroundColor: Colors.transparent,
+                            elevation: 0,
+                            expandedHeight: isScrollingDown
+                                ? (currentSurahMetadata != null ? 100.0 : 0.0)
+                                : (currentSurahMetadata != null ? 156.0 : 56.0),
+                            toolbarHeight: currentSurahMetadata != null
+                                ? 100.0
+                                : (isScrollingDown ? 0.0 : 56.0),
+                            floating: false,
+                            pinned: true,
+                            flexibleSpace: CompleteQuranHeader(
+                              title: widget.parahname ??
+                                  'Para ${widget.parahCount}',
+                              metadata: currentSurahMetadata,
+                              isScrollingDown: isScrollingDown,
+                            ),
                           ),
-                        ),
+                          SliverPadding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 10),
+                            sliver: SliverList(
+                              delegate: SliverChildListDelegate(
+                                paraArabicScreenWidget,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
+              const QuranAudioOverlay(),
+            ],
           ));
     }));
   }
