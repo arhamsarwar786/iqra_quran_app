@@ -29,14 +29,15 @@ class _MaterialScreenState extends State<MaterialScreen> {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          useMaterial3: false,
+          useMaterial3:
+              true, // Switched to Material 3 for better visuals with Poppins
           primarySwatch: primaryMaterialColor,
           primaryColor: themeProvider.selectedTheme,
           scaffoldBackgroundColor: themeProvider.selectedSecondary,
           canvasColor: themeProvider.selectedSecondary,
           highlightColor: themeProvider.selectedTheme.withOpacity(0.1),
           splashColor: themeProvider.selectedTheme.withOpacity(0.1),
-          fontFamily: 'kgf',
+          fontFamily: 'Poppins', // Using the bundled Poppins font
           colorScheme: ColorScheme.fromSwatch(
             primarySwatch: primaryMaterialColor,
           ).copyWith(
@@ -53,6 +54,7 @@ class _MaterialScreenState extends State<MaterialScreen> {
               color: Colors.white,
               fontSize: 20,
               fontWeight: FontWeight.bold,
+              fontFamily: 'Poppins',
             ),
             iconTheme: const IconThemeData(color: Colors.white),
           ),

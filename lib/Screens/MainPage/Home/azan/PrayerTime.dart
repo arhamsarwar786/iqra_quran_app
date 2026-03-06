@@ -540,8 +540,8 @@ class _PrayerTimeState extends State<PrayerTime> {
                                       child: Text(timeStr,
                                           style: const TextStyle(
                                               color: Colors.white,
-                                              fontSize: 60,
-                                              fontFamily: 'Roboto',
+                                              fontSize: 50,
+                                              fontFamily: 'Poppins',
                                               fontWeight: FontWeight.w900,
                                               letterSpacing: -2)),
                                     ),
@@ -794,7 +794,6 @@ class _PrayerTimeState extends State<PrayerTime> {
                                       style: TextStyle(
                                           fontWeight: FontWeight.w900,
                                           fontSize: 18,
-                                          fontFamily: 'Roboto',
                                           color: activeNow
                                               ? themeProvider.selectedTheme
                                               : (isPassed

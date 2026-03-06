@@ -25,9 +25,17 @@ class SurahTranslationScreen extends StatefulWidget {
 class _SurahTranslationScreenState extends State<SurahTranslationScreen> {
   final ScrollController _scrollController = ScrollController();
   int? _lastIndex;
+  AudioProvider? _audioProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _audioProvider = Provider.of<AudioProvider>(context, listen: false);
+  }
 
   @override
   void dispose() {
+    _audioProvider?.stopPlayback();
     _scrollController.dispose();
     super.dispose();
   }

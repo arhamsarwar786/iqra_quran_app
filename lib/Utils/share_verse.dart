@@ -205,7 +205,7 @@ class AppShare {
               color: Colors.white,
               fontSize: 30,
               fontWeight: FontWeight.bold,
-              fontFamily: 'Roboto'),
+              fontFamily: 'Poppins'),
         ),
         textDirection: ui.TextDirection.ltr,
       );
@@ -568,7 +568,7 @@ class AppShare {
             color: color,
             fontSize: fontSize,
             fontWeight: weight,
-            fontFamily: 'Roboto'),
+            fontFamily: 'Poppins'),
       ),
       textDirection: ui.TextDirection.ltr,
       textAlign: textAlign,

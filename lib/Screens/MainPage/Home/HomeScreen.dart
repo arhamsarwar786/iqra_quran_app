@@ -1165,7 +1165,6 @@ class _SearchInQuaranState extends State<SearchInQuaran> {
                                     style: const TextStyle(
                                       fontSize: 28,
                                       fontWeight: FontWeight.w900,
-                                      fontFamily: 'Roboto',
                                       letterSpacing: -1,
                                       color: Colors.white,
                                     ),

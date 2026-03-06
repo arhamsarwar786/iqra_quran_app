@@ -55,6 +55,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   bool _isScrollPaused = false;
   double autoScrollSpeed = 1.0;
   int? _lastRecitedIndex;
+  AudioProvider? _audioProvider;
 
   List<Widget> paraArabicScreenWidget = [];
   List<Aya> listAyat = [];
@@ -64,6 +65,12 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   bool _hasInitialScrolled = false;
   GlobalKey? _targetKey;
   int? _highlightedAyah;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _audioProvider = Provider.of<AudioProvider>(context, listen: false);
+  }
 
   @override
   void initState() {
@@ -472,6 +479,8 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
   @override
   void dispose() {
+    // Stop audio when moving back from the screen
+    _audioProvider?.stopPlayback();
     _scrollViewController?.dispose();
     super.dispose();
   }
@@ -485,6 +494,10 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       // Sync highlighting with audio
       if (audioProvider.currentAyahIndex != _lastRecitedIndex) {
         _lastRecitedIndex = audioProvider.currentAyahIndex;
+        // Clear manual highlight when audio stops or changes
+        if (_lastRecitedIndex == null) {
+          _highlightedAyah = null;
+        }
         WidgetsBinding.instance.addPostFrameCallback((_) {
           viewMaker(); // Re-render to update highlighting
         });

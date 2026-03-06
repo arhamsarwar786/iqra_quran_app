@@ -29,9 +29,17 @@ class ParahTranslationScreen extends StatefulWidget {
 class _ParahTranslationScreenState extends State<ParahTranslationScreen> {
   final ScrollController _scrollController = ScrollController();
   int? _lastIndex;
+  AudioProvider? _audioProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _audioProvider = Provider.of<AudioProvider>(context, listen: false);
+  }
 
   @override
   void dispose() {
+    _audioProvider?.stopPlayback();
     _scrollController.dispose();
     super.dispose();
   }

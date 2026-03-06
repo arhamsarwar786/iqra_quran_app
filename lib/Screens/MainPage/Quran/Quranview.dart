@@ -52,6 +52,7 @@ class _QuranViewState extends State<QuranView> {
   bool _isScrollPaused = false;
   double autoScrollSpeed = 1.0;
   int? _lastRecitedIndex;
+  AudioProvider? _audioProvider;
 
   List<Widget> quranViewWidget = [];
 
@@ -261,6 +262,12 @@ class _QuranViewState extends State<QuranView> {
   int? _highlightedAyah;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _audioProvider = Provider.of<AudioProvider>(context, listen: false);
+  }
+
+  @override
   void initState() {
     super.initState();
     _highlightedAyah = widget.targetAyatNumber;
@@ -354,6 +361,8 @@ class _QuranViewState extends State<QuranView> {
 
   @override
   void dispose() {
+    // Stop audio when moving back from the screen
+    _audioProvider?.stopPlayback();
     _scrollViewController!.dispose();
     super.dispose();
   }
@@ -368,6 +377,10 @@ class _QuranViewState extends State<QuranView> {
     // Sync highlighting with audio
     if (audioProvider.currentAyahIndex != _lastRecitedIndex) {
       _lastRecitedIndex = audioProvider.currentAyahIndex;
+      // Clear manual highlight when audio stops or changes
+      if (_lastRecitedIndex == null) {
+        _highlightedAyah = null;
+      }
       WidgetsBinding.instance.addPostFrameCallback((_) {
         viewMaker(); // Re-render to update highlighting
       });

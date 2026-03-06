@@ -163,7 +163,7 @@ class QuranShare {
               color: Colors.white,
               fontSize: 30,
               fontWeight: FontWeight.bold,
-              fontFamily: 'Roboto'),
+              fontFamily: 'Poppins'),
         ),
         textDirection: ui.TextDirection.ltr,
       );
