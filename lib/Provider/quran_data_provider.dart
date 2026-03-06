@@ -25,7 +25,6 @@ class QuranDataProvider extends ChangeNotifier {
   bool _isLoaded = false;
 
   Aya? _currentRandomAyat;
-  Timer? _backgroundTimer;
 
   List<Aya> get quranData => _quranData;
   List<ParaMetadata> get paraMetadata => _paraMetadata;
@@ -235,20 +234,21 @@ class QuranDataProvider extends ChangeNotifier {
       smallAyats = _quranData;
     }
 
-    // Return a random ayat
-    return smallAyats[DateTime.now().microsecond % smallAyats.length];
+    // Use the current date as a seed to keep the verse stable for 24 hours
+    final DateTime now = DateTime.now();
+    final int seed = now.year * 10000 + now.month * 100 + now.day;
+
+    // Return a stable random ayat for the day
+    return smallAyats[seed % smallAyats.length];
   }
 
   void _startBackgroundVerseTimer() {
-    if (_backgroundTimer != null) return;
-
-    // Set initial random verse
+    // Set initial random verse for the day
     _currentRandomAyat = getRandomSmallAyat();
 
-    _backgroundTimer = Timer.periodic(const Duration(seconds: 150), (timer) {
-      _currentRandomAyat = getRandomSmallAyat();
-      notifyListeners();
-    });
+    // We don't need a periodic timer if it's a "Daily" verse.
+    // Refreshing on app load/provider init is sufficient.
+    notifyListeners();
   }
 
   /// Normalizes Arabic text by removing diacritics and standardizing characters

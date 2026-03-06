@@ -4,6 +4,7 @@ import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Screens/MainPage/Calendar/CalendarScreen.dart';
 import 'package:iqra/Screens/MainPage/Quran/Quranview.dart';
+import 'package:iqra/Screens/MainPage/Quran/verse_detail_screen.dart';
 import 'package:iqra/Screens/MainPage/Search/SearchScreen.dart';
 import 'package:iqra/Screens/MainPage/Dua/dua_screen.dart';
 import 'package:iqra/Screens/MainPage/Home/azan/PrayerTime.dart';
@@ -556,6 +557,25 @@ class _HomeState extends State<Home> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             IconButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => VerseDetailScreen(
+                                      aya: randomAyat,
+                                      surahMetadata: surah,
+                                    ),
+                                  ),
+                                );
+                              },
+                              icon: Icon(Icons.menu_book_rounded,
+                                  color: Theme.of(context).primaryColor),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              tooltip: "Tafseer",
+                            ),
+                            const SizedBox(width: 15),
+                            IconButton(
                               onPressed: () => AppShare.image(
                                 context: context,
                                 bloc: bloc,
@@ -572,15 +592,16 @@ class _HomeState extends State<Home> {
                                   color: Theme.of(context).primaryColor),
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
+                              tooltip: "Share",
                             ),
-                            const SizedBox(width: 20),
+                            const SizedBox(width: 15),
                             Flexible(
                               child: Text(
                                 surahNameArabic,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                     color: Theme.of(context).primaryColor,
-                                    fontSize: 20,
+                                    fontSize: 18,
                                     fontFamily: bloc.arabicFontFamily,
                                     fontWeight: FontWeight.w700),
                               ),

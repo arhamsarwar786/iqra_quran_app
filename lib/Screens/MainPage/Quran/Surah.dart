@@ -79,7 +79,7 @@ class _SurahState extends State<Surah> {
                 itemCount: surahMetadata.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 1, // 2/2 is 1
+                  childAspectRatio: 0.9,
                   mainAxisSpacing: 10,
                   crossAxisSpacing: 10,
                 ),
