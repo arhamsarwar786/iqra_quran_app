@@ -251,55 +251,143 @@ class QuranDataProvider extends ChangeNotifier {
     });
   }
 
-  /// Normalizes Arabic text by removing diacritics
+  /// Normalizes Arabic text by removing diacritics and standardizing characters
   String _normalizeArabic(String text) {
-    // Regular expression for Arabic diacritics
+    if (text.isEmpty) return "";
+
+    // 1. Remove diacritics (Harakat, Sajda signs, etc.)
     final diacritics = RegExp(
         r"[\u064B-\u0652\u06D6-\u06ED\u06DF-\u06E4\u06E7-\u06E8\u06EA-\u06EB]");
-    return text.replaceAll(diacritics, "");
+    String normalized = text.replaceAll(diacritics, "");
+
+    // 2. Standardize Alif (Alif with Hamza etc -> plain Alif)
+    normalized =
+        normalized.replaceAll(RegExp(r"[\u0622\u0623\u0625]"), "\u0627");
+
+    // 3. Standardize Teh Marbuta (\u0629) to Heh (\u0647)
+    normalized = normalized.replaceAll("\u0629", "\u0647");
+
+    // 4. Standardize Alef Maksura (\u0649) to Yeh (\u064A)
+    normalized = normalized.replaceAll("\u0649", "\u064A");
+
+    return normalized.trim();
   }
 
-  /// Search Quran based on filters with normalization
+  /// Detects if a string contains Arabic/Urdu script characters
+  bool _isArabicScript(String text) {
+    // Range for Arabic and related scripts (Urdu, Persian etc)
+    return RegExp(r"[\u0600-\u06FF]").hasMatch(text);
+  }
+
+  /// Search Quran based on filters with advanced normalization and ranking
   List<Aya> searchQuran(String query,
       {bool searchArabic = true,
       bool searchTranslation = true,
       bool searchTafseer = true}) {
-    if (query.isEmpty) return [];
+    if (query.trim().isEmpty) return [];
 
-    final normalizedQuery = _normalizeArabic(query.toLowerCase().trim());
-    final lowercaseQuery = query.toLowerCase().trim();
+    final String cleanQuery = query.trim().toLowerCase();
+    final bool isQueryArabic = _isArabicScript(cleanQuery);
+    final String normalizedQuery = _normalizeArabic(cleanQuery);
+    final List<String> queryWords =
+        cleanQuery.split(RegExp(r"\s+")).where((w) => w.length > 1).toList();
 
-    return _quranData.where((aya) {
-      bool matches = false;
+    // Score map to track relevance
+    final Map<Aya, double> scoredMatches = {};
 
-      if (searchArabic) {
-        // Match against normalized Arabic text or withoutArab field
-        final normalizedArabic = _normalizeArabic(aya.arabicText);
-        if (normalizedArabic.contains(normalizedQuery) ||
-            (aya.withoutArab?.contains(lowercaseQuery) ?? false)) {
-          matches = true;
+    // First, check for Surah name matches to boost relevant ayats
+    final Set<String> matchedSurahIds = {};
+    for (var s in _surahMetadata) {
+      if (s.tname.toLowerCase().contains(cleanQuery) ||
+          s.name.contains(normalizedQuery) ||
+          s.ename.toLowerCase().contains(cleanQuery)) {
+        matchedSurahIds.add(s.index);
+      }
+    }
+
+    for (var aya in _quranData) {
+      double score = 0;
+
+      // 0. Surah match boost (If the aya belongs to a surah whose name matches the query)
+      if (matchedSurahIds.contains(aya.surahId)) {
+        score += 15.0;
+      }
+
+      // 1. Search Arabic field
+      if (searchArabic && isQueryArabic) {
+        // Use withoutArab if present (pre-normalized), otherwise compute it
+        final String textToSearch =
+            (aya.withoutArab != null && aya.withoutArab!.isNotEmpty)
+                ? aya.withoutArab!
+                : _normalizeArabic(aya.arabicText);
+
+        if (textToSearch.contains(normalizedQuery)) {
+          score += 10.0; // Base score for match
+          if (textToSearch == normalizedQuery)
+            score += 30.0; // Exact match boost
+          if (textToSearch.startsWith(normalizedQuery))
+            score += 10.0; // Prefix boost
+
+          // Keyword density boost
+          for (var word in queryWords) {
+            if (textToSearch.contains(_normalizeArabic(word))) score += 2.0;
+          }
         }
       }
 
-      if (!matches && searchTranslation) {
-        if ((aya.tarjumaIrfan?.toLowerCase().contains(lowercaseQuery) ??
-                false) ||
-            (aya.tarjumaHind?.toLowerCase().contains(lowercaseQuery) ??
-                false) ||
-            (aya.tarjumaPak?.toLowerCase().contains(lowercaseQuery) ?? false)) {
-          matches = true;
+      // 2. Search Translation fields
+      if (searchTranslation) {
+        final List<String?> translations = [
+          aya.tarjumaIrfan,
+          aya.tarjumaHind,
+          aya.tarjumaPak
+        ];
+
+        for (var t in translations) {
+          if (t == null || t.isEmpty) continue;
+          final String cleanT = t.toLowerCase();
+
+          if (cleanT.contains(cleanQuery)) {
+            double fieldScore = isQueryArabic
+                ? 3.0
+                : 10.0; // Higher weight if query matches script type
+            if (cleanT == cleanQuery) fieldScore += 20.0;
+            if (cleanT.startsWith(cleanQuery)) fieldScore += 5.0;
+
+            // Multi-word exact phrase bonus
+            if (queryWords.length > 1 && cleanT.contains(cleanQuery))
+              score += 5.0;
+
+            score += fieldScore;
+            break; // only score once per aya for translations
+          }
         }
       }
 
-      if (!matches && searchTafseer) {
-        if (aya.withoutHtmlTafseer?.toLowerCase().contains(lowercaseQuery) ??
-            false) {
-          matches = true;
+      // 3. Search Tafseer field
+      if (searchTafseer && !isQueryArabic) {
+        final String? tafseer = aya.withoutHtmlTafseer;
+        if (tafseer != null) {
+          final String cleanTafseer = tafseer.toLowerCase();
+          if (cleanTafseer.contains(cleanQuery)) {
+            score += 5.0;
+            if (cleanTafseer.startsWith(cleanQuery)) score += 2.0;
+          }
         }
       }
 
-      return matches;
-    }).toList();
+      if (score > 0) {
+        scoredMatches[aya] = score;
+      }
+    }
+
+    // Sort results by score (descending)
+    final sortedResults = scoredMatches.keys.toList();
+    sortedResults
+        .sort((a, b) => scoredMatches[b]!.compareTo(scoredMatches[a]!));
+
+    // Limit results for performance if needed (e.g., top 100)
+    return sortedResults.take(100).toList();
   }
 }
 

@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Models/aya_list_model.dart';
-import 'package:iqra/Screens/MainPage/Quran/para_arabic_screen.dart';
+import 'package:iqra/Screens/MainPage/Quran/verse_detail_screen.dart';
 import 'package:iqra/widgets.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -439,18 +439,13 @@ class _SearchScreenState extends State<SearchScreen> {
           color: Colors.transparent,
           child: InkWell(
             onTap: () {
-              final para = quranProvider.paraMetadata.firstWhere(
-                (p) => p.paraId.toString() == aya.paraId,
-                orElse: () => quranProvider.paraMetadata.first,
-              );
               push(
-                  context,
-                  ParaArabicScreen(
-                    parahCount: aya.paraId,
-                    parahname: para.paraName,
-                    targetAyatNumber: aya.ayatNumberInt,
-                    saveLastRead: false,
-                  ));
+                context,
+                VerseDetailScreen(
+                  aya: aya,
+                  surahMetadata: surah,
+                ),
+              );
             },
             child: Padding(
               padding: const EdgeInsets.all(18.0),
