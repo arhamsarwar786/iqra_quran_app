@@ -13,7 +13,7 @@ class SurahHeaderCard extends StatelessWidget {
 
     return Container(
       margin: EdgeInsets.zero,
-      height: 100, // Updated to match ParaArabicScreen's pinned height
+      height: 100, // Explicit height for pinned header stability
       decoration: BoxDecoration(
         color: theme.selectedTheme,
       ),
@@ -30,7 +30,7 @@ class SurahHeaderCard extends StatelessWidget {
                   "آياتها",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 14,
                     fontFamily: theme.arabicFontFamily,
                   ),
                 ),
@@ -39,7 +39,7 @@ class SurahHeaderCard extends StatelessWidget {
                   metadata.ayas,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -68,9 +68,6 @@ class SurahHeaderCard extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Left Group: Order & Type
-                      // Right Group (via RTL): Name & Index
-
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -78,7 +75,7 @@ class SurahHeaderCard extends StatelessWidget {
                             metadata.order,
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -87,13 +84,12 @@ class SurahHeaderCard extends StatelessWidget {
                             "(${metadata.type == 'Meccan' ? 'مكية' : 'مدنية'})",
                             style: TextStyle(
                               color: Colors.white70,
-                              fontSize: 14,
+                              fontSize: 12,
                               fontFamily: theme.arabicFontFamily,
                             ),
                           ),
                         ],
                       ),
-
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -102,7 +98,7 @@ class SurahHeaderCard extends StatelessWidget {
                             textAlign: TextAlign.right,
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -112,15 +108,13 @@ class SurahHeaderCard extends StatelessWidget {
                             textAlign: TextAlign.right,
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 20,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                               fontFamily: theme.arabicFontFamily,
                             ),
                           ),
                         ],
                       ),
-
-                      // Left Group (via RTL): Type & Order
                     ],
                   ),
                 ),
@@ -142,7 +136,7 @@ class SurahHeaderCard extends StatelessWidget {
                         "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 20,
+                          fontSize: 18,
                           fontFamily: theme.arabicFontFamily,
                         ),
                         textAlign: TextAlign.center,
@@ -180,11 +174,94 @@ class SurahHeaderCard extends StatelessWidget {
                   metadata.rukus,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A unified header widget that handles both the white title bar and the red surah card.
+class CompleteQuranHeader extends StatelessWidget {
+  final String title;
+  final SurahMetadata? metadata;
+  final bool isScrollingDown;
+
+  const CompleteQuranHeader({
+    super.key,
+    required this.title,
+    this.metadata,
+    required this.isScrollingDown,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+
+    return SafeArea(
+      bottom: false,
+      child: Stack(
+        children: [
+          // 1. The Pinned Red Surah Header Card (Pinned at the bottom of the SliverAppBar)
+          if (metadata != null)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 100,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: SurahHeaderCard(
+                  key: ValueKey(metadata!.index),
+                  metadata: metadata!,
+                ),
+              ),
+            ),
+
+          // 2. The Collapsible White Bar (Title, Background, and Back Button)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 56,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 200),
+              opacity: isScrollingDown ? 0.0 : 1.0,
+              child: Container(
+                color: Colors.white,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Centered Title
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: theme.arabicFontFamily,
+                      ),
+                    ),
+                    // Back Button (aligned left)
+                    Positioned(
+                      left: 0,
+                      child: IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],

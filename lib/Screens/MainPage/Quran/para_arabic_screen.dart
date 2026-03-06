@@ -589,77 +589,11 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                             : (isScrollingDown ? 0.0 : 56.0),
                         floating: false,
                         pinned: true,
-                        flexibleSpace: Container(
-                          color: currentSurahMetadata != null
-                              ? bloc.selectedTheme
-                              : Colors.white,
-                          child: SafeArea(
-                            bottom: false,
-                            child: Stack(
-                              children: [
-                                // The Pinned Surah Header (Fills the pinned area)
-                                if (currentSurahMetadata != null)
-                                  Positioned(
-                                    bottom: 0,
-                                    left: 0,
-                                    right: 0,
-                                    height: 100,
-                                    child: AnimatedSwitcher(
-                                      duration:
-                                          const Duration(milliseconds: 300),
-                                      child: SurahHeaderCard(
-                                        key: ValueKey(
-                                            currentSurahMetadata!.index),
-                                        metadata: currentSurahMetadata!,
-                                      ),
-                                    ),
-                                  ),
-                                // The Collapsible White Bar (Contains back button and title)
-                                Positioned(
-                                  top: 0,
-                                  left: 0,
-                                  right: 0,
-                                  height: 56,
-                                  child: AnimatedOpacity(
-                                    duration: const Duration(milliseconds: 200),
-                                    opacity: isScrollingDown ? 0.0 : 1.0,
-                                    child: Container(
-                                      color: Colors.white,
-                                      child: Row(
-                                        children: [
-                                          IconButton(
-                                            onPressed: () =>
-                                                Navigator.pop(context),
-                                            icon: const Icon(Icons.arrow_back,
-                                                color: Colors.black),
-                                          ),
-                                          Expanded(
-                                            child: Center(
-                                              child: Padding(
-                                                padding: const EdgeInsets.only(
-                                                    right: 48.0),
-                                                child: Text(
-                                                  widget.parahname ??
-                                                      'Para ${widget.parahCount}',
-                                                  style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontFamily:
-                                                        bloc.arabicFontFamily,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                        flexibleSpace: CompleteQuranHeader(
+                          title:
+                              widget.parahname ?? 'Para ${widget.parahCount}',
+                          metadata: currentSurahMetadata,
+                          isScrollingDown: isScrollingDown,
                         ),
                       ),
                       SliverPadding(
