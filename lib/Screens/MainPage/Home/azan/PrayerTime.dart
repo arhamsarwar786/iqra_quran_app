@@ -241,28 +241,23 @@ class _PrayerTimeState extends State<PrayerTime> {
     add("Asr", pt.asr, true);
 
     // Debug: Print Asr time to verify madhab difference
-    if (pt.asr != null) {
-      print(
-          '⏰ Asr time ($_madhab): ${DateFormat("h:mm a").format(pt.asr!.toLocal())}');
-    }
+    print(
+        '⏰ Asr time ($_madhab): ${DateFormat("h:mm a").format(pt.asr.toLocal())}');
 
     add("Maghrib", pt.maghrib, true);
     add("Isha", pt.isha, true);
 
     // Add Optionals
-    DateTime? sunrise = pt.sunrise;
-    add("Ishraq", sunrise?.add(const Duration(minutes: 15)), false);
-    add("Chasht", sunrise?.add(const Duration(hours: 2, minutes: 15)), false);
-    add("Awwabin", pt.maghrib?.add(const Duration(minutes: 15)), false);
-    add("Witr", pt.isha?.add(const Duration(minutes: 30)), false);
+    add("Ishraq", pt.sunrise.add(const Duration(minutes: 15)), false);
+    add("Chasht", pt.sunrise.add(const Duration(hours: 2, minutes: 15)), false);
+    add("Awwabin", pt.maghrib.add(const Duration(minutes: 15)), false);
+    add("Witr", pt.isha.add(const Duration(minutes: 30)), false);
 
-    if (pt.maghrib != null && ptTomorrow.fajr != null) {
-      Duration night = ptTomorrow.fajr!.difference(pt.maghrib!);
-      add(
-          "Tahajjud",
-          pt.maghrib!.add(Duration(seconds: (night.inSeconds * 0.75).toInt())),
-          false);
-    }
+    Duration night = ptTomorrow.fajr.difference(pt.maghrib);
+    add(
+        "Tahajjud",
+        pt.maghrib.add(Duration(seconds: (night.inSeconds * 0.75).toInt())),
+        false);
 
     timesList.sort((a, b) =>
         (a["dateTime"] as DateTime).compareTo(b["dateTime"] as DateTime));
@@ -274,18 +269,22 @@ class _PrayerTimeState extends State<PrayerTime> {
 
     // Schedule notifications if enabled (with current method + madhab)
     if (_notificationsEnabled) {
-      await PrayerNotificationService.scheduleAllPrayers(
-        position: position,
-        madhab: _madhab,
-      );
+      try {
+        await PrayerNotificationService.scheduleAllPrayers(
+          position: position,
+          madhab: _madhab,
+        );
+      } catch (e) {
+        debugPrint("Error scheduling notifications: $e");
+      }
     }
 
     return {
       "location": locationName,
       "timesList": timesList,
       "fardList": fardList,
-      "sunrise": pt.sunrise?.toLocal(),
-      "nextFajr": ptTomorrow.fajr?.toLocal(),
+      "sunrise": pt.sunrise.toLocal(),
+      "nextFajr": ptTomorrow.fajr.toLocal(),
     };
   }
 

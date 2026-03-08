@@ -101,7 +101,9 @@ flutter:
     - assets/extraction/surah.json
     - assets/extraction/quran2026.json
     - assets/extraction/sajda.json
+    - assets/json_data/about_us.json
     - assets/json_data/tasbeeh.json
+    - assets/sound/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
