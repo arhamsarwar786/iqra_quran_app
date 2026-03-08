@@ -8,11 +8,15 @@ class AudioProvider extends ChangeNotifier {
   final AudioService _audioService = AudioService();
 
   int? _currentAyahIndex;
+  String? _currentAyahId;
+  int? _currentAyahNumber;
   PlayerState? _playerState;
   bool _isBuffering = false;
   String _currentSurahName = "";
 
   int? get currentAyahIndex => _currentAyahIndex;
+  String? get currentAyahId => _currentAyahId;
+  int? get currentAyahNumber => _currentAyahNumber;
   PlayerState? get playerState => _playerState;
   bool get isBuffering => _isBuffering;
   bool get isPlaying => _audioService.isPlaying;
@@ -22,6 +26,14 @@ class AudioProvider extends ChangeNotifier {
     _audioService.init();
     _audioService.currentAyahIndexStream.listen((index) {
       _currentAyahIndex = index;
+      notifyListeners();
+    });
+    _audioService.currentAyahIdStream.listen((id) {
+      _currentAyahId = id;
+      notifyListeners();
+    });
+    _audioService.currentAyahNumberStream.listen((num) {
+      _currentAyahNumber = num;
       notifyListeners();
     });
     _audioService.playerStateStream.listen((state) {
@@ -44,7 +56,8 @@ class AudioProvider extends ChangeNotifier {
   }
 
   Future<void> startSurahPlayback(
-      BuildContext context, List<Aya> ayats, String surahName) async {
+      BuildContext context, List<Aya> ayats, String surahName,
+      {int startIndex = 0}) async {
     final hasConn = await checkConnection();
     if (!hasConn) {
       _showNoInternetDialog(context);
@@ -52,7 +65,7 @@ class AudioProvider extends ChangeNotifier {
     }
 
     _currentSurahName = surahName;
-    await _audioService.playSurah(ayats);
+    await _audioService.playSurah(ayats, startIndex: startIndex);
   }
 
   void _showNoInternetDialog(BuildContext context) {

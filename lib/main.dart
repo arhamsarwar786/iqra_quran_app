@@ -10,6 +10,7 @@ import 'Helper/tasbih_helper.dart';
 import 'Provider/main_provider.dart';
 import 'Provider/quran_data_provider.dart';
 import 'Provider/audio_provider.dart';
+import 'Provider/prayer_provider.dart';
 
 late ObjectBox objectbox;
 void main() async {
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: ((context) => ThemeProvider())),
         ChangeNotifierProvider(create: ((context) => TasbeehProvider())),
         ChangeNotifierProvider(create: (context) => AudioProvider()),
+        ChangeNotifierProvider(create: (context) => PrayerProvider()),
         ChangeNotifierProvider(
             create: ((context) => QuranDataProvider()..loadQuranData())),
       ],

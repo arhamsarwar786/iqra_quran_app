@@ -8,10 +8,12 @@ import '../Models/surah_metadata_model.dart';
 import 'share_quran.dart';
 import '../Screens/MainPage/Quran/verse_detail_screen.dart';
 import '../widgets.dart';
+import '../Provider/audio_provider.dart';
 
 class SHEET {
   static bottomSheetPreview(BuildContext context, List<Aya> ayats,
-      int initialIndex, ThemeProvider bloc) {
+      int initialIndex, ThemeProvider bloc,
+      {bool showPlayButton = true}) {
     // Filter out Ayat 0 (Bismillah) if it exists in the list for navigation
     // but check if the initialIndex needs adjustment
     List<Aya> filteredAyats = ayats.where((a) => a.ayatNumber != "0").toList();
@@ -27,6 +29,7 @@ class SHEET {
             ayats: filteredAyats,
             initialIndex: adjIndex,
             bloc: bloc,
+            showPlayButton: showPlayButton,
           );
         });
   }
@@ -67,11 +70,13 @@ class _BottomSheetContent extends StatefulWidget {
   final List<Aya> ayats;
   final int initialIndex;
   final ThemeProvider bloc;
+  final bool showPlayButton;
 
   const _BottomSheetContent({
     required this.ayats,
     required this.initialIndex,
     required this.bloc,
+    this.showPlayButton = true,
   });
 
   @override
@@ -300,21 +305,25 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
                               },
                               color: bloc.selectedTheme,
                             ),
-                            // SHEET._actionButton(
-                            //   context,
-                            //   icon: Icons.text_snippet_outlined,
-                            //   label: "Share Text",
-                            //   onTap: () {
-                            //     AppShare.text(
-                            //       title: surah?.tname ?? "",
-                            //       arabicText: aya.arabicText,
-                            //       translationText: translationText,
-                            //       surahNumber: aya.surahId,
-                            //       ayatNumber: aya.ayatNumber,
-                            //     );
-                            //   },
-                            //   color: bloc.selectedTheme,
-                            // ),
+                            if (widget.showPlayButton)
+                              SHEET._actionButton(
+                                context,
+                                icon: Icons.play_arrow_rounded,
+                                label: "Play",
+                                onTap: () {
+                                  final audio = context.read<AudioProvider>();
+                                  Navigator.pop(context); // Close sheet
+                                  audio.stopPlayback().then((_) {
+                                    audio.startSurahPlayback(
+                                      context,
+                                      widget.ayats,
+                                      surah?.name ?? "Surah",
+                                      startIndex: _currentIndex,
+                                    );
+                                  });
+                                },
+                                color: bloc.selectedTheme,
+                              ),
                           ],
                         ),
                         const SizedBox(height: 20),

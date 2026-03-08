@@ -45,20 +45,20 @@ class _QuranViewState extends State<QuranView> {
   List<Aya> listAyat = [];
   ArabicNumbers arabicNumber = ArabicNumbers();
   ScrollController? _scrollViewController;
-  bool isScrollingDown = true;
+  bool isScrollingDown = false;
   GlobalKey? _targetKey;
-  bool _hasInitialScrolled = false;
   bool isAutoScrolling = false;
   bool _isScrollPaused = false;
   double autoScrollSpeed = 1.0;
-  int? _lastRecitedIndex;
+  String? _lastRecitedId;
   AudioProvider? _audioProvider;
 
   List<Widget> quranViewWidget = [];
 
   viewMaker() async {
-    var bloc = context.read<ThemeProvider>();
-    var quranProvider = context.read<QuranDataProvider>();
+    final bloc = context.read<ThemeProvider>();
+    final quranProvider = context.read<QuranDataProvider>();
+    final audioProvider = context.read<AudioProvider>();
 
     quranViewWidget.clear();
     List<InlineSpan> textSpanChildren = [];
@@ -94,29 +94,24 @@ class _QuranViewState extends State<QuranView> {
       currentBatchAyatNumbers.clear();
     }
 
-    final audioProvider = context.read<AudioProvider>();
-
     for (var i = 0; i < listAyat.length; i++) {
       var aya = listAyat[i];
       if (aya.ayatNumber == "0") continue;
 
-      // Check if this ayah is the one being recited
-      bool isReciting = audioProvider.currentAyahIndex != null &&
-          audioProvider.currentAyahIndex ==
-              i - (listAyat[0].ayatNumber == "0" ? 1 : 0);
+      // Check if this ayah is the one being recited using unique ID
+      bool isReciting = audioProvider.currentAyahId != null &&
+          audioProvider.currentAyahId == aya.ayatId;
 
-      // Fallback: use targetAyatNumber if no audio is playing
+      // Fallback: use targetAyatNumber for initial deep-linking/highlights
       bool isTargetAyat = isReciting ||
           (_highlightedAyah != null && aya.ayatNumberInt == _highlightedAyah);
 
-      // 1. Isolate target by flushing before it
       if (isTargetAyat) {
         flush(false);
       }
 
       currentBatchAyatNumbers.add(aya.ayatNumberInt);
 
-      // Clean text by removing trailing bracketed numbers
       String text = aya.arabicText.trim();
       text = text.replaceAll(RegExp(r'\s*\(\d+\)\s*$'), '');
 
@@ -130,12 +125,12 @@ class _QuranViewState extends State<QuranView> {
           recognizer: TapGestureRecognizer()
             ..onTap = () {
               SHEET.bottomSheetPreview(
-                  context, listAyat, listAyat.indexOf(aya), bloc);
+                  context, listAyat, listAyat.indexOf(aya), bloc,
+                  showPlayButton: true);
             },
         ),
       );
 
-      // Add decorative verse marker
       textSpanChildren.add(
         WidgetSpan(
           alignment: PlaceholderAlignment.middle,
@@ -164,12 +159,10 @@ class _QuranViewState extends State<QuranView> {
         ),
       );
 
-      // 2. Isolate target by flushing AFTER it as well
       if (isTargetAyat) {
         flush(true);
       }
 
-      // Check for markers at this ayah (Signs)
       bool isSajda = aya.hasSajda;
       bool isRuoEnd = aya.hasRuko;
       bool isManzil = aya.manzil != null;
@@ -180,7 +173,6 @@ class _QuranViewState extends State<QuranView> {
       if (isSajda || isRuoEnd || isManzil || isArba || isNisf || isSalsa) {
         flush(false);
 
-        // Consolidated Sign logic
         String mainSign = "";
         String? displayLabel;
         String? topNum;
@@ -224,35 +216,24 @@ class _QuranViewState extends State<QuranView> {
           ));
         }
       }
-    }
-
-    // Final flush
+    } // Final flush
     if (textSpanChildren.isNotEmpty) {
       flush(false);
     }
 
-    setState(() {});
+    if (mounted) setState(() {});
 
-    if (widget.initialScrollOffset != null && !_hasInitialScrolled) {
+    if (_targetKey != null) {
+      // Trigger scroll precisely after build
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollViewController!.hasClients) {
-          // Delay briefly to allow proper layout
-          Future.delayed(const Duration(milliseconds: 100), () {
-            if (_scrollViewController!.hasClients) {
-              _scrollViewController!.jumpTo(widget.initialScrollOffset!);
-            }
-          });
-        }
-        _hasInitialScrolled = true;
-      });
-    } else if (_targetKey != null) {
-      // Trigger scroll if target key is set
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_targetKey!.currentContext != null) {
+        if (!mounted) return;
+        final ctx = _targetKey!.currentContext;
+        if (ctx != null) {
           Scrollable.ensureVisible(
-            _targetKey!.currentContext!,
-            duration: Duration.zero, // Instant jump like last read
-            alignment: 0.1, // Align slightly from top
+            ctx,
+            duration: const Duration(milliseconds: 300),
+            alignment: 0.4, // Keep verse clearly below the header
+            curve: Curves.easeInOut,
           );
         }
       });
@@ -270,7 +251,13 @@ class _QuranViewState extends State<QuranView> {
   @override
   void initState() {
     super.initState();
-    _highlightedAyah = widget.targetAyatNumber;
+    // Special case for Al-Fatiha: No need to select the first ayat initially
+    if (widget.suratNumber == 1 &&
+        (widget.targetAyatNumber == null || widget.targetAyatNumber == 0)) {
+      _highlightedAyah = null;
+    } else {
+      _highlightedAyah = widget.targetAyatNumber;
+    }
     final provider = context.read<QuranDataProvider>();
     listAyat = provider.getAyatsBySurah(widget.suratNumber ?? 0);
 
@@ -374,150 +361,158 @@ class _QuranViewState extends State<QuranView> {
     final audioProvider = context.watch<AudioProvider>();
     final metadata = quranProvider.getSurahMetadata(widget.suratNumber ?? 0);
 
-    // Sync highlighting with audio
-    if (audioProvider.currentAyahIndex != _lastRecitedIndex) {
-      _lastRecitedIndex = audioProvider.currentAyahIndex;
-      // Clear manual highlight when audio stops or changes
-      if (_lastRecitedIndex == null) {
+    // Sync highlighting with audio using global ayatId
+    if (audioProvider.currentAyahId != _lastRecitedId) {
+      _lastRecitedId = audioProvider.currentAyahId;
+
+      // Clear manual highlight when audio stops or moves to next
+      if (_lastRecitedId == null) {
         _highlightedAyah = null;
       }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        viewMaker(); // Re-render to update highlighting
-      });
+
+      // Schedule re-render to highlight and scroll
+      Future.microtask(() => viewMaker());
     }
 
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        bottomNavigationBar: isScrollingDown
-            ? const SizedBox()
-            : Theme(
-                data: Theme.of(context).copyWith(
-                  canvasColor: bloc.selectedTheme,
-                ),
-                child: BottomNavigationBar(
-                  backgroundColor: bloc.selectedTheme,
-                  elevation: 10,
-                  selectedItemColor: Colors.white,
-                  unselectedItemColor: Colors.white,
-                  selectedFontSize: 12,
-                  unselectedFontSize: 12,
-                  selectedLabelStyle: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                  unselectedLabelStyle: const TextStyle(color: Colors.white),
-                  currentIndex: audioProvider.currentAyahIndex != null ? 1 : 0,
-                  type: BottomNavigationBarType.fixed,
-                  onTap: (index) {
-                    if (index == 0) {
-                      push(
-                          context,
-                          SurahTranslationScreen(
-                            ayatCount: widget.ayatCount.toString(),
-                            ayatList: listAyat,
-                            suratNumber: widget.suratNumber,
-                            surahName: widget.surahName,
-                          ));
-                    } else if (index == 1) {
-                      if (audioProvider.currentAyahIndex != null) {
-                        if (audioProvider.isPlaying) {
-                          audioProvider.pausePlayback();
-                        } else {
-                          audioProvider.resumePlayback();
-                        }
-                      } else {
-                        // Start playback from the beginning of the surah
-                        audioProvider.startSurahPlayback(
-                            context, listAyat, widget.surahName ?? "Surah");
-                      }
-                    } else if (index == 2) {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AutoScrollSpeedDialog(
-                          currentSpeedFactor: autoScrollSpeed,
-                          isScrolling: isAutoScrolling,
-                          onSpeedChanged: (val) {
-                            setState(() {
-                              autoScrollSpeed = val;
-                            });
-                            if (isAutoScrolling) {
-                              _stopAutoScroll();
-                              _startAutoScroll();
-                            }
-                          },
-                          onStart: () {
-                            setState(() {
-                              isAutoScrolling = true;
-                            });
-                            _startAutoScroll();
-                          },
-                          onStop: () {
-                            _stopAutoScroll();
-                          },
-                        ),
-                      );
-                    } else if (index == 3) {
-                      push(context, const SettingScreen());
-                    }
-                  },
-                  items: [
-                    BottomNavigationBarItem(
-                      icon: const Padding(
-                        padding: EdgeInsets.only(bottom: 4.0),
-                        child: Icon(
-                          Icons.menu_book_rounded,
-                          color: Colors.white,
-                          size: 26,
-                        ),
-                      ),
-                      label: bloc.selectedTranslation == "irfan"
-                          ? "Kanz-ul-Irfan"
-                          : "Kanz-ul-Iman",
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Padding(
-                        padding: const EdgeInsets.only(bottom: 4.0),
-                        child: Icon(
-                          audioProvider.currentAyahIndex != null
-                              ? (audioProvider.isPlaying
-                                  ? Icons.pause_circle_filled_rounded
-                                  : Icons.play_circle_filled_rounded)
-                              : Icons.play_circle_outline_rounded,
-                          color: Colors.white,
-                          size: 26,
-                        ),
-                      ),
-                      label: audioProvider.currentAyahIndex != null
-                          ? (audioProvider.isPlaying ? 'Pause' : 'Resume')
-                          : 'Play Audio',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Padding(
-                        padding: const EdgeInsets.only(bottom: 4.0),
-                        child: Icon(
-                          isAutoScrolling
-                              ? Icons.stop_circle_rounded
-                              : Icons.fit_screen_rounded,
-                          color: Colors.white,
-                          size: 26,
-                        ),
-                      ),
-                      label: isAutoScrolling ? 'Stop' : 'Auto Scroll',
-                    ),
-                    const BottomNavigationBarItem(
-                      icon: Padding(
-                        padding: EdgeInsets.only(bottom: 4.0),
-                        child: Icon(
-                          Icons.settings_rounded,
-                          color: Colors.white,
-                          size: 26,
-                        ),
-                      ),
-                      label: "Setting",
-                    )
-                  ],
-                ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      bottomNavigationBar: isScrollingDown
+          ? const SizedBox()
+          : Theme(
+              data: Theme.of(context).copyWith(
+                canvasColor: bloc.selectedTheme,
               ),
-        body: Stack(
+              child: BottomNavigationBar(
+                backgroundColor: bloc.selectedTheme,
+                elevation: 10,
+                selectedItemColor: Colors.white,
+                unselectedItemColor: Colors.white,
+                selectedFontSize: 12,
+                unselectedFontSize: 12,
+                selectedLabelStyle: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold),
+                unselectedLabelStyle: const TextStyle(color: Colors.white),
+                currentIndex: audioProvider.currentAyahIndex != null ? 1 : 0,
+                type: BottomNavigationBarType.fixed,
+                onTap: (index) {
+                  if (index == 0) {
+                    push(
+                        context,
+                        SurahTranslationScreen(
+                          ayatCount: widget.ayatCount.toString(),
+                          ayatList: listAyat,
+                          suratNumber: widget.suratNumber,
+                          surahName: widget.surahName,
+                        ));
+                  } else if (index == 1) {
+                    if (audioProvider.currentAyahIndex != null) {
+                      if (audioProvider.isPlaying) {
+                        audioProvider.pausePlayback();
+                      } else {
+                        audioProvider.resumePlayback();
+                      }
+                    } else {
+                      // Start playback from theBeginning of the surah
+                      audioProvider.startSurahPlayback(
+                          context, listAyat, widget.surahName ?? "Surah",
+                          startIndex: 0);
+                    }
+                  } else if (index == 2) {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AutoScrollSpeedDialog(
+                        currentSpeedFactor: autoScrollSpeed,
+                        isScrolling: isAutoScrolling,
+                        onSpeedChanged: (val) {
+                          setState(() {
+                            autoScrollSpeed = val;
+                          });
+                          if (isAutoScrolling) {
+                            _stopAutoScroll();
+                            _startAutoScroll();
+                          }
+                        },
+                        onStart: () {
+                          setState(() {
+                            isAutoScrolling = true;
+                          });
+                          _startAutoScroll();
+                        },
+                        onStop: () {
+                          _stopAutoScroll();
+                        },
+                      ),
+                    );
+                  } else if (index == 3) {
+                    push(context, const SettingScreen());
+                  }
+                },
+                items: [
+                  BottomNavigationBarItem(
+                    icon: const Padding(
+                      padding: EdgeInsets.only(bottom: 4.0),
+                      child: Icon(
+                        Icons.menu_book_rounded,
+                        color: Colors.white,
+                        size: 26,
+                      ),
+                    ),
+                    label: bloc.selectedTranslation == "irfan"
+                        ? "Kanz-ul-Irfan"
+                        : "Kanz-ul-Iman",
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: Icon(
+                        audioProvider.currentAyahIndex != null
+                            ? (audioProvider.isPlaying
+                                ? Icons.pause_circle_filled_rounded
+                                : Icons.play_circle_filled_rounded)
+                            : Icons.play_circle_outline_rounded,
+                        color: Colors.white,
+                        size: 26,
+                      ),
+                    ),
+                    label: audioProvider.currentAyahIndex != null
+                        ? (audioProvider.isPlaying ? 'Pause' : 'Resume')
+                        : 'Play Audio',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: Icon(
+                        isAutoScrolling
+                            ? Icons.stop_circle_rounded
+                            : Icons.fit_screen_rounded,
+                        color: Colors.white,
+                        size: 26,
+                      ),
+                    ),
+                    label: isAutoScrolling ? 'Stop' : 'Auto Scroll',
+                  ),
+                  const BottomNavigationBarItem(
+                    icon: Padding(
+                      padding: EdgeInsets.only(bottom: 4.0),
+                      child: Icon(
+                        Icons.settings_rounded,
+                        color: Colors.white,
+                        size: 26,
+                      ),
+                    ),
+                    label: "Setting",
+                  )
+                ],
+              ),
+            ),
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          setState(() {
+            isScrollingDown = !isScrollingDown;
+          });
+        },
+        child: Stack(
           children: [
             Listener(
               onPointerDown: (_) => _pauseAutoScrollForTouch(),
@@ -548,30 +543,33 @@ class _QuranViewState extends State<QuranView> {
                     ),
                   ];
                 },
-                body: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                  ),
-                  padding: const EdgeInsets.only(top: 20, bottom: 20),
-                  child: Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: NotificationListener<ScrollEndNotification>(
-                      onNotification: (scrollEnd) {
-                        if (widget.saveLastRead &&
-                            scrollEnd.metrics.axis == Axis.vertical) {
-                          SavedPrefernces.updateLastReadOffset(
-                              scrollEnd.metrics.pixels);
-                        }
-                        return false;
-                      },
-                      child: SingleChildScrollView(
-                        controller: _scrollViewController,
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: quranViewWidget,
+                body: SizedBox.expand(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                    ),
+                    padding: const EdgeInsets.only(top: 4, bottom: 20),
+                    child: Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: NotificationListener<ScrollEndNotification>(
+                        onNotification: (scrollEnd) {
+                          if (widget.saveLastRead &&
+                              scrollEnd.metrics.axis == Axis.vertical) {
+                            SavedPrefernces.updateLastReadOffset(
+                                scrollEnd.metrics.pixels);
+                          }
+                          return false;
+                        },
+                        child: SingleChildScrollView(
+                          controller: _scrollViewController,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: quranViewWidget,
+                            ),
                           ),
                         ),
                       ),

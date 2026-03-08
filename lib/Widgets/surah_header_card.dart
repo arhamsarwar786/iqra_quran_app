@@ -204,68 +204,65 @@ class CompleteQuranHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>();
 
-    return SafeArea(
-      bottom: false,
-      child: Stack(
-        children: [
-          // 1. The Pinned Red Surah Header Card (Pinned at the bottom of the SliverAppBar)
-          if (metadata != null)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: 100,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: SurahHeaderCard(
-                  key: ValueKey(metadata!.index),
-                  metadata: metadata!,
-                ),
-              ),
-            ),
-
-          // 2. The Collapsible White Bar (Title, Background, and Back Button)
+    return Stack(
+      children: [
+        // 1. The Pinned Red Surah Header Card (Pinned at the bottom of the SliverAppBar)
+        if (metadata != null)
           Positioned(
-            top: 0,
+            bottom: 0,
             left: 0,
             right: 0,
-            height: 56,
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 200),
-              opacity: isScrollingDown ? 0.0 : 1.0,
-              child: Container(
-                color: Colors.white,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Centered Title
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: theme.arabicFontFamily,
-                      ),
-                    ),
-                    // Back Button (aligned left)
-                    Positioned(
-                      left: 0,
-                      child: IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+            height: 100,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: SurahHeaderCard(
+                key: ValueKey(metadata!.index),
+                metadata: metadata!,
               ),
             ),
           ),
-        ],
-      ),
+
+        // 2. The Collapsible White Bar (Title, Background, and Back Button)
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 56,
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 200),
+            opacity: isScrollingDown ? 0.0 : 1.0,
+            child: Container(
+              color: Colors.white,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Centered Title
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: theme.arabicFontFamily,
+                    ),
+                  ),
+                  // Back Button (aligned left)
+                  Positioned(
+                    left: 0,
+                    child: IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

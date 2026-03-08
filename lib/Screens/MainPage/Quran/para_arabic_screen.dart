@@ -19,7 +19,6 @@ import '../../../Helper/preference/saved_preferences.dart';
 import '../Drawer/setting_screen.dart';
 import 'translation/parah_translation_screen.dart';
 import '../../../Provider/audio_provider.dart';
-import '../../../Widgets/audio_controller_overlay.dart';
 
 class ParaArabicScreen extends StatefulWidget {
   final String? parahCount;
@@ -50,21 +49,19 @@ class ParaArabicScreen extends StatefulWidget {
 class _ParaArabicScreenState extends State<ParaArabicScreen> {
   ArabicNumbers arabicNumber = ArabicNumbers();
   ScrollController? _scrollViewController;
-  bool isScrollingDown = true;
+  bool isScrollingDown = false;
   bool isAutoScrolling = false;
   bool _isScrollPaused = false;
   double autoScrollSpeed = 1.0;
-  int? _lastRecitedIndex;
+  Map<String, GlobalKey> surahHeaderKeys = {};
+  GlobalKey? _targetKey;
+  int? _highlightedAyah;
+  String? _lastRecitedId;
   AudioProvider? _audioProvider;
-
   List<Widget> paraArabicScreenWidget = [];
   List<Aya> listAyat = [];
   SurahMetadata? firstSurahMetadata;
   SurahMetadata? currentSurahMetadata;
-  Map<String, GlobalKey> surahHeaderKeys = {};
-  bool _hasInitialScrolled = false;
-  GlobalKey? _targetKey;
-  int? _highlightedAyah;
 
   @override
   void didChangeDependencies() {
@@ -126,14 +123,6 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   void viewMaker() async {
     final bloc = context.read<ThemeProvider>();
     final quranProvider = context.read<QuranDataProvider>();
-    final audioProvider = context.read<AudioProvider>();
-
-    paraArabicScreenWidget.clear();
-    surahHeaderKeys.clear();
-    _targetKey = null;
-    firstSurahMetadata = null;
-    currentSurahMetadata = null;
-
     if (listAyat.isEmpty) return;
 
     List<InlineSpan> currentSpans = [];
@@ -169,14 +158,16 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       currentSpans.clear();
     }
 
+    // audioProvider is already available via context.read or watch
+    final audioProvider = context.read<AudioProvider>();
+
     for (var i = 0; i < listAyat.length; i++) {
       var aya = listAyat[i];
       final int ayaSurahId = int.tryParse(aya.surahId ?? "0") ?? 0;
 
-      // Check if this ayah is the one being recited
-      bool isReciting = audioProvider.currentAyahIndex != null &&
-          audioProvider.currentAyahIndex ==
-              i - (listAyat[0].ayatNumber == "0" ? 1 : 0);
+      // Check if this ayah is actually the one currently reciting
+      bool isReciting = audioProvider.currentAyahId != null &&
+          audioProvider.currentAyahId == aya.ayatId;
 
       final bool isTargetAya = isReciting ||
           (_highlightedAyah != null &&
@@ -225,7 +216,8 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
           recognizer: TapGestureRecognizer()
             ..onTap = () {
               SHEET.bottomSheetPreview(
-                  context, listAyat, listAyat.indexOf(aya), bloc);
+                  context, listAyat, listAyat.indexOf(aya), bloc,
+                  showPlayButton: false);
             },
         ),
       );
@@ -278,9 +270,22 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     }
 
     flush(false); // Flush final block
-    setState(() {});
+    if (mounted) setState(() {});
 
-    _initiateScroll();
+    if (_targetKey != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final ctx = _targetKey!.currentContext;
+        if (ctx != null) {
+          Scrollable.ensureVisible(
+            ctx,
+            duration: const Duration(milliseconds: 300),
+            alignment: 0.4, // Keep verse clearly below the header
+            curve: Curves.easeInOut,
+          );
+        }
+      });
+    }
   }
 
   void _addSignWidget(Aya aya, QuranDataProvider quranProvider) {
@@ -325,71 +330,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     }
   }
 
-  void _initiateScroll() {
-    if (widget.initialScrollOffset != null && !_hasInitialScrolled) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollViewController!.hasClients) {
-          _scrollViewController!.jumpTo(widget.initialScrollOffset!);
-        }
-        _hasInitialScrolled = true;
-      });
-    } else if (_targetKey != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollViewController != null &&
-            _scrollViewController!.hasClients) {
-          int targetIndex = paraArabicScreenWidget.indexWhere((w) {
-            return w.key == _targetKey;
-          });
-
-          if (targetIndex != -1) {
-            // Jump to approximate area to force SliverList to build children
-            double jumpPos = (targetIndex * 150.0)
-                .clamp(0, _scrollViewController!.position.maxScrollExtent);
-            _scrollViewController!.jumpTo(jumpPos);
-          }
-
-          _scrollRetryCount = 0;
-          Future.delayed(const Duration(milliseconds: 200), () {
-            if (mounted) _scrollToTarget(Duration.zero);
-          });
-        }
-      });
-    }
-  }
-
-  int _scrollRetryCount = 0;
-  static const int _maxScrollRetries = 50;
-
-  void _scrollToTarget(Duration _) {
-    if (!mounted || _targetKey == null) return;
-    final ctx = _targetKey!.currentContext;
-    if (ctx != null) {
-      final renderObject = ctx.findRenderObject() as RenderBox?;
-      if (renderObject != null &&
-          renderObject.hasSize &&
-          renderObject.size.height > 0) {
-        Scrollable.ensureVisible(
-          ctx,
-          duration: Duration.zero,
-          alignment: 0.1, // Align slightly from top for better view
-        );
-      } else if (_scrollRetryCount < _maxScrollRetries) {
-        _scrollRetryCount++;
-        Future.delayed(const Duration(milliseconds: 100), () {
-          if (mounted) _scrollToTarget(Duration.zero);
-        });
-      }
-    } else if (_scrollRetryCount < _maxScrollRetries) {
-      _scrollRetryCount++;
-      // Search Step: Nudge scroll to trigger more child building if ctx is null
-      double nextPos = (_scrollViewController!.offset + 200)
-          .clamp(0, _scrollViewController!.position.maxScrollExtent);
-      _scrollViewController!.jumpTo(nextPos);
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) _scrollToTarget(Duration.zero);
-      });
-    }
-  }
+  // Removed buggy nudge scroll logic
 
   void _updateCurrentSurah() {
     if (firstSurahMetadata == null) return;
@@ -487,200 +428,190 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(child: Builder(builder: (context) {
-      final bloc = context.read<ThemeProvider>();
-      final audioProvider = context.watch<AudioProvider>();
+    final bloc = context.read<ThemeProvider>();
+    final audioProvider = context.watch<AudioProvider>();
 
-      // Sync highlighting with audio
-      if (audioProvider.currentAyahIndex != _lastRecitedIndex) {
-        _lastRecitedIndex = audioProvider.currentAyahIndex;
-        // Clear manual highlight when audio stops or changes
-        if (_lastRecitedIndex == null) {
-          _highlightedAyah = null;
-        }
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          viewMaker(); // Re-render to update highlighting
-        });
+    // Sync highlighting with audio
+    // Sync highlighting with audio using global ayatId
+    if (audioProvider.currentAyahId != _lastRecitedId) {
+      _lastRecitedId = audioProvider.currentAyahId;
+
+      // Clear manual highlight when audio stops or moves to next
+      if (_lastRecitedId == null) {
+        _highlightedAyah = null;
       }
 
-      return Scaffold(
-          bottomNavigationBar: isScrollingDown
-              ? const SizedBox()
-              : Theme(
-                  data: Theme.of(context).copyWith(
-                    canvasColor: bloc.selectedTheme,
-                  ),
-                  child: BottomNavigationBar(
-                    backgroundColor: bloc.selectedTheme,
-                    elevation: 10,
-                    selectedItemColor: Colors.white,
-                    unselectedItemColor: Colors.white,
-                    selectedFontSize: 12,
-                    unselectedFontSize: 12,
-                    selectedLabelStyle: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
-                    unselectedLabelStyle: const TextStyle(color: Colors.white),
-                    currentIndex:
-                        audioProvider.currentAyahIndex != null ? 1 : 0,
-                    type: BottomNavigationBarType.fixed,
-                    onTap: (index) {
-                      if (index == 0) {
-                        push(
-                            context,
-                            ParahTranslationScreen(
-                              parahCount: widget.parahCount,
-                              parahname: widget.parahname,
-                              ayatInPara: widget.ayatInPara,
-                              para: widget.para,
-                              ayatList: listAyat,
-                            ));
-                      } else if (index == 1) {
-                        if (audioProvider.currentAyahIndex != null) {
-                          if (audioProvider.isPlaying) {
-                            audioProvider.pausePlayback();
-                          } else {
-                            audioProvider.resumePlayback();
-                          }
-                        } else {
-                          // Start playback from the beginning of the para page
-                          audioProvider.startSurahPlayback(context, listAyat,
-                              widget.parahname ?? "Para ${widget.parahCount}");
-                        }
-                      } else if (index == 2) {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AutoScrollSpeedDialog(
-                            currentSpeedFactor: autoScrollSpeed,
-                            isScrolling: isAutoScrolling,
-                            onSpeedChanged: (val) {
-                              setState(() => autoScrollSpeed = val);
-                              if (isAutoScrolling) {
-                                _stopAutoScroll();
-                                _startAutoScroll();
-                              }
-                            },
-                            onStart: () {
-                              setState(() => isAutoScrolling = true);
-                              _startAutoScroll();
-                            },
-                            onStop: () => _stopAutoScroll(),
-                          ),
-                        );
-                      } else if (index == 3) {
-                        push(context, const SettingScreen());
-                      }
-                    },
-                    items: [
-                      BottomNavigationBarItem(
-                        icon: const Padding(
-                          padding: EdgeInsets.only(bottom: 4.0),
-                          child: Icon(Icons.menu_book_rounded,
-                              color: Colors.white, size: 26),
-                        ),
-                        label: bloc.selectedTranslation == "irfan"
-                            ? "Kanz-ul-Irfan"
-                            : "Kanz-ul-Iman",
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Padding(
-                          padding: const EdgeInsets.only(bottom: 4.0),
-                          child: Icon(
-                            audioProvider.currentAyahIndex != null
-                                ? (audioProvider.isPlaying
-                                    ? Icons.pause_circle_filled_rounded
-                                    : Icons.play_circle_filled_rounded)
-                                : Icons.play_circle_outline_rounded,
-                            color: Colors.white,
-                            size: 26,
-                          ),
-                        ),
-                        label: audioProvider.currentAyahIndex != null
-                            ? (audioProvider.isPlaying ? 'Pause' : 'Resume')
-                            : 'Play Audio',
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Padding(
-                          padding: const EdgeInsets.only(bottom: 4.0),
-                          child: Icon(
-                              isAutoScrolling
-                                  ? Icons.stop_circle_rounded
-                                  : Icons.fit_screen_rounded,
-                              color: Colors.white,
-                              size: 26),
-                        ),
-                        label: isAutoScrolling ? "Stop" : "Auto Scroll",
-                      ),
-                      const BottomNavigationBarItem(
-                        icon: Padding(
-                          padding: EdgeInsets.only(bottom: 4.0),
-                          child: Icon(Icons.settings_rounded,
-                              color: Colors.white, size: 26),
-                        ),
-                        label: "Setting",
-                      ),
-                    ],
-                  ),
+      // Schedule re-render to highlight and scroll
+      Future.microtask(() => viewMaker());
+    }
+
+    return Scaffold(
+        backgroundColor: Colors.white,
+        bottomNavigationBar: isScrollingDown
+            ? const SizedBox()
+            : Theme(
+                data: Theme.of(context).copyWith(
+                  canvasColor: bloc.selectedTheme,
                 ),
-          body: Stack(
+                child: BottomNavigationBar(
+                  backgroundColor: bloc.selectedTheme,
+                  elevation: 10,
+                  selectedItemColor: Colors.white,
+                  unselectedItemColor: Colors.white,
+                  selectedFontSize: 12,
+                  unselectedFontSize: 12,
+                  selectedLabelStyle: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                  unselectedLabelStyle: const TextStyle(color: Colors.white),
+                  currentIndex: 0,
+                  type: BottomNavigationBarType.fixed,
+                  onTap: (index) {
+                    if (index == 0) {
+                      push(
+                          context,
+                          ParahTranslationScreen(
+                            parahCount: widget.parahCount,
+                            parahname: widget.parahname,
+                            ayatInPara: widget.ayatInPara,
+                            para: widget.para,
+                            ayatList: listAyat,
+                          ));
+                    } else if (index == 1) {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AutoScrollSpeedDialog(
+                          currentSpeedFactor: autoScrollSpeed,
+                          isScrolling: isAutoScrolling,
+                          onSpeedChanged: (val) {
+                            setState(() => autoScrollSpeed = val);
+                            if (isAutoScrolling) {
+                              _stopAutoScroll();
+                              _startAutoScroll();
+                            }
+                          },
+                          onStart: () {
+                            setState(() => isAutoScrolling = true);
+                            _startAutoScroll();
+                          },
+                          onStop: () => _stopAutoScroll(),
+                        ),
+                      );
+                    } else if (index == 2) {
+                      push(context, const SettingScreen());
+                    }
+                  },
+                  items: [
+                    BottomNavigationBarItem(
+                      icon: const Padding(
+                        padding: EdgeInsets.only(bottom: 4.0),
+                        child: Icon(Icons.menu_book_rounded,
+                            color: Colors.white, size: 26),
+                      ),
+                      label: bloc.selectedTranslation == "irfan"
+                          ? "Kanz-ul-Irfan"
+                          : "Kanz-ul-Iman",
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Padding(
+                        padding: const EdgeInsets.only(bottom: 4.0),
+                        child: Icon(
+                            isAutoScrolling
+                                ? Icons.stop_circle_rounded
+                                : Icons.fit_screen_rounded,
+                            color: Colors.white,
+                            size: 26),
+                      ),
+                      label: isAutoScrolling ? "Stop" : "Auto Scroll",
+                    ),
+                    const BottomNavigationBarItem(
+                      icon: Padding(
+                        padding: EdgeInsets.only(bottom: 4.0),
+                        child: Icon(Icons.settings_rounded,
+                            color: Colors.white, size: 26),
+                      ),
+                      label: "Setting",
+                    ),
+                  ],
+                ),
+              ),
+        body: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            setState(() {
+              isScrollingDown = !isScrollingDown;
+            });
+          },
+          child: Stack(
             children: [
               Listener(
                 onPointerDown: (_) => _pauseAutoScrollForTouch(),
                 onPointerUp: (_) => _resumeAutoScrollAfterTouch(),
                 onPointerCancel: (_) => _resumeAutoScrollAfterTouch(),
-                child: Container(
-                  color: Colors.white,
-                  child: Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: NotificationListener<ScrollEndNotification>(
-                      onNotification: (scrollEnd) {
-                        if (widget.saveLastRead &&
-                            scrollEnd.metrics.axis == Axis.vertical) {
-                          SavedPrefernces.updateLastReadOffset(
-                              scrollEnd.metrics.pixels);
-                        }
-                        return false;
-                      },
-                      child: CustomScrollView(
-                        controller: _scrollViewController,
-                        cacheExtent: 5000,
-                        slivers: [
-                          SliverAppBar(
-                            automaticallyImplyLeading: false,
-                            backgroundColor: Colors.transparent,
-                            elevation: 0,
-                            expandedHeight: isScrollingDown
-                                ? (currentSurahMetadata != null ? 100.0 : 0.0)
-                                : (currentSurahMetadata != null ? 156.0 : 56.0),
-                            toolbarHeight: currentSurahMetadata != null
-                                ? 100.0
-                                : (isScrollingDown ? 0.0 : 56.0),
-                            floating: false,
-                            pinned: true,
-                            flexibleSpace: CompleteQuranHeader(
-                              title: widget.parahname ??
-                                  'Para ${widget.parahCount}',
-                              metadata: currentSurahMetadata,
-                              isScrollingDown: isScrollingDown,
-                            ),
-                          ),
-                          SliverPadding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
-                            sliver: SliverList(
-                              delegate: SliverChildListDelegate(
-                                paraArabicScreenWidget,
+                child: NestedScrollView(
+                  headerSliverBuilder:
+                      (BuildContext context, bool innerBoxIsScrolled) {
+                    return [
+                      SliverAppBar(
+                        automaticallyImplyLeading: false,
+                        backgroundColor: currentSurahMetadata != null
+                            ? bloc.selectedTheme
+                            : Colors.white,
+                        elevation: 0,
+                        expandedHeight: isScrollingDown
+                            ? (currentSurahMetadata != null ? 100.0 : 0.0)
+                            : (currentSurahMetadata != null ? 156.0 : 56.0),
+                        toolbarHeight: currentSurahMetadata != null
+                            ? 100.0
+                            : (isScrollingDown ? 0.0 : 56.0),
+                        floating: false,
+                        pinned: true,
+                        flexibleSpace: CompleteQuranHeader(
+                          title:
+                              widget.parahname ?? 'Para ${widget.parahCount}',
+                          metadata: currentSurahMetadata,
+                          isScrollingDown: isScrollingDown,
+                        ),
+                      ),
+                    ];
+                  },
+                  body: SizedBox.expand(
+                    child: Container(
+                      color: Colors.white,
+                      child: Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: NotificationListener<ScrollEndNotification>(
+                          onNotification: (scrollEnd) {
+                            if (widget.saveLastRead &&
+                                scrollEnd.metrics.axis == Axis.vertical) {
+                              SavedPrefernces.updateLastReadOffset(
+                                  scrollEnd.metrics.pixels);
+                            }
+                            return false;
+                          },
+                          child: CustomScrollView(
+                            controller: _scrollViewController,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            cacheExtent: 5000,
+                            slivers: [
+                              SliverPadding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 10),
+                                sliver: SliverList(
+                                  delegate: SliverChildListDelegate(
+                                    paraArabicScreenWidget,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-              const QuranAudioOverlay(),
             ],
-          ));
-    }));
+          ),
+        ));
   }
 }

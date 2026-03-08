@@ -62,7 +62,7 @@ class QuranAudioOverlay extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "Reciting Verse ${audioProvider.currentAyahIndex! + 1}",
+                      "Reciting Verse ${audioProvider.currentAyahNumber ?? ""}",
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[600],

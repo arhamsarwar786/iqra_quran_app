@@ -11,10 +11,7 @@ import 'package:iqra/Screens/MainPage/Home/azan/PrayerTime.dart';
 import 'package:iqra/Screens/MainPage/Home/qibal/qibla.dart';
 import 'package:iqra/Screens/MainPage/Tasbeeh/tasbee.dart';
 import 'package:iqra/Utils/share_verse.dart';
-import 'package:iqra/Helper/preference/saved_preferences.dart';
 import 'package:provider/provider.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:adhan_dart/adhan_dart.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:hijri/hijri_calendar.dart';
@@ -29,6 +26,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import "package:timezone/data/latest.dart" as tz;
 import 'package:flutter/services.dart';
 import 'dart:async';
+import 'package:iqra/Provider/prayer_provider.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -41,16 +39,16 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  Position? position;
-  loctionAndZome() async {
-    position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-  }
-
   @override
   void initState() {
     tz.initializeTimeZones();
     super.initState();
+    // Pre-load prayer data for instant access
+    Future.microtask(() {
+      if (mounted) {
+        context.read<PrayerProvider>().fetchPrayerData();
+      }
+    });
   }
 
   List<String> imageName = [
@@ -847,23 +845,15 @@ class SearchInQuaran extends StatefulWidget {
 
 class _SearchInQuaranState extends State<SearchInQuaran> {
   Timer? _timer;
-  String _prevPrayer = "Loading...";
-  String _nextPrayer = "Loading...";
-  DateTime? _nextPrayerTime;
   DateTime _now = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    _loadPrayerTimes();
-    // Run every second for real-time countdown
+    // Periodic update for the countdown string
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) {
         setState(() => _now = DateTime.now());
-        // Reload prayer times only every minute to save resources
-        if (_now.second == 0) {
-          _loadPrayerTimes();
-        }
       }
     });
   }
@@ -874,117 +864,6 @@ class _SearchInQuaranState extends State<SearchInQuaran> {
     super.dispose();
   }
 
-  Future<void> _loadPrayerTimes() async {
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return;
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) return;
-      }
-      if (permission == LocationPermission.deniedForever) return;
-
-      Position position;
-      try {
-        position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.medium,
-          timeLimit: const Duration(seconds: 10),
-        );
-      } catch (_) {
-        final last = await Geolocator.getLastKnownPosition();
-        if (last == null) return;
-        position = last;
-      }
-
-      final coordinates = Coordinates(position.latitude, position.longitude);
-      final calcMethod = await SavedPrefernces.getCalculationMethod();
-      final madhab = await SavedPrefernces.getMadhab();
-
-      CalculationParameters params;
-      switch (calcMethod) {
-        case 'karachi':
-          params = CalculationMethodParameters.karachi();
-          break;
-        case 'mwl':
-          params = CalculationMethodParameters.muslimWorldLeague();
-          break;
-        case 'isna':
-          params = CalculationMethodParameters.northAmerica();
-          break;
-        case 'egypt':
-          params = CalculationMethodParameters.egyptian();
-          break;
-        case 'makkah':
-        case 'umm_al_qura':
-          params = CalculationMethodParameters.ummAlQura();
-          break;
-        case 'dubai':
-          params = CalculationMethodParameters.dubai();
-          break;
-        case 'turkey':
-        case 'turkiye':
-          params = CalculationMethodParameters.turkiye();
-          break;
-        case 'tehran':
-          params = CalculationMethodParameters.tehran();
-          break;
-        case 'singapore':
-          params = CalculationMethodParameters.singapore();
-          break;
-        default:
-          params = CalculationMethodParameters.karachi();
-      }
-      params.madhab = madhab == 'hanafi' ? Madhab.hanafi : Madhab.shafi;
-
-      final now = DateTime.now().toUtc();
-      final pt = PrayerTimes(
-        coordinates: coordinates,
-        date: now,
-        calculationParameters: params,
-        precision: true,
-      );
-
-      final prayers = <Map<String, dynamic>>[];
-      void add(String name, DateTime? t) {
-        if (t == null) return;
-        prayers.add({"name": name, "time": t.toLocal()});
-      }
-
-      add("Fajr", pt.fajr);
-      add("Zuhr", pt.dhuhr);
-      add("Asr", pt.asr);
-      add("Maghrib", pt.maghrib);
-      add("Isha", pt.isha);
-      prayers.sort(
-          (a, b) => (a["time"] as DateTime).compareTo(b["time"] as DateTime));
-
-      final nowLocal = DateTime.now();
-      Map<String, dynamic>? prev;
-      Map<String, dynamic>? next;
-
-      for (final p in prayers) {
-        final t = p["time"] as DateTime;
-        if (t.isBefore(nowLocal)) {
-          prev = p;
-        } else if (next == null) {
-          next = p;
-        }
-      }
-
-      if (mounted) {
-        setState(() {
-          _now = nowLocal;
-          _prevPrayer = prev?["name"] ?? prayers.last["name"];
-          _nextPrayer = next?["name"] ?? prayers.first["name"];
-          _nextPrayerTime = next?["time"] ??
-              prayers.first["time"].add(const Duration(days: 1));
-        });
-      }
-    } catch (_) {}
-  }
-
   @override
   Widget build(BuildContext context) {
     final bloc = widget.bloc!;
@@ -992,215 +871,229 @@ class _SearchInQuaranState extends State<SearchInQuaran> {
     final today =
         HijriCalendar.fromDate(_now.add(Duration(days: bloc.hijriOffset)));
 
-    String countdown = "";
-    if (_nextPrayerTime != null) {
-      final diff = _nextPrayerTime!.difference(_now);
-      if (!diff.isNegative) {
-        int h = diff.inHours;
-        int m = diff.inMinutes.remainder(60);
-        int s = diff.inSeconds.remainder(60);
-        countdown =
-            "${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}";
-      }
-    }
+    return Consumer<PrayerProvider>(
+      builder: (context, provider, child) {
+        final data = provider.prayerData;
+        String nextPrayerName = "Loading...";
+        String countdown = "--:--:--";
 
-    return Container(
-      width: size.width,
-      // padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              bloc.selectedTheme,
-              bloc.selectedTheme,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          // borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: bloc.selectedTheme.withOpacity(0.3),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
+        if (data != null) {
+          final List<Map<String, dynamic>> fardList = data["fardList"];
+          final DateTime nextFajr = data["nextFajr"];
+
+          Map<String, dynamic>? next;
+          for (final p in fardList) {
+            if ((p["dateTime"] as DateTime).isAfter(_now)) {
+              next = p;
+              break;
+            }
+          }
+
+          DateTime nextTime = next != null ? next["dateTime"] : nextFajr;
+          nextPrayerName = next != null ? next["name"] : "Fajr";
+
+          final diff = nextTime.difference(_now);
+          if (!diff.isNegative) {
+            int h = diff.inHours;
+            int m = diff.inMinutes.remainder(60);
+            int s = diff.inSeconds.remainder(60);
+            countdown =
+                "${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}";
+          }
+        }
+
+        return Container(
+          width: size.width,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [bloc.selectedTheme, bloc.selectedTheme],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          child: Stack(
-            children: [
-              // Mosque background decoration
-              Positioned(
-                right: -30,
-                bottom: -20,
-                child: Icon(
-                  Icons.mosque_rounded,
-                  size: 180,
-                  color: Colors.white.withOpacity(0.1),
-                ),
+            boxShadow: [
+              BoxShadow(
+                color: bloc.selectedTheme.withOpacity(0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
               ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    // Search Bar
-                    InkWell(
-                      onTap: () => push(context, const SearchScreen()),
-                      child: Container(
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(15),
-                          border:
-                              Border.all(color: Colors.white.withOpacity(0.2)),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(30),
+            child: Stack(
+              children: [
+                Positioned(
+                  right: -30,
+                  bottom: -20,
+                  child: Icon(
+                    Icons.mosque_rounded,
+                    size: 180,
+                    color: Colors.white.withOpacity(0.1),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      // Search Bar
+                      InkWell(
+                        onTap: () => push(context, const SearchScreen()),
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                                color: Colors.white.withOpacity(0.2)),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.search_rounded,
+                                  color: Colors.white, size: 20),
+                              const SizedBox(width: 12),
+                              Text(
+                                "Search Quran...",
+                                style: TextStyle(
+                                    color: Colors.white.withOpacity(0.8),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                              const Spacer(),
+                              Icon(Icons.mic_none_rounded,
+                                  color: Colors.white.withOpacity(0.9),
+                                  size: 18),
+                            ],
+                          ),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                      ),
+                      const SizedBox(height: 25),
+                      // Content Row
+                      IntrinsicHeight(
                         child: Row(
                           children: [
-                            const Icon(Icons.search_rounded,
-                                color: Colors.white, size: 20),
-                            const SizedBox(width: 12),
-                            Text(
-                              "Search Quran...",
-                              style: TextStyle(
-                                  color: Colors.white.withOpacity(0.8),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500),
+                            // Left: Date
+                            Expanded(
+                              flex: 11,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.calendar_today_rounded,
+                                          size: 14,
+                                          color: Colors.white.withOpacity(0.7)),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        DateFormat('EEEE, d MMM')
+                                            .format(_now)
+                                            .toUpperCase(),
+                                        style: TextStyle(
+                                            color:
+                                                Colors.white.withOpacity(0.7),
+                                            fontSize: 10,
+                                            letterSpacing: 1.2,
+                                            fontWeight: FontWeight.w700),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    "${today.hDay} ${today.longMonthName} ${today.hYear} AH",
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: -0.5),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.location_on_rounded,
+                                          size: 12,
+                                          color: Colors.white.withOpacity(0.6)),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          data != null
+                                              ? data["location"].toUpperCase()
+                                              : "DETECTING...",
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              color:
+                                                  Colors.white.withOpacity(0.6),
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w600,
+                                              letterSpacing: 1),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                            const Spacer(),
-                            Icon(Icons.mic_none_rounded,
-                                color: Colors.white.withOpacity(0.9), size: 18),
+                            VerticalDivider(
+                                color: Colors.white.withOpacity(0.2),
+                                thickness: 1,
+                                indent: 5,
+                                endIndent: 5),
+                            // Right: Prayer
+                            Expanded(
+                              flex: 9,
+                              child: InkWell(
+                                onTap: () => push(context, const PrayerTime()),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      nextPrayerName.toUpperCase(),
+                                      style: TextStyle(
+                                          color: Colors.white.withOpacity(0.7),
+                                          fontSize: 10,
+                                          letterSpacing: 1.2,
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      countdown,
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 22,
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.w900),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        "NAMAZ TIMES",
+                                        style: TextStyle(
+                                            color: bloc.selectedTheme,
+                                            fontSize: 8,
+                                            fontWeight: FontWeight.w900,
+                                            letterSpacing: 0.5),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 25),
-                    // Content Row
-                    IntrinsicHeight(
-                      child: Row(
-                        children: [
-                          // Left: Date
-                          Expanded(
-                            flex: 11,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.calendar_today_rounded,
-                                        size: 14,
-                                        color: Colors.white.withOpacity(0.7)),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      "TODAY",
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w900,
-                                        letterSpacing: 1.5,
-                                        color: Colors.white.withOpacity(0.7),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  DateFormat('EEEE, d MMM').format(_now),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  today.toFormat("dd MMMM yyyy"),
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.8),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          // Vertical Divider
-                          Container(
-                            width: 1,
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 15, vertical: 5),
-                            color: Colors.white.withOpacity(0.2),
-                          ),
-                          // Right: Prayer
-                          Expanded(
-                            flex: 13,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.access_time_rounded,
-                                        size: 14,
-                                        color: Colors.white.withOpacity(0.7)),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      "UPCOMING: $_nextPrayer",
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w900,
-                                        letterSpacing: 0.5,
-                                        color: Colors.white.withOpacity(0.9),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                ShaderMask(
-                                  shaderCallback: (bounds) =>
-                                      const LinearGradient(
-                                    colors: [Colors.white, Color(0xFFE0E0E0)],
-                                  ).createShader(bounds),
-                                  child: Text(
-                                    countdown,
-                                    style: const TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: -1,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Row(
-                                  children: [
-                                    Text(
-                                      "Prev: ",
-                                      style: TextStyle(
-                                          fontSize: 10,
-                                          color: Colors.white.withOpacity(0.6)),
-                                    ),
-                                    Text(
-                                      _prevPrayer,
-                                      style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white.withOpacity(0.9)),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

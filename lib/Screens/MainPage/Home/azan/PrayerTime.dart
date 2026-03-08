@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:adhan_dart/adhan_dart.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:provider/provider.dart';
 import '../../../../Provider/theme_provider.dart';
 import '../../../../widgets.dart';
@@ -12,6 +9,8 @@ import '../../../../Helper/preference/saved_preferences.dart';
 import '../../../../Services/prayer_notification_service.dart';
 import '../qibal/qibla.dart';
 import '../../Drawer/setting_screen.dart';
+
+import 'package:iqra/Provider/prayer_provider.dart';
 
 class PrayerTime extends StatefulWidget {
   const PrayerTime({Key? key}) : super(key: key);
@@ -22,12 +21,8 @@ class PrayerTime extends StatefulWidget {
 
 class _PrayerTimeState extends State<PrayerTime> {
   Timer? _timer;
-  late Future<Map<String, dynamic>> _prayerCacheFuture;
-  Map<String, dynamic>? _lastData;
   bool _showFardOnly = true;
   String _madhab = 'hanafi';
-  String _calcMethod = 'karachi';
-  bool _notificationsEnabled = true;
   Map<String, bool> _prayerToggles = {
     'fajr': true,
     'zuhr': true,
@@ -35,7 +30,6 @@ class _PrayerTimeState extends State<PrayerTime> {
     'maghrib': true,
     'isha': true,
   };
-  Position? _currentPosition;
 
   @override
   void initState() {
@@ -43,8 +37,8 @@ class _PrayerTimeState extends State<PrayerTime> {
     _initializeNotifications();
     _initMadhab();
     _loadPrayerToggles();
-    _prayerCacheFuture = _getPrayerData();
-    // Update every second for the clock, calculations are light
+
+    // Update every second for the countdown clock
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) setState(() {});
     });
@@ -52,23 +46,16 @@ class _PrayerTimeState extends State<PrayerTime> {
 
   Future<void> _initializeNotifications() async {
     await PrayerNotificationService.initialize();
-    bool enabled = await SavedPrefernces.getPrayerNotificationsEnabled();
-    if (mounted) {
-      setState(() {
-        _notificationsEnabled = enabled;
-      });
-    }
   }
 
   Future<void> _initMadhab() async {
     final String m = await SavedPrefernces.getMadhab();
-    final String c = await SavedPrefernces.getCalculationMethod();
     if (mounted) {
       setState(() {
         _madhab = m;
-        _calcMethod = c;
-        _refreshData();
       });
+      // Ensure provider has the latest data if madhab might have changed
+      context.read<PrayerProvider>().fetchPrayerData(forceRefresh: true);
     }
   }
 
@@ -80,12 +67,17 @@ class _PrayerTimeState extends State<PrayerTime> {
   Future<void> _togglePrayerNotif(String prayerKey, bool value) async {
     await SavedPrefernces.setPrayerNotificationEnabled(prayerKey, value);
     setState(() => _prayerToggles[prayerKey] = value);
-    if (_currentPosition != null) {
+
+    final prayerProvider = context.read<PrayerProvider>();
+    final position = prayerProvider.prayerData?['position'];
+
+    if (position != null) {
       await PrayerNotificationService.scheduleAllPrayers(
-        position: _currentPosition!,
+        position: position,
         madhab: _madhab,
       );
     }
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(value
@@ -104,188 +96,6 @@ class _PrayerTimeState extends State<PrayerTime> {
   void dispose() {
     _timer?.cancel();
     super.dispose();
-  }
-
-  void _refreshData() {
-    setState(() {
-      _prayerCacheFuture = _getPrayerData();
-    });
-  }
-
-  Future<Map<String, dynamic>> _getPrayerData() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) throw 'Location services are disabled.';
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied)
-        throw 'Location permissions are denied';
-    }
-
-    if (permission == LocationPermission.deniedForever)
-      throw 'Location permissions are permanently denied.';
-
-    Position position;
-    try {
-      position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.medium,
-        timeLimit: const Duration(seconds: 15),
-      );
-    } catch (e) {
-      position = await Geolocator.getLastKnownPosition() ??
-          await Geolocator.getCurrentPosition(
-              desiredAccuracy: LocationAccuracy.low);
-    }
-
-    String locationName = "Searching...";
-    try {
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(position.latitude, position.longitude);
-      if (placemarks.isNotEmpty) {
-        Placemark place = placemarks[0];
-        locationName =
-            "${place.locality ?? place.subAdministrativeArea}, ${place.country}";
-
-        // 🕋 Auto-adjust Hijri based on country
-        if (mounted) {
-          final bloc = Provider.of<ThemeProvider>(context, listen: false);
-          bloc.updateHijriAutoAdjust(place.country ?? "");
-        }
-      }
-    } catch (e) {
-      locationName = "Location Detected";
-    }
-
-    // Calculation — use saved method (default: Karachi = authentic for Pakistan)
-    Coordinates coordinates =
-        Coordinates(position.latitude, position.longitude);
-
-    CalculationParameters params;
-    switch (_calcMethod) {
-      case 'karachi':
-        params = CalculationMethodParameters.karachi();
-        break;
-      case 'mwl':
-        params = CalculationMethodParameters.muslimWorldLeague();
-        break;
-      case 'isna':
-        params = CalculationMethodParameters.northAmerica();
-        break;
-      case 'egypt':
-        params = CalculationMethodParameters.egyptian();
-        break;
-      case 'makkah':
-      case 'umm_al_qura':
-        params = CalculationMethodParameters.ummAlQura();
-        break;
-      case 'dubai':
-        params = CalculationMethodParameters.dubai();
-        break;
-      case 'turkey':
-      case 'turkiye':
-        params = CalculationMethodParameters.turkiye();
-        break;
-      case 'tehran':
-        params = CalculationMethodParameters.tehran();
-        break;
-      case 'singapore':
-        params = CalculationMethodParameters.singapore();
-        break;
-      default:
-        params = CalculationMethodParameters.karachi();
-    }
-    params.madhab = _madhab == 'hanafi' ? Madhab.hanafi : Madhab.shafi;
-
-    // Debug: Print madhab being used
-    print('🕌 Calculating prayer times with madhab: $_madhab');
-    print('📍 Location: ${position.latitude}, ${position.longitude}');
-
-    // We pass TODAY'S DATE in UTC to ensure adhan_dart calculates correctly for the global day
-    // then we handle local conversion manually.
-    final DateTime nowUtc = DateTime.now().toUtc();
-    PrayerTimes pt = PrayerTimes(
-        coordinates: coordinates,
-        date: nowUtc,
-        calculationParameters: params,
-        precision: true);
-
-    DateTime tomorrowUtc = nowUtc.add(const Duration(days: 1));
-    PrayerTimes ptTomorrow = PrayerTimes(
-        coordinates: coordinates,
-        date: tomorrowUtc,
-        calculationParameters: params,
-        precision: true);
-
-    // Filtered lists
-    final List<Map<String, dynamic>> timesList = [];
-    final List<Map<String, dynamic>> fardList = [];
-
-    void add(String name, DateTime? time, bool fard) {
-      if (time == null) return;
-      // Convert to local for specific device display and internal comparison
-      final DateTime localTime = time.toLocal();
-      final entry = {
-        "name": name,
-        "time": DateFormat("h:mm a").format(localTime),
-        "dateTime": localTime,
-        "isFard": fard,
-      };
-      timesList.add(entry);
-      if (fard) fardList.add(entry);
-    }
-
-    // Add Farz
-    add("Fajr", pt.fajr, true);
-    add("Zuhr", pt.dhuhr, true);
-    add("Asr", pt.asr, true);
-
-    // Debug: Print Asr time to verify madhab difference
-    print(
-        '⏰ Asr time ($_madhab): ${DateFormat("h:mm a").format(pt.asr.toLocal())}');
-
-    add("Maghrib", pt.maghrib, true);
-    add("Isha", pt.isha, true);
-
-    // Add Optionals
-    add("Ishraq", pt.sunrise.add(const Duration(minutes: 15)), false);
-    add("Chasht", pt.sunrise.add(const Duration(hours: 2, minutes: 15)), false);
-    add("Awwabin", pt.maghrib.add(const Duration(minutes: 15)), false);
-    add("Witr", pt.isha.add(const Duration(minutes: 30)), false);
-
-    Duration night = ptTomorrow.fajr.difference(pt.maghrib);
-    add(
-        "Tahajjud",
-        pt.maghrib.add(Duration(seconds: (night.inSeconds * 0.75).toInt())),
-        false);
-
-    timesList.sort((a, b) =>
-        (a["dateTime"] as DateTime).compareTo(b["dateTime"] as DateTime));
-    fardList.sort((a, b) =>
-        (a["dateTime"] as DateTime).compareTo(b["dateTime"] as DateTime));
-
-    // Store position for notification scheduling
-    _currentPosition = position;
-
-    // Schedule notifications if enabled (with current method + madhab)
-    if (_notificationsEnabled) {
-      try {
-        await PrayerNotificationService.scheduleAllPrayers(
-          position: position,
-          madhab: _madhab,
-        );
-      } catch (e) {
-        debugPrint("Error scheduling notifications: $e");
-      }
-    }
-
-    return {
-      "location": locationName,
-      "timesList": timesList,
-      "fardList": fardList,
-      "sunrise": pt.sunrise.toLocal(),
-      "nextFajr": ptTomorrow.fajr.toLocal(),
-    };
   }
 
   @override
@@ -330,22 +140,24 @@ class _PrayerTimeState extends State<PrayerTime> {
           elevation: 0,
           foregroundColor: Colors.black87,
           actions: [
-            IconButton(
-              onPressed: () {
-                if (_lastData != null) {
-                  AppShare.namazTimes(
-                    context: context,
-                    bloc: themeProvider,
-                    location: _lastData!["location"],
-                    date:
-                        DateFormat("EEEE, d MMMM yyyy").format(DateTime.now()),
-                    times: _lastData!["timesList"],
-                  );
-                }
-              },
-              icon:
-                  Icon(Icons.share_rounded, color: themeProvider.selectedTheme),
-            ),
+            Consumer<PrayerProvider>(builder: (context, provider, _) {
+              return IconButton(
+                onPressed: () {
+                  if (provider.prayerData != null) {
+                    AppShare.namazTimes(
+                      context: context,
+                      bloc: themeProvider,
+                      location: provider.prayerData!["location"],
+                      date: DateFormat("EEEE, d MMMM yyyy")
+                          .format(DateTime.now()),
+                      times: provider.prayerData!["timesList"],
+                    );
+                  }
+                },
+                icon: Icon(Icons.share_rounded,
+                    color: themeProvider.selectedTheme),
+              );
+            }),
             IconButton(
               onPressed: () => push(context, const DirectionTOQiblah()),
               icon: Icon(Icons.compass_calibration_rounded,
@@ -359,15 +171,13 @@ class _PrayerTimeState extends State<PrayerTime> {
             )
           ],
         ),
-        body: FutureBuilder<Map<String, dynamic>>(
-          key: ValueKey(_madhab), // Force rebuild when madhab changes
-          future: _prayerCacheFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting &&
-                _lastData == null) {
+        body: Consumer<PrayerProvider>(
+          builder: (context, prayerProvider, child) {
+            final data = prayerProvider.prayerData;
+            if (prayerProvider.isLoading && data == null) {
               return const Center(child: CircularProgressIndicator());
             }
-            if (snapshot.hasError) {
+            if (prayerProvider.error != null && data == null) {
               return Center(
                   child: Padding(
                 padding: const EdgeInsets.all(24.0),
@@ -377,23 +187,25 @@ class _PrayerTimeState extends State<PrayerTime> {
                     const Icon(Icons.error_outline,
                         size: 48, color: Colors.red),
                     const SizedBox(height: 16),
-                    Text("Error Loading Times\n${snapshot.error}",
+                    Text("Error Loading Times\n${prayerProvider.error}",
                         textAlign: TextAlign.center),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                        onPressed: _refreshData, child: const Text("Retry"))
+                        onPressed: prayerProvider.fetchPrayerData,
+                        child: const Text("Retry"))
                   ],
                 ),
               ));
             }
 
-            final data = snapshot.data ?? _lastData!;
-            _lastData = data;
+            if (data == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
             final now = DateTime.now();
             final List<Map<String, dynamic>> fardList = data["fardList"];
-            final DateTime? sunrise = data["sunrise"];
-            final DateTime? nextFajr = data["nextFajr"];
+            final DateTime sunrise = data["sunrise"];
+            final DateTime nextFajr = data["nextFajr"];
 
             // logic for current and next FARZ explicitly
             String currentFarz = "";
@@ -401,7 +213,9 @@ class _PrayerTimeState extends State<PrayerTime> {
             String nextFarz = "";
             DateTime? nextFarzStart;
 
-            // Standard Farz Sequence logic
+            // Improved Active Detection: find the most recent prayer that has already started
+            // We use displayList (which includes Sun/Tahajjud) for visual highlighting,
+            // but currentFarz logic usually focuses on the 5 fards for the header.
             for (var i = 0; i < fardList.length; i++) {
               final DateTime time = fardList[i]["dateTime"]; // Local
               if (time.isAfter(now)) {
@@ -409,11 +223,10 @@ class _PrayerTimeState extends State<PrayerTime> {
                 nextFarzStart = time;
                 if (i > 0) {
                   currentFarz = fardList[i - 1]["name"];
-                  // Special Rule: Fajr ends at Sunrise
                   currentFarzEnd = (currentFarz == "Fajr") ? sunrise : time;
                 } else {
-                  // Before Fajr (Night)
-                  currentFarz = "Isha (Passing)";
+                  // If before first prayer of the day, last prayer was Isha
+                  currentFarz = "Isha";
                   currentFarzEnd = fardList[0]["dateTime"];
                 }
                 break;
@@ -425,14 +238,19 @@ class _PrayerTimeState extends State<PrayerTime> {
               currentFarz = "Isha";
               nextFarz = "Fajr";
               nextFarzStart = nextFajr;
+              // Isha ends at next fajr (or midnight depending on preference, but fajr is safe)
+              currentFarzEnd = nextFajr;
             }
 
             // Header Logic
             String label = "";
             String timeStr = "";
 
-            // Focus logic: If we are in an active window of a farz prayer, show its end
-            if (currentFarz.isNotEmpty &&
+            if (now.isBefore(fardList[0]["dateTime"])) {
+              label = "Upcoming (Fajr) Starts In";
+              timeStr =
+                  _formatDuration(fardList[0]["dateTime"].difference(now));
+            } else if (currentFarz.isNotEmpty &&
                 currentFarzEnd != null &&
                 now.isBefore(currentFarzEnd)) {
               label = "$currentFarz Time Ends In";
@@ -448,7 +266,8 @@ class _PrayerTimeState extends State<PrayerTime> {
                 _showFardOnly ? fardList : data["timesList"];
 
             return RefreshIndicator(
-              onRefresh: () async => _refreshData(),
+              onRefresh: () async =>
+                  prayerProvider.fetchPrayerData(forceRefresh: true),
               child: CustomScrollView(
                 slivers: [
                   SliverToBoxAdapter(
@@ -670,7 +489,6 @@ class _PrayerTimeState extends State<PrayerTime> {
                           // If it's Fajr window (past start, before sunrise)
                           if (name == "Fajr" &&
                               now.isAfter(dateTime) &&
-                              sunrise != null &&
                               now.isBefore(sunrise)) activeNow = true;
                           // For Zuhr, Asr etc, it's active until next Farz
 
@@ -817,86 +635,67 @@ class _PrayerTimeState extends State<PrayerTime> {
     );
   }
 
-  Widget _madhabChip(String label, String value, ThemeProvider tp) {
-    bool isSelected = _madhab == value;
+  Widget _toggleItem(
+      String title, bool active, VoidCallback onTap, ThemeProvider theme) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        decoration: BoxDecoration(
+          color: active ? theme.selectedTheme : Colors.transparent,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Text(title,
+            style: TextStyle(
+                color: active ? Colors.white : Colors.black54,
+                fontWeight: FontWeight.bold,
+                fontSize: 12)),
+      ),
+    );
+  }
+
+  Widget _madhabChip(String title, String val, ThemeProvider theme) {
+    bool active = _madhab == val;
     return GestureDetector(
       onTap: () async {
-        if (!isSelected) {
-          // Clear cached data first
-          _lastData = null;
+        if (!active) {
+          await SavedPrefernces.setMadhab(val);
+          setState(() => _madhab = val);
+          Provider.of<PrayerProvider>(context, listen: false)
+              .fetchPrayerData(forceRefresh: true);
 
-          setState(() {
-            _madhab = value;
-          });
-
-          await SavedPrefernces.setMadhab(value);
-
-          // Force refresh with new madhab
-          _refreshData();
-
-          // Show feedback
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content:
-                    Text('Switched to $label - Recalculating prayer times...'),
+                    Text('Switched to $title - Recalculating prayer times...'),
                 duration: const Duration(seconds: 2),
-                backgroundColor: tp.selectedTheme,
+                backgroundColor: theme.selectedTheme,
               ),
-            );
-          }
-
-          // Reschedule notifications with new madhab if enabled
-          if (_notificationsEnabled && _currentPosition != null) {
-            await PrayerNotificationService.scheduleAllPrayers(
-              position: _currentPosition!,
-              madhab: value,
             );
           }
         }
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? tp.selectedTheme : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-              color: isSelected ? tp.selectedTheme : Colors.grey.shade300),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                      color: tp.selectedTheme.withOpacity(0.2),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2))
-                ]
-              : null,
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black87,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            fontSize: 12,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _toggleItem(
-      String label, bool active, VoidCallback onTap, ThemeProvider tp) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        decoration: BoxDecoration(
-            color: active ? tp.selectedTheme : Colors.transparent,
-            borderRadius: BorderRadius.circular(30)),
-        child: Text(label,
+            color: active ? theme.selectedTheme : Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(
+              color: active ? theme.selectedTheme : Colors.grey.shade300,
+              width: 1.5,
+            ),
+            boxShadow: [
+              if (active)
+                BoxShadow(
+                    color: theme.selectedTheme.withOpacity(0.3), blurRadius: 8)
+            ]),
+        child: Text(title,
             style: TextStyle(
-                color: active ? Colors.white : Colors.grey[600],
-                fontWeight: FontWeight.bold,
-                fontSize: 11)),
+                color: active ? Colors.white : Colors.black87,
+                fontSize: 12,
+                fontWeight: FontWeight.bold)),
       ),
     );
   }
