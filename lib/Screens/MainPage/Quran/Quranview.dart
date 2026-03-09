@@ -412,10 +412,15 @@ class _QuranViewState extends State<QuranView> {
                         audioProvider.resumePlayback();
                       }
                     } else {
-                      // Start playback from theBeginning of the surah
+                      // Start playback from the beginning of the surah using ayatId
                       audioProvider.startSurahPlayback(
                           context, listAyat, widget.surahName ?? "Surah",
-                          startIndex: 0);
+                          startAyatId: listAyat.isNotEmpty
+                              ? listAyat
+                                  .firstWhere((a) => a.ayatNumber != "0",
+                                      orElse: () => listAyat.first)
+                                  .ayatId
+                              : null);
                     }
                   } else if (index == 2) {
                     showDialog(
@@ -461,23 +466,23 @@ class _QuranViewState extends State<QuranView> {
                         ? "Kanz-ul-Irfan"
                         : "Kanz-ul-Iman",
                   ),
-                  BottomNavigationBarItem(
-                    icon: Padding(
-                      padding: const EdgeInsets.only(bottom: 4.0),
-                      child: Icon(
-                        audioProvider.currentAyahIndex != null
-                            ? (audioProvider.isPlaying
-                                ? Icons.pause_circle_filled_rounded
-                                : Icons.play_circle_filled_rounded)
-                            : Icons.play_circle_outline_rounded,
-                        color: Colors.white,
-                        size: 26,
-                      ),
-                    ),
-                    label: audioProvider.currentAyahIndex != null
-                        ? (audioProvider.isPlaying ? 'Pause' : 'Resume')
-                        : 'Play Audio',
-                  ),
+                  // BottomNavigationBarItem(
+                  //   icon: Padding(
+                  //     padding: const EdgeInsets.only(bottom: 4.0),
+                  //     child: Icon(
+                  //       audioProvider.currentAyahIndex != null
+                  //           ? (audioProvider.isPlaying
+                  //               ? Icons.pause_circle_filled_rounded
+                  //               : Icons.play_circle_filled_rounded)
+                  //           : Icons.play_circle_outline_rounded,
+                  //       color: Colors.white,
+                  //       size: 26,
+                  //     ),
+                  //   ),
+                  //   label: audioProvider.currentAyahIndex != null
+                  //       ? (audioProvider.isPlaying ? 'Pause' : 'Resume')
+                  //       : 'Play Audio',
+                  // ),
                   BottomNavigationBarItem(
                     icon: Padding(
                       padding: const EdgeInsets.only(bottom: 4.0),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:just_audio/just_audio.dart';
 import '../Models/aya_list_model.dart';
 
@@ -44,19 +45,24 @@ class AudioService {
     });
   }
 
-  Future<void> playSurah(List<Aya> ayats, {int startIndex = 0}) async {
-    String? targetId;
-
-    if (startIndex >= 0 && startIndex < ayats.length) {
+  Future<void> playSurah(List<Aya> ayats,
+      {String? startAyatId, int? startIndex}) async {
+    // Determine the target ID to start at
+    String? targetId = startAyatId;
+    if (targetId == null &&
+        startIndex != null &&
+        startIndex >= 0 &&
+        startIndex < ayats.length) {
       targetId = ayats[startIndex].ayatId;
     }
 
-    // Consistent filtering: Skip Bismillah (Verse 0) for all Surahs/Paras.
-    // For Alafasy, Track 1 is S1 V1 (Alhamdulillah), which already includes Bismillah audio.
+    // Always skip Bismillah (ayatNumber "0") in the active playlist.
+    // Track 1 for Alafasy is S1 V1 (Alhamdulillah), which contains the Bismillah intro.
     _playlist = ayats.where((a) => a.ayatNumber != "0").toList();
 
     if (targetId != null) {
       _currentIndex = _playlist.indexWhere((a) => a.ayatId == targetId);
+      // Fallback: If targetId (e.g. Bismillah) was filtered out, start at the first available verse
       if (_currentIndex == -1) _currentIndex = 0;
     } else {
       _currentIndex = 0;
@@ -78,31 +84,8 @@ class AudioService {
     _currentAyahId.add(_lastAyahId);
     _currentAyahNumber.add(_lastAyahNumber);
 
-    // Track Mapping Logic:
-    // Tracks 1-6236 in the API correspond to the verses of the Quran.
-    // In this mapping, Fatiha Bismillah is Track 1.
-    // For all other Surahs (2-114), Bismillah is NOT a track.
-    // So we subtract the number of "extra" Bismillahs encountered before this verse.
-
-    int surahIdInt = int.tryParse(aya.surahId ?? "1") ?? 1;
-
-    // Number of extra Bismillahs (those NOT in the 1-6236 sequence):
-    // Surah 1: Bismillah is Track 1. Count = 1.
-    // Surah 2-8: surahId - count of bismillahs before or at this surah.
-    // Correct Formula:
-    // Before S1 V1 (Alhamdu), there is 1 extra (S1 Bismillah).
-    // Before S2 V1, there are 2 extras (S1 Bismillah + S2 Bismillah).
-    // Surah 9 has no Bismallah.
-
-    int totalBismillahsBeforeOrAtS =
-        surahIdInt < 9 ? surahIdInt : surahIdInt - 1;
-
-    int globalTrackIndex =
-        (int.tryParse(aya.ayatId ?? "1") ?? 1) - totalBismillahsBeforeOrAtS;
-
-    // Since Tracks start at 1, if ID 2 (S1 V1) - 1 (S1 BM) = 1. Track 1 is S1 V1.
-    // Track 8 is S2 V1. (ID 10 - 2 BM = 8). Correct.
-
+    String globalTrackIndex = aya.ayatId ?? "1";
+    // debugger();
     final String audioUrl =
         "https://cdn.islamic.network/quran/audio/128/ar.alafasy/$globalTrackIndex.mp3";
 

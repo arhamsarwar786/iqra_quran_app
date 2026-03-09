@@ -318,7 +318,7 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
                                       context,
                                       widget.ayats,
                                       surah?.name ?? "Surah",
-                                      startIndex: _currentIndex,
+                                      startAyatId: aya.ayatId,
                                     );
                                   });
                                 },

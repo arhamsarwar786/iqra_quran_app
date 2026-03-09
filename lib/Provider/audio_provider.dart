@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:provider/provider.dart';
 import '../Models/aya_list_model.dart';
+import '../Provider/theme_provider.dart';
 import '../Services/audio_service.dart';
 
 class AudioProvider extends ChangeNotifier {
@@ -57,7 +59,7 @@ class AudioProvider extends ChangeNotifier {
 
   Future<void> startSurahPlayback(
       BuildContext context, List<Aya> ayats, String surahName,
-      {int startIndex = 0}) async {
+      {String? startAyatId, int? startIndex}) async {
     final hasConn = await checkConnection();
     if (!hasConn) {
       _showNoInternetDialog(context);
@@ -65,27 +67,46 @@ class AudioProvider extends ChangeNotifier {
     }
 
     _currentSurahName = surahName;
-    await _audioService.playSurah(ayats, startIndex: startIndex);
+    await _audioService.playSurah(ayats,
+        startAyatId: startAyatId, startIndex: startIndex);
   }
 
   void _showNoInternetDialog(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(color: themeProvider.selectedTheme, width: 2)),
+        title: Row(
           children: [
-            Icon(Icons.wifi_off_rounded, color: Colors.redAccent),
-            SizedBox(width: 10),
-            Text("Connection Required"),
+            Icon(Icons.wifi_off_rounded, color: themeProvider.selectedTheme),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                "Connection Required",
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, color: Colors.black87),
+              ),
+            ),
           ],
         ),
         content: const Text(
           "To listen to the beautiful recitation, an active internet connection is required. Please check your connection and try again.",
-          style: TextStyle(fontSize: 16),
+          style: TextStyle(fontSize: 15, color: Colors.black87, height: 1.5),
         ),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: themeProvider.selectedTheme.withOpacity(0.1),
+              foregroundColor: themeProvider.selectedTheme,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
             onPressed: () => Navigator.pop(context),
             child:
                 const Text("OK", style: TextStyle(fontWeight: FontWeight.bold)),
