@@ -5,10 +5,11 @@
   "packages": [
     {
       "name": "iqra",
-      "version": "1.1.0+7",
+      "version": "1.1.0+8",
       "dependencies": [
         "adhan_dart",
         "arabic_numbers",
+        "bm25",
         "carousel_slider",
         "cupertino_icons",
         "easy_localization",
@@ -140,6 +141,15 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "bm25",
+      "version": "2.2.3",
+      "dependencies": [
+        "async",
+        "collection",
+        "meta"
       ]
     },
     {

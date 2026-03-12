@@ -50,6 +50,12 @@
       "languageVersion": "3.6"
     },
     {
+      "name": "bm25",
+      "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/bm25-2.2.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "boolean_selector",
       "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/boolean_selector-2.1.2",
       "packageUri": "lib/",

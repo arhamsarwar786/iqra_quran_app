@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:just_audio/just_audio.dart';
 import '../Models/aya_list_model.dart';
+import '../Provider/quran_data_provider.dart';
 
 class AudioService {
   static final AudioService _instance = AudioService._internal();
@@ -84,10 +85,10 @@ class AudioService {
     _currentAyahId.add(_lastAyahId);
     _currentAyahNumber.add(_lastAyahNumber);
 
-    String globalTrackIndex = aya.ayatId ?? "1";
-    // debugger();
+    // Calculate correct global index for audio (1-6236)
+    final int trackIndex = QuranDataProvider().getGlobalAyatIndex(aya.surahId, aya.ayatNumber);
     final String audioUrl =
-        "https://cdn.islamic.network/quran/audio/128/ar.alafasy/$globalTrackIndex.mp3";
+        "https://cdn.islamic.network/quran/audio/128/ar.alafasy/$trackIndex.mp3";
 
     try {
       _lastAyahIndex = _currentIndex;

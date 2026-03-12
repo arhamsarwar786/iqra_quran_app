@@ -80,7 +80,7 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
-  void _performSearch(String query) {
+  Future<void> _performSearch(String query) async {
     if (query.trim().length < 2) {
       if (mounted) {
         setState(() {
@@ -98,7 +98,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     final quranProvider =
         Provider.of<QuranDataProvider>(context, listen: false);
-    final results = quranProvider.searchQuran(
+    final results = await quranProvider.searchQuran(
       query.trim(),
       searchArabic: _searchArabic,
       searchTranslation: _searchTranslation,
@@ -217,10 +217,14 @@ class _SearchScreenState extends State<SearchScreen> {
 
       if (mounted) setState(() => _playingIndex = index);
 
-      // Using Alquran.cloud audio CDN (Alafasy reciter)
-      // ayatId in our model is global index (1-6236)
+      // Calculate correct global index for audio (1-6236)
+      final quranProvider =
+          Provider.of<QuranDataProvider>(context, listen: false);
+      final int trackIndex =
+          quranProvider.getGlobalAyatIndex(aya.surahId, aya.ayatNumber);
+
       final String audioUrl =
-          "https://cdn.islamic.network/quran/audio/128/ar.alafasy/${aya.ayatId}.mp3";
+          "https://cdn.islamic.network/quran/audio/128/ar.alafasy/$trackIndex.mp3";
 
       dev.log("Loading URL: $audioUrl");
       await _audioPlayer.setUrl(audioUrl);
@@ -470,17 +474,17 @@ class _SearchScreenState extends State<SearchScreen> {
                           ),
                         ),
                       ),
-                      const Spacer(),
-                      IconButton(
-                        icon: Icon(
-                          isPlaying
-                              ? Icons.pause_circle_filled
-                              : Icons.play_circle_filled,
-                          color: theme.selectedTheme,
-                          size: 30,
-                        ),
-                        onPressed: () => _playRecitation(aya, index),
-                      ),
+                      // const Spacer(),
+                      // IconButton(
+                      //   icon: Icon(
+                      //     isPlaying
+                      //         ? Icons.pause_circle_filled
+                      //         : Icons.play_circle_filled,
+                      //     color: theme.selectedTheme,
+                      //     size: 30,
+                      //   ),
+                      //   onPressed: () => _playRecitation(aya, index),
+                      // ),
                     ],
                   ),
                   const SizedBox(height: 12),

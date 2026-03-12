@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.1.0+7
+version: 1.1.0+8
 
 environment:
   sdk: ">=2.17.6 <3.0.0"
@@ -33,53 +33,48 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
-  provider:
-  arabic_numbers: any 
-  adhan_dart: 
-  timezone: 
-  intl: 
-  hijri:
-  geolocator: 
-  geocoding: 
-  lat_lng_to_timezone: any
-  flutter_compass: any 
-  stream_transform: any
-  vector_math:
-  carousel_slider: 
-  objectbox: 
-  objectbox_flutter_libs:
-  shared_preferences: 
-  just_audio: 
-  share_plus: 10.1.4
-  package_info_plus: 8.1.1
-  path_provider:
-  flutter_card_swiper: ^7.0.1
+  cupertino_icons: ^1.0.8
+  provider: ^6.1.5+1
+  arabic_numbers: ^1.0.0
+  adhan_dart: ^1.2.0
+  timezone: ^0.9.4
+  intl: ^0.20.2
+  hijri: ^3.0.0
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
+  lat_lng_to_timezone: ^0.2.0
+  flutter_compass: ^0.8.1
+  stream_transform: ^2.1.1
+  vector_math: ^2.2.0
+  carousel_slider: ^5.1.2
+  objectbox: ^5.2.0
+  objectbox_flutter_libs: ^5.2.0
+  shared_preferences: ^2.5.4
+  just_audio: ^0.10.5
+  share_plus: ^10.1.4
+  package_info_plus: ^8.1.1
+  path_provider: ^2.1.5
+  flutter_card_swiper: ^7.2.0
   flutter_localization: ^0.1.14
-  easy_localization: ^3.0.3
-  file:
-  flutter_local_notifications: ^17.0.0
-  file_picker: ^8.0.0
+  easy_localization: ^3.0.8
+  file: ^7.0.1
+  flutter_local_notifications: ^17.2.4
+  file_picker: ^8.3.7
   speech_to_text: ^7.3.0
-  permission_handler: ^11.0.1
-  url_launcher: ^6.1.7
-  font_awesome_flutter: 10.1.0
+  permission_handler: ^11.4.0
+  url_launcher: ^6.3.2
+  font_awesome_flutter: ^10.1.0
   upgrader: ^12.5.0
+  bm25: ^2.2.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  build_runner: any
-  objectbox_generator: any
+  build_runner: ^2.11.1
+  objectbox_generator: ^5.2.0
   flutter_launcher_icons: ^0.10.0
-
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  flutter_lints: ^2.0.3
 
 flutter_icons:
   android: true
