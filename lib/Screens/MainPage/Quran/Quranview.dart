@@ -404,25 +404,27 @@ class _QuranViewState extends State<QuranView> {
                           suratNumber: widget.suratNumber,
                           surahName: widget.surahName,
                         ));
-                  } else if (index == 1) {
-                    if (audioProvider.currentAyahIndex != null) {
-                      if (audioProvider.isPlaying) {
-                        audioProvider.pausePlayback();
-                      } else {
-                        audioProvider.resumePlayback();
-                      }
-                    } else {
-                      // Start playback from the beginning of the surah using ayatId
-                      audioProvider.startSurahPlayback(
-                          context, listAyat, widget.surahName ?? "Surah",
-                          startAyatId: listAyat.isNotEmpty
-                              ? listAyat
-                                  .firstWhere((a) => a.ayatNumber != "0",
-                                      orElse: () => listAyat.first)
-                                  .ayatId
-                              : null);
-                    }
-                  } else if (index == 2) {
+                  }
+                  // else if (index == 1) {
+                  //   if (audioProvider.currentAyahIndex != null) {
+                  //     if (audioProvider.isPlaying) {
+                  //       audioProvider.pausePlayback();
+                  //     } else {
+                  //       audioProvider.resumePlayback();
+                  //     }
+                  //   } else {
+                  //     // Start playback from the beginning of the surah using ayatId
+                  //     audioProvider.startSurahPlayback(
+                  //         context, listAyat, widget.surahName ?? "Surah",
+                  //         startAyatId: listAyat.isNotEmpty
+                  //             ? listAyat
+                  //                 .firstWhere((a) => a.ayatNumber != "0",
+                  //                     orElse: () => listAyat.first)
+                  //                 .ayatId
+                  //             : null);
+                  //   }
+                  // }
+                  else if (index == 1) {
                     showDialog(
                       context: context,
                       builder: (context) => AutoScrollSpeedDialog(
@@ -448,7 +450,7 @@ class _QuranViewState extends State<QuranView> {
                         },
                       ),
                     );
-                  } else if (index == 3) {
+                  } else if (index == 2) {
                     push(context, const SettingScreen());
                   }
                 },
