@@ -7,6 +7,7 @@ import '../Models/ruko_model.dart';
 import '../Models/sajda_model.dart';
 import '../Models/surah_metadata_model.dart';
 import '../Services/search_engine.dart';
+import '../Services/analytics_service.dart';
 
 // ─── Top-level compute functions (must be top-level for isolate use) ──────────
 
@@ -323,6 +324,7 @@ class QuranDataProvider extends ChangeNotifier {
     bool searchTafseer = true,
   }) async {
     if (query.trim().isEmpty) return [];
+    AnalyticsService.trackSearch(query);
     final String q = query.trim().toLowerCase();
 
     final match = RegExp(r'^(\d+)(?::|\ +)(\d+)$').firstMatch(q);

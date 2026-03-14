@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../Models/aya_list_model.dart';
 import '../Provider/theme_provider.dart';
 import '../Services/audio_service.dart';
+import '../Services/analytics_service.dart';
 
 class AudioProvider extends ChangeNotifier {
   final AudioService _audioService = AudioService();
@@ -67,6 +68,7 @@ class AudioProvider extends ChangeNotifier {
     }
 
     _currentSurahName = surahName;
+    AnalyticsService.logEvent('audio_played', parameters: {'surah_name': surahName});
     await _audioService.playSurah(ayats,
         startAyatId: startAyatId, startIndex: startIndex);
   }

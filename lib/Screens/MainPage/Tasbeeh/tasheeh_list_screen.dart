@@ -7,6 +7,7 @@ import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Utils/constants.dart';
 import 'package:provider/provider.dart';
 import 'package:iqra/Provider/tasbih_count.dart';
+import 'package:iqra/Services/analytics_service.dart';
 import 'package:iqra/main.dart';
 
 class TasheehListScreen extends StatefulWidget {
@@ -112,6 +113,7 @@ class _TasheehListScreenState extends State<TasheehListScreen> {
 
                     return InkWell(
                       onTap: () {
+                        AnalyticsService.trackFeatureAccess('tasbeeh');
                         var tasbeehProvider = context.read<TasbeehProvider>();
                         var tasbihCountProvider = context.read<TasbeeCount>();
                         final currentTasbeeh = tasbeehProvider.selectedTasbeeh;

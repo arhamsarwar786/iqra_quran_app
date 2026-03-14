@@ -66,6 +66,7 @@ dependencies:
   font_awesome_flutter: ^10.1.0
   upgrader: ^12.5.0
   bm25: ^2.2.3
+  appmetrica_plugin: ^3.4.0
 
 dev_dependencies:
   flutter_test:

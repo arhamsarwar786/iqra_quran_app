@@ -4,6 +4,7 @@ import 'package:iqra/Helper/favourite.dart';
 import 'package:iqra/Models/quaran_favorate.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
+import 'package:iqra/Services/analytics_service.dart';
 import 'package:provider/provider.dart';
 import 'Quranview.dart';
 
@@ -90,6 +91,7 @@ class _SurahState extends State<Surah> {
 
                   return InkWell(
                     onTap: () {
+                      AnalyticsService.trackQuranOpen(surahNumber, surah.name);
                       Navigator.push(
                         context,
                         MaterialPageRoute(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iqra/Screens/MainPage/Home/qibal/flutter_qiblah.dart';
+import '../../../../Services/analytics_service.dart';
 import '../../../../widgets.dart';
 import 'compass.dart';
 
@@ -12,6 +13,13 @@ class DirectionTOQiblah extends StatefulWidget {
 
 class _DirectionTOQiblahState extends State<DirectionTOQiblah> {
   final _deviceSupport = FlutterQiblah.androidDeviceSensorSupport();
+
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.trackFeatureAccess('qibla');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

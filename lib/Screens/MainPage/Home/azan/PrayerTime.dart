@@ -11,6 +11,7 @@ import '../qibal/qibla.dart';
 import '../../Drawer/setting_screen.dart';
 
 import 'package:iqra/Provider/prayer_provider.dart';
+import '../../../../Services/analytics_service.dart';
 
 class PrayerTime extends StatefulWidget {
   const PrayerTime({Key? key}) : super(key: key);
@@ -144,6 +145,7 @@ class _PrayerTimeState extends State<PrayerTime> {
               return IconButton(
                 onPressed: () {
                   if (provider.prayerData != null) {
+                    AnalyticsService.logEvent('share_prayer_times');
                     AppShare.namazTimes(
                       context: context,
                       bloc: themeProvider,

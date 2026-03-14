@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:iqra/Models/name_of_Allah_model.dart';
 import 'package:iqra/Provider/theme_provider.dart';
+import 'package:iqra/Services/analytics_service.dart';
 import 'package:provider/provider.dart';
 
 class NameofAllah extends StatefulWidget {
@@ -19,6 +20,7 @@ class _NameofAllahState extends State<NameofAllah> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.trackFeatureAccess('names_of_allah');
     loadNamesOfAllah();
   }
 

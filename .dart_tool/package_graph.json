@@ -8,6 +8,7 @@
       "version": "1.1.0+8",
       "dependencies": [
         "adhan_dart",
+        "appmetrica_plugin",
         "arabic_numbers",
         "bm25",
         "carousel_slider",
@@ -141,6 +142,16 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "appmetrica_plugin",
+      "version": "3.4.0",
+      "dependencies": [
+        "decimal",
+        "flutter",
+        "logging",
+        "stack_trace"
       ]
     },
     {
@@ -1611,6 +1622,19 @@
         "collection",
         "hooks"
       ]
+    },
+    {
+      "name": "decimal",
+      "version": "3.2.4",
+      "dependencies": [
+        "intl",
+        "rational"
+      ]
+    },
+    {
+      "name": "rational",
+      "version": "2.2.3",
+      "dependencies": []
     }
   ],
   "configVersion": 1

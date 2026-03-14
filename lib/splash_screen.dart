@@ -8,6 +8,7 @@ import 'package:iqra/Provider/prayer_provider.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Screens/MainPage/main_screen.dart';
 import 'package:iqra/Screens/Permission/permission_screen.dart';
+import 'package:iqra/Services/analytics_service.dart';
 import 'package:iqra/Utils/constants.dart';
 import 'package:provider/provider.dart';
 
@@ -38,6 +39,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logEvent('app_started');
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(

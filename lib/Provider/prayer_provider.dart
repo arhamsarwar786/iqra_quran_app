@@ -5,6 +5,7 @@ import 'package:adhan_dart/adhan_dart.dart';
 import 'package:intl/intl.dart';
 import '../Helper/preference/saved_preferences.dart';
 import '../Services/prayer_notification_service.dart';
+import '../Services/analytics_service.dart';
 
 class PrayerProvider extends ChangeNotifier {
   Map<String, dynamic>? _prayerData;
@@ -23,6 +24,7 @@ class PrayerProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      AnalyticsService.trackPrayerTimeCheck();
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) throw 'Location services are disabled.';
 

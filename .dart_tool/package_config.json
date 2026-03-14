@@ -20,6 +20,12 @@
       "languageVersion": "3.9"
     },
     {
+      "name": "appmetrica_plugin",
+      "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/appmetrica_plugin-3.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.14"
+    },
+    {
       "name": "arabic_numbers",
       "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/arabic_numbers-1.0.0",
       "packageUri": "lib/",
@@ -186,6 +192,12 @@
       "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/dbus-0.7.12",
       "packageUri": "lib/",
       "languageVersion": "2.17"
+    },
+    {
+      "name": "decimal",
+      "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/decimal-3.2.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
     },
     {
       "name": "easy_localization",
@@ -738,6 +750,12 @@
       "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/pubspec_parse-1.5.0",
       "packageUri": "lib/",
       "languageVersion": "3.6"
+    },
+    {
+      "name": "rational",
+      "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/rational-2.2.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.14"
     },
     {
       "name": "rxdart",

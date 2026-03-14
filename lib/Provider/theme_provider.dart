@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iqra/Helper/preference/saved_preferences.dart';
 import 'package:iqra/Models/theme_model.dart';
 import 'package:iqra/controller/methods.dart';
+import 'package:iqra/Services/analytics_service.dart';
 
 class ThemeProvider extends ChangeNotifier {
   // Color selectedTheme = Color(0xff227C9E);0E323F
@@ -64,6 +65,7 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   changeTheme(theme) {
+    AnalyticsService.trackSettingChange('theme', theme);
     SavedPrefernces.setTheme(theme);
     var finded = ThemeModel.fromJson(theme);
     selectedTheme = finded.primary.toString().toColor();
@@ -82,6 +84,7 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   changeArabicFont(data) {
+    AnalyticsService.trackSettingChange('arabic_font_size', data);
     SavedPrefernces.setArabicFontSize(data);
     getSelectedArabicFont();
   }
@@ -144,6 +147,7 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   changeTranslation(data) {
+    AnalyticsService.trackSettingChange('translation', data);
     SavedPrefernces.setSelectedTranslation(data);
     getSelectedTranslation();
   }

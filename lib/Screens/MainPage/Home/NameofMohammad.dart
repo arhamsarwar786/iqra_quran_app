@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'dart:convert';
 import '../../../Models/name_of_muhammad_model.dart';
 import '../../../Provider/theme_provider.dart';
+import '../../../Services/analytics_service.dart';
 
 class NameofMohammad extends StatefulWidget {
   const NameofMohammad({Key? key}) : super(key: key);
@@ -21,6 +22,7 @@ class _NameofMohammadState extends State<NameofMohammad> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.trackFeatureAccess('names_of_muhammad');
     loadNames();
   }
 
