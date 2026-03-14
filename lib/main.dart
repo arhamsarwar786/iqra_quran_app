@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => AudioProvider()),
         ChangeNotifierProvider(create: (context) => PrayerProvider()),
         ChangeNotifierProvider(
-            create: ((context) => QuranDataProvider()..loadQuranData())),
+            create: ((context) => QuranDataProvider())),
       ],
       // child: const Demo(),
       child: const MaterialScreen(),

@@ -59,6 +59,14 @@ class _MaterialScreenState extends State<MaterialScreen> {
             iconTheme: const IconThemeData(color: Colors.white),
           ),
         ),
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: TextScaler.noScaling,
+            ),
+            child: child!,
+          );
+        },
         home: const SplashScreen(),
       ),
     );
