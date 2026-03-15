@@ -161,7 +161,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       }
 
       paraArabicScreenWidget.add(Padding(
-        padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
         child: RichText(
           key: key,
           textAlign: TextAlign
@@ -301,6 +301,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     }
 
     flush(false); // Flush final block
+    paraArabicScreenWidget.add(const SizedBox(height: 150));
     if (mounted) {
       setState(() {
         _lastFontSize = bloc.arabicFontSize;
@@ -673,7 +674,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                               slivers: [
                                 SliverPadding(
                                   padding: const EdgeInsets.only(
-                                      left: 5, right: 5, top: 10, bottom: 150),
+                                      left: 12, right: 12, top: 10, bottom: 10),
                                   sliver: SliverList(
                                     delegate: SliverChildListDelegate(
                                       paraArabicScreenWidget,

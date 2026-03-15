@@ -163,7 +163,7 @@ class VerseDetailScreen extends StatelessWidget {
         ),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(22),
+          padding: const EdgeInsets.all(20), // Increased for better framing
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(25),
@@ -191,7 +191,7 @@ class VerseDetailScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: fontSize,
                       fontFamily: fontFamily,
-                      height: 1.8,
+                      height: 1.8, // Increased for readability
                       color: Colors.black.withOpacity(0.85),
                     ),
                   ),
@@ -209,71 +209,70 @@ class VerseDetailScreen extends StatelessWidget {
   }) {
     final List<TextSpan> spans = [];
 
-    // Refined Regex for structured Islamic text:
-    // Group 1: { ... } -> Quranic Verses or Important Citations (Large/Bold/Theme)
-    // Group 2: [ ... ] -> Major Topic Headings (Bold/Underlined)
-    // Group 3: ( ... ) -> Footnotes, References, or Page Numbers (Small/Secondary)
-    // Group 4: Regular text content
+    // Aggressive Normalization: Flatten and clean input
+    String cleanedText = text
+        .replaceAll('\r', '')
+        .replaceAll(RegExp(r'\n+'), ' ')
+        .replaceAll(RegExp(r' {2,}'), ' ')
+        .trim();
+
     final RegExp exp = RegExp(
       r'\{(.*?)\}|\[(.*?)\]|\((.*?)\)|([^\{\[\]\(\)]+)',
       dotAll: true,
     );
 
-    final Iterable<RegExpMatch> matches = exp.allMatches(text.trim());
+    final Iterable<RegExpMatch> matches = exp.allMatches(cleanedText);
 
     for (final RegExpMatch match in matches) {
       if (match.group(1) != null) {
-        // --- {Verse / Central Point} ---
-        String content = match.group(1)!.trim();
+        // --- {Verse Highlight} ---
+        // Ensure separation from previous text and clear space after
         spans.add(
           TextSpan(
-            text: "\n\n$content\n\n",
+            text: "\n{${match.group(1)!.trim()}}\n\n",
             style: TextStyle(
               color: themeColor,
               fontWeight: FontWeight.w900,
-              fontSize: fontSize + 3, // Make it significantly larger
-              height: 2.0,
+              fontSize: fontSize + 2.5,
+              height: 1.95,
               fontFamily: fontFamily,
             ),
           ),
         );
       } else if (match.group(2) != null) {
         // --- [Topic Heading] ---
-        String content = match.group(2)!.trim();
+        // Double-break before and after for "Easy" readability
         spans.add(
           TextSpan(
-            text: "\n\n[$content]\n",
+            text: "\n\n[${match.group(2)!.trim()}]\n\n",
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.bold,
               fontSize: fontSize + 1,
-              height: 2.2,
+              height: 2.1,
               decoration: TextDecoration.underline,
-              decorationColor: themeColor.withOpacity(0.4),
+              decorationColor: themeColor.withOpacity(0.35),
             ),
           ),
         );
       } else if (match.group(3) != null) {
-        // --- (Footnote / Reference) ---
-        String content = match.group(3)!.trim();
+        // --- (Footnote) ---
         spans.add(
           TextSpan(
-            text: " ($content) ",
+            text: " (${match.group(3)!.trim()}) ",
             style: TextStyle(
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
-              fontSize: (fontSize - 5).clamp(10.0, 18.0), // Proper small size
+              color: Colors.grey[700],
+              fontWeight: FontWeight.bold,
+              fontSize: (fontSize - 5.5).clamp(10.0, 18.0),
               fontStyle: FontStyle.italic,
-              height: 1.5,
+              height: 1.6,
             ),
           ),
         );
       } else if (match.group(4) != null) {
         // --- Normal Body Text ---
         String body = match.group(4)!;
-
-        // Smart formatting for sentence endings and list items
-        body = body.replaceAll("۔ ", "۔\n\n");
+        if (body.trim().isEmpty) continue;
 
         spans.add(
           TextSpan(
@@ -291,7 +290,7 @@ class VerseDetailScreen extends StatelessWidget {
 
     return SelectableText.rich(
       TextSpan(children: spans),
-      textAlign: TextAlign.justify,
+      textAlign: TextAlign.right,
       style: TextStyle(fontFamily: fontFamily),
     );
   }

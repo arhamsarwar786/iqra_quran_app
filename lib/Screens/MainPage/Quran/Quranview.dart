@@ -81,7 +81,7 @@ class _QuranViewState extends State<QuranView> {
       }
 
       quranViewWidget.add(Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
         child: RichText(
           key: key,
           textAlign: TextAlign.center,
@@ -227,6 +227,7 @@ class _QuranViewState extends State<QuranView> {
     if (textSpanChildren.isNotEmpty) {
       flush(false);
     }
+    quranViewWidget.add(const SizedBox(height: 150));
 
     if (mounted) {
       setState(() {
@@ -607,7 +608,7 @@ class _QuranViewState extends State<QuranView> {
                             physics: const AlwaysScrollableScrollPhysics(),
                             child: Container(
                               padding: const EdgeInsets.only(
-                                  left: 12, right: 12, top: 10, bottom: 150),
+                                  left: 12, right: 12, top: 10, bottom: 10),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: quranViewWidget,

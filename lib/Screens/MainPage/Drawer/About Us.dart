@@ -358,7 +358,47 @@ class _AboutusState extends State<Aboutus> {
                                               url:
                                                   "https://www.tiktok.com/@theiqraquranofficial",
                                             ),
+                                            _socialIcon(
+                                              icon: FontAwesomeIcons.globe,
+                                              color: bloc.selectedTheme,
+                                              url: "https://www.theiqraquran.com/",
+                                            ),
                                           ],
+                                        ),
+                                        const SizedBox(height: 30),
+                                        // Website Button
+                                        ElevatedButton.icon(
+                                          onPressed: () => _launchURL(
+                                              "https://www.theiqraquran.com/"),
+                                          icon: const Icon(
+                                              FontAwesomeIcons.globe,
+                                              size: 18),
+                                          label: Text(
+                                            isUrdu
+                                                ? "ہماری ویب سائٹ دیکھیں"
+                                                : "Visit Our Website",
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: isUrdu
+                                                  ? bloc.urduFontFamily
+                                                  : null,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: bloc.selectedTheme,
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 30, vertical: 15),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(30),
+                                            ),
+                                            elevation: 8,
+                                            shadowColor: bloc.selectedTheme
+                                                .withOpacity(0.4),
+                                          ),
                                         ),
                                       ],
                                     ),

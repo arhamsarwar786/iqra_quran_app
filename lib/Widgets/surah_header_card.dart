@@ -136,7 +136,8 @@ class SurahHeaderCard extends StatelessWidget {
                         "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 18,
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
                           fontFamily: theme.arabicFontFamily,
                         ),
                         textAlign: TextAlign.center,
