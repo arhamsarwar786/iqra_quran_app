@@ -42,10 +42,18 @@ class PrayerProvider extends ChangeNotifier {
       Position? position = await Geolocator.getLastKnownPosition();
 
       if (position == null) {
-        position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.low,
-          timeLimit: const Duration(seconds: 5),
-        );
+        try {
+          position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.low,
+            timeLimit: const Duration(seconds: 10), // Increased to 10s
+          );
+        } catch (e) {
+          debugPrint("Location fetch timeout/error: $e");
+          // If 10s passed and we still have no position, 
+          // we look for last known again just in case, or re-throw
+          position = await Geolocator.getLastKnownPosition();
+          if (position == null) rethrow; 
+        }
       }
 
       final String madhab = await SavedPrefernces.getMadhab();

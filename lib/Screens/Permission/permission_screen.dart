@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:iqra/Screens/MainPage/main_screen.dart';
+import 'package:iqra/splash_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../widgets.dart';
 import 'package:upgrader/upgrader.dart';
@@ -40,7 +40,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
   Future<void> _checkAutoNavigate() async {
     if (_locationGranted && _notificationGranted && _audioGranted) {
       if (mounted) {
-        pushUntil(context, const MainScreen());
+        pushUntil(context, const SplashScreen());
       }
     }
   }
@@ -110,7 +110,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
 
   void _handleGetStarted() {
     if (_locationGranted && _notificationGranted && _audioGranted) {
-      pushUntil(context, const MainScreen());
+      pushUntil(context, const SplashScreen());
     } else {
       snackBar(context, "Please allow all permissions to continue.");
     }

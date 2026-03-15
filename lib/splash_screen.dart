@@ -106,47 +106,66 @@ class _SplashScreenState extends State<SplashScreen>
       permission = await Geolocator.checkPermission();
     } catch (_) {}
 
+    final bool locationOk = permission == LocationPermission.whileInUse ||
+        permission == LocationPermission.always;
+
+    // Load both in parallel
     await Future.wait([
       quranProvider.loadQuranData(),
-      _loadPrayer(prayerProvider, permission),
+      if (locationOk) _loadPrayer(prayerProvider, permission),
     ]);
 
     quranProvider.removeListener(_onProviderUpdate);
 
     if (!mounted || _navigated) return;
 
-    // Loading truly complete
+    // If location is OK but we still have no prayer data (e.g. timeout), 
+    // we should NOT proceed to MainScreen until it's ready.
+    int prayerRetries = 0;
+    while (locationOk && prayerProvider.prayerData == null && prayerRetries < 3) {
+      debugPrint("Location OK but no prayer data, retrying ($prayerRetries)...");
+      await _loadPrayer(prayerProvider, permission);
+      if (prayerProvider.prayerData == null) {
+        prayerRetries++;
+        await Future.delayed(const Duration(seconds: 2));
+      }
+    }
+
+    // Loading truly complete for Quran
     _loadingDone = true;
     _displayProgress.value = 1.0;
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 800));
     if (!mounted || _navigated) return;
 
     _navigated = true;
-    final bool locationOk =
-        permission == LocationPermission.whileInUse ||
-            permission == LocationPermission.always;
-
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) =>
-            locationOk ? const MainScreen() : const PermissionScreen(),
-      ),
-    );
-  }
-
-  void _onProviderUpdate() {
-    if (!mounted) return;
-    _realProgressValue = Provider.of<QuranDataProvider>(context, listen: false).loadProgress;
+    
+    // If location is denied, we show Permission Screen. 
+    // BUT we need to make sure when user comes back, they go through Splash again.
+    if (!locationOk) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const PermissionScreen()),
+      );
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MainScreen()),
+      );
+    }
   }
 
   Future<void> _loadPrayer(
       PrayerProvider provider, LocationPermission perm) async {
-    if (perm != LocationPermission.whileInUse &&
-        perm != LocationPermission.always) return;
     try {
       await provider.fetchPrayerData();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint("Splash: Error loading prayer data: $e");
+    }
+  }
+
+  void _onProviderUpdate() {
+    if (!mounted) return;
+    _realProgressValue =
+        Provider.of<QuranDataProvider>(context, listen: false).loadProgress;
   }
 
   @override
