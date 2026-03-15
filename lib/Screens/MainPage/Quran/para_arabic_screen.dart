@@ -59,6 +59,11 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   String? _lastRecitedId;
   AudioProvider? _audioProvider;
   List<Widget> paraArabicScreenWidget = [];
+
+  // Tracking for theme/font changes to trigger real-time re-renders
+  double? _lastFontSize;
+  String? _lastFontFamily;
+  Color? _lastThemeColor;
   List<Aya> listAyat = [];
   SurahMetadata? firstSurahMetadata;
   SurahMetadata? currentSurahMetadata;
@@ -126,7 +131,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
     paraArabicScreenWidget.clear();
     // surahHeaderKeys.clear(); // Removed to allow persistence across build/highlight cycles
-    firstSurahMetadata = null; 
+    firstSurahMetadata = null;
 
     List<InlineSpan> currentSpans = [];
     String? currentSurahId;
@@ -281,13 +286,19 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     }
 
     flush(false); // Flush final block
-    if (mounted) setState(() {});
-    
+    if (mounted) {
+      setState(() {
+        _lastFontSize = bloc.arabicFontSize;
+        _lastFontFamily = bloc.arabicFontFamily;
+        _lastThemeColor = bloc.selectedTheme;
+      });
+    }
+
     // After the list is built and rendered, ensure the header shows the correct Surah
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _updateCurrentSurah();
-      
+
       if (_targetKey != null) {
         final ctx = _targetKey!.currentContext;
         if (ctx != null) {
@@ -348,12 +359,12 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
   void _updateCurrentSurah() {
     if (firstSurahMetadata == null || listAyat.isEmpty) return;
-    
+
     final qProvider = context.read<QuranDataProvider>();
     SurahMetadata? bestMatch = firstSurahMetadata;
-    
+
     double statusBarHeight = MediaQuery.of(context).padding.top;
-    double threshold = statusBarHeight + 110.0; 
+    double threshold = statusBarHeight + 110.0;
     bool foundInView = false;
 
     // 1. Try tracking via GlobalKeys of headers/trackers
@@ -362,9 +373,10 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       if (context != null) {
         final RenderBox box = context.findRenderObject() as RenderBox;
         final position = box.localToGlobal(Offset.zero).dy;
-        
+
         if (position <= threshold) {
-          final metadata = qProvider.getSurahMetadata(int.tryParse(entry.key) ?? 0);
+          final metadata =
+              qProvider.getSurahMetadata(int.tryParse(entry.key) ?? 0);
           if (metadata != null) {
             bestMatch = metadata;
             foundInView = true;
@@ -381,7 +393,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     if (!foundInView && _scrollViewController!.hasClients) {
       final offset = _scrollViewController!.offset;
       final maxScroll = _scrollViewController!.position.maxScrollExtent;
-      
+
       if (offset > 500 && maxScroll > 0) {
         double progress = (offset / maxScroll).clamp(0.0, 1.0);
         int targetAyahIndex = (progress * (listAyat.length - 1)).toInt();
@@ -471,8 +483,15 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<ThemeProvider>();
+    final bloc = context.watch<ThemeProvider>();
     final audioProvider = context.watch<AudioProvider>();
+
+    // Detect theme/font changes and trigger re-render in real-time
+    if (bloc.arabicFontSize != _lastFontSize ||
+        bloc.arabicFontFamily != _lastFontFamily ||
+        bloc.selectedTheme != _lastThemeColor) {
+      Future.microtask(() => viewMaker());
+    }
 
     // Sync highlighting with audio
     // Sync highlighting with audio using global ayatId

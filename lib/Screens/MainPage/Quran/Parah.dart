@@ -58,7 +58,7 @@ class _ParahState extends State<Parah> {
   @override
   Widget build(BuildContext context) {
     return Builder(builder: (context) {
-      var bloc = context.read<ThemeProvider>();
+      var bloc = context.watch<ThemeProvider>();
       return Padding(
         padding:
             const EdgeInsets.only(left: 8.0, right: 8.0, top: 15, bottom: 10),

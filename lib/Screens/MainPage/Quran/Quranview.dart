@@ -54,6 +54,11 @@ class _QuranViewState extends State<QuranView> {
   AudioProvider? _audioProvider;
 
   List<Widget> quranViewWidget = [];
+  
+  // Tracking for theme/font changes to trigger real-time re-renders
+  double? _lastFontSize;
+  String? _lastFontFamily;
+  Color? _lastThemeColor;
 
   viewMaker() async {
     final bloc = context.read<ThemeProvider>();
@@ -221,7 +226,13 @@ class _QuranViewState extends State<QuranView> {
       flush(false);
     }
 
-    if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {
+        _lastFontSize = bloc.arabicFontSize;
+        _lastFontFamily = bloc.arabicFontFamily;
+        _lastThemeColor = bloc.selectedTheme;
+      });
+    }
 
     if (_targetKey != null) {
       // Trigger scroll precisely after build
@@ -360,6 +371,13 @@ class _QuranViewState extends State<QuranView> {
     final quranProvider = context.read<QuranDataProvider>();
     final audioProvider = context.watch<AudioProvider>();
     final metadata = quranProvider.getSurahMetadata(widget.suratNumber ?? 0);
+
+    // Detect theme/font changes and trigger re-render in real-time
+    if (bloc.arabicFontSize != _lastFontSize ||
+        bloc.arabicFontFamily != _lastFontFamily ||
+        bloc.selectedTheme != _lastThemeColor) {
+      Future.microtask(() => viewMaker());
+    }
 
     // Sync highlighting with audio using global ayatId
     if (audioProvider.currentAyahId != _lastRecitedId) {

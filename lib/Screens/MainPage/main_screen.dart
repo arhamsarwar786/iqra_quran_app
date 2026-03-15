@@ -28,7 +28,7 @@ class _MainScreenState extends State<MainScreen> {
 
     // Trigger search index building after landing on Home
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<QuranDataProvider>().buildSearchIndex();
+      // context.read<QuranDataProvider>().buildSearchIndex();
     });
   }
 
