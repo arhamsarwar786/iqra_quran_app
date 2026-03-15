@@ -70,7 +70,7 @@ class _SplashScreenState extends State<SplashScreen>
       _navigated = true;
       qProvider.removeListener(_checkNavigation);
       
-      await Future.delayed(const Duration(milliseconds: 1200));
+      await Future.delayed(const Duration(milliseconds: 300));
       if (!mounted) return;
 
       LocationPermission permission = LocationPermission.denied;

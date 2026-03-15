@@ -11,6 +11,7 @@ import '../qibal/qibla.dart';
 import '../../Drawer/setting_screen.dart';
 
 import 'package:iqra/Provider/prayer_provider.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../../../Services/analytics_service.dart';
 
 class PrayerTime extends StatefulWidget {
@@ -180,24 +181,101 @@ class _PrayerTimeState extends State<PrayerTime> {
               return const Center(child: CircularProgressIndicator());
             }
             if (prayerProvider.error != null && data == null) {
-              return Center(
-                  child: Padding(
-                padding: const EdgeInsets.all(24.0),
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline,
-                        size: 48, color: Colors.red),
-                    const SizedBox(height: 16),
-                    Text("Error Loading Times\n${prayerProvider.error}",
-                        textAlign: TextAlign.center),
-                    const SizedBox(height: 16),
+                    // Premium Glowing Warning Icon
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.red.withOpacity(0.15),
+                            blurRadius: 30,
+                            spreadRadius: 5,
+                          )
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.location_off_rounded,
+                        size: 64,
+                        color: Colors.redAccent,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    Text(
+                      "Location Unavailable",
+                      style: TextStyle(
+                        color: themeProvider.selectedTheme,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      prayerProvider.error != null && prayerProvider.error!.contains('permanently denied')
+                          ? "Location access is permanently disabled. Please enable it in your phone settings to see prayer times."
+                          : (prayerProvider.error ?? "We couldn't determine your location to calculate prayer times. Please ensure GPS is enabled."),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 15,
+                        height: 1.5,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    // Glassmorphism Styled Action Button
                     ElevatedButton(
-                        onPressed: prayerProvider.fetchPrayerData,
-                        child: const Text("Retry"))
+                      onPressed: () async {
+                        AnalyticsService.logEvent('location_error_action');
+                        if (prayerProvider.error != null && prayerProvider.error!.contains('permanently denied')) {
+                          await Geolocator.openAppSettings();
+                        } else {
+                          prayerProvider.fetchPrayerData(forceRefresh: true);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: themeProvider.selectedTheme,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        elevation: 8,
+                        shadowColor: themeProvider.selectedTheme.withOpacity(0.4),
+                      ),
+                      child: Text(
+                        prayerProvider.error != null && prayerProvider.error!.contains('permanently denied')
+                            ? "Open Settings"
+                            : "Try Again",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        "Maybe Later",
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-              ));
+              );
             }
 
             if (data == null) {

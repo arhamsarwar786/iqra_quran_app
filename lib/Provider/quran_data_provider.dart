@@ -150,8 +150,8 @@ class QuranDataProvider extends ChangeNotifier {
         return;
       }
       
-      // Auto-step: advances by ~0.15% every 40ms
-      double next = _simulatedProgress + 0.0015;
+      // Auto-step: advances by ~0.4% every 40ms (reaches 100% in ~10s if loading is slow)
+      double next = _simulatedProgress + 0.004;
       
       // Sync with real progress if real progress jumps ahead
       if (_loadProgress > next) {

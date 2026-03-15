@@ -17,11 +17,17 @@ class PrayerProvider extends ChangeNotifier {
   String? get error => _error;
 
   Future<void> fetchPrayerData({bool forceRefresh = false}) async {
+    if (_isLoading) return; // Guard against multiple triggers
     if (_prayerData != null && !forceRefresh) return;
 
     _isLoading = true;
     _error = null;
     notifyListeners();
+
+    // Visual feedback delay for manual retries
+    if (forceRefresh) {
+      await Future.delayed(const Duration(milliseconds: 800));
+    }
 
     try {
       AnalyticsService.trackPrayerTimeCheck();
