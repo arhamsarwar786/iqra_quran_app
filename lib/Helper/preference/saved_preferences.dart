@@ -228,4 +228,24 @@ class SavedPrefernces {
     final pref = await SharedPreferences.getInstance();
     return pref.getString('last_country');
   }
+
+  static setLat(double lat) async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.setDouble('last_lat', lat);
+  }
+
+  static Future<double> getLat() async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getDouble('last_lat') ?? 0.0;
+  }
+
+  static setLng(double lng) async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.setDouble('last_lng', lng);
+  }
+
+  static Future<double> getLng() async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getDouble('last_lng') ?? 0.0;
+  }
 }

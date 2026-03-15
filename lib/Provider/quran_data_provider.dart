@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:math';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import '../Models/aya_list_model.dart';
@@ -64,6 +66,28 @@ List<RukoModel> _generateRukuIsolate(List<Aya> data) {
   return list;
 }
 
+/// Data structure for pre-normalized search documents
+class IndexData {
+  final List<String> arabicDocs;
+  final List<String> translationDocs;
+  final List<String> tafseerDocs;
+  IndexData(this.arabicDocs, this.translationDocs, this.tafseerDocs);
+}
+
+/// Normalizes all search fields in a background isolate
+IndexData _prepareIndexData(List<Aya> data) {
+  final List<String> arabicDocs = [];
+  final List<String> translationDocs = [];
+  final List<String> tafseerDocs = [];
+
+  for (final aya in data) {
+    arabicDocs.add(QuranDataProvider.normalizeArabic(aya.arabicText.toLowerCase()));
+    translationDocs.add(QuranDataProvider.normalizeArabic((aya.tarjumaIrfan ?? "").toLowerCase()));
+    tafseerDocs.add(QuranDataProvider.normalizeArabic((aya.withoutHtmlTafseer ?? "").toLowerCase()));
+  }
+  return IndexData(arabicDocs, translationDocs, tafseerDocs);
+}
+
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 class QuranDataProvider extends ChangeNotifier {
@@ -88,6 +112,11 @@ class QuranDataProvider extends ChangeNotifier {
 
   QuranSearchEngine? _searchEngine;
   Aya? _currentRandomAyat;
+  Timer? _rotationTimer;
+
+  // ── Initialization Logic for Splash ──
+  double _simulatedProgress = 0.0;
+  Timer? _splashTicker;
 
   // ── Getters ────────────────────────────────────────────────────
   List<Aya> get quranData => _quranData;
@@ -100,9 +129,46 @@ class QuranDataProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isLoaded => _isLoaded;
   double get loadProgress => _loadProgress;
+  double get displayProgress => _simulatedProgress;
   Aya? get currentRandomAyat => _currentRandomAyat;
 
   // ── Main load entry-point ──────────────────────────────────────
+
+  /// Orchestrates the entire app startup sequence.
+  /// Moves logic out of SplashScreen and into the Provider.
+  Future<void> appInitialize() async {
+    if (_isLoaded || _isLoading) return;
+    
+    _simulatedProgress = 0.0;
+    _loadProgress = 0.0;
+    
+    // Start the "Smooth ticker" for the UI
+    _splashTicker?.cancel();
+    _splashTicker = Timer.periodic(const Duration(milliseconds: 40), (timer) {
+      if (_isLoaded) {
+        timer.cancel();
+        return;
+      }
+      
+      // Auto-step: advances by ~0.15% every 40ms
+      double next = _simulatedProgress + 0.0015;
+      
+      // Sync with real progress if real progress jumps ahead
+      if (_loadProgress > next) {
+        next = _loadProgress;
+      }
+      
+      // Cap at 99% until fully loaded
+      if (next > 0.99) next = 0.99;
+      
+      if (next > _simulatedProgress) {
+        _simulatedProgress = next;
+        notifyListeners();
+      }
+    });
+
+    await loadQuranData();
+  }
 
   /// Loads all Quran data.  On failure it auto-releases memory and retries
   /// up to [maxRetries] times before silently continuing so the app can
@@ -188,14 +254,21 @@ class QuranDataProvider extends ChangeNotifier {
 
     // ── 6. Done ───────────────────────────────────────────────────
     _isLoaded = true;
+    _simulatedProgress = 1.0;
+    _splashTicker?.cancel();
+    
     _currentRandomAyat = _pickDailyAyat();
     _setProgress(1.0);
     _isLoading = false;
-    notifyListeners();
-    debugPrint('QuranData: Ready.');
 
-    // ── 7. Build search index silently in background ──────────────
-    _buildSearchIndexAsync();
+    // Start rotation timer
+    _rotationTimer?.cancel();
+    _rotationTimer = Timer.periodic(const Duration(seconds: 200), (timer) {
+      rotateRandomAyat();
+    });
+
+    notifyListeners();
+    debugPrint('QuranData: Ready and auto-rotation started.');
   }
 
   void _setProgress(double value) {
@@ -226,13 +299,26 @@ class QuranDataProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> _buildSearchIndexAsync() async {
-    if (_quranData.isEmpty) return;
+  /// Builds the BM25 search index in a background isolate.
+  /// This is heavy and should be called after landing on Home.
+  Future<void> buildSearchIndex() async {
+    if (_quranData.isEmpty || _searchEngine != null) return;
     try {
       debugPrint('QuranSearch: Building BM25 index…');
+      
+      // Phase 1: Heavy normalization in background isolate
+      final IndexData docs = await compute(_prepareIndexData, _quranData);
+      
       _searchEngine =
-          QuranSearchEngine(_quranData, normalize: _normalizeArabic);
-      await _searchEngine!.buildIndex();
+          QuranSearchEngine(_quranData, normalize: normalizeArabic);
+          
+      // Phase 2: BM25 index construction
+      await _searchEngine!.buildIndexFromDocs(
+        docs.arabicDocs, 
+        docs.translationDocs, 
+        docs.tafseerDocs
+      );
+      
       debugPrint('QuranSearch: Index ready.');
       notifyListeners();
     } catch (e) {
@@ -262,12 +348,27 @@ class QuranDataProvider extends ChangeNotifier {
     _paraRukuCounts.clear();
     _searchEngine = null;
     _currentRandomAyat = null;
+    _rotationTimer?.cancel();
+    _splashTicker?.cancel();
     _isLoaded = false;
     _isLoading = false;
     _loadProgress = 0.0;
+    _simulatedProgress = 0.0;
   }
 
-  // ── Public query helpers ───────────────────────────────────────
+  void rotateRandomAyat() {
+    if (_quranData.isEmpty) return;
+    var small = _quranData
+        .where((a) =>
+            a.arabicText.length < 200 && // Slightly larger limit for variety
+            a.ayatNumber != '0' &&
+            a.surahId != null &&
+            a.paraId != null)
+        .toList();
+    if (small.isEmpty) small = _quranData;
+    _currentRandomAyat = small[Random().nextInt(small.length)];
+    notifyListeners();
+  }
 
   List<Aya> getAyatsBySurah(int surahId) => _quranData
       .where((a) => (int.tryParse(a.surahId ?? '0') ?? 0) == surahId)
@@ -352,16 +453,13 @@ class QuranDataProvider extends ChangeNotifier {
     if (_quranData.isEmpty) return null;
     var small = _quranData
         .where((a) =>
-            a.arabicText.length < 150 &&
+            a.arabicText.length < 200 &&
             a.ayatNumber != '0' &&
             a.surahId != null &&
             a.paraId != null)
         .toList();
     if (small.isEmpty) small = _quranData;
-    final int seed = DateTime.now().year * 10000 +
-        DateTime.now().month * 100 +
-        DateTime.now().day;
-    return small[seed % small.length];
+    return small[Random().nextInt(small.length)];
   }
 
   static final _diacriticsRx = RegExp(
@@ -373,7 +471,7 @@ class QuranDataProvider extends ChangeNotifier {
   static final _verseNumRx = RegExp(r'\(\d+\)');
   static final _digitsRx = RegExp(r'[0-9\u0660-\u0669]');
 
-  static String _normalizeArabic(String text) {
+  static String normalizeArabic(String text) {
     if (text.isEmpty) return '';
     return text
         .replaceAll(_diacriticsRx, '')

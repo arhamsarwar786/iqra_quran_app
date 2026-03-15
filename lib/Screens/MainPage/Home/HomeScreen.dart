@@ -51,6 +51,11 @@ class _HomeState extends State<Home> {
     });
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   List<String> imageName = [
     "Rectangle 3.png",
     "Rectangle 4.png",
@@ -100,8 +105,15 @@ class _HomeState extends State<Home> {
               onTap: () {
                 push(context, const Aboutus());
               },
-              child: Image.asset("assets/images/infoIcon.png"),
+              child: Icon(
+                Icons.info_outline,
+                size: 30,
+              ),
+              // child: Image.asset("assets/images/infoIcon.png"),
             ),
+            SizedBox(
+              width: 10,
+            )
             // IconButton(onPressed: (){
 
             // }, icon:const Icon(Icons.notifications)),
@@ -522,7 +534,8 @@ class _HomeState extends State<Home> {
               },
               child: Column(
                 key: ValueKey(verseRef),
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -554,25 +567,6 @@ class _HomeState extends State<Home> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            IconButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => VerseDetailScreen(
-                                      aya: randomAyat,
-                                      surahMetadata: surah,
-                                    ),
-                                  ),
-                                );
-                              },
-                              icon: Icon(Icons.menu_book_rounded,
-                                  color: Theme.of(context).primaryColor),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              tooltip: "Tafseer",
-                            ),
-                            const SizedBox(width: 15),
                             IconButton(
                               onPressed: () => AppShare.image(
                                 context: context,
@@ -660,6 +654,45 @@ class _HomeState extends State<Home> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          push(
+                            context,
+                            VerseDetailScreen(
+                              aya: randomAyat,
+                              surahMetadata: surah,
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          height: 40,
+                          // width: 100,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(45),
+                            border: Border.all(
+                              color: Theme.of(context).primaryColor,
+                              width: 1,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Tafseer",
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),

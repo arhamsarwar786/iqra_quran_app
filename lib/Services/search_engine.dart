@@ -25,16 +25,21 @@ class QuranSearchEngine {
       tafseerDocs.add(normalize((aya.withoutHtmlTafseer ?? "").toLowerCase()));
     }
 
-    // Initialize indices in parallel
-    final results = await Future.wait([
-      BM25.build(arabicDocs),
-      BM25.build(translationDocs),
-      BM25.build(tafseerDocs),
-    ]);
+    await buildIndexFromDocs(arabicDocs, translationDocs, tafseerDocs);
+  }
 
-    _arabicBM25 = results[0];
-    _translationBM25 = results[1];
-    _tafseerBM25 = results[2];
+  /// Builds the search index from pre-normalized documents.
+  Future<void> buildIndexFromDocs(
+      List<String> arabicDocs, List<String> translationDocs, List<String> tafseerDocs) async {
+    // Initialize indices sequentially with small yields to prevent memory spikes
+    // and keep the UI thread responsive during construction.
+    _arabicBM25 = await BM25.build(arabicDocs);
+    await Future.delayed(const Duration(milliseconds: 100)); // Yield
+    
+    _translationBM25 = await BM25.build(translationDocs);
+    await Future.delayed(const Duration(milliseconds: 100)); // Yield
+    
+    _tafseerBM25 = await BM25.build(tafseerDocs);
   }
 
   /// Performs a ranked search asynchronously across enabled fields.

@@ -4,7 +4,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:iqra/Provider/prayer_provider.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Screens/MainPage/main_screen.dart';
 import 'package:iqra/Screens/Permission/permission_screen.dart';
@@ -28,13 +27,7 @@ class _SplashScreenState extends State<SplashScreen>
   // ── Shimmer sweep on progress bar ────────────────────────────
   late AnimationController _shimmerController;
 
-  // ── Displayed progress (0.0–1.0) ─────────────────────────────
-  final ValueNotifier<double> _displayProgress = ValueNotifier(0.0);
-
-  double _realProgressValue = 0.0;
-  bool _loadingDone = false;
   bool _navigated = false;
-  Timer? _ticker;
 
   @override
   void initState() {
@@ -49,131 +42,67 @@ class _SplashScreenState extends State<SplashScreen>
       systemNavigationBarIconBrightness: Brightness.light,
     ));
 
-    // Logo breathing: feels alive and premium
+    // Logo breathing
     _breathController = AnimationController(
       duration: const Duration(milliseconds: 1800),
       vsync: this,
     )..repeat(reverse: true);
-    // Increased range from 1.07 to 1.15 for more obvious movement
     _breathScale = Tween<double>(begin: 1.0, end: 1.15).animate(
       CurvedAnimation(parent: _breathController, curve: Curves.easeInOut),
     );
 
-    // Continuous shimmer for the progress bar
     _shimmerController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat();
 
-    // ── Ticker: Ensures the percentage NEVER stops ─────────────────
-    // It advances automatically every 40ms (~25 times per second)
-    _ticker = Timer.periodic(const Duration(milliseconds: 40), (_) {
-      if (!mounted || _loadingDone) return;
-
-      final double current = _displayProgress.value;
-      
-      // Auto-step: advances by ~0.15% every 40ms (≈3.75% per second)
-      double next = current + 0.0015; 
-
-      // If real progress from provider jumps ahead, catch up to it
-      if (_realProgressValue > next) {
-        next = _realProgressValue;
-      }
-
-      // Never let it hit 100% until the provider actually finishes
-      if (next > 0.99) next = 0.99;
-
-      if (next > current) {
-        _displayProgress.value = next;
-      }
+    // Start initialization in provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final qProvider = Provider.of<QuranDataProvider>(context, listen: false);
+      qProvider.appInitialize();
+      qProvider.addListener(_checkNavigation);
     });
-
-    _startLoading();
   }
 
-  Future<void> _startLoading() async {
-    if (!mounted) return;
+  void _checkNavigation() async {
+    final qProvider = Provider.of<QuranDataProvider>(context, listen: false);
+    if (qProvider.isLoaded && !_navigated) {
+      _navigated = true;
+      qProvider.removeListener(_checkNavigation);
+      
+      await Future.delayed(const Duration(milliseconds: 1200));
+      if (!mounted) return;
 
-    final quranProvider =
-        Provider.of<QuranDataProvider>(context, listen: false);
-    final prayerProvider =
-        Provider.of<PrayerProvider>(context, listen: false);
+      LocationPermission permission = LocationPermission.denied;
+      try {
+        permission = await Geolocator.checkPermission();
+      } catch (_) {}
 
-    quranProvider.addListener(_onProviderUpdate);
+      final bool locationOk = permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always;
 
-    LocationPermission permission = LocationPermission.denied;
-    try {
-      permission = await Geolocator.checkPermission();
-    } catch (_) {}
-
-    final bool locationOk = permission == LocationPermission.whileInUse ||
-        permission == LocationPermission.always;
-
-    // Load both in parallel
-    await Future.wait([
-      quranProvider.loadQuranData(),
-      if (locationOk) _loadPrayer(prayerProvider, permission),
-    ]);
-
-    quranProvider.removeListener(_onProviderUpdate);
-
-    if (!mounted || _navigated) return;
-
-    // If location is OK but we still have no prayer data (e.g. timeout), 
-    // we should NOT proceed to MainScreen until it's ready.
-    int prayerRetries = 0;
-    while (locationOk && prayerProvider.prayerData == null && prayerRetries < 3) {
-      debugPrint("Location OK but no prayer data, retrying ($prayerRetries)...");
-      await _loadPrayer(prayerProvider, permission);
-      if (prayerProvider.prayerData == null) {
-        prayerRetries++;
-        await Future.delayed(const Duration(seconds: 2));
+      if (!locationOk) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const PermissionScreen()),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainScreen()),
+        );
       }
     }
-
-    // Loading truly complete for Quran
-    _loadingDone = true;
-    _displayProgress.value = 1.0;
-
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (!mounted || _navigated) return;
-
-    _navigated = true;
-    
-    // If location is denied, we show Permission Screen. 
-    // BUT we need to make sure when user comes back, they go through Splash again.
-    if (!locationOk) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const PermissionScreen()),
-      );
-    } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainScreen()),
-      );
-    }
-  }
-
-  Future<void> _loadPrayer(
-      PrayerProvider provider, LocationPermission perm) async {
-    try {
-      await provider.fetchPrayerData();
-    } catch (e) {
-      debugPrint("Splash: Error loading prayer data: $e");
-    }
-  }
-
-  void _onProviderUpdate() {
-    if (!mounted) return;
-    _realProgressValue =
-        Provider.of<QuranDataProvider>(context, listen: false).loadProgress;
   }
 
   @override
   void dispose() {
-    _ticker?.cancel();
+    // We don't remove listener here because the navigation handles it,
+    // but safe to try to ensure no leaks if disposed early.
+    try {
+      Provider.of<QuranDataProvider>(context, listen: false)
+          .removeListener(_checkNavigation);
+    } catch (_) {}
     _breathController.dispose();
     _shimmerController.dispose();
-    _displayProgress.dispose();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
         overlays: SystemUiOverlay.values);
     super.dispose();
@@ -215,9 +144,9 @@ class _SplashScreenState extends State<SplashScreen>
               // ── Progress Section ───────────────────────────────
               Padding(
                 padding: const EdgeInsets.fromLTRB(40, 0, 40, 60),
-                child: ValueListenableBuilder<double>(
-                  valueListenable: _displayProgress,
-                  builder: (_, progress, __) {
+                child: Consumer<QuranDataProvider>(
+                  builder: (_, qProvider, __) {
+                    final progress = qProvider.displayProgress;
                     final int pct = (progress * 100).toInt().clamp(0, 100);
                     
                     return Column(

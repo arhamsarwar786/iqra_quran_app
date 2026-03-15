@@ -119,11 +119,14 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     return provider.getAyatsByPara(int.tryParse(paraId) ?? 0);
   }
 
-  /// Refactored view maker for clean and robust verse matching
   void viewMaker() async {
     final bloc = context.read<ThemeProvider>();
     final quranProvider = context.read<QuranDataProvider>();
     if (listAyat.isEmpty) return;
+
+    paraArabicScreenWidget.clear();
+    // surahHeaderKeys.clear(); // Removed to allow persistence across build/highlight cycles
+    firstSurahMetadata = null; 
 
     List<InlineSpan> currentSpans = [];
     String? currentSurahId;
@@ -180,15 +183,23 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
         currentSurahId = aya.surahId;
         final metadata = quranProvider.getSurahMetadata(ayaSurahId);
         if (metadata != null) {
+          // Reuse existing key to help Flutter maintain state
+          final key = surahHeaderKeys[aya.surahId!] ?? GlobalKey();
+          surahHeaderKeys[aya.surahId!] = key;
+
           if (firstSurahMetadata == null) {
             firstSurahMetadata = metadata;
             currentSurahMetadata = metadata;
+            // Invisible tracker for the first surah of the Juz
+            paraArabicScreenWidget.add(_KeepAliveWrapper(
+              child: SizedBox(key: key, height: 0),
+            ));
           } else {
-            final key = GlobalKey();
-            surahHeaderKeys[aya.surahId!] = key;
-            paraArabicScreenWidget.add(SurahHeaderCard(
-              key: key,
-              metadata: metadata,
+            paraArabicScreenWidget.add(_KeepAliveWrapper(
+              child: SurahHeaderCard(
+                key: key,
+                metadata: metadata,
+              ),
             ));
           }
         }
@@ -271,10 +282,13 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
     flush(false); // Flush final block
     if (mounted) setState(() {});
-
-    if (_targetKey != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
+    
+    // After the list is built and rendered, ensure the header shows the correct Surah
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _updateCurrentSurah();
+      
+      if (_targetKey != null) {
         final ctx = _targetKey!.currentContext;
         if (ctx != null) {
           Scrollable.ensureVisible(
@@ -284,8 +298,8 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
             curve: Curves.easeInOut,
           );
         }
-      });
-    }
+      }
+    });
   }
 
   void _addSignWidget(Aya aya, QuranDataProvider quranProvider) {
@@ -333,23 +347,52 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   // Removed buggy nudge scroll logic
 
   void _updateCurrentSurah() {
-    if (firstSurahMetadata == null) return;
+    if (firstSurahMetadata == null || listAyat.isEmpty) return;
+    
+    final qProvider = context.read<QuranDataProvider>();
     SurahMetadata? bestMatch = firstSurahMetadata;
-    double threshold = 200.0;
+    
+    double statusBarHeight = MediaQuery.of(context).padding.top;
+    double threshold = statusBarHeight + 110.0; 
+    bool foundInView = false;
 
-    surahHeaderKeys.forEach((surahId, key) {
-      final context = key.currentContext;
+    // 1. Try tracking via GlobalKeys of headers/trackers
+    for (var entry in surahHeaderKeys.entries) {
+      final context = entry.value.currentContext;
       if (context != null) {
         final RenderBox box = context.findRenderObject() as RenderBox;
         final position = box.localToGlobal(Offset.zero).dy;
+        
         if (position <= threshold) {
-          final qProvider = context.read<QuranDataProvider>();
-          final metadata =
-              qProvider.getSurahMetadata(int.tryParse(surahId) ?? 0);
-          if (metadata != null) bestMatch = metadata;
+          final metadata = qProvider.getSurahMetadata(int.tryParse(entry.key) ?? 0);
+          if (metadata != null) {
+            bestMatch = metadata;
+            foundInView = true;
+          }
+        } else {
+          break; // Stop at first header below threshold
         }
       }
-    });
+    }
+
+    // 2. Fallback: If we didn't find a currently built header that passed threshold,
+    // but we are scrolled down, use percentage of the list to estimate the surah.
+    // This handles the case where long surahs cause headers to be disposed.
+    if (!foundInView && _scrollViewController!.hasClients) {
+      final offset = _scrollViewController!.offset;
+      final maxScroll = _scrollViewController!.position.maxScrollExtent;
+      
+      if (offset > 500 && maxScroll > 0) {
+        double progress = (offset / maxScroll).clamp(0.0, 1.0);
+        int targetAyahIndex = (progress * (listAyat.length - 1)).toInt();
+        final estimatedAyah = listAyat[targetAyahIndex];
+        final surahId = int.tryParse(estimatedAyah.surahId ?? "0") ?? 0;
+        final metadata = qProvider.getSurahMetadata(surahId);
+        if (metadata != null) {
+          bestMatch = metadata;
+        }
+      }
+    }
 
     if (currentSurahMetadata?.index != bestMatch?.index) {
       setState(() {
@@ -594,8 +637,8 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                             cacheExtent: 5000,
                             slivers: [
                               SliverPadding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 10),
+                                padding: const EdgeInsets.only(
+                                    left: 5, right: 5, bottom: 30, top: 10),
                                 sliver: SliverList(
                                   delegate: SliverChildListDelegate(
                                     paraArabicScreenWidget,
@@ -614,4 +657,26 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
           ),
         ));
   }
+}
+
+/// A wrapper to keep the trackers and headers alive in the lazy-loading SliverList.
+/// This ensures their GlobalKey contexts are not destroyed when scrolled far away.
+class _KeepAliveWrapper extends StatefulWidget {
+  final Widget child;
+  const _KeepAliveWrapper({required this.child});
+
+  @override
+  State<_KeepAliveWrapper> createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<_KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }

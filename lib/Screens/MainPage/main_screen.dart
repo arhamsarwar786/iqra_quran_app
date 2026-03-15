@@ -6,11 +6,11 @@ import '../../Provider/main_provider.dart';
 import '../../Provider/theme_provider.dart';
 import '../../widgets.dart';
 import 'package:upgrader/upgrader.dart';
-import 'Dua/dua_screen.dart';
 import 'Home/HomeScreen.dart';
 import 'Drawer/setting_screen.dart';
 import 'Quran/Favorite.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../Provider/quran_data_provider.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -25,6 +25,11 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     // Start update check
     _checkUpdate();
+
+    // Trigger search index building after landing on Home
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<QuranDataProvider>().buildSearchIndex();
+    });
   }
 
   Future<void> _checkUpdate() async {

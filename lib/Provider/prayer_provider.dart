@@ -44,17 +44,43 @@ class PrayerProvider extends ChangeNotifier {
       if (position == null) {
         try {
           position = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.low,
-            timeLimit: const Duration(seconds: 10), // Increased to 10s
+            desiredAccuracy: LocationAccuracy.medium,
+            timeLimit: const Duration(seconds: 30), // Increased to 30s for robustness
           );
         } catch (e) {
           debugPrint("Location fetch timeout/error: $e");
-          // If 10s passed and we still have no position, 
-          // we look for last known again just in case, or re-throw
+          
+          // Fallback 1: Last known position
           position = await Geolocator.getLastKnownPosition();
-          if (position == null) rethrow; 
+          
+          if (position == null) {
+            // Fallback 2: Saved coordinates if available
+            final savedLat = await SavedPrefernces.getLat();
+            final savedLng = await SavedPrefernces.getLng();
+            
+            if (savedLat != 0.0 && savedLng != 0.0) {
+              position = Position(
+                latitude: savedLat,
+                longitude: savedLng,
+                timestamp: DateTime.now(),
+                accuracy: 0,
+                altitude: 0,
+                heading: 0,
+                speed: 0,
+                speedAccuracy: 0,
+                altitudeAccuracy: 0,
+                headingAccuracy: 0,
+              );
+            } else {
+              throw 'Unable to determine location. Please ensure GPS is enabled and try again.';
+            }
+          }
         }
       }
+
+      // Store successfully obtained coordinates for future fallbacks
+      await SavedPrefernces.setLat(position.latitude);
+      await SavedPrefernces.setLng(position.longitude);
 
       final String madhab = await SavedPrefernces.getMadhab();
       final String calcMethod = await SavedPrefernces.getCalculationMethod();
@@ -212,7 +238,7 @@ class PrayerProvider extends ChangeNotifier {
     try {
       await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.medium,
-        timeLimit: const Duration(seconds: 10),
+        timeLimit: const Duration(seconds: 30),
       );
 
       // Refresh to ensure accuracy
