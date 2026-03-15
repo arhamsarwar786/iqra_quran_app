@@ -108,6 +108,7 @@ class VerseDetailScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _detailCard(
+                    context: context,
                     title: "Translation ($translatorName)",
                     content: translationText,
                     fontFamily: bloc.urduFontFamily,
@@ -116,6 +117,7 @@ class VerseDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   _detailCard(
+                    context: context,
                     title: "Tafseer",
                     content: aya.withoutHtmlTafseer?.trim().isNotEmpty == true
                         ? aya.withoutHtmlTafseer!.trim()
@@ -123,6 +125,7 @@ class VerseDetailScreen extends StatelessWidget {
                     fontFamily: bloc.urduFontFamily,
                     fontSize: bloc.urduFontSize - 2,
                     color: Colors.blueGrey[800]!,
+                    isTafseer: true,
                   ),
                 ],
               ),
@@ -135,19 +138,22 @@ class VerseDetailScreen extends StatelessWidget {
   }
 
   Widget _detailCard({
+    required BuildContext context,
     required String title,
     required String content,
     required String fontFamily,
     required double fontSize,
     required Color color,
+    bool isTafseer = false,
   }) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+          padding: const EdgeInsets.only(left: 8.0, bottom: 8.0, right: 8.0),
           child: Text(
             title,
+            textAlign: TextAlign.right,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -157,7 +163,7 @@ class VerseDetailScreen extends StatelessWidget {
         ),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(25),
@@ -168,19 +174,125 @@ class VerseDetailScreen extends StatelessWidget {
                 offset: const Offset(0, 5),
               ),
             ],
+            border: Border.all(color: color.withOpacity(0.05), width: 1),
           ),
-          child: Text(
-            content,
-            textAlign: TextAlign.right,
-            style: TextStyle(
-              fontSize: fontSize,
-              fontFamily: fontFamily,
-              height: 1.6,
-              color: Colors.black87,
-            ),
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: isTafseer
+                ? _buildFormattedUrduText(
+                    content,
+                    fontFamily: fontFamily,
+                    fontSize: fontSize,
+                    themeColor: color,
+                  )
+                : Text(
+                    content,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      fontFamily: fontFamily,
+                      height: 1.8,
+                      color: Colors.black.withOpacity(0.85),
+                    ),
+                  ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildFormattedUrduText(
+    String text, {
+    required String fontFamily,
+    required double fontSize,
+    required Color themeColor,
+  }) {
+    final List<TextSpan> spans = [];
+
+    // Refined Regex for structured Islamic text:
+    // Group 1: { ... } -> Quranic Verses or Important Citations (Large/Bold/Theme)
+    // Group 2: [ ... ] -> Major Topic Headings (Bold/Underlined)
+    // Group 3: ( ... ) -> Footnotes, References, or Page Numbers (Small/Secondary)
+    // Group 4: Regular text content
+    final RegExp exp = RegExp(
+      r'\{(.*?)\}|\[(.*?)\]|\((.*?)\)|([^\{\[\]\(\)]+)',
+      dotAll: true,
+    );
+
+    final Iterable<RegExpMatch> matches = exp.allMatches(text.trim());
+
+    for (final RegExpMatch match in matches) {
+      if (match.group(1) != null) {
+        // --- {Verse / Central Point} ---
+        String content = match.group(1)!.trim();
+        spans.add(
+          TextSpan(
+            text: "\n\n$content\n\n",
+            style: TextStyle(
+              color: themeColor,
+              fontWeight: FontWeight.w900,
+              fontSize: fontSize + 3, // Make it significantly larger
+              height: 2.0,
+              fontFamily: fontFamily,
+            ),
+          ),
+        );
+      } else if (match.group(2) != null) {
+        // --- [Topic Heading] ---
+        String content = match.group(2)!.trim();
+        spans.add(
+          TextSpan(
+            text: "\n\n[$content]\n",
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: fontSize + 1,
+              height: 2.2,
+              decoration: TextDecoration.underline,
+              decorationColor: themeColor.withOpacity(0.4),
+            ),
+          ),
+        );
+      } else if (match.group(3) != null) {
+        // --- (Footnote / Reference) ---
+        String content = match.group(3)!.trim();
+        spans.add(
+          TextSpan(
+            text: " ($content) ",
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+              fontSize: (fontSize - 5).clamp(10.0, 18.0), // Proper small size
+              fontStyle: FontStyle.italic,
+              height: 1.5,
+            ),
+          ),
+        );
+      } else if (match.group(4) != null) {
+        // --- Normal Body Text ---
+        String body = match.group(4)!;
+
+        // Smart formatting for sentence endings and list items
+        body = body.replaceAll("۔ ", "۔\n\n");
+
+        spans.add(
+          TextSpan(
+            text: body,
+            style: TextStyle(
+              color: Colors.black.withOpacity(0.85),
+              fontWeight: FontWeight.normal,
+              fontSize: fontSize,
+              height: 1.85,
+            ),
+          ),
+        );
+      }
+    }
+
+    return SelectableText.rich(
+      TextSpan(children: spans),
+      textAlign: TextAlign.justify,
+      style: TextStyle(fontFamily: fontFamily),
     );
   }
 }

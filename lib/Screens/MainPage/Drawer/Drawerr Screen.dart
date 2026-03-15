@@ -1,5 +1,4 @@
 // import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Screens/MainPage/Drawer/setting_screen.dart';
@@ -13,6 +12,7 @@ import '../Quran/tabbarview.dart';
 import 'About Us.dart';
 import 'ContactUs.dart';
 import 'package:iqra/Utils/sadqa_dialog.dart';
+import 'package:share_plus/share_plus.dart';
 
 // import 'contactUs.dart';
 
@@ -182,6 +182,10 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
                                 const Duration(milliseconds: 250),
                                 () => SadqaDialog.show(context),
                               );
+                            } else if (i == 8) {
+                              Navigator.of(context).pop();
+                              Share.share(
+                                  "Download IQRA QURAN App: https://play.google.com/store/apps/details?id=com.devsinntechnologies.iqraquran");
                             } else if (i < _navigationSc.length) {
                               push(context, _navigationSc[i]);
                             }

@@ -165,6 +165,18 @@ class SavedPrefernces {
   ///// Last Read Tracking
   static setLastRead(Map<String, dynamic> lastReadData) async {
     final pref = await SharedPreferences.getInstance();
+    
+    // Check if we already have this same item saved, and preserve its offset if so
+    String? existingData = pref.getString('lastRead');
+    if (existingData != null) {
+      Map<String, dynamic> existing = jsonDecode(existingData);
+      if (existing['type'] == lastReadData['type'] && 
+          existing['id'].toString() == lastReadData['id'].toString()) {
+        // Carry over the existing scroll offset so we don't wipe it on screen load
+        lastReadData['scrollOffset'] = existing['scrollOffset'];
+      }
+    }
+    
     await pref.setString('lastRead', jsonEncode(lastReadData));
   }
 
@@ -177,12 +189,15 @@ class SavedPrefernces {
     return null;
   }
 
-  static updateLastReadOffset(double offset) async {
+  static updateLastReadOffset(double offset, {int? ayatNumber}) async {
     final pref = await SharedPreferences.getInstance();
     String? data = pref.getString('lastRead');
     if (data != null) {
       Map<String, dynamic> lastReadData = jsonDecode(data);
       lastReadData['scrollOffset'] = offset;
+      if (ayatNumber != null) {
+        lastReadData['lastReadAyat'] = ayatNumber;
+      }
       await pref.setString('lastRead', jsonEncode(lastReadData));
     }
   }

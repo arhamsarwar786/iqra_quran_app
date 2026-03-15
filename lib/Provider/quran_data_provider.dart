@@ -300,11 +300,7 @@ class QuranDataProvider extends ChangeNotifier {
   }
 
   /// Builds the BM25 search index in a background isolate.
-  /// This is heavy and should be called after landing on Home.
   Future<void> buildSearchIndex() async {
-    // Temporarily disabled for performance testing
-    return;
-    /*
     if (_quranData.isEmpty || _searchEngine != null) return;
     try {
       debugPrint('QuranSearch: Building BM25 index…');
@@ -328,7 +324,12 @@ class QuranDataProvider extends ChangeNotifier {
       debugPrint('QuranSearch: Index build failed – $e');
       _searchEngine = null;
     }
-    */
+  }
+
+  /// Clears the search index to free up RAM.
+  void clearSearchIndex() {
+    _searchEngine = null;
+    debugPrint('QuranSearch: Index cleared from RAM.');
   }
 
   // ── Memory management ──────────────────────────────────────────
@@ -430,7 +431,7 @@ class QuranDataProvider extends ChangeNotifier {
   }) async {
     if (query.trim().isEmpty) return [];
     
-    // Temporarily disabled complex search for performance testing
+    // 1. Direct Verse Lookup (e.g. "2:255" or "18 10")
     final String q = query.trim().toLowerCase();
     final match = RegExp(r'^(\d+)(?::|\ +)(\d+)$').firstMatch(q);
     if (match != null) {
@@ -440,8 +441,23 @@ class QuranDataProvider extends ChangeNotifier {
               a.ayatNumber == match.group(2))
           .toList();
     }
-    
-    return [];
+
+    // 2. BM25 Search
+    if (_searchEngine == null) {
+      debugPrint('QuranSearch: Search triggered but index not ready. Building…');
+      await buildSearchIndex();
+    }
+
+    if (_searchEngine == null) return [];
+
+    final searchResults = await _searchEngine!.search(
+      query,
+      searchArabic: searchArabic,
+      searchTranslation: searchTranslation,
+      searchTafseer: searchTafseer,
+    );
+
+    return searchResults.map((r) => r.aya).toList();
   }
 
   // ── Internal helpers ───────────────────────────────────────────

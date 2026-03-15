@@ -28,6 +28,7 @@ class TabBarDemo extends StatelessWidget {
     final name = lastRead["name"];
     final count = lastRead["count"];
     final scrollOffset = (lastRead["scrollOffset"] as num?)?.toDouble();
+    final lastReadAyat = (lastRead["lastReadAyat"] as int?);
 
     Widget? destination;
 
@@ -37,6 +38,7 @@ class TabBarDemo extends StatelessWidget {
         surahName: name,
         ayatCount: count,
         initialScrollOffset: scrollOffset,
+        targetAyatNumber: lastReadAyat,
       );
     } else if (type == "para") {
       destination = ParaArabicScreen(
@@ -44,6 +46,7 @@ class TabBarDemo extends StatelessWidget {
         parahname: name,
         ayatInPara: int.tryParse(count?.toString() ?? "0"),
         initialScrollOffset: scrollOffset,
+        targetAyatNumber: lastReadAyat,
       );
     }
 

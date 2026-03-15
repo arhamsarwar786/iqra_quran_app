@@ -38,6 +38,11 @@ class _SearchScreenState extends State<SearchScreen> {
     super.initState();
     _searchController.addListener(_onSearchChanged);
     _requestMicrophonePermission();
+    
+    // Build search index when entering the search page
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<QuranDataProvider>().buildSearchIndex();
+    });
   }
 
   Future<void> _requestMicrophonePermission() async {
@@ -53,6 +58,11 @@ class _SearchScreenState extends State<SearchScreen> {
     _searchController.dispose();
     _debounce?.cancel();
     _audioPlayer.dispose();
+    
+    // Clear search index when leaving the search page to save RAM
+    // Using select to avoid build issues if provider changed, but read is standard in dispose
+    context.read<QuranDataProvider>().clearSearchIndex();
+    
     super.dispose();
   }
 
