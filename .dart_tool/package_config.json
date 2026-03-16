@@ -266,6 +266,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "flutter_intro",
+      "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/flutter_intro-3.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
       "name": "flutter_launcher_icons",
       "rootUri": "file:///Users/as-macbook/.pub-cache/hosted/pub.dev/flutter_launcher_icons-0.10.0",
       "packageUri": "lib/",

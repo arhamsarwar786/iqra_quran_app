@@ -19,6 +19,7 @@
         "flutter",
         "flutter_card_swiper",
         "flutter_compass",
+        "flutter_intro",
         "flutter_local_notifications",
         "flutter_localization",
         "font_awesome_flutter",
@@ -142,6 +143,14 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "flutter_intro",
+      "version": "3.4.0",
+      "dependencies": [
+        "collection",
+        "flutter"
       ]
     },
     {
@@ -904,6 +913,14 @@
       ]
     },
     {
+      "name": "decimal",
+      "version": "3.2.4",
+      "dependencies": [
+        "intl",
+        "rational"
+      ]
+    },
+    {
       "name": "xml",
       "version": "6.6.1",
       "dependencies": [
@@ -1520,6 +1537,11 @@
       ]
     },
     {
+      "name": "rational",
+      "version": "2.2.3",
+      "dependencies": []
+    },
+    {
       "name": "petitparser",
       "version": "7.0.2",
       "dependencies": [
@@ -1622,19 +1644,6 @@
         "collection",
         "hooks"
       ]
-    },
-    {
-      "name": "decimal",
-      "version": "3.2.4",
-      "dependencies": [
-        "intl",
-        "rational"
-      ]
-    },
-    {
-      "name": "rational",
-      "version": "2.2.3",
-      "dependencies": []
     }
   ],
   "configVersion": 1

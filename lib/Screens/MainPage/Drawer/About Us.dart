@@ -358,11 +358,6 @@ class _AboutusState extends State<Aboutus> {
                                               url:
                                                   "https://www.tiktok.com/@theiqraquranofficial",
                                             ),
-                                            _socialIcon(
-                                              icon: FontAwesomeIcons.globe,
-                                              color: bloc.selectedTheme,
-                                              url: "https://www.theiqraquran.com/",
-                                            ),
                                           ],
                                         ),
                                         const SizedBox(height: 30),
