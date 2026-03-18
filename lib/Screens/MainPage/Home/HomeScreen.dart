@@ -42,6 +42,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final ScrollController _scrollController = ScrollController();
   final List<GlobalKey> _introKeys = List.generate(8, (index) => GlobalKey());
+  bool _scrolledStep6 = false;
+  bool _scrolledStep7 = false;
 
   @override
   void initState() {
@@ -210,13 +212,14 @@ class _HomeState extends State<Home> {
                     return OverlayPosition(
                       width: screenSize.width * 0.9,
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      bottom: 80,
+                      top: 80, // Place text safely near the top of the screen
                       left: screenSize.width * 0.05,
                     );
                   },
                   overlayBuilder: (params) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (_introKeys[6].currentContext != null) {
+                      if (!_scrolledStep6 && _introKeys[6].currentContext != null) {
+                        _scrolledStep6 = true;
                         Scrollable.ensureVisible(
                           _introKeys[6].currentContext!,
                           duration: const Duration(milliseconds: 400),
@@ -232,37 +235,45 @@ class _HomeState extends State<Home> {
                         });
                       }
                     });
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Get a beautiful new verse from the Quran every 3 Minutes with translation.",
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            height: 1.4,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: params.onNext,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: bloc.selectedTheme,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.85),
+                        borderRadius: BorderRadius.circular(16)
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "Get a beautiful new verse from the Quran every 3 Minutes with translation.",
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              height: 1.4,
+                              color: Colors.white,
                             ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
                           ),
-                          child: const Text("NEXT",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1)),
-                        ),
-                      ],
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: params.onNext,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: bloc.selectedTheme,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 12),
+                            ),
+                            child: const Text("NEXT",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 1)),
+                          ),
+                        ],
+                      ),
                     );
                   },
                   builder: (context, key) => Container(
@@ -278,13 +289,14 @@ class _HomeState extends State<Home> {
                     return OverlayPosition(
                       width: screenSize.width * 0.9,
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      top: 100,
+                      top: 100, // Text stays dynamically at the top while QURAN / ALLAH cards scroll to bottom
                       left: screenSize.width * 0.05,
                     );
                   },
                   overlayBuilder: (params) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (_introKeys[7].currentContext != null) {
+                      if (!_scrolledStep7 && _introKeys[7].currentContext != null) {
+                        _scrolledStep7 = true;
                         Scrollable.ensureVisible(
                           _introKeys[7].currentContext!,
                           duration: const Duration(milliseconds: 400),
@@ -300,37 +312,45 @@ class _HomeState extends State<Home> {
                         });
                       }
                     });
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Read and learn the 99 Names of Allah and the Names of Prophet Muhammad (PBUH).",
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            height: 1.4,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: params.onFinish,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: bloc.selectedTheme,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.85),
+                        borderRadius: BorderRadius.circular(16)
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "Read and learn the 99 Names of Allah and the Names of Prophet Muhammad (PBUH).",
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              height: 1.4,
+                              color: Colors.white,
                             ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
                           ),
-                          child: const Text("FINISH",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1)),
-                        ),
-                      ],
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: params.onFinish,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: bloc.selectedTheme,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 12),
+                            ),
+                            child: const Text("FINISH",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 1)),
+                          ),
+                        ],
+                      ),
                     );
                   },
                   builder: (context, key) => Container(

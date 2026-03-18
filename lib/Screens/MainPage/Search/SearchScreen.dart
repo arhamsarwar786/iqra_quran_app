@@ -299,7 +299,7 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         child: TextField(
           controller: _searchController,
-          style: const TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: 16, color: Colors.black87),
           decoration: InputDecoration(
             hintText: "Search Arabic or Translation...",
             hintStyle: TextStyle(color: Colors.grey.withOpacity(0.6)),
@@ -705,6 +705,7 @@ class _VoiceSearchDialogState extends State<_VoiceSearchDialog> {
                 style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w500,
+                    color: Colors.black87,
                     fontFamily: theme.urduFontFamily),
                 decoration: const InputDecoration(
                   border: InputBorder.none,

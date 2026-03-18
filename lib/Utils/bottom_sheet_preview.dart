@@ -9,6 +9,7 @@ import 'share_quran.dart';
 import '../Screens/MainPage/Quran/verse_detail_screen.dart';
 import '../widgets.dart';
 import '../Provider/audio_provider.dart';
+import 'package:flutter_intro/flutter_intro.dart';
 
 class SHEET {
   static bottomSheetPreview(BuildContext context, List<Aya> ayats,
@@ -86,30 +87,54 @@ class _BottomSheetContent extends StatefulWidget {
 class _BottomSheetContentState extends State<_BottomSheetContent> {
   late PageController _pageController;
   late int _currentIndex;
+  final ScrollController _introScrollController = ScrollController();
+  final GlobalKey _sheetKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
+    
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (mounted && _sheetKey.currentContext != null) {
+        if (_introScrollController.hasClients) {
+          _introScrollController.animateTo(
+            _introScrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          ).then((_) {
+            if (mounted) {
+              try {
+                Intro.of(_sheetKey.currentContext!).start(group: 'bottom_sheet');
+              } catch (_) {}
+            }
+          });
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _introScrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final bloc = widget.bloc;
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.75,
-      decoration: BoxDecoration(
-        color: bloc.selectedSecondary,
-        borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-      ),
+    return Intro(
+      maskColor: Colors.black.withOpacity(0.8),
+      child: Container(
+        key: _sheetKey,
+        height: MediaQuery.of(context).size.height * 0.75,
+        decoration: BoxDecoration(
+          color: bloc.selectedSecondary,
+          borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+        ),
       child: Column(
         children: [
           const SizedBox(height: 15),
@@ -140,6 +165,9 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
                 final SurahMetadata? surah =
                     quranProvider.getSurahMetadata(surahId);
 
+                // Use initialIndex exclusively to prevent GlobalKey collisions across PageView items
+                bool isInitialPageAndTutorialTarget = index == widget.initialIndex;
+
                 String translationText = "";
                 String translatorName = "";
 
@@ -159,6 +187,7 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: SingleChildScrollView(
+                    controller: isInitialPageAndTutorialTarget ? _introScrollController : null,
                     child: Column(
                       children: [
                         const SizedBox(height: 5),
@@ -269,61 +298,206 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            SHEET._actionButton(
-                              context,
-                              icon: Icons.share,
-                              label: "Share",
-                              onTap: () {
-                                QuranShare.image(
-                                  context: context,
-                                  bloc: bloc,
-                                  title: surah?.tname ?? "",
-                                  arabicTitle: surah?.name ?? "",
-                                  arabicText: aya.arabicText,
-                                  translationText: translationText,
-                                  translatorName: translatorName,
-                                  surahNumber: aya.surahId,
-                                  ayatNumber: aya.ayatNumber,
-                                  paraNumber: aya.paraId,
-                                );
-                              },
-                              color: bloc.selectedTheme,
-                            ),
-                            const SizedBox(width: 15),
-                            SHEET._actionButton(
-                              context,
-                              icon: Icons.menu_book_rounded,
-                              label: "Tafseer",
-                              onTap: () {
-                                push(
-                                  context,
-                                  VerseDetailScreen(
-                                    aya: aya,
-                                    surahMetadata: surah,
+                            isInitialPageAndTutorialTarget
+                                ? IntroStepBuilder(
+                                    group: 'bottom_sheet',
+                                    order: 1,
+                                    overlayBuilder: (params) => Container(
+                                      margin: const EdgeInsets.only(top: 10, left: 10, right: 10),
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black87,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Text('Share this Ayat as an image to WhatsApp or others.',
+                                              style: TextStyle(color: Colors.white, fontSize: 12),
+                                              textAlign: TextAlign.center),
+                                          const SizedBox(height: 8),
+                                          ElevatedButton(
+                                            onPressed: params.onNext,
+                                            style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
+                                            child: const Text('Next'),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    builder: (context, key) => Container(
+                                      key: key,
+                                      child: SHEET._actionButton(
+                                        context,
+                                        icon: Icons.share,
+                                        label: "Share",
+                                        onTap: () {
+                                          QuranShare.image(
+                                            context: context,
+                                            bloc: bloc,
+                                            title: surah?.tname ?? "",
+                                            arabicTitle: surah?.name ?? "",
+                                            arabicText: aya.arabicText,
+                                            translationText: translationText,
+                                            translatorName: translatorName,
+                                            surahNumber: aya.surahId,
+                                            ayatNumber: aya.ayatNumber,
+                                            paraNumber: aya.paraId,
+                                          );
+                                        },
+                                        color: bloc.selectedTheme,
+                                      ),
+                                    ),
+                                  )
+                                : SHEET._actionButton(
+                                    context,
+                                    icon: Icons.share,
+                                    label: "Share",
+                                    onTap: () {
+                                      QuranShare.image(
+                                        context: context,
+                                        bloc: bloc,
+                                        title: surah?.tname ?? "",
+                                        arabicTitle: surah?.name ?? "",
+                                        arabicText: aya.arabicText,
+                                        translationText: translationText,
+                                        translatorName: translatorName,
+                                        surahNumber: aya.surahId,
+                                        ayatNumber: aya.ayatNumber,
+                                        paraNumber: aya.paraId,
+                                      );
+                                    },
+                                    color: bloc.selectedTheme,
                                   ),
-                                );
-                              },
-                              color: bloc.selectedTheme,
-                            ),
+                            const SizedBox(width: 15),
+                            isInitialPageAndTutorialTarget
+                                ? IntroStepBuilder(
+                                    group: 'bottom_sheet',
+                                    order: 2,
+                                    overlayBuilder: (params) => Container(
+                                      margin: const EdgeInsets.only(top: 10, left: 10, right: 10),
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black87,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Text('Read detailed Urdu Tafseer for this Verse.',
+                                              style: TextStyle(color: Colors.white, fontSize: 12),
+                                              textAlign: TextAlign.center),
+                                          const SizedBox(height: 8),
+                                          ElevatedButton(
+                                            onPressed: widget.showPlayButton ? params.onNext : params.onFinish,
+                                            style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
+                                            child: Text(widget.showPlayButton ? 'Next' : 'Finish'),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    builder: (context, key) => Container(
+                                      key: key,
+                                      child: SHEET._actionButton(
+                                        context,
+                                        icon: Icons.menu_book_rounded,
+                                        label: "Tafseer",
+                                        onTap: () {
+                                          push(
+                                            context,
+                                            VerseDetailScreen(
+                                              aya: aya,
+                                              surahMetadata: surah,
+                                            ),
+                                          );
+                                        },
+                                        color: bloc.selectedTheme,
+                                      ),
+                                    ),
+                                  )
+                                : SHEET._actionButton(
+                                    context,
+                                    icon: Icons.menu_book_rounded,
+                                    label: "Tafseer",
+                                    onTap: () {
+                                      push(
+                                        context,
+                                        VerseDetailScreen(
+                                          aya: aya,
+                                          surahMetadata: surah,
+                                        ),
+                                      );
+                                    },
+                                    color: bloc.selectedTheme,
+                                  ),
                             if (widget.showPlayButton)
-                              SHEET._actionButton(
-                                context,
-                                icon: Icons.play_arrow_rounded,
-                                label: "Play",
-                                onTap: () {
-                                  final audio = context.read<AudioProvider>();
-                                  Navigator.pop(context); // Close sheet
-                                  audio.stopPlayback().then((_) {
-                                    audio.startSurahPlayback(
+                              isInitialPageAndTutorialTarget
+                                  ? IntroStepBuilder(
+                                      group: 'bottom_sheet',
+                                      order: 3,
+                                      overlayBuilder: (params) => Container(
+                                        margin: const EdgeInsets.only(top: 10, left: 10, right: 10),
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black87,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Text('Listen to the audio recitation of this Ayat.',
+                                                style: TextStyle(color: Colors.white, fontSize: 12),
+                                                textAlign: TextAlign.center),
+                                            const SizedBox(height: 8),
+                                            ElevatedButton(
+                                              onPressed: params.onFinish,
+                                              style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
+                                              child: const Text('Finish'),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      builder: (context, key) => Container(
+                                        key: key,
+                                        child: SHEET._actionButton(
+                                          context,
+                                          icon: Icons.play_arrow_rounded,
+                                          label: "Play",
+                                          onTap: () {
+                                            final audio =
+                                                context.read<AudioProvider>();
+                                            Navigator.pop(context); // Close sheet
+                                            audio.stopPlayback().then((_) {
+                                              audio.startSurahPlayback(
+                                                context,
+                                                widget.ayats,
+                                                surah?.name ?? "Surah",
+                                                startAyatId: aya.ayatId,
+                                              );
+                                            });
+                                          },
+                                          color: bloc.selectedTheme,
+                                        ),
+                                      ),
+                                    )
+                                  : SHEET._actionButton(
                                       context,
-                                      widget.ayats,
-                                      surah?.name ?? "Surah",
-                                      startAyatId: aya.ayatId,
-                                    );
-                                  });
-                                },
-                                color: bloc.selectedTheme,
-                              ),
+                                      icon: Icons.play_arrow_rounded,
+                                      label: "Play",
+                                      onTap: () {
+                                        final audio =
+                                            context.read<AudioProvider>();
+                                        Navigator.pop(context); // Close sheet
+                                        audio.stopPlayback().then((_) {
+                                          audio.startSurahPlayback(
+                                            context,
+                                            widget.ayats,
+                                            surah?.name ?? "Surah",
+                                            startAyatId: aya.ayatId,
+                                          );
+                                        });
+                                      },
+                                      color: bloc.selectedTheme,
+                                    ),
                           ],
                         ),
                         const SizedBox(height: 20),
@@ -403,6 +577,7 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

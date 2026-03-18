@@ -18,6 +18,7 @@ import '../../../Widgets/auto_scroll_speed_dialog.dart';
 import '../Drawer/setting_screen.dart';
 import '../../../Provider/audio_provider.dart';
 import '../../../Widgets/audio_controller_overlay.dart';
+import 'package:flutter_intro/flutter_intro.dart';
 
 class QuranView extends StatefulWidget {
   final String? ayatCount;
@@ -69,6 +70,7 @@ class _QuranViewState extends State<QuranView> {
     quranViewWidget.clear();
     List<InlineSpan> textSpanChildren = [];
     List<int> currentBatchAyatNumbers = [];
+    bool isFirstAyat = true;
 
     // Helper to flush current spans into a widget
     void flush(bool isTarget) {
@@ -80,22 +82,62 @@ class _QuranViewState extends State<QuranView> {
         _targetKey = key;
       }
 
-      quranViewWidget.add(Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
-        child: RichText(
-          key: key,
-          textAlign: TextAlign.center,
-          text: TextSpan(
-            children: List<InlineSpan>.from(textSpanChildren),
-            style: TextStyle(
-              fontSize: bloc.arabicFontSize,
-              fontFamily: bloc.arabicFontFamily,
-              color: Colors.black,
-              height: 1.8,
-            ),
+      Widget rtWidget = RichText(
+        key: key,
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          children: List<InlineSpan>.from(textSpanChildren),
+          style: TextStyle(
+            fontSize: bloc.arabicFontSize,
+            fontFamily: bloc.arabicFontFamily,
+            color: Colors.black,
+            height: 1.8,
           ),
         ),
-      ));
+      );
+
+      if (isFirstAyat) {
+        quranViewWidget.add(Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
+          child: IntroStepBuilder(
+            group: 'quran_view',
+            order: 4,
+            overlayBuilder: (params) => Container(
+              margin: const EdgeInsets.only(top: 10, left: 10, right: 10),
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: Colors.black87,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Tap on any Ayat to open options for Tafseer, Audio, and Sharing.',
+                      style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: params.onFinish,
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
+                    child: const Text('Finish'),
+                  ),
+                ],
+              ),
+            ),
+            builder: (context, introKey) => Container(
+              key: introKey,
+              child: rtWidget,
+            ),
+          ),
+        ));
+        isFirstAyat = false;
+      } else {
+        quranViewWidget.add(Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
+          child: rtWidget,
+        ));
+      }
+
       textSpanChildren.clear();
       currentBatchAyatNumbers.clear();
     }
@@ -317,6 +359,14 @@ class _QuranViewState extends State<QuranView> {
         }
       }
     });
+
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted && _scaffoldKey.currentContext != null) {
+        try {
+          Intro.of(_scaffoldKey.currentContext!).start(group: 'quran_view');
+        } catch (_) {}
+      }
+    });
   }
 
   void _startAutoScroll() {
@@ -381,6 +431,8 @@ class _QuranViewState extends State<QuranView> {
     super.dispose();
   }
 
+  final GlobalKey _scaffoldKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     final bloc = context.watch<ThemeProvider>();
@@ -409,8 +461,11 @@ class _QuranViewState extends State<QuranView> {
     }
 
     return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.white,
+      child: Intro(
+        maskColor: Colors.black.withOpacity(0.8),
+        child: Scaffold(
+          key: _scaffoldKey,
+          backgroundColor: Colors.white,
         bottomNavigationBar: isScrollingDown
             ? const SizedBox()
             : Theme(
@@ -491,55 +546,119 @@ class _QuranViewState extends State<QuranView> {
                   },
                   items: [
                     BottomNavigationBarItem(
-                      icon: const Padding(
-                        padding: EdgeInsets.only(bottom: 4.0),
-                        child: Icon(
-                          Icons.menu_book_rounded,
-                          color: Colors.white,
-                          size: 26,
+                      icon: IntroStepBuilder(
+                        group: 'quran_view',
+                        order: 1,
+                        overlayBuilder: (params) => Container(
+                          margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.black87,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('Change between Kanz-ul-Iman and Kanz-ul-Irfan translations.',
+                                  style: TextStyle(color: Colors.white, fontSize: 12),
+                                  textAlign: TextAlign.center),
+                              const SizedBox(height: 8),
+                              ElevatedButton(
+                                onPressed: params.onNext,
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
+                                child: const Text('Next'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        builder: (context, key) => Padding(
+                          key: key,
+                          padding: const EdgeInsets.only(bottom: 4.0),
+                          child: const Icon(
+                            Icons.menu_book_rounded,
+                            color: Colors.white,
+                            size: 26,
+                          ),
                         ),
                       ),
                       label: bloc.selectedTranslation == "irfan"
                           ? "Kanz-ul-Irfan"
                           : "Kanz-ul-Iman",
                     ),
-                    // BottomNavigationBarItem(
-                    //   icon: Padding(
-                    //     padding: const EdgeInsets.only(bottom: 4.0),
-                    //     child: Icon(
-                    //       audioProvider.currentAyahIndex != null
-                    //           ? (audioProvider.isPlaying
-                    //               ? Icons.pause_circle_filled_rounded
-                    //               : Icons.play_circle_filled_rounded)
-                    //           : Icons.play_circle_outline_rounded,
-                    //       color: Colors.white,
-                    //       size: 26,
-                    //     ),
-                    //   ),
-                    //   label: audioProvider.currentAyahIndex != null
-                    //       ? (audioProvider.isPlaying ? 'Pause' : 'Resume')
-                    //       : 'Play Audio',
-                    // ),
                     BottomNavigationBarItem(
-                      icon: Padding(
-                        padding: const EdgeInsets.only(bottom: 4.0),
-                        child: Icon(
-                          isAutoScrolling
-                              ? Icons.stop_circle_rounded
-                              : Icons.fit_screen_rounded,
-                          color: Colors.white,
-                          size: 26,
+                      icon: IntroStepBuilder(
+                        group: 'quran_view',
+                        order: 2,
+                        overlayBuilder: (params) => Container(
+                          margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.black87,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('Auto-scroll the page hands-free while reciting or listening.',
+                                  style: TextStyle(color: Colors.white, fontSize: 12),
+                                  textAlign: TextAlign.center),
+                              const SizedBox(height: 8),
+                              ElevatedButton(
+                                onPressed: params.onNext,
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
+                                child: const Text('Next'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        builder: (context, key) => Padding(
+                          key: key,
+                          padding: const EdgeInsets.only(bottom: 4.0),
+                          child: Icon(
+                            isAutoScrolling
+                                ? Icons.stop_circle_rounded
+                                : Icons.fit_screen_rounded,
+                            color: Colors.white,
+                            size: 26,
+                          ),
                         ),
                       ),
                       label: isAutoScrolling ? 'Stop' : 'Auto Scroll',
                     ),
-                    const BottomNavigationBarItem(
-                      icon: Padding(
-                        padding: EdgeInsets.only(bottom: 4.0),
-                        child: Icon(
-                          Icons.settings_rounded,
-                          color: Colors.white,
-                          size: 26,
+                    BottomNavigationBarItem(
+                      icon: IntroStepBuilder(
+                        group: 'quran_view',
+                        order: 3,
+                        overlayBuilder: (params) => Container(
+                          margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.black87,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('Customize font size, family, and translation language.',
+                                  style: TextStyle(color: Colors.white, fontSize: 12),
+                                  textAlign: TextAlign.center),
+                              const SizedBox(height: 8),
+                              ElevatedButton(
+                                onPressed: params.onNext,
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
+                                child: const Text('Next'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        builder: (context, key) => Padding(
+                          key: key,
+                          padding: const EdgeInsets.only(bottom: 4.0),
+                          child: const Icon(
+                            Icons.settings_rounded,
+                            color: Colors.white,
+                            size: 26,
+                          ),
                         ),
                       ),
                       label: "Setting",
@@ -625,6 +744,7 @@ class _QuranViewState extends State<QuranView> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
