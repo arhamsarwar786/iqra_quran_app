@@ -1,4 +1,3 @@
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:arabic_numbers/arabic_numbers.dart';
@@ -19,7 +18,6 @@ import '../../../Provider/audio_provider.dart';
 import '../../../Widgets/audio_controller_overlay.dart';
 import 'package:flutter_intro/flutter_intro.dart';
 import '../../../Utils/utils.dart';
-
 
 class QuranView extends StatefulWidget {
   final String? ayatCount;
@@ -103,15 +101,17 @@ class _QuranViewState extends State<QuranView> {
           child: IntroStepBuilder(
             group: 'quran_view',
             order: 4,
-            getOverlayPosition: ({required offset, required screenSize, required size}) {
+            getOverlayPosition: (
+                {required offset, required screenSize, required size}) {
               return OverlayPosition(
                 width: screenSize.width * 0.9,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                top: offset.dy + size.height + 20, 
+                top: offset.dy + size.height + 20,
                 left: screenSize.width * 0.05,
               );
             },
-            overlayBuilder: (params) => buildIntroOverlay(params, 'Tap on any Ayat to open options for Tafseer, Audio, and Sharing.'),
+            overlayBuilder: (params) => buildIntroOverlay(params,
+                'Tap on any Ayat to open options for Tafseer, Audio, and Sharing.'),
             builder: (context, introKey) => Container(
               key: introKey,
               child: rtWidget,
@@ -348,18 +348,18 @@ class _QuranViewState extends State<QuranView> {
       }
     });
 
-      // Future.delayed(const Duration(milliseconds: 1500), () async {
-      //   SharedPreferences prefs = await SharedPreferences.getInstance();
-      //   bool introShown = prefs.getBool('quran_view_intro') ?? false;
-      //   if (!introShown) {
-      //     if (mounted && _scaffoldKey.currentContext != null) {
-      //       try {
-      //         Intro.of(_scaffoldKey.currentContext!).start(group: 'quran_view');
-      //         await prefs.setBool('quran_view_intro', true);
-      //       } catch (_) {}
-      //     }
-      //   }
-      // });
+    Future.delayed(const Duration(milliseconds: 300), () async {
+      // SharedPreferences prefs = await SharedPreferences.getInstance();
+      // bool introShown = prefs.getBool('quran_view_intro') ?? false;
+      // if (!introShown) {
+      if (mounted && _scaffoldKey.currentContext != null) {
+        try {
+          Intro.of(_scaffoldKey.currentContext!).start(group: 'quran_view');
+          // await prefs.setBool('quran_view_intro', true);
+        } catch (_) {}
+      }
+      // }
+    });
   }
 
   void _startAutoScroll() {
@@ -455,236 +455,251 @@ class _QuranViewState extends State<QuranView> {
 
     return SafeArea(
       child: Intro(
-        maskColor: Colors.black.withOpacity(0.8),
+        maskColor: bloc.selectedTheme.withOpacity(0.5),
         child: Scaffold(
           key: _scaffoldKey,
           backgroundColor: Colors.white,
-        bottomNavigationBar: isScrollingDown
-            ? const SizedBox()
-            : Theme(
-                data: Theme.of(context).copyWith(
-                  canvasColor: bloc.selectedTheme,
-                ),
-                child: BottomNavigationBar(
-                  backgroundColor: bloc.selectedTheme,
-                  elevation: 10,
-                  selectedItemColor: Colors.white,
-                  unselectedItemColor: Colors.white,
-                  selectedFontSize: 12,
-                  unselectedFontSize: 12,
-                  selectedLabelStyle: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                  unselectedLabelStyle: const TextStyle(color: Colors.white),
-                  currentIndex: audioProvider.currentAyahIndex != null ? 1 : 0,
-                  type: BottomNavigationBarType.fixed,
-                  onTap: (index) {
-                    if (index == 0) {
-                      push(
-                          context,
-                          SurahTranslationScreen(
-                            ayatCount: widget.ayatCount.toString(),
-                            ayatList: listAyat,
-                            suratNumber: widget.suratNumber,
-                            surahName: widget.surahName,
-                          ));
-                    }
-                    // else if (index == 1) {
-                    //   if (audioProvider.currentAyahIndex != null) {
-                    //     if (audioProvider.isPlaying) {
-                    //       audioProvider.pausePlayback();
-                    //     } else {
-                    //       audioProvider.resumePlayback();
-                    //     }
-                    //   } else {
-                    //     // Start playback from the beginning of the surah using ayatId
-                    //     audioProvider.startSurahPlayback(
-                    //         context, listAyat, widget.surahName ?? "Surah",
-                    //         startAyatId: listAyat.isNotEmpty
-                    //             ? listAyat
-                    //                 .firstWhere((a) => a.ayatNumber != "0",
-                    //                     orElse: () => listAyat.first)
-                    //                 .ayatId
-                    //             : null);
-                    //   }
-                    // }
-                    else if (index == 1) {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AutoScrollSpeedDialog(
-                          currentSpeedFactor: autoScrollSpeed,
-                          isScrolling: isAutoScrolling,
-                          onSpeedChanged: (val) {
-                            setState(() {
-                              autoScrollSpeed = val;
-                            });
-                            if (isAutoScrolling) {
-                              _stopAutoScroll();
-                              _startAutoScroll();
-                            }
-                          },
-                          onStart: () {
-                            setState(() {
-                              isAutoScrolling = true;
-                            });
-                            _startAutoScroll();
-                          },
-                          onStop: () {
-                            _stopAutoScroll();
-                          },
-                        ),
-                      );
-                    } else if (index == 2) {
-                      push(context, const SettingScreen());
-                    }
-                  },
-                  items: [
-                    BottomNavigationBarItem(
-                      icon: IntroStepBuilder(
-                        group: 'quran_view',
-                        order: 1,
-                        getOverlayPosition: ({required offset, required screenSize, required size}) {
-                          return OverlayPosition(
-                            width: screenSize.width * 0.8,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            bottom: screenSize.height - offset.dy + 10,
-                            left: screenSize.width * 0.1,
-                          );
-                        },
-                        overlayBuilder: (params) => buildIntroOverlay(params, 'Change between Kanz-ul-Iman and Kanz-ul-Irfan translations.'),
-                        builder: (context, key) => Padding(
-                          key: key,
-                          padding: const EdgeInsets.only(bottom: 4.0),
-                          child: const Icon(
-                            Icons.menu_book_rounded,
-                            color: Colors.white,
-                            size: 26,
-                          ),
-                        ),
-                      ),
-                      label: bloc.selectedTranslation == "irfan"
-                          ? "Kanz-ul-Irfan"
-                          : "Kanz-ul-Iman",
-                    ),
-                    BottomNavigationBarItem(
-                      icon: IntroStepBuilder(
-                        group: 'quran_view',
-                        order: 2,
-                        getOverlayPosition: ({required offset, required screenSize, required size}) {
-                          return OverlayPosition(
-                            width: screenSize.width * 0.8,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            bottom: screenSize.height - offset.dy + 10,
-                            left: screenSize.width * 0.1,
-                          );
-                        },
-                        overlayBuilder: (params) => buildIntroOverlay(params, 'Auto-scroll the page hands-free while reciting or listening.'),
-                        builder: (context, key) => Padding(
-                          key: key,
-                          padding: const EdgeInsets.only(bottom: 4.0),
-                          child: Icon(
-                            isAutoScrolling
-                                ? Icons.stop_circle_rounded
-                                : Icons.fit_screen_rounded,
-                            color: Colors.white,
-                            size: 26,
-                          ),
-                        ),
-                      ),
-                      label: isAutoScrolling ? 'Stop' : 'Auto Scroll',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: IntroStepBuilder(
-                        group: 'quran_view',
-                        order: 3,
-                        getOverlayPosition: ({required offset, required screenSize, required size}) {
-                          return OverlayPosition(
-                            width: screenSize.width * 0.8,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            bottom: screenSize.height - offset.dy + 10,
-                            left: screenSize.width * 0.1,
-                          );
-                        },
-                        overlayBuilder: (params) => buildIntroOverlay(params, 'Customize font size, family, and translation language.'),
-                        builder: (context, key) => Padding(
-                          key: key,
-                          padding: const EdgeInsets.only(bottom: 4.0),
-                          child: const Icon(
-                            Icons.settings_rounded,
-                            color: Colors.white,
-                            size: 26,
-                          ),
-                        ),
-                      ),
-                      label: "Setting",
-                    )
-                  ],
-                ),
-              ),
-        body: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            setState(() {
-              isScrollingDown = !isScrollingDown;
-            });
-          },
-          child: Stack(
-            children: [
-              Listener(
-                onPointerDown: (_) => _pauseAutoScrollForTouch(),
-                onPointerUp: (_) => _resumeAutoScrollAfterTouch(),
-                onPointerCancel: (_) => _resumeAutoScrollAfterTouch(),
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (notification) {
-                    if (notification is ScrollEndNotification) {
-                      if (widget.saveLastRead) {
-                        _updateLastRead(notification.metrics.pixels);
+          bottomNavigationBar: isScrollingDown
+              ? const SizedBox()
+              : Theme(
+                  data: Theme.of(context).copyWith(
+                    canvasColor: bloc.selectedTheme,
+                  ),
+                  child: BottomNavigationBar(
+                    backgroundColor: bloc.selectedTheme,
+                    elevation: 10,
+                    selectedItemColor: Colors.white,
+                    unselectedItemColor: Colors.white,
+                    selectedFontSize: 12,
+                    unselectedFontSize: 12,
+                    selectedLabelStyle: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                    unselectedLabelStyle: const TextStyle(color: Colors.white),
+                    currentIndex:
+                        audioProvider.currentAyahIndex != null ? 1 : 0,
+                    type: BottomNavigationBarType.fixed,
+                    onTap: (index) {
+                      if (index == 0) {
+                        push(
+                            context,
+                            SurahTranslationScreen(
+                              ayatCount: widget.ayatCount.toString(),
+                              ayatList: listAyat,
+                              suratNumber: widget.suratNumber,
+                              surahName: widget.surahName,
+                            ));
                       }
-                    }
-                    return false;
-                  },
-                  child: NestedScrollView(
-                    headerSliverBuilder:
-                        (BuildContext context, bool innerBoxIsScrolled) {
-                      return [
-                        SliverAppBar(
-                          automaticallyImplyLeading: false,
-                          backgroundColor: metadata != null
-                              ? bloc.selectedTheme
-                              : Colors.white,
-                          elevation: 0,
-                          expandedHeight: isScrollingDown
-                              ? (metadata != null ? 100.0 : 0.0)
-                              : (metadata != null ? 156.0 : 56.0),
-                          toolbarHeight: metadata != null
-                              ? 100.0
-                              : (isScrollingDown ? 0.0 : 56.0),
-                          floating: false,
-                          pinned: true,
-                          flexibleSpace: CompleteQuranHeader(
-                            title: widget.surahName ?? '',
-                            metadata: metadata,
-                            isScrollingDown: isScrollingDown,
+                      // else if (index == 1) {
+                      //   if (audioProvider.currentAyahIndex != null) {
+                      //     if (audioProvider.isPlaying) {
+                      //       audioProvider.pausePlayback();
+                      //     } else {
+                      //       audioProvider.resumePlayback();
+                      //     }
+                      //   } else {
+                      //     // Start playback from the beginning of the surah using ayatId
+                      //     audioProvider.startSurahPlayback(
+                      //         context, listAyat, widget.surahName ?? "Surah",
+                      //         startAyatId: listAyat.isNotEmpty
+                      //             ? listAyat
+                      //                 .firstWhere((a) => a.ayatNumber != "0",
+                      //                     orElse: () => listAyat.first)
+                      //                 .ayatId
+                      //             : null);
+                      //   }
+                      // }
+                      else if (index == 1) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AutoScrollSpeedDialog(
+                            currentSpeedFactor: autoScrollSpeed,
+                            isScrolling: isAutoScrolling,
+                            onSpeedChanged: (val) {
+                              setState(() {
+                                autoScrollSpeed = val;
+                              });
+                              if (isAutoScrolling) {
+                                _stopAutoScroll();
+                                _startAutoScroll();
+                              }
+                            },
+                            onStart: () {
+                              setState(() {
+                                isAutoScrolling = true;
+                              });
+                              _startAutoScroll();
+                            },
+                            onStop: () {
+                              _stopAutoScroll();
+                            },
+                          ),
+                        );
+                      } else if (index == 2) {
+                        push(context, const SettingScreen());
+                      }
+                    },
+                    items: [
+                      BottomNavigationBarItem(
+                        icon: IntroStepBuilder(
+                          group: 'quran_view',
+                          order: 1,
+                          getOverlayPosition: (
+                              {required offset,
+                              required screenSize,
+                              required size}) {
+                            return OverlayPosition(
+                              width: screenSize.width * 0.8,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              bottom: screenSize.height - offset.dy + 10,
+                              left: screenSize.width * 0.1,
+                            );
+                          },
+                          overlayBuilder: (params) => buildIntroOverlay(params,
+                              'Change between Kanz-ul-Iman and Kanz-ul-Irfan translations.'),
+                          builder: (context, key) => Padding(
+                            key: key,
+                            padding: const EdgeInsets.only(bottom: 4.0),
+                            child: const Icon(
+                              Icons.menu_book_rounded,
+                              color: Colors.white,
+                              size: 26,
+                            ),
                           ),
                         ),
-                      ];
-                    },
-                    body: SizedBox.expand(
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
+                        label: bloc.selectedTranslation == "irfan"
+                            ? "Kanz-ul-Irfan"
+                            : "Kanz-ul-Iman",
+                      ),
+                      BottomNavigationBarItem(
+                        icon: IntroStepBuilder(
+                          group: 'quran_view',
+                          order: 2,
+                          getOverlayPosition: (
+                              {required offset,
+                              required screenSize,
+                              required size}) {
+                            return OverlayPosition(
+                              width: screenSize.width * 0.8,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              bottom: screenSize.height - offset.dy + 10,
+                              left: screenSize.width * 0.1,
+                            );
+                          },
+                          overlayBuilder: (params) => buildIntroOverlay(params,
+                              'Auto-scroll the page hands-free while reciting or listening.'),
+                          builder: (context, key) => Padding(
+                            key: key,
+                            padding: const EdgeInsets.only(bottom: 4.0),
+                            child: Icon(
+                              isAutoScrolling
+                                  ? Icons.stop_circle_rounded
+                                  : Icons.fit_screen_rounded,
+                              color: Colors.white,
+                              size: 26,
+                            ),
+                          ),
                         ),
-                        padding: const EdgeInsets.only(top: 4, bottom: 0),
-                        child: Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: SingleChildScrollView(
-                            controller: _scrollViewController,
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            child: Container(
-                              padding: const EdgeInsets.only(
-                                  left: 12, right: 12, top: 10, bottom: 10),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: quranViewWidget,
+                        label: isAutoScrolling ? 'Stop' : 'Auto Scroll',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: IntroStepBuilder(
+                          group: 'quran_view',
+                          order: 3,
+                          getOverlayPosition: (
+                              {required offset,
+                              required screenSize,
+                              required size}) {
+                            return OverlayPosition(
+                              width: screenSize.width * 0.8,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              bottom: screenSize.height - offset.dy + 10,
+                              left: screenSize.width * 0.1,
+                            );
+                          },
+                          overlayBuilder: (params) => buildIntroOverlay(params,
+                              'Customize font size, family, and translation language.'),
+                          builder: (context, key) => Padding(
+                            key: key,
+                            padding: const EdgeInsets.only(bottom: 4.0),
+                            child: const Icon(
+                              Icons.settings_rounded,
+                              color: Colors.white,
+                              size: 26,
+                            ),
+                          ),
+                        ),
+                        label: "Setting",
+                      )
+                    ],
+                  ),
+                ),
+          body: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              setState(() {
+                isScrollingDown = !isScrollingDown;
+              });
+            },
+            child: Stack(
+              children: [
+                Listener(
+                  onPointerDown: (_) => _pauseAutoScrollForTouch(),
+                  onPointerUp: (_) => _resumeAutoScrollAfterTouch(),
+                  onPointerCancel: (_) => _resumeAutoScrollAfterTouch(),
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      if (notification is ScrollEndNotification) {
+                        if (widget.saveLastRead) {
+                          _updateLastRead(notification.metrics.pixels);
+                        }
+                      }
+                      return false;
+                    },
+                    child: NestedScrollView(
+                      headerSliverBuilder:
+                          (BuildContext context, bool innerBoxIsScrolled) {
+                        return [
+                          SliverAppBar(
+                            automaticallyImplyLeading: false,
+                            backgroundColor: metadata != null
+                                ? bloc.selectedTheme
+                                : Colors.white,
+                            elevation: 0,
+                            expandedHeight: isScrollingDown
+                                ? (metadata != null ? 100.0 : 0.0)
+                                : (metadata != null ? 156.0 : 56.0),
+                            toolbarHeight: metadata != null
+                                ? 100.0
+                                : (isScrollingDown ? 0.0 : 56.0),
+                            floating: false,
+                            pinned: true,
+                            flexibleSpace: CompleteQuranHeader(
+                              title: widget.surahName ?? '',
+                              metadata: metadata,
+                              isScrollingDown: isScrollingDown,
+                            ),
+                          ),
+                        ];
+                      },
+                      body: SizedBox.expand(
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                          ),
+                          padding: const EdgeInsets.only(top: 4, bottom: 0),
+                          child: Directionality(
+                            textDirection: TextDirection.rtl,
+                            child: SingleChildScrollView(
+                              controller: _scrollViewController,
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              child: Container(
+                                padding: const EdgeInsets.only(
+                                    left: 12, right: 12, top: 10, bottom: 10),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: quranViewWidget,
+                                ),
                               ),
                             ),
                           ),
@@ -693,12 +708,11 @@ class _QuranViewState extends State<QuranView> {
                     ),
                   ),
                 ),
-              ),
-              const QuranAudioOverlay(),
-            ],
+                const QuranAudioOverlay(),
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }

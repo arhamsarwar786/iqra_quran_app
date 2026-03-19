@@ -12,6 +12,8 @@ import '../../../Provider/tasbih_count.dart';
 import '../../../main.dart';
 import 'digital_font.dart';
 import 'tasbee_info.dart';
+import 'package:flutter_intro/flutter_intro.dart';
+import '../../../Utils/utils.dart';
 
 ///////////////////////////////////////////////
 
@@ -22,10 +24,28 @@ class Tasbih extends StatefulWidget {
 }
 
 class _MyWidgetState extends State<Tasbih> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
     setSound();
+
+    Future.delayed(const Duration(milliseconds: 200), () async {
+      // SharedPreferences prefs = await SharedPreferences.getInstance();
+      // bool introShown = prefs.getBool('tasbeeh_intro_shown') ?? false;
+
+      // if (!introShown) {
+      if (mounted && _scaffoldKey.currentContext != null) {
+        try {
+          Intro.of(_scaffoldKey.currentContext!).start(group: 'tasbeeh');
+          // await prefs.setBool('tasbeeh_intro_shown', true);
+        } catch (e) {
+          debugPrint("TASBEEH INTRO ERROR: $e");
+        }
+      }
+      // }
+    });
   }
 
   final player = AudioPlayer();
@@ -41,200 +61,236 @@ class _MyWidgetState extends State<Tasbih> {
     var themeProvider = Provider.of<ThemeProvider>(context);
     final selectedTasbeeh = tasbeehProvider.selectedTasbeeh;
 
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(
+    return Intro(
+      maskColor: themeProvider.selectedTheme.withOpacity(0.5),
+      child: Scaffold(
+        key: _scaffoldKey,
+        floatingActionButton: IntroStepBuilder(
+          group: 'tasbeeh',
+          order: 4,
+          overlayBuilder: (params) => buildIntroOverlay(params,
+              "Tap here to save your progress or select from saved Tasbeehs."),
+          builder: (context, key) => FloatingActionButton(
+              key: key,
+              backgroundColor: Theme.of(context).primaryColor,
+              isExtended: true,
+              child: const Icon(Icons.add),
+              onPressed: () {
+                push(context, const TasheehListScreen());
+              }),
+        ),
+        appBar: AppBar(
           backgroundColor: Theme.of(context).primaryColor,
-          isExtended: true,
-          child: const Icon(Icons.add),
-          onPressed: () {
-            push(context, const TasheehListScreen());
-          }),
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
-        title: const Text("Tasbeeh"),
-        centerTitle: true,
-        actions: [
-          IconButton(
-              onPressed: () async {
-                if (selectedTasbeeh != null) {
-                  await objectbox.saveDailyTasbih(selectedTasbeeh.arabic ?? '',
-                      tasbihProvider.currentStep.toInt());
-                }
-                push(context, const TasbihInfo());
-              },
-              icon: const Icon(Icons.history)),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            selectedTasbeeh != null
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20.0, vertical: 0.0),
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(
-                            0.2), // Glassmorphism white transparent
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                            color: Colors.white.withOpacity(0.4), width: 1.5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 15,
-                            spreadRadius: 2,
-                            offset: const Offset(0, 4),
-                          )
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-                          child: Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  selectedTasbeeh.arabic ?? '',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
-                                    fontFamily: themeProvider.arabicFontFamily,
-                                    fontSize: 34,
-                                    fontWeight: FontWeight.bold,
-                                    shadows: const [
-                                      Shadow(
-                                          offset: Offset(0.5, 0.5),
-                                          blurRadius: 3,
-                                          color: Colors.black12),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  selectedTasbeeh.transliteration ?? '',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontFamily: themeProvider.urduFontFamily,
-                                    color: Theme.of(context)
-                                        .primaryColor
-                                        .withOpacity(0.8),
-                                    fontSize: 20,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  selectedTasbeeh.urduMeaning ?? '',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontFamily: themeProvider.urduFontFamily,
-                                    color: Theme.of(context)
-                                        .primaryColor
-                                        .withOpacity(0.9),
-                                    fontSize: 20,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+          title: const Text("Tasbeeh"),
+          centerTitle: true,
+          actions: [
+            IntroStepBuilder(
+              group: 'tasbeeh',
+              order: 3,
+              overlayBuilder: (params) => buildIntroOverlay(
+                  params, "Tap here to view your daily saved Tasbeeh history."),
+              builder: (context, key) => IconButton(
+                  key: key,
+                  onPressed: () async {
+                    if (selectedTasbeeh != null) {
+                      await objectbox.saveDailyTasbih(
+                          selectedTasbeeh.arabic ?? '',
+                          tasbihProvider.currentStep.toInt());
+                    }
+                    push(context, const TasbihInfo());
+                  },
+                  icon: const Icon(Icons.history)),
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              selectedTasbeeh != null
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20.0, vertical: 0.0),
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(
+                              0.2), // Glassmorphism white transparent
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                              color: Colors.white.withOpacity(0.4), width: 1.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 15,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 4),
+                            )
+                          ],
                         ),
-                      ),
-                    ),
-                  )
-                : const SizedBox.shrink(),
-            Expanded(
-              flex: 7,
-              child: Center(
-                child: Consumer<TasbeeCount>(builder: (context, value, widget) {
-                  return Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 30),
-                      alignment: Alignment.center,
-                      child: Stack(
-                        children: [
-                          CustomPaint(
-                            size: Size(size.width,
-                                (size.width * 1.3375527426160339).toDouble()),
-                            painter: RPSCustomPainter(context),
-                          ),
-                          Positioned(
-                            top: size.height * 0.1,
-                            left: 90,
-                            right: 90,
-                            child: Container(
-                              alignment: Alignment.center,
-                              height: size.height * 0.13,
-                              width: size.width * 0.5,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).primaryColor,
-                                borderRadius: BorderRadius.circular(6.0),
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  DigitalNumber(
-                                    value: value.currentStep.toInt(),
-                                    height: 50,
-                                    color: Colors.white,
+                                  Text(
+                                    selectedTasbeeh.arabic ?? '',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                      fontFamily:
+                                          themeProvider.arabicFontFamily,
+                                      fontSize: 34,
+                                      fontWeight: FontWeight.bold,
+                                      shadows: const [
+                                        Shadow(
+                                            offset: Offset(0.5, 0.5),
+                                            blurRadius: 3,
+                                            color: Colors.black12),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    selectedTasbeeh.transliteration ?? '',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: themeProvider.urduFontFamily,
+                                      color: Theme.of(context)
+                                          .primaryColor
+                                          .withOpacity(0.8),
+                                      fontSize: 20,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    selectedTasbeeh.urduMeaning ?? '',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: themeProvider.urduFontFamily,
+                                      color: Theme.of(context)
+                                          .primaryColor
+                                          .withOpacity(0.9),
+                                      fontSize: 20,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                          Positioned(
-                            // bottom: 70,
-                            bottom: size.height * 0.1,
-                            left: 0,
-                            right: 0,
-                            child: BouncingButton(
-                              onPress: () async {
-                                await value.increment();
-                                player.seek(Duration.zero);
-                                player.play();
-                              },
-                              child: CircleAvatar(
-                                radius: 80,
-                                backgroundColor:
-                                    const Color(0xffF2EEEE).withOpacity(1.0),
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+              Expanded(
+                flex: 7,
+                child: Center(
+                  child:
+                      Consumer<TasbeeCount>(builder: (context, value, widget) {
+                    return Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 30),
+                        alignment: Alignment.center,
+                        child: Stack(
+                          children: [
+                            CustomPaint(
+                              size: Size(size.width,
+                                  (size.width * 1.3375527426160339).toDouble()),
+                              painter: RPSCustomPainter(context),
+                            ),
+                            Positioned(
+                              top: size.height * 0.1,
+                              left: 90,
+                              right: 90,
+                              child: Container(
+                                alignment: Alignment.center,
+                                height: size.height * 0.13,
+                                width: size.width * 0.5,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).primaryColor,
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    DigitalNumber(
+                                      value: value.currentStep.toInt(),
+                                      height: 50,
+                                      color: Colors.white,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                          Positioned(
-                              // left: 0,
-                              top: 0,
-                              right: size.width * 0.22,
-                              bottom: 20,
-                              child: BouncingButton(
-                                  onPress: () {
-                                    customAlertBox(context,
-                                        title: "Want to Delete?",
-                                        decription:
-                                            "Are you sure you want to clear user data.",
-                                        onTab: () async {
-                                      await value.resetCount();
-                                      pop(context);
-                                    });
+                            Positioned(
+                              // bottom: 70,
+                              bottom: size.height * 0.1,
+                              left: 0,
+                              right: 0,
+                              child: IntroStepBuilder(
+                                group: 'tasbeeh',
+                                order: 1,
+                                overlayBuilder: (params) => buildIntroOverlay(
+                                    params,
+                                    "Tap anywhere on this large button to count your Tasbeeh."),
+                                builder: (context, key) => BouncingButton(
+                                  key: key,
+                                  onPress: () async {
+                                    await value.increment();
+                                    player.seek(Duration.zero);
+                                    player.play();
                                   },
                                   child: CircleAvatar(
-                                    radius: 20,
-                                    backgroundColor:
-                                        const Color.fromARGB(255, 255, 0, 0)
-                                            .withOpacity(1.0),
-                                  ))),
-                        ],
-                      ));
-                }),
+                                    radius: 80,
+                                    backgroundColor: const Color(0xffF2EEEE)
+                                        .withOpacity(1.0),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                                // left: 0,
+                                top: 0,
+                                right: size.width * 0.22,
+                                bottom: 20,
+                                child: IntroStepBuilder(
+                                    group: 'tasbeeh',
+                                    order: 2,
+                                    overlayBuilder: (params) => buildIntroOverlay(
+                                        params,
+                                        "Tap this red button to reset your counter back to zero."),
+                                    builder: (context, key) => BouncingButton(
+                                        key: key,
+                                        onPress: () {
+                                          customAlertBox(context,
+                                              title: "Want to Delete?",
+                                              decription:
+                                                  "Are you sure you want to clear user data.",
+                                              onTab: () async {
+                                            await value.resetCount();
+                                            pop(context);
+                                          });
+                                        },
+                                        child: CircleAvatar(
+                                          radius: 20,
+                                          backgroundColor: const Color.fromARGB(
+                                                  255, 255, 0, 0)
+                                              .withOpacity(1.0),
+                                        )))),
+                          ],
+                        ));
+                  }),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
