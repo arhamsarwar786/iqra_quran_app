@@ -10,6 +10,7 @@ import '../Screens/MainPage/Quran/verse_detail_screen.dart';
 import '../widgets.dart';
 import '../Provider/audio_provider.dart';
 import 'package:flutter_intro/flutter_intro.dart';
+import 'utils.dart';
 
 class SHEET {
   static bottomSheetPreview(BuildContext context, List<Aya> ayats,
@@ -96,23 +97,28 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
     
-    Future.delayed(const Duration(milliseconds: 800), () {
-      if (mounted && _sheetKey.currentContext != null) {
-        if (_introScrollController.hasClients) {
-          _introScrollController.animateTo(
-            _introScrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-          ).then((_) {
-            if (mounted) {
-              try {
-                Intro.of(_sheetKey.currentContext!).start(group: 'bottom_sheet');
-              } catch (_) {}
-            }
-          });
-        }
-      }
-    });
+    // Future.delayed(const Duration(milliseconds: 800), () async {
+    //   SharedPreferences prefs = await SharedPreferences.getInstance();
+    //   bool introShown = prefs.getBool('bottom_sheet_intro_shown') ?? false;
+    //   if (!introShown) {
+    //     if (mounted && _sheetKey.currentContext != null) {
+    //       if (_introScrollController.hasClients) {
+    //         _introScrollController.animateTo(
+    //           _introScrollController.position.maxScrollExtent,
+    //           duration: const Duration(milliseconds: 500),
+    //           curve: Curves.easeInOut,
+    //         ).then((_) async {
+    //           if (mounted) {
+    //             try {
+    //               Intro.of(_sheetKey.currentContext!).start(group: 'bottom_sheet');
+    //               await prefs.setBool('bottom_sheet_intro_shown', true);
+    //             } catch (_) {}
+    //           }
+    //         });
+    //       }
+    //     }
+    //   }
+    // });
   }
 
   @override
@@ -302,28 +308,15 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
                                 ? IntroStepBuilder(
                                     group: 'bottom_sheet',
                                     order: 1,
-                                    overlayBuilder: (params) => Container(
-                                      margin: const EdgeInsets.only(top: 10, left: 10, right: 10),
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black87,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Text('Share this Ayat as an image to WhatsApp or others.',
-                                              style: TextStyle(color: Colors.white, fontSize: 12),
-                                              textAlign: TextAlign.center),
-                                          const SizedBox(height: 8),
-                                          ElevatedButton(
-                                            onPressed: params.onNext,
-                                            style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
-                                            child: const Text('Next'),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                    getOverlayPosition: ({required offset, required screenSize, required size}) {
+                                      return OverlayPosition(
+                                        width: screenSize.width * 0.8,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        bottom: screenSize.height - offset.dy + 10,
+                                        left: screenSize.width * 0.1,
+                                      );
+                                    },
+                                    overlayBuilder: (params) => buildIntroOverlay(params, 'Share this Ayat as an image to WhatsApp or others.'),
                                     builder: (context, key) => Container(
                                       key: key,
                                       child: SHEET._actionButton(
@@ -373,28 +366,15 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
                                 ? IntroStepBuilder(
                                     group: 'bottom_sheet',
                                     order: 2,
-                                    overlayBuilder: (params) => Container(
-                                      margin: const EdgeInsets.only(top: 10, left: 10, right: 10),
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black87,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Text('Read detailed Urdu Tafseer for this Verse.',
-                                              style: TextStyle(color: Colors.white, fontSize: 12),
-                                              textAlign: TextAlign.center),
-                                          const SizedBox(height: 8),
-                                          ElevatedButton(
-                                            onPressed: widget.showPlayButton ? params.onNext : params.onFinish,
-                                            style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
-                                            child: Text(widget.showPlayButton ? 'Next' : 'Finish'),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                    getOverlayPosition: ({required offset, required screenSize, required size}) {
+                                      return OverlayPosition(
+                                        width: screenSize.width * 0.8,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        bottom: screenSize.height - offset.dy + 10,
+                                        left: screenSize.width * 0.1,
+                                      );
+                                    },
+                                    overlayBuilder: (params) => buildIntroOverlay(params, 'Read detailed Urdu Tafseer for this Verse.'),
                                     builder: (context, key) => Container(
                                       key: key,
                                       child: SHEET._actionButton(
@@ -434,28 +414,15 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
                                   ? IntroStepBuilder(
                                       group: 'bottom_sheet',
                                       order: 3,
-                                      overlayBuilder: (params) => Container(
-                                        margin: const EdgeInsets.only(top: 10, left: 10, right: 10),
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: Colors.black87,
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const Text('Listen to the audio recitation of this Ayat.',
-                                                style: TextStyle(color: Colors.white, fontSize: 12),
-                                                textAlign: TextAlign.center),
-                                            const SizedBox(height: 8),
-                                            ElevatedButton(
-                                              onPressed: params.onFinish,
-                                              style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
-                                              child: const Text('Finish'),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                      getOverlayPosition: ({required offset, required screenSize, required size}) {
+                                        return OverlayPosition(
+                                          width: screenSize.width * 0.8,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          bottom: screenSize.height - offset.dy + 10,
+                                          left: screenSize.width * 0.1,
+                                        );
+                                      },
+                                      overlayBuilder: (params) => buildIntroOverlay(params, 'Listen to the audio recitation of this Ayat.'),
                                       builder: (context, key) => Container(
                                         key: key,
                                         child: SHEET._actionButton(

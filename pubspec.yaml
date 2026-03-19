@@ -143,9 +143,9 @@ flutter:
       fonts:
         - asset: assets/fonts/AlQalam Abuzar Regular.ttf
 
-    - family: mehr
+    - family: jamel
       fonts:
-        - asset: assets/fonts/mehr.ttf
+        - asset: assets/fonts/jamel.ttf
     - family: nastaleeq
       fonts:
         - asset: assets/fonts/nastaleeq.ttf 

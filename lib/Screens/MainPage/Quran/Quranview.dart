@@ -1,4 +1,3 @@
-// ignore_for_file: file_names
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +18,8 @@ import '../Drawer/setting_screen.dart';
 import '../../../Provider/audio_provider.dart';
 import '../../../Widgets/audio_controller_overlay.dart';
 import 'package:flutter_intro/flutter_intro.dart';
+import '../../../Utils/utils.dart';
+
 
 class QuranView extends StatefulWidget {
   final String? ayatCount;
@@ -102,28 +103,15 @@ class _QuranViewState extends State<QuranView> {
           child: IntroStepBuilder(
             group: 'quran_view',
             order: 4,
-            overlayBuilder: (params) => Container(
-              margin: const EdgeInsets.only(top: 10, left: 10, right: 10),
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                color: Colors.black87,
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('Tap on any Ayat to open options for Tafseer, Audio, and Sharing.',
-                      style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: params.onFinish,
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
-                    child: const Text('Finish'),
-                  ),
-                ],
-              ),
-            ),
+            getOverlayPosition: ({required offset, required screenSize, required size}) {
+              return OverlayPosition(
+                width: screenSize.width * 0.9,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                top: offset.dy + size.height + 20, 
+                left: screenSize.width * 0.05,
+              );
+            },
+            overlayBuilder: (params) => buildIntroOverlay(params, 'Tap on any Ayat to open options for Tafseer, Audio, and Sharing.'),
             builder: (context, introKey) => Container(
               key: introKey,
               child: rtWidget,
@@ -360,13 +348,18 @@ class _QuranViewState extends State<QuranView> {
       }
     });
 
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted && _scaffoldKey.currentContext != null) {
-        try {
-          Intro.of(_scaffoldKey.currentContext!).start(group: 'quran_view');
-        } catch (_) {}
-      }
-    });
+      // Future.delayed(const Duration(milliseconds: 1500), () async {
+      //   SharedPreferences prefs = await SharedPreferences.getInstance();
+      //   bool introShown = prefs.getBool('quran_view_intro') ?? false;
+      //   if (!introShown) {
+      //     if (mounted && _scaffoldKey.currentContext != null) {
+      //       try {
+      //         Intro.of(_scaffoldKey.currentContext!).start(group: 'quran_view');
+      //         await prefs.setBool('quran_view_intro', true);
+      //       } catch (_) {}
+      //     }
+      //   }
+      // });
   }
 
   void _startAutoScroll() {
@@ -549,28 +542,15 @@ class _QuranViewState extends State<QuranView> {
                       icon: IntroStepBuilder(
                         group: 'quran_view',
                         order: 1,
-                        overlayBuilder: (params) => Container(
-                          margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.black87,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text('Change between Kanz-ul-Iman and Kanz-ul-Irfan translations.',
-                                  style: TextStyle(color: Colors.white, fontSize: 12),
-                                  textAlign: TextAlign.center),
-                              const SizedBox(height: 8),
-                              ElevatedButton(
-                                onPressed: params.onNext,
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
-                                child: const Text('Next'),
-                              ),
-                            ],
-                          ),
-                        ),
+                        getOverlayPosition: ({required offset, required screenSize, required size}) {
+                          return OverlayPosition(
+                            width: screenSize.width * 0.8,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            bottom: screenSize.height - offset.dy + 10,
+                            left: screenSize.width * 0.1,
+                          );
+                        },
+                        overlayBuilder: (params) => buildIntroOverlay(params, 'Change between Kanz-ul-Iman and Kanz-ul-Irfan translations.'),
                         builder: (context, key) => Padding(
                           key: key,
                           padding: const EdgeInsets.only(bottom: 4.0),
@@ -589,28 +569,15 @@ class _QuranViewState extends State<QuranView> {
                       icon: IntroStepBuilder(
                         group: 'quran_view',
                         order: 2,
-                        overlayBuilder: (params) => Container(
-                          margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.black87,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text('Auto-scroll the page hands-free while reciting or listening.',
-                                  style: TextStyle(color: Colors.white, fontSize: 12),
-                                  textAlign: TextAlign.center),
-                              const SizedBox(height: 8),
-                              ElevatedButton(
-                                onPressed: params.onNext,
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
-                                child: const Text('Next'),
-                              ),
-                            ],
-                          ),
-                        ),
+                        getOverlayPosition: ({required offset, required screenSize, required size}) {
+                          return OverlayPosition(
+                            width: screenSize.width * 0.8,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            bottom: screenSize.height - offset.dy + 10,
+                            left: screenSize.width * 0.1,
+                          );
+                        },
+                        overlayBuilder: (params) => buildIntroOverlay(params, 'Auto-scroll the page hands-free while reciting or listening.'),
                         builder: (context, key) => Padding(
                           key: key,
                           padding: const EdgeInsets.only(bottom: 4.0),
@@ -629,28 +596,15 @@ class _QuranViewState extends State<QuranView> {
                       icon: IntroStepBuilder(
                         group: 'quran_view',
                         order: 3,
-                        overlayBuilder: (params) => Container(
-                          margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.black87,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text('Customize font size, family, and translation language.',
-                                  style: TextStyle(color: Colors.white, fontSize: 12),
-                                  textAlign: TextAlign.center),
-                              const SizedBox(height: 8),
-                              ElevatedButton(
-                                onPressed: params.onNext,
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
-                                child: const Text('Next'),
-                              ),
-                            ],
-                          ),
-                        ),
+                        getOverlayPosition: ({required offset, required screenSize, required size}) {
+                          return OverlayPosition(
+                            width: screenSize.width * 0.8,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            bottom: screenSize.height - offset.dy + 10,
+                            left: screenSize.width * 0.1,
+                          );
+                        },
+                        overlayBuilder: (params) => buildIntroOverlay(params, 'Customize font size, family, and translation language.'),
                         builder: (context, key) => Padding(
                           key: key,
                           padding: const EdgeInsets.only(bottom: 4.0),

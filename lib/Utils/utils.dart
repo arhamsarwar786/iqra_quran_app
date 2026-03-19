@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_intro/flutter_intro.dart';
+
 const fontFamilyList = [
   {"name": "NotoNaskhArabic", "fontFamily": "notoNash"},
   {"name": "DroidNaskh", "fontFamily": "droid"},
@@ -56,6 +59,49 @@ var arabicFontFamily = [
   "AlQalamQuranMajeed"
 ];
 
-var urduFontFamily = ["nastaleeq", "pdmsSaleem"];
+var urduFontFamily = ["Jameel Noori", "nastaleeq", "pdmsSaleem"];
 
 const bismillaArabic = "بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِیْمِ";
+
+Widget buildIntroOverlay(StepWidgetParams params, String text) {
+  bool isLast = params.onNext == null;
+  return Container(
+    margin: const EdgeInsets.all(10),
+    padding: const EdgeInsets.all(15),
+    decoration: BoxDecoration(
+      color: Colors.black87,
+      borderRadius: BorderRadius.circular(15),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(text,
+            style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (!isLast) ...[
+              TextButton(
+                onPressed: params.onFinish,
+                child: const Text('Skip', style: TextStyle(color: Colors.white70)),
+              ),
+              const SizedBox(width: 8),
+            ],
+            ElevatedButton(
+              onPressed: isLast ? params.onFinish : params.onNext,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white, 
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              child: Text(isLast ? 'Finish' : 'Next', style: const TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}

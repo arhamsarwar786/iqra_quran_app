@@ -28,6 +28,7 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:iqra/Provider/prayer_provider.dart';
 import 'package:flutter_intro/flutter_intro.dart';
+import 'package:iqra/Utils/utils.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -41,9 +42,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final ScrollController _scrollController = ScrollController();
-  final List<GlobalKey> _introKeys = List.generate(8, (index) => GlobalKey());
-  bool _scrolledStep6 = false;
+  final List<GlobalKey> _introKeys = List.generate(9, (index) => GlobalKey());
   bool _scrolledStep7 = false;
+  bool _scrolledStep8 = false;
 
   @override
   void initState() {
@@ -122,21 +123,25 @@ class _HomeState extends State<Home> {
             elevation: 0,
             leading: IntroStepBuilder(
               order: 1,
-              text:
-                  "Open this menu to find Settings, Help, and more about Iqra Quran.",
+              overlayBuilder: (params) => buildIntroOverlay(params, "Open this menu to find Settings, Help, and more about Iqra Quran."),
               builder: (context, key) => IconButton(
                   key: key,
                   onPressed: () => Home.scaffoldKey.currentState!.openDrawer(),
                   icon: const Icon(Icons.menu)),
             ),
             actions: [
-              GestureDetector(
-                onTap: () {
-                  push(context, const Aboutus());
-                },
-                child: Icon(
-                  Icons.info_outline,
-                  size: 30,
+              IntroStepBuilder(
+                order: 2,
+                overlayBuilder: (params) => buildIntroOverlay(params, "Learn more about Iqra Quran, its creators, and get in touch."),
+                builder: (context, key) => GestureDetector(
+                  key: key,
+                  onTap: () {
+                    push(context, const Aboutus());
+                  },
+                  child: const Icon(
+                    Icons.info_outline,
+                    size: 30,
+                  ),
                 ),
               ),
               const SizedBox(width: 10)
@@ -192,21 +197,19 @@ class _HomeState extends State<Home> {
                 ),
                 const SizedBox(height: 5),
                 IntroStepBuilder(
-                  order: 4,
-                  text:
-                      "Get accurate Qibla directions and a complete timetable for all 5 prayers.",
+                  order: 5,
+                  overlayBuilder: (params) => buildIntroOverlay(params, "Get accurate Qibla directions and a complete timetable for all 5 prayers."),
                   builder: (context, key) => prayerQiblaList(context, size, bloc, key: key),
                 ),
                 const SizedBox(height: 10),
                 IntroStepBuilder(
-                  order: 5,
-                  text:
-                      "Quickly access the Hijri Calendar, Tasbeeh counter, Kalimas, and Duas.",
+                  order: 6,
+                  overlayBuilder: (params) => buildIntroOverlay(params, "Quickly access the Hijri Calendar, Tasbeeh counter, Kalimas, and Duas."),
                   builder: (context, key) => screensList(context, size, bloc, key: key),
                 ),
                 const SizedBox(height: 10),
                 IntroStepBuilder(
-                  order: 6,
+                  order: 7,
                   getOverlayPosition: (
                       {required offset, required screenSize, required size}) {
                     return OverlayPosition(
@@ -218,10 +221,10 @@ class _HomeState extends State<Home> {
                   },
                   overlayBuilder: (params) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (!_scrolledStep6 && _introKeys[6].currentContext != null) {
-                        _scrolledStep6 = true;
+                      if (!_scrolledStep7 && _introKeys[7].currentContext != null) {
+                        _scrolledStep7 = true;
                         Scrollable.ensureVisible(
-                          _introKeys[6].currentContext!,
+                          _introKeys[7].currentContext!,
                           duration: const Duration(milliseconds: 400),
                           curve: Curves.easeInOut,
                           alignment: 0.3,
@@ -256,34 +259,47 @@ class _HomeState extends State<Home> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: params.onNext,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: bloc.selectedTheme,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TextButton(
+                                onPressed: params.onFinish,
+                                child: const Text("SKIP",
+                                    style: TextStyle(
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.bold)),
                               ),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                            ),
-                            child: const Text("NEXT",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 1)),
+                              const SizedBox(width: 8),
+                              ElevatedButton(
+                                onPressed: params.onNext,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: bloc.selectedTheme,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 24, vertical: 12),
+                                ),
+                                child: const Text("NEXT",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 1)),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     );
                   },
                   builder: (context, key) => Container(
-                    key: _introKeys[6],
+                    key: _introKeys[7],
                     child: quranDailyVerse(context, size, bloc, _randomAyat, key: key),
                   ),
                 ),
                 const SizedBox(height: 10),
                 IntroStepBuilder(
-                  order: 7,
+                  order: 8,
                   getOverlayPosition: (
                       {required offset, required screenSize, required size}) {
                     return OverlayPosition(
@@ -295,10 +311,10 @@ class _HomeState extends State<Home> {
                   },
                   overlayBuilder: (params) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (!_scrolledStep7 && _introKeys[7].currentContext != null) {
-                        _scrolledStep7 = true;
+                      if (!_scrolledStep8 && _introKeys[8].currentContext != null) {
+                        _scrolledStep8 = true;
                         Scrollable.ensureVisible(
-                          _introKeys[7].currentContext!,
+                          _introKeys[8].currentContext!,
                           duration: const Duration(milliseconds: 400),
                           curve: Curves.easeInOut,
                           alignment: 0.8,
@@ -334,7 +350,14 @@ class _HomeState extends State<Home> {
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton(
-                            onPressed: params.onFinish,
+                            onPressed: () {
+                              params.onFinish();
+                              _scrollController.animateTo(
+                                0.0,
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.easeInOut,
+                              );
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
                               foregroundColor: bloc.selectedTheme,
@@ -354,7 +377,7 @@ class _HomeState extends State<Home> {
                     );
                   },
                   builder: (context, key) => Container(
-                    key: _introKeys[7],
+                    key: _introKeys[8],
                     child: namesAllahProphet(context, size, bloc, key: key),
                   ),
                 ),
@@ -1162,9 +1185,8 @@ class _SearchInQuaranState extends State<SearchInQuaran> {
                     children: [
                       // --- Search Bar (Top) ---
                       IntroStepBuilder(
-                        order: 2,
-                        text:
-                            "Instantly search for any Surah, Verse, or topic in the Holy Quran.",
+                        order: 3,
+                        overlayBuilder: (params) => buildIntroOverlay(params, "Instantly search for any Surah, Verse, or topic in the Holy Quran."),
                         builder: (context, key) => InkWell(
                           key: key,
                           onTap: () => push(context, const SearchScreen()),
@@ -1201,9 +1223,8 @@ class _SearchInQuaranState extends State<SearchInQuaran> {
                       const SizedBox(height: 25),
                       // --- Info Header Row ---
                       IntroStepBuilder(
-                        order: 3,
-                        text:
-                            "Check the current Islamic date and how much time is left for the next prayer.",
+                        order: 4,
+                        overlayBuilder: (params) => buildIntroOverlay(params, "Check the current Islamic date and how much time is left for the next prayer."),
                         builder: (context, key) => IntrinsicHeight(
                           key: key,
                           child: Row(
