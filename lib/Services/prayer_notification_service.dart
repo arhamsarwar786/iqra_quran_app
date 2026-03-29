@@ -54,6 +54,13 @@ class PrayerNotificationService {
             AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
 
+    // Check for exact alarm permission on Android 12+ (API 31+)
+    // This is optional but helpful to ensure zonedSchedule works correctly
+    await _notifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestExactAlarmsPermission();
+
     _initialized = true;
   }
 
@@ -105,18 +112,22 @@ class PrayerNotificationService {
   }
 
   // ─── Returns the Android notification details ────────────────────────────
+  // IMPORTANT: Changing channel ID (e.g., from 'prayer_notifications' to 'prayer_notifications_high')
+  // is NECESSARY if you want to ensure sound plays on devices where the channel was already
+  // created with lower importance or no sound previously.
   static Future<AndroidNotificationDetails> _androidDetails(
       String prayerName) async {
     // Bundled azan.mp3 in res/raw
     return AndroidNotificationDetails(
-      'prayer_notifications',
-      'Prayer Times',
-      channelDescription: 'Adhan notifications for daily prayer times',
+      'prayer_notifications_high_v2', // Updated ID to ensure high importance/sound on existing devices
+      'Prayer Alerts',
+      channelDescription: 'Adhan sound notifications for daily prayer times',
       importance: Importance.max,
       priority: Priority.high,
       playSound: true,
       sound: const RawResourceAndroidNotificationSound('azan'),
       enableVibration: true,
+      audioAttributesUsage: AudioAttributesUsage.alarm, // Important for sound on some devices
       icon: '@mipmap/ic_launcher',
       styleInformation: BigTextStyleInformation(
         'وقت نماز $prayerName آ گیا',

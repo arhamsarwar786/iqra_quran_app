@@ -13,6 +13,9 @@ import 'About Us.dart';
 import 'ContactUs.dart';
 import 'package:iqra/Utils/sadqa_dialog.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:iqra/Helper/preference/saved_preferences.dart';
+import 'package:flutter_intro/flutter_intro.dart';
+import 'package:iqra/Screens/MainPage/Home/HomeScreen.dart';
 
 // import 'contactUs.dart';
 
@@ -175,7 +178,6 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
                           ),
                           selectedTileColor: const Color(0xff00164C),
                           onTap: () {
-                            // Index 8 = Donate → show Sadqa Jariya dialog
                             if (i == 7) {
                               Navigator.of(context).pop();
                               Future.delayed(
@@ -206,6 +208,39 @@ class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
                       ),
                     );
                   },
+                ),
+              ),
+              // ── App Guide Small Option ─────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.only(bottom: 5, top: 5),
+                child: TextButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close drawer synchronously!
+                    SavedPrefernces.setShowTutorials(true).then((_) {
+                      Future.delayed(const Duration(milliseconds: 350), () {
+                        final introC = Home.scaffoldKey.currentContext;
+                        if (introC != null && introC.mounted) {
+                          try {
+                            Intro.of(introC).start(reset: true);
+                            SavedPrefernces.markTutorialSeen('home');
+                          } catch (e) {
+                            debugPrint("Failed to start intro from drawer: $e");
+                          }
+                        }
+                      });
+                    });
+                  },
+                  icon: Icon(Icons.auto_awesome,
+                      size: 16, color: bloc.selectedTheme.withOpacity(0.7)),
+                  label: Text(
+                    "App Guide",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: bloc.selectedTheme.withOpacity(0.7),
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
                 ),
               ),
             ],

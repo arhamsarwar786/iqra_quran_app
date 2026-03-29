@@ -263,4 +263,30 @@ class SavedPrefernces {
     final pref = await SharedPreferences.getInstance();
     return pref.getDouble('last_lng') ?? 0.0;
   }
+
+  ///// App Tutorials
+  static Future<void> setShowTutorials(bool show) async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.setBool('show_tutorials', show);
+    if (show) {
+      // If the user re-enables tutorials, clear the 'seen' flags so they play again ONCE
+      await pref.remove('tutorial_seen_home');
+      await pref.remove('tutorial_seen_tasbeeh');
+    }
+  }
+
+  static Future<bool> getShowTutorials() async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getBool('show_tutorials') ?? true; // Default to true on fresh install
+  }
+
+  static Future<void> markTutorialSeen(String screenName) async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.setBool('tutorial_seen_$screenName', true);
+  }
+
+  static Future<bool> hasSeenTutorial(String screenName) async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getBool('tutorial_seen_$screenName') ?? false;
+  }
 }

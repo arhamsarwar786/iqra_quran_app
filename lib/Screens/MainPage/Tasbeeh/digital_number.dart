@@ -1,6 +1,4 @@
-
 part of digital_font;
-
 
 class DigitalNumber extends StatelessWidget {
   final int? value;
@@ -8,13 +6,13 @@ class DigitalNumber extends StatelessWidget {
   final double? height;
   final Color? color;
 
-  const DigitalNumber({Key? key,
+  const DigitalNumber({
+    Key? key,
     @required this.value,
     @required this.height,
     @required this.color,
     this.padLeft = 0,
-  })
-      : assert(value != null),
+  })  : assert(value != null),
         assert(height != null),
         assert(color != null),
         super(key: key);
@@ -23,7 +21,6 @@ class DigitalNumber extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget digitPainter(int digit) {
       return CustomPaint(
-       
         size: Size(height! / 2.0, height!),
         painter: _DigitalDigitPainter(digit, height!, color!),
       );
@@ -55,6 +52,8 @@ class DigitalNumber extends StatelessWidget {
     }
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: List.from(children.reversed),
     );
@@ -72,9 +71,9 @@ class _DigitalDigitPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_DigitalDigitPainter oldDelegate) {
-    return value != oldDelegate.value
-        || height != oldDelegate.height
-        || color != oldDelegate.color;
+    return value != oldDelegate.value ||
+        height != oldDelegate.height ||
+        color != oldDelegate.color;
   }
 
   @override

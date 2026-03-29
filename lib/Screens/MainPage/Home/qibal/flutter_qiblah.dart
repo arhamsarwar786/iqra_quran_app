@@ -5,14 +5,12 @@ import 'package:flutter_compass/flutter_compass.dart';
 import 'utils.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:stream_transform/stream_transform.dart' show CombineLatest;
+import '../../../../Helper/preference/saved_preferences.dart';
 
-/// [FlutterQiblah] is a singleton class that provides assess to compass events,
-/// check for sensor support in Android
-/// Get current  location
-/// Get Qiblah direction
+/// [FlutterQiblah] is a singleton class that provides access to compass events,
+/// check for sensor support, get current location, and calculate Qiblah direction.
 class FlutterQiblah {
-  static const MethodChannel _channel =
-      MethodChannel('ml.medyas.flutter_qiblah');
+  static const MethodChannel _channel = MethodChannel('ml.medyas.flutter_qiblah');
   static final FlutterQiblah _instance = FlutterQiblah._();
 
   Stream<QiblahDirection>? _qiblahStream;
@@ -23,71 +21,130 @@ class FlutterQiblah {
     return _instance;
   }
 
-  /// Check Android device sensor support
-  static Future<bool?> androidDeviceSensorSupport() async {
+  /// Check device sensor support
+  static Future<bool> androidDeviceSensorSupport() async {
     if (Platform.isAndroid) {
-      return true;
-    } else {
-      return await _channel.invokeMethod("androidSupportSensor");
+      try {
+        // If the custom plugin was intended to be used, try it
+        final support = await _channel.invokeMethod("androidSupportSensor");
+        return support ?? true;
+      } catch (e) {
+        // If plugin is missing or error, fallback to assuming true 
+        // and handle specific sensor status in the compass stream check.
+        return true; 
+      }
     }
+    // iOS usually has better compass support out of the box
+    return true; 
   }
 
-  /// Request Location permission, return GeolocationStatus object
+  /// Request Location permission
   static Future<LocationPermission> requestPermissions() async {
     return await Geolocator.requestPermission();
   }
 
-  /// get location status: GPS enabled and the permission status with GeolocationStatus
+  /// get location status: GPS enabled and permission status
   static Future<LocationStatus> checkLocationStatus() async {
     final status = await Geolocator.checkPermission();
     final enabled = await Geolocator.isLocationServiceEnabled();
     return LocationStatus(enabled, status);
   }
 
-  /// Provides a stream of Map with current compass and Qiblah direction
-  /// {"qiblah": QIBLAH, "direction": DIRECTION}
-  /// Direction varies from 0-360, 0 being north.
-  /// Qiblah varies from 0-360, offset from direction(North)
+  /// Provides a stream of Qiblah direction, merging compass and location updates.
   static Stream<QiblahDirection> get qiblahStream {
     if (FlutterCompass.events == null) {
       return Stream.error("Compass not supported on this device");
     }
-    _instance._qiblahStream ??= _merge<CompassEvent, Position>(
-      FlutterCompass.events!,
-      Geolocator.getPositionStream(),
-    );
 
+    // Reuse stream if exists, or build a new one
+    _instance._qiblahStream ??= _buildQiblahStream();
     return _instance._qiblahStream!;
   }
 
-  /// Merge the compass stream with location updates, and calculate the Qiblah direction
-  // / return a Stream<Map<String, dynamic>> containing compass and Qiblah direction
-  /// Direction varies from 0-360, 0 being north.
-  /// Qiblah varies from 0-360, offset from direction(North)
-  static Stream<QiblahDirection> _merge<A, B>(
-      Stream<A> streamA, Stream<B> streamB) {
-    return streamA.combineLatest<B, QiblahDirection>(streamB, (dir, pos) {
-      final position = pos as Position;
-      final event = dir as CompassEvent;
+  static Stream<QiblahDirection> _buildQiblahStream() {
+    final compassStream = FlutterCompass.events;
+    if (compassStream == null) {
+      return Stream.error("Compass not supported on this device");
+    }
 
-      // Calculate the Qiblah offset to North
-      final offSet =
-          Utils.getOffsetFromNorth(position.latitude, position.longitude);
+    // Use a more reliable position source that provides immediate value if possible
+    final positionStream = _getReliablePositionStream();
 
-      // Adjust Qiblah direction based on North direction
-      final qiblah = (event.heading ?? 0.0) + (360 - offSet);
+    return compassStream.combineLatest<Position, QiblahDirection>(
+      positionStream,
+      (event, position) {
+        // Calculate the Qiblah offset to North
+        final offSet = Utils.getOffsetFromNorth(position.latitude, position.longitude);
 
-      return QiblahDirection(qiblah, event.heading ?? 0.0, offSet);
-    });
+        // Adjust Qiblah direction based on North direction (heading)
+        // If event.heading is null, it means sensor data is temporarily unavailable
+        final qiblah = (event.heading ?? 0.0) + (360 - offSet);
+
+        return QiblahDirection(qiblah, event.heading ?? 0.0, offSet);
+      },
+    );
   }
 
-//   /// Close compass stream, and set Qiblah stream to null
+  /// Creates a position stream that emits cached/last known position first
+  static Stream<Position> _getReliablePositionStream() async* {
+    // 1. Try our saved preferences first (fastest)
+    final savedLat = await SavedPrefernces.getLat();
+    final savedLng = await SavedPrefernces.getLng();
+    if (savedLat != 0.0 && savedLng != 0.0) {
+      yield _createPosition(savedLat, savedLng);
+    }
+
+    // 2. Try last known position for quick update
+    try {
+      final lastKnown = await Geolocator.getLastKnownPosition();
+      if (lastKnown != null) {
+        yield lastKnown;
+      }
+    } catch (_) {}
+
+    // 3. Get current position once for accuracy
+    try {
+      final current = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 15),
+      );
+      yield current;
+      
+      // Update saved preferences with latest accurate position
+      await SavedPrefernces.setLat(current.latitude);
+      await SavedPrefernces.setLng(current.longitude);
+    } catch (_) {}
+
+    // 4. Then follow the stream for any significant changes
+    yield* Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.medium,
+        distanceFilter: 200, // Update only if user moves 200 meters
+      ),
+    );
+  }
+
+  static Position _createPosition(double lat, double lng) {
+    return Position(
+      latitude: lat,
+      longitude: lng,
+      timestamp: DateTime.now(),
+      accuracy: 0.0,
+      altitude: 0.0,
+      heading: 0.0,
+      speed: 0.0,
+      speedAccuracy: 0.0,
+      altitudeAccuracy: 0.0,
+      headingAccuracy: 0.0,
+    );
+  }
+
   Future<void> dispose() async {
     _qiblahStream = null;
   }
 }
 
-/// Location Status class, contains the GPS status(Enabled or not) and GeolocationStatus
+/// Location Status class
 class LocationStatus {
   final bool enabled;
   final LocationPermission status;
@@ -103,3 +160,4 @@ class QiblahDirection {
 
   const QiblahDirection(this.qiblah, this.direction, this.offset);
 }
+

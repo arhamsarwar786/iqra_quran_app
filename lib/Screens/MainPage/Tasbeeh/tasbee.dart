@@ -14,6 +14,7 @@ import 'digital_font.dart';
 import 'tasbee_info.dart';
 import 'package:flutter_intro/flutter_intro.dart';
 import '../../../Utils/utils.dart';
+import 'package:iqra/Helper/preference/saved_preferences.dart';
 
 ///////////////////////////////////////////////
 
@@ -32,19 +33,19 @@ class _MyWidgetState extends State<Tasbih> {
     setSound();
 
     Future.delayed(const Duration(milliseconds: 200), () async {
-      // SharedPreferences prefs = await SharedPreferences.getInstance();
-      // bool introShown = prefs.getBool('tasbeeh_intro_shown') ?? false;
-
-      // if (!introShown) {
-      if (mounted && _scaffoldKey.currentContext != null) {
-        try {
-          Intro.of(_scaffoldKey.currentContext!).start(group: 'tasbeeh');
-          // await prefs.setBool('tasbeeh_intro_shown', true);
-        } catch (e) {
-          debugPrint("TASBEEH INTRO ERROR: $e");
+      if (!mounted) return;
+      bool showTuts = await SavedPrefernces.getShowTutorials();
+      bool hasSeen = await SavedPrefernces.hasSeenTutorial('tasbeeh');
+      if (showTuts && !hasSeen) {
+        if (_scaffoldKey.currentContext != null) {
+          try {
+            Intro.of(_scaffoldKey.currentContext!).start(group: 'tasbeeh');
+            await SavedPrefernces.markTutorialSeen('tasbeeh');
+          } catch (e) {
+            debugPrint("TASBEEH INTRO ERROR: $e");
+          }
         }
       }
-      // }
     });
   }
 
@@ -111,9 +112,10 @@ class _MyWidgetState extends State<Tasbih> {
               selectedTasbeeh != null
                   ? Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20.0, vertical: 0.0),
+                          horizontal: 0.0, vertical: 0.0),
                       child: Container(
                         width: double.infinity,
+                        height: size.height * 0.25,
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(
                               0.2), // Glassmorphism white transparent
@@ -135,52 +137,59 @@ class _MyWidgetState extends State<Tasbih> {
                             filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
                             child: Padding(
                               padding: const EdgeInsets.all(20.0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    selectedTasbeeh.arabic ?? '',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Theme.of(context).primaryColor,
-                                      fontFamily:
-                                          themeProvider.arabicFontFamily,
-                                      fontSize: 34,
-                                      fontWeight: FontWeight.bold,
-                                      shadows: const [
-                                        Shadow(
-                                            offset: Offset(0.5, 0.5),
-                                            blurRadius: 3,
-                                            color: Colors.black12),
-                                      ],
-                                    ),
+                              child: Center(
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        selectedTasbeeh.arabic ?? '',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Theme.of(context).primaryColor,
+                                          fontFamily:
+                                              themeProvider.arabicFontFamily,
+                                          fontSize: 34,
+                                          fontWeight: FontWeight.bold,
+                                          shadows: const [
+                                            Shadow(
+                                                offset: Offset(0.5, 0.5),
+                                                blurRadius: 3,
+                                                color: Colors.black12),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        selectedTasbeeh.transliteration ?? '',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontFamily:
+                                              themeProvider.urduFontFamily,
+                                          color: Theme.of(context)
+                                              .primaryColor
+                                              .withOpacity(0.8),
+                                          fontSize: 20,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 5),
+                                      Text(
+                                        selectedTasbeeh.urduMeaning ?? '',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontFamily:
+                                              themeProvider.urduFontFamily,
+                                          color: Theme.of(context)
+                                              .primaryColor
+                                              .withOpacity(0.9),
+                                          fontSize: 20,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    selectedTasbeeh.transliteration ?? '',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontFamily: themeProvider.urduFontFamily,
-                                      color: Theme.of(context)
-                                          .primaryColor
-                                          .withOpacity(0.8),
-                                      fontSize: 20,
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    selectedTasbeeh.urduMeaning ?? '',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontFamily: themeProvider.urduFontFamily,
-                                      color: Theme.of(context)
-                                          .primaryColor
-                                          .withOpacity(0.9),
-                                      fontSize: 20,
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
@@ -194,44 +203,43 @@ class _MyWidgetState extends State<Tasbih> {
                   child:
                       Consumer<TasbeeCount>(builder: (context, value, widget) {
                     return Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 30),
+                        padding: EdgeInsets.only(
+                            top: 10, left: 10, right: 10, bottom: 40),
                         alignment: Alignment.center,
                         child: Stack(
                           children: [
                             CustomPaint(
                               size: Size(size.width,
-                                  (size.width * 1.3375527426160339).toDouble()),
+                                  (size.width * 5.3375527426160339).toDouble()),
                               painter: RPSCustomPainter(context),
                             ),
+                            // Digital Display Screen
                             Positioned(
-                              top: size.height * 0.1,
-                              left: 90,
-                              right: 90,
+                              top: size.height * 0.08,
+                              left: size.width * 0.20,
+                              right: size.width * 0.20,
                               child: Container(
                                 alignment: Alignment.center,
-                                height: size.height * 0.13,
-                                width: size.width * 0.5,
+                                height: size.height * 0.11,
                                 decoration: BoxDecoration(
                                   color: Theme.of(context).primaryColor,
-                                  borderRadius: BorderRadius.circular(6.0),
-                                ),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    DigitalNumber(
-                                      value: value.currentStep.toInt(),
-                                      height: 50,
-                                      color: Colors.white,
-                                    ),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black.withOpacity(0.2),
+                                        blurRadius: 5)
                                   ],
+                                ),
+                                child: DigitalNumber(
+                                  value: value.currentStep.toInt(),
+                                  height: size.height * 0.07,
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
                             Positioned(
                               // bottom: 70,
-                              bottom: size.height * 0.1,
+                              bottom: size.height * 0.07,
                               left: 0,
                               right: 0,
                               child: IntroStepBuilder(
@@ -255,11 +263,10 @@ class _MyWidgetState extends State<Tasbih> {
                                 ),
                               ),
                             ),
+                            // Reset Button (Red) - Top Right position
                             Positioned(
-                                // left: 0,
-                                top: 0,
-                                right: size.width * 0.22,
-                                bottom: 20,
+                                top: size.height * 0.19,
+                                right: size.width * 0.10,
                                 child: IntroStepBuilder(
                                     group: 'tasbeeh',
                                     order: 2,

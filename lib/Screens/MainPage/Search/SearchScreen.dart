@@ -653,8 +653,9 @@ class _VoiceSearchDialogState extends State<_VoiceSearchDialog> {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       elevation: 20,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -751,7 +752,7 @@ class _VoiceSearchDialogState extends State<_VoiceSearchDialog> {
           ],
         ),
       ),
-    );
+    ));
   }
 }
 

@@ -354,7 +354,7 @@ class _QuranViewState extends State<QuranView> {
       // if (!introShown) {
       if (mounted && _scaffoldKey.currentContext != null) {
         try {
-          Intro.of(_scaffoldKey.currentContext!).start(group: 'quran_view');
+          // Intro.of(_scaffoldKey.currentContext!).start(group: 'quran_view');
           // await prefs.setBool('quran_view_intro', true);
         } catch (_) {}
       }

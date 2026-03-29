@@ -80,24 +80,27 @@ Widget buildIntroOverlay(StepWidgetParams params, String text) {
             style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center),
         const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
           children: [
-            if (!isLast) ...[
+            if (!isLast)
               TextButton(
                 onPressed: params.onFinish,
-                child: const Text('Skip', style: TextStyle(color: Colors.white70)),
+                child: const Text('Skip',
+                    style: TextStyle(color: Colors.white70)),
               ),
-              const SizedBox(width: 8),
-            ],
             ElevatedButton(
               onPressed: isLast ? params.onFinish : params.onNext,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white, 
+                backgroundColor: Colors.white,
                 foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
-              child: Text(isLast ? 'Finish' : 'Next', style: const TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(isLast ? 'Finish' : 'Next',
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),

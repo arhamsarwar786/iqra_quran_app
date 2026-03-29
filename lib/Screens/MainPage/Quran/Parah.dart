@@ -138,41 +138,48 @@ class _ParahState extends State<Parah> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    FittedBox(
-                                      child: Text(
-                                        paraName,
-                                        style: TextStyle(
-                                            fontFamily: bloc.arabicFontFamily,
-                                            color: Colors.black,
-                                            fontSize: 30,
-                                            fontWeight: FontWeight.w500),
+                                    Expanded(
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          paraName,
+                                          style: TextStyle(
+                                              fontFamily: bloc.arabicFontFamily,
+                                              color: Colors.black,
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.w500),
+                                        ),
                                       ),
                                     )
                                   ],
                                 ),
                                 const SizedBox(height: 4),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "Ayat: $ayatCount",
-                                      style: TextStyle(
-                                          fontFamily: bloc.arabicFontFamily,
-                                          color: Colors.black,
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      "Ruku: $rukuCount",
-                                      style: TextStyle(
-                                          fontFamily: bloc.arabicFontFamily,
-                                          color: Colors.black,
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500),
-                                    )
-                                  ],
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Ayat: $ayatCount",
+                                        style: TextStyle(
+                                            fontFamily: bloc.arabicFontFamily,
+                                            color: Colors.black,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        "Ruku: $rukuCount",
+                                        style: TextStyle(
+                                            fontFamily: bloc.arabicFontFamily,
+                                            color: Colors.black,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500),
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),

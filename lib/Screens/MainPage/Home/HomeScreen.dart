@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:iqra/Models/aya_list_model.dart';
 import 'package:iqra/Models/surah_metadata_model.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
@@ -29,6 +31,7 @@ import 'dart:async';
 import 'package:iqra/Provider/prayer_provider.dart';
 import 'package:flutter_intro/flutter_intro.dart';
 import 'package:iqra/Utils/utils.dart';
+import 'package:iqra/Helper/preference/saved_preferences.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -58,15 +61,21 @@ class _HomeState extends State<Home> {
       }
     });
 
-    // Start intro after a short delay so the UI is ready
-    Future.delayed(const Duration(milliseconds: 400), () {
+    // Start intro after a delay to ensure the UI and all steps are ready
+    Future.delayed(const Duration(milliseconds: 500), () async {
       if (mounted) {
-        final introContext = Home.scaffoldKey.currentContext;
-        if (introContext != null) {
-          try {
-            Intro.of(introContext).start();
-          } catch (e) {
-            debugPrint("Failed to start intro: $e");
+        bool showTuts = await SavedPrefernces.getShowTutorials();
+        bool hasSeen = await SavedPrefernces.hasSeenTutorial('home');
+        if (showTuts && !hasSeen) {
+          final introContext = Home.scaffoldKey.currentContext;
+          if (introContext != null) {
+            try {
+              // Force discovery of all steps in the ScrollView
+              Intro.of(introContext).start();
+              await SavedPrefernces.markTutorialSeen('home');
+            } catch (e) {
+              debugPrint("Failed to start intro: $e");
+            }
           }
         }
       }
@@ -277,7 +286,23 @@ class _HomeState extends State<Home> {
                               ),
                               const SizedBox(width: 8),
                               ElevatedButton(
-                                onPressed: params.onNext,
+                                onPressed: () {
+                                  // Explicitly finish the first guide group and start the next
+                                  params.onFinish();
+
+                                  final introC =
+                                      Home.scaffoldKey.currentContext;
+                                  if (introC != null) {
+                                    // Provide a small delay to let the previous mask fade out
+                                    Future.delayed(
+                                        const Duration(milliseconds: 400), () {
+                                      if (introC.mounted) {
+                                        Intro.of(introC)
+                                            .start(group: 'step8', reset: true);
+                                      }
+                                    });
+                                  }
+                                },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.white,
                                   foregroundColor: bloc.selectedTheme,
@@ -307,6 +332,7 @@ class _HomeState extends State<Home> {
                 const SizedBox(height: 10),
                 IntroStepBuilder(
                   order: 8,
+                  group: 'step8',
                   getOverlayPosition: (
                       {required offset, required screenSize, required size}) {
                     return OverlayPosition(
@@ -389,7 +415,7 @@ class _HomeState extends State<Home> {
                     child: namesAllahProphet(context, size, bloc, key: key),
                   ),
                 ),
-                const SizedBox(height: 180),
+                const SizedBox(height: 50),
               ],
             ),
           ),
@@ -849,34 +875,25 @@ class _HomeState extends State<Home> {
                   ),
                   const SizedBox(height: 14),
                   // ── Source pill: Para · Surah · Verse numbers ──────
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 8),
-                        decoration: BoxDecoration(
-                          // color: bloc.selectedTheme.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            // BoxShadow(
-                            //   color: bloc.selectedTheme.withOpacity(0.1),
-                            //   blurRadius: 10,
-                            //   offset: const Offset(0, 4),
-                            // ),
-                          ],
-                        ),
-                        child: Text(
-                          "Para: ${randomAyat.paraId}  •  Surah: ${randomAyat.surahId}  •  Verse: ${randomAyat.ayatNumber}",
-                          style: TextStyle(
-                            color: bloc.selectedTheme,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.3,
-                          ),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 8),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: const [],
+                      ),
+                      child: Text(
+                        "Para: ${randomAyat.paraId}  •  Surah: ${randomAyat.surahId}  •  Verse: ${randomAyat.ayatNumber}",
+                        style: TextStyle(
+                          color: bloc.selectedTheme,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.3,
                         ),
                       ),
-                    ],
+                    ),
                   ),
                   const SizedBox(height: 15),
                   Row(

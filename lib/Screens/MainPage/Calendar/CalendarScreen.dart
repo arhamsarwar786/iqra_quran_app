@@ -201,7 +201,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 7,
-                      childAspectRatio: 0.65,
+                      childAspectRatio: 0.57,
                     ),
                     itemCount: rows * 7,
                     itemBuilder: (context, index) {
@@ -259,8 +259,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 children: [
                                   const SizedBox(height: 10),
                                   Container(
-                                    height: 32,
-                                    width: 32,
+                                    height: 25,
+                                    width: 25,
                                     decoration: BoxDecoration(
                                       color: isToday
                                           ? Colors.white

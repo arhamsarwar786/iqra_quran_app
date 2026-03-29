@@ -12,11 +12,16 @@ import 'Provider/quran_data_provider.dart';
 import 'Provider/audio_provider.dart';
 import 'Provider/prayer_provider.dart';
 import 'Services/analytics_service.dart';
+import 'Services/prayer_notification_service.dart';
 
 late ObjectBox objectbox;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AnalyticsService.initialize();
+  
+  // Initialize notification service early to request permissions on first launch
+  await PrayerNotificationService.initialize();
+  
   objectbox = await ObjectBox.init();
   // await getCustomTheme();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])

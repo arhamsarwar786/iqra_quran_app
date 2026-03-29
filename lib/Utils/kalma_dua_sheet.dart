@@ -142,25 +142,8 @@ class _KDSBottomSheetContentState extends State<_KDSBottomSheetContent> {
                               ? MainAxisAlignment.center
                               : MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: bloc.selectedTheme.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                item.title,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: bloc.selectedTheme,
-                                  fontFamily: bloc.urduFontFamily,
-                                  fontSize: 20,
-                                ),
-                              ),
-                            ),
-                            if (item.subtitle != null)
-                              Container(
+                            Flexible(
+                              child: Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
@@ -168,14 +151,40 @@ class _KDSBottomSheetContentState extends State<_KDSBottomSheetContent> {
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
-                                  item.subtitle!,
+                                  item.title,
+                                  // overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.right,
                                   style: TextStyle(
-                                    fontFamily: bloc.urduFontFamily,
-                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold,
                                     color: bloc.selectedTheme,
+                                    fontFamily: bloc.urduFontFamily,
+                                    fontSize: 20,
                                   ),
                                 ),
                               ),
+                            ),
+                            if (item.subtitle != null) ...[
+                              const SizedBox(width: 10),
+                              Flexible(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: bloc.selectedTheme.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    item.subtitle!,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontFamily: bloc.urduFontFamily,
+                                      fontSize: 25,
+                                      color: bloc.selectedTheme,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                         const Divider(height: 40),

@@ -129,11 +129,12 @@ class SurahHeaderCard extends StatelessWidget {
                   ),
                 if (metadata.index != "9")
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+                    padding:
+                        const EdgeInsets.only(bottom: 4, left: 5, right: 5),
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
-                        "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
+                        "﷽",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 25,

@@ -402,21 +402,24 @@ class _PrayerTimeState extends State<PrayerTime> {
                                 padding: const EdgeInsets.all(28.0),
                                 child: Column(
                                   children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(Icons.location_on_rounded,
-                                            color: Colors.white, size: 16),
-                                        const SizedBox(width: 8),
-                                        Text(data["location"].toUpperCase(),
-                                            style: TextStyle(
-                                                color: Colors.white
-                                                    .withOpacity(0.9),
-                                                fontWeight: FontWeight.w800,
-                                                letterSpacing: 2.0,
-                                                fontSize: 12)),
-                                      ],
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(Icons.location_on_rounded,
+                                              color: Colors.white, size: 16),
+                                          const SizedBox(width: 8),
+                                          Text(data["location"].toUpperCase(),
+                                              style: TextStyle(
+                                                  color: Colors.white
+                                                      .withOpacity(0.9),
+                                                  fontWeight: FontWeight.w800,
+                                                  letterSpacing: 2.0,
+                                                  fontSize: 12)),
+                                        ],
+                                      ),
                                     ),
                                     const SizedBox(height: 25),
                                     Text(label.toUpperCase(),
@@ -461,23 +464,26 @@ class _PrayerTimeState extends State<PrayerTime> {
                                                 blurRadius: 15,
                                               )
                                             ]),
-                                        child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(Icons.explore_outlined,
-                                                  color: themeProvider
-                                                      .selectedTheme,
-                                                  size: 20),
-                                              const SizedBox(width: 12),
-                                              Text("QIBLA DIRECTION",
-                                                  style: TextStyle(
-                                                      color: themeProvider
-                                                          .selectedTheme,
-                                                      fontSize: 13,
-                                                      letterSpacing: 1.5,
-                                                      fontWeight:
-                                                          FontWeight.w900)),
-                                            ]),
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(Icons.explore_outlined,
+                                                    color: themeProvider
+                                                        .selectedTheme,
+                                                    size: 20),
+                                                const SizedBox(width: 12),
+                                                Text("QIBLA DIRECTION",
+                                                    style: TextStyle(
+                                                        color: themeProvider
+                                                            .selectedTheme,
+                                                        fontSize: 13,
+                                                        letterSpacing: 1.5,
+                                                        fontWeight:
+                                                            FontWeight.w900)),
+                                              ]),
+                                        ),
                                       ),
                                     )
                                   ],
@@ -501,10 +507,11 @@ class _PrayerTimeState extends State<PrayerTime> {
                                   fontSize: 14,
                                   color: Colors.grey)),
                           const SizedBox(height: 8),
-                          Row(
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 8,
                             children: [
                               _madhabChip("Hanafi", "hanafi", themeProvider),
-                              const SizedBox(width: 12),
                               _madhabChip(
                                   "Shafi / Standard", "shafi", themeProvider),
                             ],
@@ -520,11 +527,14 @@ class _PrayerTimeState extends State<PrayerTime> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text("Daily Schedule",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                  color: Color(0xFF2D3436))),
+                          Flexible(
+                            child: Text("Daily Schedule",
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                    color: Color(0xFF2D3436))),
+                          ),
                           Container(
                             padding: const EdgeInsets.all(2),
                             decoration: BoxDecoration(
@@ -619,13 +629,16 @@ class _PrayerTimeState extends State<PrayerTime> {
                               ),
                               title: Row(
                                 children: [
-                                  Text(name,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 17,
-                                          color: isPassed
-                                              ? const Color(0xFFA4B0BE)
-                                              : const Color(0xFF2D3436))),
+                                  Expanded(
+                                    child: Text(name,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 17,
+                                            color: isPassed
+                                                ? const Color(0xFFA4B0BE)
+                                                : const Color(0xFF2D3436))),
+                                  ),
                                   if (!isFard) ...[
                                     const SizedBox(width: 8),
                                     Container(
@@ -653,50 +666,53 @@ class _PrayerTimeState extends State<PrayerTime> {
                                           letterSpacing: 0.5,
                                           fontWeight: FontWeight.w900))
                                   : null,
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (isFard) ...[
-                                    GestureDetector(
-                                      onTap: () {
-                                        final key = name.toLowerCase();
-                                        final current =
-                                            _prayerToggles[key] ?? true;
-                                        _togglePrayerNotif(key, !current);
-                                      },
-                                      child: AnimatedSwitcher(
-                                        duration:
-                                            const Duration(milliseconds: 250),
-                                        child: Icon(
-                                          (_prayerToggles[name.toLowerCase()] ??
-                                                  true)
-                                              ? Icons
-                                                  .notifications_active_rounded
-                                              : Icons
-                                                  .notifications_off_outlined,
-                                          key: ValueKey(_prayerToggles[
-                                              name.toLowerCase()]),
-                                          color: (_prayerToggles[
-                                                      name.toLowerCase()] ??
-                                                  true)
-                                              ? themeProvider.selectedTheme
-                                              : Colors.grey.shade300,
-                                          size: 22,
+                              trailing: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (isFard) ...[
+                                      GestureDetector(
+                                        onTap: () {
+                                          final key = name.toLowerCase();
+                                          final current =
+                                              _prayerToggles[key] ?? true;
+                                          _togglePrayerNotif(key, !current);
+                                        },
+                                        child: AnimatedSwitcher(
+                                          duration:
+                                              const Duration(milliseconds: 250),
+                                          child: Icon(
+                                            (_prayerToggles[name.toLowerCase()] ??
+                                                    true)
+                                                ? Icons
+                                                    .notifications_active_rounded
+                                                : Icons
+                                                    .notifications_off_outlined,
+                                            key: ValueKey(_prayerToggles[
+                                                name.toLowerCase()]),
+                                            color: (_prayerToggles[
+                                                        name.toLowerCase()] ??
+                                                    true)
+                                                ? themeProvider.selectedTheme
+                                                : Colors.grey.shade300,
+                                            size: 22,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 15),
+                                      const SizedBox(width: 15),
+                                    ],
+                                    Text(prayer["time"],
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 18,
+                                            color: activeNow
+                                                ? themeProvider.selectedTheme
+                                                : (isPassed
+                                                    ? const Color(0xFFA4B0BE)
+                                                    : const Color(0xFF57606F)))),
                                   ],
-                                  Text(prayer["time"],
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 18,
-                                          color: activeNow
-                                              ? themeProvider.selectedTheme
-                                              : (isPassed
-                                                  ? const Color(0xFFA4B0BE)
-                                                  : const Color(0xFF57606F)))),
-                                ],
+                                ),
                               ),
                             ),
                           );
