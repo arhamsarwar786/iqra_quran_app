@@ -8,7 +8,6 @@ import '../Models/para_metadata_model.dart';
 import '../Models/ruko_model.dart';
 import '../Models/sajda_model.dart';
 import '../Models/surah_metadata_model.dart';
-import '../Services/search_engine.dart';
 import '../Services/analytics_service.dart';
 
 // ─── Top-level compute functions (must be top-level for isolate use) ──────────
@@ -66,27 +65,7 @@ List<RukoModel> _generateRukuIsolate(List<Aya> data) {
   return list;
 }
 
-/// Data structure for pre-normalized search documents
-class IndexData {
-  final List<String> arabicDocs;
-  final List<String> translationDocs;
-  final List<String> tafseerDocs;
-  IndexData(this.arabicDocs, this.translationDocs, this.tafseerDocs);
-}
 
-/// Normalizes all search fields in a background isolate
-IndexData _prepareIndexData(List<Aya> data) {
-  final List<String> arabicDocs = [];
-  final List<String> translationDocs = [];
-  final List<String> tafseerDocs = [];
-
-  for (final aya in data) {
-    arabicDocs.add(QuranDataProvider.normalizeArabic(aya.arabicText.toLowerCase()));
-    translationDocs.add(QuranDataProvider.normalizeArabic((aya.tarjumaIrfan ?? "").toLowerCase()));
-    tafseerDocs.add(QuranDataProvider.normalizeArabic((aya.withoutHtmlTafseer ?? "").toLowerCase()));
-  }
-  return IndexData(arabicDocs, translationDocs, tafseerDocs);
-}
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
@@ -110,7 +89,6 @@ class QuranDataProvider extends ChangeNotifier {
   /// 0.0 – 1.0 fine-grained loading progress (drives the splash-screen bar).
   double _loadProgress = 0.0;
 
-  QuranSearchEngine? _searchEngine;
   Aya? _currentRandomAyat;
   Timer? _rotationTimer;
 
@@ -299,38 +277,11 @@ class QuranDataProvider extends ChangeNotifier {
     }
   }
 
-  /// Builds the BM25 search index in a background isolate.
-  Future<void> buildSearchIndex() async {
-    if (_quranData.isEmpty || _searchEngine != null) return;
-    try {
-      debugPrint('QuranSearch: Building BM25 index…');
-      
-      // Phase 1: Heavy normalization in background isolate
-      final IndexData docs = await compute(_prepareIndexData, _quranData);
-      
-      _searchEngine =
-          QuranSearchEngine(_quranData, normalize: normalizeArabic);
-          
-      // Phase 2: BM25 index construction
-      await _searchEngine!.buildIndexFromDocs(
-        docs.arabicDocs, 
-        docs.translationDocs, 
-        docs.tafseerDocs
-      );
-      
-      debugPrint('QuranSearch: Index ready.');
-      notifyListeners();
-    } catch (e) {
-      debugPrint('QuranSearch: Index build failed – $e');
-      _searchEngine = null;
-    }
-  }
+  /// Unused dummy method for backward compatibility
+  Future<void> buildSearchIndex() async {}
 
-  /// Clears the search index to free up RAM.
-  void clearSearchIndex() {
-    _searchEngine = null;
-    debugPrint('QuranSearch: Index cleared from RAM.');
-  }
+  /// Unused dummy method for backward compatibility
+  void clearSearchIndex() {}
 
   // ── Memory management ──────────────────────────────────────────
 
@@ -351,7 +302,6 @@ class QuranDataProvider extends ChangeNotifier {
     _surahMetadata = [];
     _paraAyatCounts.clear();
     _paraRukuCounts.clear();
-    _searchEngine = null;
     _currentRandomAyat = null;
     _rotationTimer?.cancel();
     _splashTicker?.cancel();
@@ -442,22 +392,41 @@ class QuranDataProvider extends ChangeNotifier {
           .toList();
     }
 
-    // 2. BM25 Search
-    if (_searchEngine == null) {
-      debugPrint('QuranSearch: Search triggered but index not ready. Building…');
-      await buildSearchIndex();
+    // 2. Direct Linear Search (Zero-RAM Overhead, highly optimized for 1GB devices)
+    final String normalizedQuery = normalizeArabic(q);
+    
+    // Process search synchronously in memory. 6236 records takes ~1-3ms in Dart.
+    final List<Aya> results = [];
+    for (final aya in _quranData) {
+      bool isMatch = false;
+
+      // Check Arabic
+      if (searchArabic) {
+        if (normalizeArabic(aya.arabicText.toLowerCase()).contains(normalizedQuery)) {
+          isMatch = true;
+        }
+      }
+
+      // Check Translation
+      if (!isMatch && searchTranslation && aya.tarjumaIrfan != null) {
+        if (aya.tarjumaIrfan!.toLowerCase().contains(q)) {
+          isMatch = true;
+        }
+      }
+
+      // Check Tafseer
+      if (!isMatch && searchTafseer && aya.withoutHtmlTafseer != null) {
+        if (aya.withoutHtmlTafseer!.toLowerCase().contains(q)) {
+          isMatch = true;
+        }
+      }
+
+      if (isMatch) {
+        results.add(aya);
+      }
     }
 
-    if (_searchEngine == null) return [];
-
-    final searchResults = await _searchEngine!.search(
-      query,
-      searchArabic: searchArabic,
-      searchTranslation: searchTranslation,
-      searchTafseer: searchTafseer,
-    );
-
-    return searchResults.map((r) => r.aya).toList();
+    return results;
   }
 
   // ── Internal helpers ───────────────────────────────────────────

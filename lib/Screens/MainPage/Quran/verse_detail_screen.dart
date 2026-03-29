@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:iqra/Models/aya_list_model.dart';
 import 'package:iqra/Models/surah_metadata_model.dart';
 import 'package:iqra/Provider/theme_provider.dart';
+import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:provider/provider.dart';
 
 class VerseDetailScreen extends StatelessWidget {
   final Aya aya;
   final SurahMetadata? surahMetadata;
+  final String? searchQuery;
 
   const VerseDetailScreen({
     super.key,
     required this.aya,
     this.surahMetadata,
+    this.searchQuery,
   });
 
   @override
@@ -72,15 +75,23 @@ class VerseDetailScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Text(
-                    aya.arabicText,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: bloc.arabicFontSize + 2,
-                      fontFamily: bloc.arabicFontFamily,
-                      color: Colors.white,
-                      height: 1.8,
+                  SelectableText.rich(
+                    TextSpan(
+                      children: _getHighlightSpans(
+                        aya.arabicText,
+                        searchQuery ?? '',
+                        TextStyle(
+                          fontSize: bloc.arabicFontSize + 2,
+                          fontFamily: bloc.arabicFontFamily,
+                          color: Colors.white,
+                          height: 1.8,
+                        ),
+                        // Soft highlight color for white text on dark primary bg
+                        Colors.black.withOpacity(0.3),
+                        Colors.amberAccent,
+                      ),
                     ),
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
                   Container(
@@ -185,15 +196,22 @@ class VerseDetailScreen extends StatelessWidget {
                     fontSize: fontSize,
                     themeColor: color,
                   )
-                : Text(
-                    content,
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: fontSize,
-                      fontFamily: fontFamily,
-                      height: 1.8, // Increased for readability
-                      color: Colors.black.withOpacity(0.85),
+                : SelectableText.rich(
+                    TextSpan(
+                      children: _getHighlightSpans(
+                        content,
+                        searchQuery ?? '',
+                        TextStyle(
+                          fontSize: fontSize,
+                          fontFamily: fontFamily,
+                          height: 1.8, // Increased for readability
+                          color: Colors.black.withOpacity(0.85),
+                        ),
+                        color.withOpacity(0.2), // bg
+                        color,                  // fg
+                      ),
                     ),
+                    textAlign: TextAlign.right,
                   ),
           ),
         ),
@@ -274,17 +292,18 @@ class VerseDetailScreen extends StatelessWidget {
         String body = match.group(4)!;
         if (body.trim().isEmpty) continue;
 
-        spans.add(
-          TextSpan(
-            text: body,
-            style: TextStyle(
-              color: Colors.black.withOpacity(0.85),
-              fontWeight: FontWeight.normal,
-              fontSize: fontSize,
-              height: 1.85,
-            ),
+        spans.addAll(_getHighlightSpans(
+          body,
+          searchQuery ?? '',
+          TextStyle(
+            color: Colors.black.withOpacity(0.85),
+            fontWeight: FontWeight.normal,
+            fontSize: fontSize,
+            height: 1.85,
           ),
-        );
+          themeColor.withOpacity(0.2),
+          themeColor,
+        ));
       }
     }
 
@@ -293,5 +312,64 @@ class VerseDetailScreen extends StatelessWidget {
       textAlign: TextAlign.right,
       style: TextStyle(fontFamily: fontFamily),
     );
+  }
+
+  List<TextSpan> _getHighlightSpans(String text, String query, TextStyle style,
+      Color highlightBgColor, Color highlightFgColor) {
+    if (query.trim().isEmpty) {
+      return [TextSpan(text: text, style: style)];
+    }
+
+    final String cleanQuery = QuranDataProvider.normalizeArabic(query).trim();
+    if (cleanQuery.isEmpty) {
+      return [TextSpan(text: text, style: style)];
+    }
+
+    String diacritics =
+        r'[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u06DF-\u06E4\u06E7-\u06E8\u06EA-\u06EB]*';
+    StringBuffer regexBuf = StringBuffer();
+    for (int i = 0; i < cleanQuery.length; i++) {
+      String char = cleanQuery[i];
+      if (r'\.^$*+?-()[]{}\|'.contains(char)) {
+        regexBuf.write('\\$char');
+      } else {
+        regexBuf.write(char);
+      }
+      regexBuf.write(diacritics);
+    }
+
+    RegExp regex;
+    try {
+      regex = RegExp(regexBuf.toString(), caseSensitive: false);
+    } catch (_) {
+      regex = RegExp(RegExp.escape(cleanQuery), caseSensitive: false);
+    }
+
+    List<TextSpan> spans = [];
+    int start = 0;
+
+    final matches = regex.allMatches(text);
+    if (matches.isEmpty) {
+      return [TextSpan(text: text, style: style)];
+    }
+
+    for (final match in matches) {
+      if (match.start > start) {
+        spans.add(TextSpan(text: text.substring(start, match.start), style: style));
+      }
+      spans.add(TextSpan(
+        text: text.substring(match.start, match.end),
+        style: style.copyWith(
+          backgroundColor: highlightBgColor,
+          color: highlightFgColor,
+          fontWeight: FontWeight.bold,
+        ),
+      ));
+      start = match.end;
+    }
+    if (start < text.length) {
+      spans.add(TextSpan(text: text.substring(start), style: style));
+    }
+    return spans;
   }
 }

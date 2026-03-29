@@ -556,25 +556,29 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                               ayatList: listAyat,
                             ));
                       } else if (index == 1) {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AutoScrollSpeedDialog(
-                            currentSpeedFactor: autoScrollSpeed,
-                            isScrolling: isAutoScrolling,
-                            onSpeedChanged: (val) {
-                              setState(() => autoScrollSpeed = val);
-                              if (isAutoScrolling) {
-                                _stopAutoScroll();
+                        if (isAutoScrolling) {
+                          _stopAutoScroll();
+                        } else {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AutoScrollSpeedDialog(
+                              currentSpeedFactor: autoScrollSpeed,
+                              isScrolling: isAutoScrolling,
+                              onSpeedChanged: (val) {
+                                setState(() => autoScrollSpeed = val);
+                                if (isAutoScrolling) {
+                                  _stopAutoScroll();
+                                  _startAutoScroll();
+                                }
+                              },
+                              onStart: () {
+                                setState(() => isAutoScrolling = true);
                                 _startAutoScroll();
-                              }
-                            },
-                            onStart: () {
-                              setState(() => isAutoScrolling = true);
-                              _startAutoScroll();
-                            },
-                            onStop: () => _stopAutoScroll(),
-                          ),
-                        );
+                              },
+                              onStop: () => _stopAutoScroll(),
+                            ),
+                          );
+                        }
                       } else if (index == 2) {
                         push(context, const SettingScreen());
                       }

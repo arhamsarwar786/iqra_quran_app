@@ -38,11 +38,6 @@ class _SearchScreenState extends State<SearchScreen> {
     super.initState();
     _searchController.addListener(_onSearchChanged);
     _requestMicrophonePermission();
-    
-    // Build search index when entering the search page
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<QuranDataProvider>().buildSearchIndex();
-    });
   }
 
   Future<void> _requestMicrophonePermission() async {
@@ -58,11 +53,7 @@ class _SearchScreenState extends State<SearchScreen> {
     _searchController.dispose();
     _debounce?.cancel();
     _audioPlayer.dispose();
-    
-    // Clear search index when leaving the search page to save RAM
-    // Using select to avoid build issues if provider changed, but read is standard in dispose
-    context.read<QuranDataProvider>().clearSearchIndex();
-    
+
     super.dispose();
   }
 
@@ -337,10 +328,10 @@ class _SearchScreenState extends State<SearchScreen> {
         children: [
           _filterChip("Arabic", _searchArabic,
               (val) => setState(() => _searchArabic = val), theme),
-          const SizedBox(width: 10),
+          const SizedBox(width: 5),
           _filterChip("Translation", _searchTranslation,
               (val) => setState(() => _searchTranslation = val), theme),
-          const SizedBox(width: 10),
+          const SizedBox(width: 5),
           _filterChip("Tafseer", _searchTafseer,
               (val) => setState(() => _searchTafseer = val), theme),
         ],
@@ -351,6 +342,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget _filterChip(String label, bool selected, Function(bool) onSelected,
       ThemeProvider theme) {
     return FilterChip(
+      padding: EdgeInsets.all(0),
       label: Text(label),
       selected: selected,
       onSelected: (val) {
@@ -360,6 +352,7 @@ class _SearchScreenState extends State<SearchScreen> {
       selectedColor: theme.selectedTheme.withOpacity(0.2),
       checkmarkColor: theme.selectedTheme,
       labelStyle: TextStyle(
+        fontSize: 10,
         color: selected ? theme.selectedTheme : Colors.grey[700],
         fontWeight: selected ? FontWeight.bold : FontWeight.normal,
       ),
@@ -416,15 +409,16 @@ class _SearchScreenState extends State<SearchScreen> {
         Expanded(
           child: ListView.builder(
             itemCount: _results.length,
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            padding: const EdgeInsets.fromLTRB(5, 0, 5, 20),
             itemBuilder: (context, index) {
               final aya = _results[index];
               final surah =
                   quranProvider.getSurahMetadata(int.parse(aya.surahId ?? "1"));
               final isPlaying = _playingIndex == index;
+              final query = _searchController.text.trim();
 
               return _buildResultCard(
-                  aya, surah, theme, quranProvider, index, isPlaying);
+                  aya, surah, theme, quranProvider, index, isPlaying, query);
             },
           ),
         ),
@@ -432,23 +426,114 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildResultCard(Aya aya, var surah, ThemeProvider theme,
-      QuranDataProvider quranProvider, int index, bool isPlaying) {
+  Widget _buildHighlightedText(String text, String query, TextStyle style,
+      ThemeProvider theme, TextAlign align,
+      {int? maxLines}) {
+    if (query.isEmpty) {
+      return SelectableText(
+        text,
+        style: style,
+        textAlign: align,
+        maxLines: maxLines,
+        scrollPhysics: const NeverScrollableScrollPhysics(),
+      );
+    }
+
+    final String cleanQuery = QuranDataProvider.normalizeArabic(query).trim();
+    if (cleanQuery.isEmpty) {
+      return SelectableText(text,
+          style: style,
+          textAlign: align,
+          maxLines: maxLines,
+          scrollPhysics: const NeverScrollableScrollPhysics());
+    }
+
+    // Build a diacritic-ignoring regex for the normalized query
+    String diacritics =
+        r'[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u06DF-\u06E4\u06E7-\u06E8\u06EA-\u06EB]*';
+    StringBuffer regexBuf = StringBuffer();
+    for (int i = 0; i < cleanQuery.length; i++) {
+      String char = cleanQuery[i];
+      if (r'\.^$*+?-()[]{}\|'.contains(char)) {
+        regexBuf.write('\\$char');
+      } else {
+        regexBuf.write(char);
+      }
+      regexBuf.write(diacritics);
+    }
+
+    RegExp regex;
+    try {
+      regex = RegExp(regexBuf.toString(), caseSensitive: false);
+    } catch (_) {
+      regex = RegExp(RegExp.escape(cleanQuery), caseSensitive: false);
+    }
+
+    List<TextSpan> spans = [];
+    int start = 0;
+
+    final matches = regex.allMatches(text);
+    if (matches.isEmpty) {
+      // Fallback if no robust match
+      return SelectableText(text,
+          style: style,
+          textAlign: align,
+          maxLines: maxLines,
+          scrollPhysics: const NeverScrollableScrollPhysics());
+    }
+
+    for (final match in matches) {
+      if (match.start > start) {
+        spans.add(TextSpan(text: text.substring(start, match.start)));
+      }
+      spans.add(TextSpan(
+        text: text.substring(match.start, match.end),
+        style: style.copyWith(
+          backgroundColor: theme.selectedTheme.withOpacity(0.2),
+          color: theme.selectedTheme,
+          fontWeight: FontWeight.bold,
+        ),
+      ));
+      start = match.end;
+    }
+    if (start < text.length) {
+      spans.add(TextSpan(text: text.substring(start)));
+    }
+
+    return SelectableText.rich(
+      TextSpan(children: spans, style: style),
+      textAlign: align,
+      maxLines: maxLines,
+      scrollPhysics: const NeverScrollableScrollPhysics(),
+    );
+  }
+
+  Widget _buildResultCard(
+      Aya aya,
+      var surah,
+      ThemeProvider theme,
+      QuranDataProvider quranProvider,
+      int index,
+      bool isPlaying,
+      String query) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 15, left: 0, right: 0),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+            color: theme.selectedTheme.withOpacity(0.15), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: theme.selectedTheme.withOpacity(0.1),
+            blurRadius: 15,
+            spreadRadius: 2,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -458,11 +543,13 @@ class _SearchScreenState extends State<SearchScreen> {
                 VerseDetailScreen(
                   aya: aya,
                   surahMetadata: surah,
+                  searchQuery: query,
                 ),
               );
             },
             child: Padding(
-              padding: const EdgeInsets.all(18.0),
+              padding: const EdgeInsets.only(
+                  top: 15, bottom: 10, left: 10, right: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -470,78 +557,121 @@ class _SearchScreenState extends State<SearchScreen> {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
+                            horizontal: 14, vertical: 6),
                         decoration: BoxDecoration(
-                          color: theme.selectedTheme.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          "${surah?.name ?? ""} : ${aya.ayatNumber}",
-                          style: TextStyle(
-                            color: theme.selectedTheme,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                          gradient: LinearGradient(
+                            colors: [
+                              theme.selectedTheme.withOpacity(0.15),
+                              theme.selectedTheme.withOpacity(0.05),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                              color: theme.selectedTheme.withOpacity(0.2)),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.auto_stories_rounded,
+                                size: 14, color: theme.selectedTheme),
+                            const SizedBox(width: 6),
+                            Text(
+                              "${surah?.name ?? ""} : ${aya.ayatNumber}",
+                              style: TextStyle(
+                                color: theme.selectedTheme.withOpacity(0.9),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      // const Spacer(),
-                      // IconButton(
-                      //   icon: Icon(
-                      //     isPlaying
-                      //         ? Icons.pause_circle_filled
-                      //         : Icons.play_circle_filled,
-                      //     color: theme.selectedTheme,
-                      //     size: 30,
-                      //   ),
-                      //   onPressed: () => _playRecitation(aya, index),
-                      // ),
+                      const Spacer(),
+                      Icon(Icons.open_in_new_rounded,
+                          size: 18, color: Colors.grey[400]),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  Text(
+                  const SizedBox(height: 18),
+                  _buildHighlightedText(
                     aya.arabicText,
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 24,
+                    query,
+                    TextStyle(
+                      fontSize: 26,
                       fontFamily: theme.arabicFontFamily,
-                      height: 1.5,
-                      color: const Color(0xFF2D3436),
+                      height: 1.6,
+                      color: const Color(0xFF1E272E),
                     ),
+                    theme,
+                    TextAlign.right,
                   ),
                   if (_searchTranslation &&
                       (aya.tarjumaIrfan?.isNotEmpty ?? false)) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      aya.tarjumaIrfan!,
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontFamily: theme.urduFontFamily,
-                        color: Colors.grey[700],
-                        height: 1.4,
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: _buildHighlightedText(
+                        aya.tarjumaIrfan!,
+                        query,
+                        TextStyle(
+                          fontSize: 17,
+                          fontFamily: theme.urduFontFamily,
+                          color: const Color(0xFF485460),
+                          height: 1.5,
+                        ),
+                        theme,
+                        TextAlign.right,
                       ),
                     ),
                   ],
                   if (_searchTafseer &&
                       (aya.withoutHtmlTafseer?.isNotEmpty ?? false)) ...[
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 16),
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.grey[50],
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey[200]!),
+                        color: theme.selectedTheme.withOpacity(0.04),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                            color: theme.selectedTheme.withOpacity(0.1)),
                       ),
-                      child: Text(
-                        aya.withoutHtmlTafseer!.length > 150
-                            ? "${aya.withoutHtmlTafseer!.substring(0, 150)}..."
-                            : aya.withoutHtmlTafseer!,
-                        style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[600],
-                            fontStyle: FontStyle.italic),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                "Tafseer Highlight",
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.selectedTheme.withOpacity(0.7),
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              Icon(Icons.info_outline_rounded,
+                                  size: 12,
+                                  color: theme.selectedTheme.withOpacity(0.7)),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          _buildHighlightedText(
+                            aya.withoutHtmlTafseer!.length > 180
+                                ? "${aya.withoutHtmlTafseer!.substring(0, 180)}..."
+                                : aya.withoutHtmlTafseer!,
+                            query,
+                            TextStyle(
+                              fontSize: 14,
+                              color: const Color(0xFF576574),
+                              fontFamily: theme.urduFontFamily,
+                              height: 1.4,
+                            ),
+                            theme,
+                            TextAlign.right,
+                            maxLines: 3,
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -640,7 +770,9 @@ class _VoiceSearchDialogState extends State<_VoiceSearchDialog> {
           _level = level;
         });
       },
-      listenFor: const Duration(seconds: 30),
+      listenFor: const Duration(seconds: 60),
+      pauseFor: const Duration(seconds: 5),
+      listenMode: stt.ListenMode.dictation,
       cancelOnError: true,
       partialResults: true,
     );
@@ -651,108 +783,110 @@ class _VoiceSearchDialogState extends State<_VoiceSearchDialog> {
     final theme = Provider.of<ThemeProvider>(context);
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-      elevation: 20,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Animated Microphone & Waves
-            SizedBox(
-              height: 100,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Animated pulse circles
-                  _PulseCircle(level: _level, color: theme.selectedTheme),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: theme.selectedTheme,
-                      shape: BoxShape.circle,
-                    ),
-                    padding: const EdgeInsets.all(15),
-                    child: const Icon(Icons.mic, color: Colors.white, size: 40),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              "اب بولیں (اردو)...",
-              style: TextStyle(
-                color: theme.selectedTheme,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                fontFamily: theme.urduFontFamily,
-              ),
-            ),
-            const SizedBox(height: 25),
-            // Text Feed (Editable)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: Colors.grey[300]!),
-              ),
-              child: TextField(
-                controller: _controller,
-                focusNode: _focusNode,
-                textAlign: TextAlign.center,
-                textDirection: TextDirection.rtl, // Right-to-Left for Urdu
-                maxLines: 3,
-                style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
-                    fontFamily: theme.urduFontFamily),
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "آپ کی آواز یہاں نظر آئے گی...",
-                  hintTextDirection: TextDirection.rtl,
-                ),
-              ),
-            ),
-            const SizedBox(height: 30),
-            // Actions
-            Row(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+        elevation: 20,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Cancel",
-                        style: TextStyle(color: Colors.grey)),
+                // Animated Microphone & Waves
+                SizedBox(
+                  height: 100,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Animated pulse circles
+                      _PulseCircle(level: _level, color: theme.selectedTheme),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: theme.selectedTheme,
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(15),
+                        child: const Icon(Icons.mic,
+                            color: Colors.white, size: 40),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      final searchText = _controller.text.trim();
-                      if (searchText.isNotEmpty) {
-                        widget.onSearch(searchText);
-                        Navigator.pop(context);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.selectedTheme,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text("Search",
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 20),
+                Text(
+                  "اب بولیں (اردو)...",
+                  style: TextStyle(
+                    color: theme.selectedTheme,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    fontFamily: theme.urduFontFamily,
                   ),
+                ),
+                const SizedBox(height: 25),
+                // Text Feed (Editable)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: TextField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    textAlign: TextAlign.center,
+                    textDirection: TextDirection.rtl, // Right-to-Left for Urdu
+                    maxLines: 3,
+                    style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                        fontFamily: theme.urduFontFamily),
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "آپ کی آواز یہاں نظر آئے گی...",
+                      hintTextDirection: TextDirection.rtl,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                // Actions
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Cancel",
+                            style: TextStyle(color: Colors.grey)),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          final searchText = _controller.text.trim();
+                          if (searchText.isNotEmpty) {
+                            widget.onSearch(searchText);
+                            Navigator.pop(context);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.selectedTheme,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text("Search",
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-    ));
+          ),
+        ));
   }
 }
 
