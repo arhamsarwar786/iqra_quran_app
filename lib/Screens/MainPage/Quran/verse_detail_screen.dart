@@ -325,6 +325,38 @@ class VerseDetailScreen extends StatelessWidget {
       return [TextSpan(text: text, style: style)];
     }
 
+    List<TextSpan> spans = [];
+    int start = 0;
+
+    // FIRST PASS: Literal case-insensitive match (for Urdu/English)
+    final lowerText = text.toLowerCase();
+    final lowerQuery = query.toLowerCase();
+    int literalIdx = lowerText.indexOf(lowerQuery);
+
+    if (literalIdx != -1) {
+      while (true) {
+        final int index = lowerText.indexOf(lowerQuery, start);
+        if (index < 0) {
+          spans.add(TextSpan(text: text.substring(start), style: style));
+          break;
+        }
+        if (index > start) {
+          spans.add(TextSpan(text: text.substring(start, index), style: style));
+        }
+        spans.add(TextSpan(
+          text: text.substring(index, index + lowerQuery.length),
+          style: style.copyWith(
+            backgroundColor: highlightBgColor,
+            color: highlightFgColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ));
+        start = index + lowerQuery.length;
+      }
+      return spans;
+    }
+
+    // SECOND PASS: Arabic Regex Match
     String diacritics =
         r'[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u06DF-\u06E4\u06E7-\u06E8\u06EA-\u06EB]*';
     StringBuffer regexBuf = StringBuffer();
@@ -345,8 +377,8 @@ class VerseDetailScreen extends StatelessWidget {
       regex = RegExp(RegExp.escape(cleanQuery), caseSensitive: false);
     }
 
-    List<TextSpan> spans = [];
-    int start = 0;
+    spans = [];
+    start = 0;
 
     final matches = regex.allMatches(text);
     if (matches.isEmpty) {

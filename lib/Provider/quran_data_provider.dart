@@ -65,8 +65,6 @@ List<RukoModel> _generateRukuIsolate(List<Aya> data) {
   return list;
 }
 
-
-
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 class QuranDataProvider extends ChangeNotifier {
@@ -116,10 +114,10 @@ class QuranDataProvider extends ChangeNotifier {
   /// Moves logic out of SplashScreen and into the Provider.
   Future<void> appInitialize() async {
     if (_isLoaded || _isLoading) return;
-    
+
     _simulatedProgress = 0.0;
     _loadProgress = 0.0;
-    
+
     // Start the "Smooth ticker" for the UI
     _splashTicker?.cancel();
     _splashTicker = Timer.periodic(const Duration(milliseconds: 40), (timer) {
@@ -127,18 +125,18 @@ class QuranDataProvider extends ChangeNotifier {
         timer.cancel();
         return;
       }
-      
+
       // Auto-step: advances by ~0.4% every 40ms (reaches 100% in ~10s if loading is slow)
       double next = _simulatedProgress + 0.004;
-      
+
       // Sync with real progress if real progress jumps ahead
       if (_loadProgress > next) {
         next = _loadProgress;
       }
-      
+
       // Cap at 99% until fully loaded
       if (next > 0.99) next = 0.99;
-      
+
       if (next > _simulatedProgress) {
         _simulatedProgress = next;
         notifyListeners();
@@ -234,7 +232,7 @@ class QuranDataProvider extends ChangeNotifier {
     _isLoaded = true;
     _simulatedProgress = 1.0;
     _splashTicker?.cancel();
-    
+
     _currentRandomAyat = _pickDailyAyat();
     _setProgress(1.0);
     _isLoading = false;
@@ -271,8 +269,7 @@ class QuranDataProvider extends ChangeNotifier {
 
     _paraRukuCounts.clear();
     for (final ruko in _rukoData) {
-      final String p =
-          lookup['${ruko.surat}|${ruko.ayaAfterRako}'] ?? '0';
+      final String p = lookup['${ruko.surat}|${ruko.ayaAfterRako}'] ?? '0';
       if (p != '0') _paraRukuCounts[p] = (_paraRukuCounts[p] ?? 0) + 1;
     }
   }
@@ -367,8 +364,8 @@ class QuranDataProvider extends ChangeNotifier {
     }
     int effectiveAyah = ayatNumber == 0 ? 1 : ayatNumber;
     if (surahId <= _surahMetadata.length) {
-      effectiveAyah = effectiveAyah
-          .clamp(1, _surahMetadata[surahId - 1].surahTotalAyaat);
+      effectiveAyah =
+          effectiveAyah.clamp(1, _surahMetadata[surahId - 1].surahTotalAyaat);
     }
     return globalIndex + effectiveAyah;
   }
@@ -380,21 +377,20 @@ class QuranDataProvider extends ChangeNotifier {
     bool searchTafseer = true,
   }) async {
     if (query.trim().isEmpty) return [];
-    
+
     // 1. Direct Verse Lookup (e.g. "2:255" or "18 10")
     final String q = query.trim().toLowerCase();
     final match = RegExp(r'^(\d+)(?::|\ +)(\d+)$').firstMatch(q);
     if (match != null) {
       return _quranData
           .where((a) =>
-              a.surahId == match.group(1) &&
-              a.ayatNumber == match.group(2))
+              a.surahId == match.group(1) && a.ayatNumber == match.group(2))
           .toList();
     }
 
     // 2. Direct Linear Search (Zero-RAM Overhead, highly optimized for 1GB devices)
     final String normalizedQuery = normalizeArabic(q);
-    
+
     // Process search synchronously in memory. 6236 records takes ~1-3ms in Dart.
     final List<Aya> results = [];
     for (final aya in _quranData) {
@@ -402,7 +398,14 @@ class QuranDataProvider extends ChangeNotifier {
 
       // Check Arabic
       if (searchArabic) {
-        if (normalizeArabic(aya.arabicText.toLowerCase()).contains(normalizedQuery)) {
+        // Use the pre-cleaned "withoutArab" field for much faster and more accurate plain Arabic search
+        final String targetArabic =
+            (aya.withoutArab != null && aya.withoutArab!.isNotEmpty)
+                ? aya.withoutArab!
+                : aya.arabicText;
+
+        if (normalizeArabic(targetArabic.toLowerCase())
+            .contains(normalizedQuery)) {
           isMatch = true;
         }
       }
@@ -472,4 +475,5 @@ class QuranDataProvider extends ChangeNotifier {
 
 // ── Background Parse Helpers ──────────
 List<SajdaModel> _parseSajdaIsolate(String json) => sajdaModelFromJson(json);
-List<SurahMetadata> _parseSurahIsolate(String json) => surahMetadataFromJson(json);
+List<SurahMetadata> _parseSurahIsolate(String json) =>
+    surahMetadataFromJson(json);

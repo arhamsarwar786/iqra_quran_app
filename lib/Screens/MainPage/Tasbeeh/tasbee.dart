@@ -106,7 +106,7 @@ class _MyWidgetState extends State<Tasbih> {
         ),
         body: SafeArea(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               selectedTasbeeh != null
@@ -196,9 +196,37 @@ class _MyWidgetState extends State<Tasbih> {
                         ),
                       ),
                     )
-                  : const SizedBox.shrink(),
+                  : Container(
+                      width: double.infinity,
+                      height: size.height * 0.25,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: themeProvider.selectedTheme.withOpacity(0.3),
+                            width: 1.5),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.touch_app_rounded,
+                              size: 36,
+                              color:
+                                  themeProvider.selectedTheme.withOpacity(0.6)),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Tap  +  to choose a Tasbeeh',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color:
+                                  themeProvider.selectedTheme.withOpacity(0.75),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
               Expanded(
-                flex: 7,
                 child: Center(
                   child:
                       Consumer<TasbeeCount>(builder: (context, value, widget) {

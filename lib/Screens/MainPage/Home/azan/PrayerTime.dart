@@ -219,9 +219,12 @@ class _PrayerTimeState extends State<PrayerTime> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      prayerProvider.error != null && prayerProvider.error!.contains('permanently denied')
+                      prayerProvider.error != null &&
+                              prayerProvider.error!
+                                  .contains('permanently denied')
                           ? "Location access is permanently disabled. Please enable it in your phone settings to see prayer times."
-                          : (prayerProvider.error ?? "We couldn't determine your location to calculate prayer times. Please ensure GPS is enabled."),
+                          : (prayerProvider.error ??
+                              "We couldn't determine your location to calculate prayer times. Please ensure GPS is enabled."),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.grey.shade600,
@@ -235,7 +238,9 @@ class _PrayerTimeState extends State<PrayerTime> {
                     ElevatedButton(
                       onPressed: () async {
                         AnalyticsService.logEvent('location_error_action');
-                        if (prayerProvider.error != null && prayerProvider.error!.contains('permanently denied')) {
+                        if (prayerProvider.error != null &&
+                            prayerProvider.error!
+                                .contains('permanently denied')) {
                           await Geolocator.openAppSettings();
                         } else {
                           prayerProvider.fetchPrayerData(forceRefresh: true);
@@ -244,15 +249,19 @@ class _PrayerTimeState extends State<PrayerTime> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: themeProvider.selectedTheme,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 48, vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
                         elevation: 8,
-                        shadowColor: themeProvider.selectedTheme.withOpacity(0.4),
+                        shadowColor:
+                            themeProvider.selectedTheme.withOpacity(0.4),
                       ),
                       child: Text(
-                        prayerProvider.error != null && prayerProvider.error!.contains('permanently denied')
+                        prayerProvider.error != null &&
+                                prayerProvider.error!
+                                    .contains('permanently denied')
                             ? "Open Settings"
                             : "Try Again",
                         style: const TextStyle(
@@ -401,6 +410,7 @@ class _PrayerTimeState extends State<PrayerTime> {
                               Padding(
                                 padding: const EdgeInsets.all(28.0),
                                 child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     FittedBox(
                                       fit: BoxFit.scaleDown,
@@ -422,29 +432,39 @@ class _PrayerTimeState extends State<PrayerTime> {
                                       ),
                                     ),
                                     const SizedBox(height: 25),
-                                    Text(label.toUpperCase(),
-                                        style: TextStyle(
-                                            color:
-                                                Colors.white.withOpacity(0.7),
-                                            fontSize: 11,
-                                            letterSpacing: 2.0,
-                                            fontWeight: FontWeight.bold)),
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(label.toUpperCase(),
+                                          textAlign: TextAlign.center,
+                                          maxLines: 1,
+                                          style: TextStyle(
+                                              color:
+                                                  Colors.white.withOpacity(0.7),
+                                              fontSize: 11,
+                                              letterSpacing: 2.0,
+                                              fontWeight: FontWeight.bold)),
+                                    ),
                                     const SizedBox(height: 10),
-                                    ShaderMask(
-                                      shaderCallback: (bounds) =>
-                                          const LinearGradient(
-                                        colors: [
-                                          Colors.white,
-                                          Color(0xFFE0E0E0)
-                                        ],
-                                      ).createShader(bounds),
-                                      child: Text(timeStr,
-                                          style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 50,
-                                              fontFamily: 'Poppins',
-                                              fontWeight: FontWeight.w900,
-                                              letterSpacing: -2)),
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: ShaderMask(
+                                        shaderCallback: (bounds) =>
+                                            const LinearGradient(
+                                          colors: [
+                                            Colors.white,
+                                            Color(0xFFE0E0E0)
+                                          ],
+                                        ).createShader(bounds),
+                                        child: Text(timeStr,
+                                            textAlign: TextAlign.center,
+                                            maxLines: 1,
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 50,
+                                                fontFamily: 'Poppins',
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: -2)),
+                                      ),
                                     ),
                                     const SizedBox(height: 25),
                                     GestureDetector(
@@ -683,7 +703,8 @@ class _PrayerTimeState extends State<PrayerTime> {
                                           duration:
                                               const Duration(milliseconds: 250),
                                           child: Icon(
-                                            (_prayerToggles[name.toLowerCase()] ??
+                                            (_prayerToggles[
+                                                        name.toLowerCase()] ??
                                                     true)
                                                 ? Icons
                                                     .notifications_active_rounded
@@ -710,7 +731,8 @@ class _PrayerTimeState extends State<PrayerTime> {
                                                 ? themeProvider.selectedTheme
                                                 : (isPassed
                                                     ? const Color(0xFFA4B0BE)
-                                                    : const Color(0xFF57606F)))),
+                                                    : const Color(
+                                                        0xFF57606F)))),
                                   ],
                                 ),
                               ),

@@ -27,21 +27,22 @@ class _TabBarDemoState extends State<TabBarDemo> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(milliseconds: 200), () async {
-      // SharedPreferences prefs = await SharedPreferences.getInstance();
-      // bool introShown = prefs.getBool('tabbar_intro_shown') ?? false;
+      if (!mounted) return;
 
-      // if (!introShown) {
+      // ── One-time intro guard ─────────────────────────────────────────
+      final bool showTuts = await SavedPrefernces.getShowTutorials();
+      final bool hasSeen = await SavedPrefernces.hasSeenTutorial('tabbar');
+      if (!showTuts || hasSeen) return;
+      // ────────────────────────────────────────────────────────────────
+
       if (mounted && _scaffoldKey.currentContext != null) {
         try {
           Intro.of(_scaffoldKey.currentContext!).start(group: 'tabbar');
-          // await prefs.setBool('tabbar_intro_shown', true);
+          await SavedPrefernces.markTutorialSeen('tabbar');
         } catch (e) {
-          debugPrint("INTRO ERROR: $e");
+          debugPrint('Tabbar Intro Error: $e');
         }
-      } else {
-        debugPrint("INTRO ERROR: _scaffoldKey is null");
       }
-      // }
     });
   }
 

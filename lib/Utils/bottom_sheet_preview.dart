@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
+import 'package:iqra/Helper/preference/saved_preferences.dart';
 import 'package:provider/provider.dart';
 import '../Models/aya_list_model.dart';
 import '../Models/surah_metadata_model.dart';
@@ -97,29 +98,32 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
     _pageController = PageController(initialPage: widget.initialIndex);
 
     Future.delayed(const Duration(milliseconds: 200), () async {
-      // SharedPreferences prefs = await SharedPreferences.getInstance();
-      // bool introShown = prefs.getBool('bottom_sheet_intro_shown') ?? false;
+      if (!mounted) return;
 
-      // if (!introShown) {
+      // ── One-time intro guard ─────────────────────────────────────────
+      final bool showTuts = await SavedPrefernces.getShowTutorials();
+      final bool hasSeen = await SavedPrefernces.hasSeenTutorial('bottom_sheet');
+      if (!showTuts || hasSeen) return;
+      // ────────────────────────────────────────────────────────────────
+
+      if (_sheetKey.currentContext == null || !mounted) return;
+
+      if (_introScrollController.hasClients) {
+        await _introScrollController.animateTo(
+          _introScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+        );
+      }
+
       if (mounted && _sheetKey.currentContext != null) {
-        if (_introScrollController.hasClients) {
-          await _introScrollController.animateTo(
-            _introScrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
-          );
-        }
-
-        if (mounted) {
-          try {
-            Intro.of(_sheetKey.currentContext!).start(group: 'bottom_sheet');
-            // await prefs.setBool('bottom_sheet_intro_shown', true);
-          } catch (e) {
-            debugPrint("Bottom sheet Intro Error: $e");
-          }
+        try {
+          Intro.of(_sheetKey.currentContext!).start(group: 'bottom_sheet');
+          await SavedPrefernces.markTutorialSeen('bottom_sheet');
+        } catch (e) {
+          debugPrint('Bottom sheet Intro Error: $e');
         }
       }
-      // }
     });
   }
 

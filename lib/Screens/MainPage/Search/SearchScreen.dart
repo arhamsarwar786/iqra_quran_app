@@ -407,21 +407,23 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
         Expanded(
-          child: ListView.builder(
-            itemCount: _results.length,
-            padding: const EdgeInsets.fromLTRB(5, 0, 5, 20),
-            itemBuilder: (context, index) {
-              final aya = _results[index];
-              final surah =
-                  quranProvider.getSurahMetadata(int.parse(aya.surahId ?? "1"));
-              final isPlaying = _playingIndex == index;
-              final query = _searchController.text.trim();
+          child: SelectionArea(
+            child: ListView.builder(
+              itemCount: _results.length,
+              padding: const EdgeInsets.fromLTRB(5, 0, 5, 20),
+              itemBuilder: (context, index) {
+                final aya = _results[index];
+                final surah = quranProvider
+                    .getSurahMetadata(int.parse(aya.surahId ?? "1"));
+                final isPlaying = _playingIndex == index;
+                final query = _searchController.text.trim();
 
-              return _buildResultCard(
-                  aya, surah, theme, quranProvider, index, isPlaying, query);
-            },
+                return _buildResultCard(
+                    aya, surah, theme, quranProvider, index, isPlaying, query);
+              },
+            ),
           ),
-        ),
+        )
       ],
     );
   }
@@ -430,25 +432,55 @@ class _SearchScreenState extends State<SearchScreen> {
       ThemeProvider theme, TextAlign align,
       {int? maxLines}) {
     if (query.isEmpty) {
-      return SelectableText(
+      return Text(
         text,
         style: style,
         textAlign: align,
         maxLines: maxLines,
-        scrollPhysics: const NeverScrollableScrollPhysics(),
       );
     }
 
     final String cleanQuery = QuranDataProvider.normalizeArabic(query).trim();
     if (cleanQuery.isEmpty) {
-      return SelectableText(text,
-          style: style,
-          textAlign: align,
-          maxLines: maxLines,
-          scrollPhysics: const NeverScrollableScrollPhysics());
+      return Text(text, style: style, textAlign: align, maxLines: maxLines);
     }
 
-    // Build a diacritic-ignoring regex for the normalized query
+    List<TextSpan> spans = [];
+    int start = 0;
+
+    // FIRST PASS: Exact literal case-insensitive match (Best for Urdu/English)
+    final lowerText = text.toLowerCase();
+    final lowerQuery = query.toLowerCase();
+    int literalIdx = lowerText.indexOf(lowerQuery);
+
+    if (literalIdx != -1) {
+      while (true) {
+        final int index = lowerText.indexOf(lowerQuery, start);
+        if (index < 0) {
+          spans.add(TextSpan(text: text.substring(start)));
+          break;
+        }
+        if (index > start) {
+          spans.add(TextSpan(text: text.substring(start, index)));
+        }
+        spans.add(TextSpan(
+          text: text.substring(index, index + lowerQuery.length),
+          style: style.copyWith(
+            backgroundColor: theme.selectedTheme.withOpacity(0.2),
+            color: theme.selectedTheme,
+            fontWeight: FontWeight.bold,
+          ),
+        ));
+        start = index + lowerQuery.length;
+      }
+      return Text.rich(
+        TextSpan(children: spans, style: style),
+        textAlign: align,
+        maxLines: maxLines,
+      );
+    }
+
+    // SECOND PASS: Robust Arabic Regex Matrix (Best for Arabic with diacritics)
     String diacritics =
         r'[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u06DF-\u06E4\u06E7-\u06E8\u06EA-\u06EB]*';
     StringBuffer regexBuf = StringBuffer();
@@ -469,17 +501,13 @@ class _SearchScreenState extends State<SearchScreen> {
       regex = RegExp(RegExp.escape(cleanQuery), caseSensitive: false);
     }
 
-    List<TextSpan> spans = [];
-    int start = 0;
+    spans = [];
+    start = 0;
 
     final matches = regex.allMatches(text);
     if (matches.isEmpty) {
       // Fallback if no robust match
-      return SelectableText(text,
-          style: style,
-          textAlign: align,
-          maxLines: maxLines,
-          scrollPhysics: const NeverScrollableScrollPhysics());
+      return Text(text, style: style, textAlign: align, maxLines: maxLines);
     }
 
     for (final match in matches) {
@@ -500,11 +528,10 @@ class _SearchScreenState extends State<SearchScreen> {
       spans.add(TextSpan(text: text.substring(start)));
     }
 
-    return SelectableText.rich(
+    return Text.rich(
       TextSpan(children: spans, style: style),
       textAlign: align,
       maxLines: maxLines,
-      scrollPhysics: const NeverScrollableScrollPhysics(),
     );
   }
 
@@ -657,9 +684,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           ),
                           const SizedBox(height: 6),
                           _buildHighlightedText(
-                            aya.withoutHtmlTafseer!.length > 180
-                                ? "${aya.withoutHtmlTafseer!.substring(0, 180)}..."
-                                : aya.withoutHtmlTafseer!,
+                            _getTafseerSnippet(aya.withoutHtmlTafseer!, query),
                             query,
                             TextStyle(
                               fontSize: 14,
@@ -682,6 +707,82 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
       ),
     );
+  }
+
+  String _getTafseerSnippet(String fullTafseer, String query) {
+    if (fullTafseer.isEmpty) return "";
+    if (query.trim().isEmpty) {
+      return fullTafseer.length > 180
+          ? "${fullTafseer.substring(0, 180)}..."
+          : fullTafseer;
+    }
+
+    final String cleanQuery = QuranDataProvider.normalizeArabic(query).trim();
+    if (cleanQuery.isEmpty) {
+      return fullTafseer.length > 180
+          ? "${fullTafseer.substring(0, 180)}..."
+          : fullTafseer;
+    }
+
+    // FIRST PASS: Exact literal case-insensitive match (Best for Urdu/English)
+    int literalIdx = fullTafseer.toLowerCase().indexOf(query.toLowerCase());
+    if (literalIdx != -1) {
+      int start = literalIdx - 80;
+      int end = literalIdx + query.length + 100;
+
+      if (start < 0) start = 0;
+      if (end > fullTafseer.length) end = fullTafseer.length;
+
+      String snippet = fullTafseer.substring(start, end);
+      if (start > 0) snippet = "...$snippet";
+      if (end < fullTafseer.length) snippet = "$snippet...";
+
+      return snippet;
+    }
+
+    // SECOND PASS: Robust Arabic Regex Matrix
+    String diacritics =
+        r'[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u06DF-\u06E4\u06E7-\u06E8\u06EA-\u06EB]*';
+    StringBuffer regexBuf = StringBuffer();
+    for (int i = 0; i < cleanQuery.length; i++) {
+      String char = cleanQuery[i];
+      if (r'\.^$*+?-()[]{}\|'.contains(char)) {
+        regexBuf.write('\\$char');
+      } else {
+        regexBuf.write(char);
+      }
+      regexBuf.write(diacritics);
+    }
+
+    RegExp regex;
+    try {
+      regex = RegExp(regexBuf.toString(), caseSensitive: false);
+    } catch (_) {
+      regex = RegExp(RegExp.escape(cleanQuery), caseSensitive: false);
+    }
+
+    final match = regex.firstMatch(fullTafseer);
+    if (match != null) {
+      // Create a context window of ~180 characters around the match
+      int start = match.start - 80;
+      int end = match.end + 100;
+
+      if (start < 0) start = 0;
+      if (end > fullTafseer.length) end = fullTafseer.length;
+
+      String snippet = fullTafseer.substring(start, end);
+
+      // Add ellipses safely
+      if (start > 0) snippet = "...$snippet";
+      if (end < fullTafseer.length) snippet = "$snippet...";
+
+      return snippet;
+    }
+
+    // Fallback if match not found specifically in Tafseer
+    return fullTafseer.length > 180
+        ? "${fullTafseer.substring(0, 180)}..."
+        : fullTafseer;
   }
 
   Widget _buildEmptyState(String message, IconData icon, ThemeProvider theme) {

@@ -18,10 +18,10 @@ late ObjectBox objectbox;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AnalyticsService.initialize();
-  
+
   // Initialize notification service early to request permissions on first launch
   await PrayerNotificationService.initialize();
-  
+
   objectbox = await ObjectBox.init();
   // await getCustomTheme();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
@@ -45,8 +45,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: ((context) => TasbeehProvider())),
         ChangeNotifierProvider(create: (context) => AudioProvider()),
         ChangeNotifierProvider(create: (context) => PrayerProvider()),
-        ChangeNotifierProvider(
-            create: ((context) => QuranDataProvider())),
+        ChangeNotifierProvider(create: ((context) => QuranDataProvider())),
       ],
       // child: const Demo(),
       child: const MaterialScreen(),

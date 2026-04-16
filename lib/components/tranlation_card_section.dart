@@ -2,6 +2,9 @@ import "package:flutter/material.dart";
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Utils/bottom_sheet_preview.dart';
 import 'package:iqra/Utils/share_verse.dart';
+import 'package:iqra/Utils/utils.dart';
+import 'package:iqra/Screens/MainPage/Quran/verse_detail_screen.dart';
+import 'package:iqra/widgets.dart';
 import 'package:provider/provider.dart';
 import '../Models/aya_list_model.dart';
 import '../Models/surah_metadata_model.dart';
@@ -106,6 +109,25 @@ class TranlationCardSection extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      // ── Tafseer Button ──────────────────────────
+                      IconButton(
+                        onPressed: () {
+                          push(
+                            context,
+                            VerseDetailScreen(
+                              aya: aya,
+                              surahMetadata: surah,
+                            ),
+                          );
+                        },
+                        icon: Icon(Icons.menu_book_rounded,
+                            color: provider.selectedTheme, size: 20),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        tooltip: 'Tafseer',
+                      ),
+                      const SizedBox(width: 12),
+                      // ── Share Button ────────────────────────────
                       IconButton(
                         onPressed: () {
                           AppShare.image(
@@ -125,6 +147,7 @@ class TranlationCardSection extends StatelessWidget {
                             color: provider.selectedTheme, size: 20),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
+                        tooltip: 'Share',
                       ),
                       const SizedBox(width: 20),
                       Flexible(
