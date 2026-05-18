@@ -43,9 +43,11 @@ class _HajjComingSoonScreenState extends State<HajjComingSoonScreen> {
   Widget build(BuildContext context) {
     return Consumer<HajjLiveProvider>(
       builder: (context, provider, child) {
-        final timeService = HajjTimeService();
-        final countdownStr =
-            timeService.formatCountdown(provider.remainingTime);
+        final remainingTime = provider.remainingTime;
+        final days = remainingTime.inDays;
+        final hours = remainingTime.inHours.remainder(24);
+        final minutes = remainingTime.inMinutes.remainder(60);
+        final seconds = remainingTime.inSeconds.remainder(60);
 
         return Scaffold(
           backgroundColor: Colors.black, // Dark background base
@@ -94,9 +96,10 @@ class _HajjComingSoonScreenState extends State<HajjComingSoonScreen> {
                           children: [
                             const SizedBox(height: 40),
                             _buildHeroSection(provider),
-                            const SizedBox(height: 60),
-                            _buildCountdownSection(countdownStr),
-                            const SizedBox(height: 60),
+                            const SizedBox(height: 36),
+                            _buildCountdownSection(
+                                days, hours, minutes, seconds),
+                            const SizedBox(height: 36),
                             _buildDetailsCard(provider),
                             const SizedBox(height: 60),
                             _buildBottomActions(context, provider),
@@ -144,67 +147,70 @@ class _HajjComingSoonScreenState extends State<HajjComingSoonScreen> {
   Widget _buildHeroSection(HajjLiveProvider provider) {
     return Column(
       children: [
-        // Premium Kaaba Image with glow
+        // Premium Kaaba with glowing white circle background
         Container(
-          width: 100,
-          height: 100,
+          width: 120,
+          height: 120,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
+            color: Colors.white.withOpacity(0.1),
+            border: Border.all(color: Colors.amber.withOpacity(0.3), width: 2),
             boxShadow: [
               BoxShadow(
-                color: Colors.amber.withOpacity(0.4),
-                blurRadius: 30,
-                spreadRadius: 10,
+                color: Colors.amber.withOpacity(0.35),
+                blurRadius: 40,
+                spreadRadius: 12,
               ),
             ],
           ),
-          child: Image.asset(
-            'assets/images/kaaba.png',
-            width: 100,
-            height: 100,
-            fit: BoxFit.contain,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Image.asset(
+              'assets/images/kaaba.png',
+              fit: BoxFit.contain,
+            ),
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
         // Main Title
         const Text(
           "Hajj Live 2026",
           textAlign: TextAlign.center,
           style: TextStyle(
               color: Colors.white,
-              fontSize: 38,
+              fontSize: 40,
               fontWeight: FontWeight.bold,
               fontFamily: 'Poppins'),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         // Date badge
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
           decoration: BoxDecoration(
             color: Colors.amber.withOpacity(0.15),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.amber.withOpacity(0.4)),
+            border: Border.all(color: Colors.amber.withOpacity(0.5)),
           ),
           child: const Text(
             "26 May 2026",
             style: TextStyle(
                 color: Colors.amber,
                 fontSize: 13,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1),
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         const Text(
           "The journey of a lifetime",
           style: TextStyle(
-              color: Colors.white54, fontSize: 16, fontStyle: FontStyle.italic),
+              color: Colors.white60, fontSize: 15, fontStyle: FontStyle.italic),
         ),
       ],
     );
   }
 
-  Widget _buildCountdownSection(String countdown) {
+  Widget _buildCountdownSection(int days, int hours, int minutes, int seconds) {
     return Column(
       children: [
         const Text(
@@ -215,35 +221,76 @@ class _HajjComingSoonScreenState extends State<HajjComingSoonScreen> {
               letterSpacing: 4,
               fontSize: 12),
         ),
-        const SizedBox(height: 24),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withOpacity(0.1)),
-              ),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  countdown,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                    fontFamily: 'monospace',
-                  ),
-                ),
-              ),
-            ),
-          ),
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildCountUnit(days.toString().padLeft(2, '0'), 'DAYS'),
+            _buildCountSeparator(),
+            _buildCountUnit(hours.toString().padLeft(2, '0'), 'HRS'),
+            _buildCountSeparator(),
+            _buildCountUnit(minutes.toString().padLeft(2, '0'), 'MIN'),
+            _buildCountSeparator(),
+            _buildCountUnit(seconds.toString().padLeft(2, '0'), 'SEC'),
+          ],
         ),
       ],
+    );
+  }
+
+  Widget _buildCountUnit(String value, String label) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          width: 72,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withOpacity(0.15)),
+          ),
+          child: Column(
+            children: [
+              Text(
+                value,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'monospace',
+                  height: 1,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.amber,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCountSeparator() {
+    return const Padding(
+      padding: EdgeInsets.only(bottom: 18),
+      child: Text(
+        ":",
+        style: TextStyle(
+          color: Colors.amber,
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 
