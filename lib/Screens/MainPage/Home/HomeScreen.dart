@@ -32,6 +32,7 @@ import 'package:iqra/Provider/prayer_provider.dart';
 import 'package:flutter_intro/flutter_intro.dart';
 import 'package:iqra/Utils/utils.dart';
 import 'package:iqra/Helper/preference/saved_preferences.dart';
+import 'package:iqra/features/hajj_live/hajj_live_module.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -222,6 +223,8 @@ class _HomeState extends State<Home> {
                   builder: (context, key) =>
                       screensList(context, size, bloc, key: key),
                 ),
+                const SizedBox(height: 10),
+                const HajjLiveCard(),
                 const SizedBox(height: 10),
                 IntroStepBuilder(
                   order: 7,

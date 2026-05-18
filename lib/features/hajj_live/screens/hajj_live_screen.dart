@@ -1,0 +1,267 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:iqra/features/hajj_live/widgets/hajj_player.dart';
+import 'package:provider/provider.dart';
+import '../providers/hajj_live_provider.dart';
+import '../services/hajj_share_service.dart';
+import 'package:iqra/Provider/theme_provider.dart';
+import 'hajj_stream_error_screen.dart';
+import 'package:shimmer/shimmer.dart';
+
+enum StreamPlaybackState {
+  idle,
+  loading,
+  buffering,
+  live,
+  reconnecting,
+  failed,
+  offline
+}
+
+class HajjLiveScreen extends StatefulWidget {
+  final String streamId;
+
+  const HajjLiveScreen({Key? key, required this.streamId}) : super(key: key);
+
+  @override
+  State<HajjLiveScreen> createState() => _HajjLiveScreenState();
+}
+
+class _HajjLiveScreenState extends State<HajjLiveScreen> {
+  StreamPlaybackState _playbackState = StreamPlaybackState.loading;
+  // share key removed
+
+  @override
+  void initState() {
+    super.initState();
+    // In a real app, this state would be driven by the player controller
+    // For now, we simulate the transition from loading to live
+    Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() => _playbackState = StreamPlaybackState.live);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<HajjLiveProvider>(
+      builder: (context, provider, child) {
+        final config = provider.config;
+        if (config == null) return const HajjStreamErrorScreen(streamId: "");
+
+        return Scaffold(
+          backgroundColor: Colors.black,
+          body: Stack(
+            children: [
+              // The Video Player
+              Center(
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: HajjPlayer(
+                    streamUrl: config.streamUrl,
+                    streamId: config.streamId,
+                    platform: config.streamPlatform,
+                    onStateChanged: (state) {
+                      if (mounted) setState(() => _playbackState = state);
+                    },
+                  ),
+                ),
+              ),
+
+              // Overlay UI
+              _buildTopBar(context, provider),
+              _buildBottomStatus(),
+
+              // Loading/Buffering/Error Overlays
+              if (_playbackState == StreamPlaybackState.loading)
+                _buildLoadingOverlay(),
+              if (_playbackState == StreamPlaybackState.buffering)
+                _buildBufferingIndicator(),
+              if (_playbackState == StreamPlaybackState.reconnecting)
+                _buildReconnectingOverlay(),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTopBar(BuildContext context, HajjLiveProvider provider) {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        padding: EdgeInsets.only(
+          top: MediaQuery.of(context).padding.top + 10,
+          left: 16,
+          right: 16,
+          bottom: 20,
+        ),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.black87, Colors.transparent],
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+            Column(
+              children: [
+                const Text(
+                  "Hajj Live Stream",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins'),
+                ),
+                if (_playbackState == StreamPlaybackState.live)
+                  _buildAnimatedLiveTag(),
+              ],
+            ),
+            IconButton(
+              icon: const Icon(Icons.share, color: Colors.white),
+              onPressed: () {
+                HajjShareService.shareHajjCard(
+                  context: context,
+                  bloc: Provider.of<ThemeProvider>(context, listen: false),
+                  provider: provider,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnimatedLiveTag() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.fiber_manual_record, color: Colors.red, size: 10),
+        const SizedBox(width: 4),
+        Shimmer.fromColors(
+          baseColor: Colors.red,
+          highlightColor: Colors.white,
+          child: const Text(
+            "LIVE NOW",
+            style: TextStyle(
+                color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBottomStatus() {
+    return Positioned(
+      bottom: 40,
+      left: 0,
+      right: 0,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Consumer<HajjLiveProvider>(
+            builder: (context, provider, child) {
+              return ElevatedButton.icon(
+                onPressed: () {
+                  HajjShareService.shareHajjCard(
+                    context: context,
+                    bloc: Provider.of<ThemeProvider>(context, listen: false),
+                    provider: provider,
+                  );
+                },
+                icon: const Icon(Icons.share, color: Colors.white),
+                label: const Text("Share Live Stream",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      Provider.of<ThemeProvider>(context).selectedTheme,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: Text(
+              _playbackState == StreamPlaybackState.live
+                  ? "Connected to holy stream"
+                  : "Optimizing playback...",
+              style:
+                  TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingOverlay() {
+    return Container(
+      color: Colors.black,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Shimmer.fromColors(
+              baseColor: Colors.white10,
+              highlightColor: Colors.white24,
+              child: Container(
+                width: 200,
+                height: 110,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            const CircularProgressIndicator(
+                color: Colors.white, strokeWidth: 2),
+            const SizedBox(height: 24),
+            const Text(
+              "Connecting to Hajj live stream...",
+              style: TextStyle(color: Colors.white70, fontFamily: 'Poppins'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBufferingIndicator() {
+    return const Center(
+        child: CircularProgressIndicator(color: Colors.red, strokeWidth: 2));
+  }
+
+  Widget _buildReconnectingOverlay() {
+    return Container(
+      color: Colors.black54,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.sync, color: Colors.amber, size: 48),
+            const SizedBox(height: 16),
+            const Text("Connection lost. Reconnecting...",
+                style: TextStyle(color: Colors.white)),
+          ],
+        ),
+      ),
+    );
+  }
+}

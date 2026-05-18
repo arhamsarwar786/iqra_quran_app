@@ -13,6 +13,7 @@ import 'Provider/audio_provider.dart';
 import 'Provider/prayer_provider.dart';
 import 'Services/analytics_service.dart';
 import 'Services/prayer_notification_service.dart';
+import 'features/hajj_live/hajj_live_module.dart';
 
 late ObjectBox objectbox;
 void main() async {
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => AudioProvider()),
         ChangeNotifierProvider(create: (context) => PrayerProvider()),
         ChangeNotifierProvider(create: ((context) => QuranDataProvider())),
+        ChangeNotifierProvider(create: (_) => HajjLiveProvider()),
       ],
       // child: const Demo(),
       child: const MaterialScreen(),
