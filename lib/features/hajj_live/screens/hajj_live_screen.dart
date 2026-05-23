@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:iqra/features/hajj_live/widgets/hajj_player.dart';
 import 'package:provider/provider.dart';
 import '../providers/hajj_live_provider.dart';
@@ -42,6 +43,17 @@ class _HajjLiveScreenState extends State<HajjLiveScreen> {
         setState(() => _playbackState = StreamPlaybackState.live);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    // Restore portrait orientation and show system UI when leaving the screen
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    super.dispose();
   }
 
   @override
@@ -180,6 +192,40 @@ class _HajjLiveScreenState extends State<HajjLiveScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Fullscreen Landscape Button
+          GestureDetector(
+            onTap: () async {
+              await SystemChrome.setPreferredOrientations([
+                DeviceOrientation.landscapeLeft,
+                DeviceOrientation.landscapeRight,
+              ]);
+              await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.fullscreen_rounded, color: Colors.white, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    "Full Screen",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
           Consumer<HajjLiveProvider>(
             builder: (context, provider, child) {
               return ElevatedButton.icon(

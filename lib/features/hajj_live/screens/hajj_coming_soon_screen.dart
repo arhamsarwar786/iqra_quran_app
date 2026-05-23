@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -27,6 +28,7 @@ class _HajjComingSoonScreenState extends State<HajjComingSoonScreen>
   int _currentSlide = 0;
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
+  Timer? _autoScrollTimer;
 
   @override
   void initState() {
@@ -50,6 +52,21 @@ class _HajjComingSoonScreenState extends State<HajjComingSoonScreen>
     _fadeController.forward();
 
     _loadHajjData();
+    _startAutoScroll();
+  }
+
+  void _startAutoScroll() {
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!mounted) return;
+      final cards = (_hajjData?['dhikr_cards'] as List? ?? []);
+      if (cards.isEmpty) return;
+      final next = (_currentSlide + 1) % cards.length;
+      _pageController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOutCubic,
+      );
+    });
   }
 
   Future<void> _loadHajjData() async {
@@ -66,6 +83,7 @@ class _HajjComingSoonScreenState extends State<HajjComingSoonScreen>
 
   @override
   void dispose() {
+    _autoScrollTimer?.cancel();
     _videoController.dispose();
     _pageController.dispose();
     _fadeController.dispose();
@@ -137,7 +155,7 @@ class _HajjComingSoonScreenState extends State<HajjComingSoonScreen>
                               _buildAyatSlider(theme),
                               const SizedBox(height: 28),
                               // Hajj Duas & Dhikr List
-                              _buildHajjDhikrList(theme),
+                              // _buildHajjDhikrList(theme),
                               const SizedBox(height: 30),
                               _buildBottomActions(context, provider),
                               const SizedBox(height: 40),
@@ -333,70 +351,52 @@ class _HajjComingSoonScreenState extends State<HajjComingSoonScreen>
                 fontWeight: FontWeight.bold)),
       );
 
-  // ─── ARABIC AYAT SLIDER ─────────────────────────────────────────────────
+  // ─── ARABIC DHIKR SLIDER ─────────────────────────────────────────────────
   Widget _buildAyatSlider(Color theme) {
-    final ayat = _hajjData?['quran_ayat'] as List? ?? [];
-    final talbiyah = _hajjData?['talbiyah'];
-
-    // Combine talbiyah + ayat into a unified list of cards
-    final List<Map<String, dynamic>> cards = [];
-    if (talbiyah != null) {
-      cards.add({
-        'type': 'talbiyah',
-        'label': 'TALBIYAH',
-        'surah': talbiyah['occasion'] ?? 'Recite in Ihram',
-        'arabic': talbiyah['arabic'],
-        'transliteration': talbiyah['transliteration'],
-        'translation': talbiyah['translation'],
-      });
-    }
-    for (final a in ayat) {
-      cards.add({
-        'type': 'ayah',
-        'label': 'QURAN',
-        'surah': '${a['surah']} ${a['ayah_number']}',
-        'arabic': a['arabic'],
-        'transliteration': a['transliteration'],
-        'translation': a['translation'],
-      });
-    }
-
+    final cards = _hajjData?['dhikr_cards'] as List? ?? [];
     if (cards.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Row(
             children: [
-              Icon(Icons.auto_stories_rounded, color: Colors.amber, size: 18),
-              SizedBox(width: 8),
-              Text(
-                "Duas & Ayat of Hajj (Read Arabic)",
+              const Icon(Icons.menu_book_rounded,
+                  color: Colors.amber, size: 18),
+              const SizedBox(width: 8),
+              const Text(
+                "اقرأ وتذكر الله",
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  fontFamily: 'AlQalamQuranMajeed',
                 ),
+              ),
+              const Spacer(),
+              Text(
+                "${_currentSlide + 1}/${cards.length}",
+                style: const TextStyle(color: Colors.white38, fontSize: 12),
               ),
             ],
           ),
         ),
         const SizedBox(height: 14),
         SizedBox(
-          height: 180,
+          height: 200,
           child: PageView.builder(
             controller: _pageController,
             itemCount: cards.length,
             onPageChanged: (i) => setState(() => _currentSlide = i),
             itemBuilder: (context, index) {
-              final card = cards[index];
-              final bool isTalbiyah = card['type'] == 'talbiyah';
+              final card = Map<String, dynamic>.from(cards[index]);
               return AnimatedScale(
-                scale: _currentSlide == index ? 1.0 : 0.94,
-                duration: const Duration(milliseconds: 300),
-                child: _buildAyatCard(card, isTalbiyah, theme),
+                scale: _currentSlide == index ? 1.0 : 0.93,
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.easeOutCubic,
+                child: _buildAyatCard(card, theme),
               );
             },
           ),
@@ -409,7 +409,7 @@ class _HajjComingSoonScreenState extends State<HajjComingSoonScreen>
             return AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               margin: const EdgeInsets.symmetric(horizontal: 3),
-              width: _currentSlide == i ? 20 : 6,
+              width: _currentSlide == i ? 22 : 6,
               height: 6,
               decoration: BoxDecoration(
                 color: _currentSlide == i ? Colors.amber : Colors.white24,
@@ -422,126 +422,134 @@ class _HajjComingSoonScreenState extends State<HajjComingSoonScreen>
     );
   }
 
-  Widget _buildAyatCard(Map<String, dynamic> card, bool isTalbiyah, Color theme) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: () => _openTasbeeh(
-          card['arabic'] ?? '',
-          card['transliteration'] ?? '',
-          card['translation'] ?? '',
-        ),
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 6),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: isTalbiyah
-                  ? [const Color(0xFF1A3A2A), const Color(0xFF0D2218)]
-                  : [const Color(0xFF1A2A3A), const Color(0xFF0D1A25)],
-            ),
-            border: Border.all(
-              color: isTalbiyah
-                  ? Colors.green.withOpacity(0.35)
-                  : Colors.amber.withOpacity(0.25),
-              width: 1.2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: (isTalbiyah ? Colors.green : Colors.amber).withOpacity(0.1),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
+  Widget _buildAyatCard(Map<String, dynamic> card, Color theme) {
+    return GestureDetector(
+      onTap: () => _openTasbeeh(
+        card['arabic'] ?? '',
+        card['transliteration'] ?? '',
+        card['translation'] ?? '',
+      ),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF1C2A1A), Color(0xFF0D1A10)],
           ),
-          child: Stack(
-            children: [
-              // Arabic watermark
-              Positioned(
-                right: 10,
-                bottom: 10,
-                child: Text(
-                  "حج",
-                  style: TextStyle(
-                    fontSize: 80,
-                    color: Colors.white.withOpacity(0.04),
-                    fontWeight: FontWeight.bold,
-                  ),
+          border: Border.all(
+            color: Colors.greenAccent.withOpacity(0.18),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.green.withOpacity(0.12),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Subtle Arabic watermark bottom-right
+            Positioned(
+              right: 14,
+              bottom: 12,
+              child: Text(
+                "﷽",
+                style: TextStyle(
+                  fontSize: 64,
+                  color: Colors.white.withOpacity(0.04),
+                  fontFamily: 'AlQalamQuranMajeed',
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Label + Tap hint row
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: (isTalbiyah ? Colors.green : Colors.amber).withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: (isTalbiyah ? Colors.green : Colors.amber).withOpacity(0.5),
-                            ),
-                          ),
-                          child: Text(
-                            card['label'],
-                            style: TextStyle(
-                              color: isTalbiyah ? Colors.green.shade300 : Colors.amber,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1,
-                            ),
-                          ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── TOP-LEFT: "Best to read" badge + dhikr name ──
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFB5002B),
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.black26,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(Icons.touch_app, color: Colors.white70, size: 10),
-                              SizedBox(width: 4),
-                              Text("TAP TO TASBEEH", style: TextStyle(color: Colors.white70, fontSize: 8)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    // Arabic text centered
-                    Expanded(
-                      child: Center(
-                        child: SingleChildScrollView(
-                          physics: const BouncingScrollPhysics(),
-                          child: Text(
-                            card['arabic'],
-                            textAlign: TextAlign.center,
-                            textDirection: TextDirection.rtl,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              height: 1.5,
-                              fontFamily: 'AlQalamQuranMajeed',
-                            ),
+                        child: const Text(
+                          "Best to read nowadays",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.3,
                           ),
                         ),
                       ),
+                      const Spacer(),
+                      // Tap hint
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 7, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.touch_app_rounded,
+                                color: Colors.white54, size: 10),
+                            SizedBox(width: 3),
+                            Text("اضغط للتسبيح",
+                                style: TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 8,
+                                    fontFamily: 'AlQalamQuranMajeed')),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  // Dhikr name (small, amber)
+                  Text(
+                    card['name'] ?? '',
+                    style: TextStyle(
+                      color: Colors.amber.withOpacity(0.8),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
                     ),
-                  ],
-                ),
+                  ),
+                  const Spacer(),
+                  // ── LARGE ARABIC TEXT (main content) ──
+                  SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      card['arabic'] ?? '',
+                      textAlign: TextAlign.right,
+                      textDirection: TextDirection.rtl,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        height: 1.7,
+                        fontFamily: 'AlQalamQuranMajeed',
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

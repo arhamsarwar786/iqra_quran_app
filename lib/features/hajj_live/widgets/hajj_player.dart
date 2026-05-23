@@ -139,44 +139,22 @@ class _HajjPlayerState extends State<HajjPlayer> {
       // YouTube Fallback
       final String embedUrl =
           "https://www.youtube-nocookie.com/embed/${widget.streamId}?autoplay=1&mute=0&rel=0&playsinline=1&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3&fs=0&disablekb=1";
-      return InAppWebView(
-        initialUrlRequest: URLRequest(
-          url: WebUri(embedUrl),
-          headers: {
-            'Referer': 'https://www.youtube-nocookie.com',
-          },
-        ),
-        initialSettings: InAppWebViewSettings(
-          javaScriptEnabled: true,
-          mediaPlaybackRequiresUserGesture: false,
-          allowsInlineMediaPlayback: true,
-        ),
-        onLoadStop: (controller, url) async {
-          // Trusted Types safe CSS injection
-          await controller.evaluateJavascript(source: """
-            (function() {
-              var style = document.createElement('style');
-              style.type = 'text/css';
-              style.appendChild(document.createTextNode(`
-                .ytp-chrome-top, 
-                .ytp-chrome-bottom, 
-                .ytp-gradient-top, 
-                .ytp-gradient-bottom, 
-                .ytp-watermark, 
-                .ytp-youtube-button, 
-                .ytp-pause-overlay, 
-                .ytp-pause-overlay-container,
-                .ytp-large-play-button-red,
-                .ytp-large-play-button {
-                  display: none !important;
-                }
-              `));
-              document.head.appendChild(style);
-            })();
-          """);
-        },
-        onProgressChanged: (controller, progress) async {
-          if (progress == 100) {
+      return IgnorePointer(
+        ignoring: true,
+        child: InAppWebView(
+          initialUrlRequest: URLRequest(
+            url: WebUri(embedUrl),
+            headers: {
+              'Referer': 'https://www.youtube-nocookie.com',
+            },
+          ),
+          initialSettings: InAppWebViewSettings(
+            javaScriptEnabled: true,
+            mediaPlaybackRequiresUserGesture: false,
+            allowsInlineMediaPlayback: true,
+          ),
+          onLoadStop: (controller, url) async {
+            // Trusted Types safe CSS injection
             await controller.evaluateJavascript(source: """
               (function() {
                 var style = document.createElement('style');
@@ -198,8 +176,33 @@ class _HajjPlayerState extends State<HajjPlayer> {
                 document.head.appendChild(style);
               })();
             """);
-          }
-        },
+          },
+          onProgressChanged: (controller, progress) async {
+            if (progress == 100) {
+              await controller.evaluateJavascript(source: """
+                (function() {
+                  var style = document.createElement('style');
+                  style.type = 'text/css';
+                  style.appendChild(document.createTextNode(`
+                    .ytp-chrome-top, 
+                    .ytp-chrome-bottom, 
+                    .ytp-gradient-top, 
+                    .ytp-gradient-bottom, 
+                    .ytp-watermark, 
+                    .ytp-youtube-button, 
+                    .ytp-pause-overlay, 
+                    .ytp-pause-overlay-container,
+                    .ytp-large-play-button-red,
+                    .ytp-large-play-button {
+                      display: none !important;
+                    }
+                  `));
+                  document.head.appendChild(style);
+                })();
+              """);
+            }
+          },
+        ),
       );
     }
   }
