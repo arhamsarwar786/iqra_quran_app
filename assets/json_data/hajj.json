@@ -1,0 +1,33 @@
+{
+    "takbeerat": [
+        {
+            "name": "Takbeer for Hajj and Eid",
+            "arabic": "الله أكبر، الله أكبر، لا إله إلا الله، والله أكبر، الله أكبر، ولله الحمد",
+            "transliteration": "Allahu Akbar, Allahu Akbar, La ilaha illallah, Wallahu Akbar, Allahu Akbar, Wa lillahil hamd",
+            "translation": "Allah is the Greatest, Allah is the Greatest. There is no god except Allah. Allah is the Greatest, Allah is the Greatest. And all praise belongs to Allah."
+        }
+    ],
+    "talbiyah": {
+        "name": "Talbiyah",
+        "arabic": "لبيك اللهم لبيك، لبيك لا شريك لك لبيك، إن الحمد والنعمة لك والملك، لا شريك لك",
+        "transliteration": "Labbayka Allahumma labbayk, Labbayka la sharika laka labbayk, Innal hamda wan-ni'mata laka wal-mulk, La sharika lak",
+        "translation": "Here I am, O Allah, here I am. Here I am, You have no partner, here I am. Indeed all praise, blessings, and sovereignty belong to You. You have no partner."
+    },
+    "recommended_dhikr": [
+        {
+            "name": "Takbeer",
+            "phrase": "Allahu Akbar",
+            "meaning": "Allah is the Greatest"
+        },
+        {
+            "name": "Tahleel",
+            "phrase": "La ilaha illallah",
+            "meaning": "There is no god except Allah"
+        },
+        {
+            "name": "Tahmeed",
+            "phrase": "Alhamdulillah",
+            "meaning": "All praise belongs to Allah"
+        }
+    ]
+}

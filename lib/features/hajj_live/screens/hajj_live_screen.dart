@@ -29,6 +29,7 @@ class HajjLiveScreen extends StatefulWidget {
 
 class _HajjLiveScreenState extends State<HajjLiveScreen> {
   StreamPlaybackState _playbackState = StreamPlaybackState.loading;
+  int _playerRetryKey = 0;
   // share key removed
 
   @override
@@ -59,11 +60,18 @@ class _HajjLiveScreenState extends State<HajjLiveScreen> {
                 child: AspectRatio(
                   aspectRatio: 16 / 9,
                   child: HajjPlayer(
+                    key: ValueKey("hajj_player_$_playerRetryKey"),
                     streamUrl: config.streamUrl,
-                    streamId: config.streamId,
+                    streamId: config.streamId.isNotEmpty ? config.streamId : widget.streamId,
                     platform: config.streamPlatform,
                     onStateChanged: (state) {
-                      if (mounted) setState(() => _playbackState = state);
+                      if (mounted) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            setState(() => _playbackState = state);
+                          }
+                        });
+                      }
                     },
                   ),
                 ),
@@ -80,6 +88,8 @@ class _HajjLiveScreenState extends State<HajjLiveScreen> {
                 _buildBufferingIndicator(),
               if (_playbackState == StreamPlaybackState.reconnecting)
                 _buildReconnectingOverlay(),
+              if (_playbackState == StreamPlaybackState.failed)
+                _buildFailedOverlay(context, provider),
             ],
           ),
         );
@@ -260,6 +270,68 @@ class _HajjLiveScreenState extends State<HajjLiveScreen> {
             const Text("Connection lost. Reconnecting...",
                 style: TextStyle(color: Colors.white)),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFailedOverlay(BuildContext context, HajjLiveProvider provider) {
+    return Container(
+      color: Colors.black87,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline, color: Colors.redAccent, size: 64),
+              const SizedBox(height: 16),
+              const Text(
+                "Playback failed",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "The connection to the stream was lost.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  setState(() {
+                    _playbackState = StreamPlaybackState.loading;
+                    _playerRetryKey++; // Forces HajjPlayer to recreate state
+                  });
+                  try {
+                    await provider.refreshConfig();
+                  } catch (e) {
+                    debugPrint("Retry refresh config error: $e");
+                  }
+                },
+                icon: const Icon(Icons.refresh, color: Colors.white),
+                label: const Text(
+                  "RETRY CONNECTION",
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Provider.of<ThemeProvider>(context, listen: false).selectedTheme,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

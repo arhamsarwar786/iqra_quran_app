@@ -22,9 +22,10 @@ import '../Drawer/Drawerr Screen.dart';
 import '../Drawer/About Us.dart';
 import '../Khalima/kalma_screen.dart';
 import '../main_screen.dart';
+import '../Quran/tabbarview.dart';
 import 'NameofAllah.dart';
 import 'NameofMohammad.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+// carousel_slider removed
 import "package:timezone/data/latest.dart" as tz;
 import 'package:flutter/services.dart';
 import 'dart:async';
@@ -49,6 +50,7 @@ class _HomeState extends State<Home> {
   final List<GlobalKey> _introKeys = List.generate(9, (index) => GlobalKey());
   bool _scrolledStep7 = false;
   bool _scrolledStep8 = false;
+  bool _isScrolled = false;
 
   @override
   void initState() {
@@ -59,6 +61,14 @@ class _HomeState extends State<Home> {
     Future.microtask(() {
       if (mounted) {
         context.read<PrayerProvider>().fetchPrayerData();
+      }
+    });
+
+    _scrollController.addListener(() {
+      if (_scrollController.offset > 40 && !_isScrolled) {
+        setState(() => _isScrolled = true);
+      } else if (_scrollController.offset <= 40 && _isScrolled) {
+        setState(() => _isScrolled = false);
       }
     });
 
@@ -89,18 +99,6 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
-  List<String> imageName = [
-    "Rectangle 3.png",
-    "Rectangle 4.png",
-    "after-prayer-dua.jpg",
-    "Rectangle 6.png",
-    "Rectangle 7.png",
-    "dhikr-After-Salah.jpg",
-    "dua-after-prayer.jpg",
-    "Good-deeds-to-do-in-Muharram-768x432.jpg",
-    "List-of-Adhkar-After-Prayer.jpg",
-    "Masnoon-Dua-After-Salah.jpg"
-  ];
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -129,8 +127,8 @@ class _HomeState extends State<Home> {
           drawer: const Darwerr(),
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
+            backgroundColor: _isScrolled ? bloc.selectedTheme.withOpacity(0.95) : Colors.transparent,
+            elevation: _isScrolled ? 2 : 0,
             leading: IntroStepBuilder(
               order: 1,
               overlayBuilder: (params) => buildIntroOverlay(params,
@@ -141,6 +139,31 @@ class _HomeState extends State<Home> {
                   icon: const Icon(Icons.menu)),
             ),
             actions: [
+              IntroStepBuilder(
+                order: 3,
+                overlayBuilder: (params) => buildIntroOverlay(params,
+                    "Instantly search for any Surah, Verse, or topic in the Holy Quran."),
+                builder: (context, key) => InkWell(
+                  key: key,
+                  onTap: () => push(context, const SearchScreen()),
+                  child: Container(
+                    height: 40,
+                    width: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.18),
+                      borderRadius: BorderRadius.circular(25),
+                      border: Border.all(
+                          color: Colors.white.withOpacity(0.25), width: 1),
+                    ),
+                    // padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Icon(Icons.search_rounded,
+                        color: Colors.white, size: 22),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 10,
+              ),
               IntroStepBuilder(
                 order: 2,
                 overlayBuilder: (params) => buildIntroOverlay(params,
@@ -163,58 +186,9 @@ class _HomeState extends State<Home> {
             controller: _scrollController,
             child: Column(
               children: [
-                SizedBox(
-                  height: 330,
-                  child: Stack(
-                    children: [
-                      CarouselSlider.builder(
-                        itemCount: imageName.length,
-                        options: CarouselOptions(
-                          height: 200,
-                          viewportFraction: 1.01,
-                          scrollDirection: Axis.horizontal,
-                          autoPlay: true,
-                        ),
-                        itemBuilder: (context, index, pageViewIndex) {
-                          return Image(
-                            image:
-                                AssetImage("assets/images/${imageName[index]}"),
-                            width: size.width,
-                            fit: BoxFit.fitWidth,
-                          );
-                        },
-                      ),
-                      Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              bloc.selectedTheme.withOpacity(0.3),
-                              bloc.selectedTheme.withOpacity(0.1),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        child: SearchInQuaran(
-                          size: size,
-                          bloc: bloc,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                SearchInQuaran(size: size, bloc: bloc),
                 const SizedBox(height: 5),
-                IntroStepBuilder(
-                  order: 5,
-                  overlayBuilder: (params) => buildIntroOverlay(params,
-                      "Get accurate Qibla directions and a complete timetable for all 5 prayers."),
-                  builder: (context, key) =>
-                      prayerQiblaList(context, size, bloc, key: key),
-                ),
+                // Removed redundant prayerQiblaList since items are now in the grid
                 const SizedBox(height: 10),
                 IntroStepBuilder(
                   order: 6,
@@ -332,92 +306,6 @@ class _HomeState extends State<Home> {
                         key: key),
                   ),
                 ),
-                const SizedBox(height: 10),
-                IntroStepBuilder(
-                  order: 8,
-                  group: 'step8',
-                  getOverlayPosition: (
-                      {required offset, required screenSize, required size}) {
-                    return OverlayPosition(
-                      width: screenSize.width * 0.9,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      top:
-                          100, // Text stays dynamically at the top while QURAN / ALLAH cards scroll to bottom
-                      left: screenSize.width * 0.05,
-                    );
-                  },
-                  overlayBuilder: (params) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (!_scrolledStep8 &&
-                          _introKeys[8].currentContext != null) {
-                        _scrolledStep8 = true;
-                        Scrollable.ensureVisible(
-                          _introKeys[8].currentContext!,
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.easeInOut,
-                          alignment: 0.8,
-                        ).then((_) {
-                          final introC = Home.scaffoldKey.currentContext;
-                          if (introC != null && introC.mounted) {
-                            try {
-                              Intro.of(introC).refresh();
-                            } catch (_) {}
-                          }
-                        });
-                      }
-                    });
-                    return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.85),
-                          borderRadius: BorderRadius.circular(16)),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            "Read and learn the 99 Names of Allah and the Names of Prophet Muhammad (PBUH).",
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              height: 1.4,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              params.onFinish();
-                              _scrollController.animateTo(
-                                0.0,
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.easeInOut,
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: bloc.selectedTheme,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                            ),
-                            child: const Text("FINISH",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 1)),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  builder: (context, key) => Container(
-                    key: _introKeys[8],
-                    child: namesAllahProphet(context, size, bloc, key: key),
-                  ),
-                ),
                 const SizedBox(height: 50),
               ],
             ),
@@ -427,143 +315,161 @@ class _HomeState extends State<Home> {
     );
   }
 
-  // ScreenList //
+  // ScreenList — 4×2 grid (8 features) //
   Widget screensList(BuildContext context, Size size, ThemeProvider bloc,
       {Key? key}) {
-    return Padding(
-      key: key,
-      padding: const EdgeInsets.only(
-        left: 8.0,
-        right: 8.0,
-      ),
-      child: Card(
-        elevation: 5,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Container(
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(30)),
+    final Color iconBg = bloc.selectedTheme.withOpacity(0.12);
+    final Color iconColor = bloc.selectedTheme;
+
+    Widget gridItem({
+      required String label,
+      required IconData icon,
+      required VoidCallback onTap,
+    }) {
+      return Expanded(
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.only(
-                left: 15.0, right: 15.0, top: 7, bottom: 7),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                InkWell(
-                  onTap: () {
-                    push(context, const CalendarScreen());
-                  },
-                  child: Column(
-                    children: [
-                      Container(
-                        height: 24,
-                        width: 17,
-                        decoration: BoxDecoration(
-                            image: DecorationImage(
-                                image: AssetImage(
-                                    "assets/images/quran${bloc.iconNumber}.png"),
-                                fit: BoxFit.fill)),
+                Container(
+                  width: 62,
+                  height: 62,
+                  decoration: BoxDecoration(
+                    color: iconBg,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: iconColor.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
                       ),
-                      Text(
-                        "Calender".toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      )
                     ],
                   ),
+                  child: Icon(icon, color: iconColor, size: 28),
                 ),
-                InkWell(
-                  onTap: () {
-                    push(
-                      context,
-                      Tasbih(
-                          // value: nameController.text,
-                          ),
-                    );
-                    // push(context, const TasbeeDetail());
-                  },
-                  child: Column(
-                    children: [
-                      Container(
-                        height: 25,
-                        width: 18,
-                        decoration: BoxDecoration(
-                            image: DecorationImage(
-                                image: AssetImage(
-                                    "assets/images/Tasbi${int.parse(bloc.iconNumber)}.png"),
-                                fit: BoxFit.fill)),
-                      ),
-                      Text(
-                        "TASBEEH",
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      )
-                    ],
+                const SizedBox(height: 7),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: bloc.selectedTheme.withOpacity(0.85),
                   ),
-                ),
-                InkWell(
-                  onTap: () {
-                    push(context, KhalimaScreen());
-                  },
-                  child: Column(
-                    children: [
-                      Container(
-                        height: 25,
-                        width: 24,
-                        decoration: BoxDecoration(
-                            image: DecorationImage(
-                          image: AssetImage(
-                              "assets/images/kalma${int.parse(bloc.iconNumber)}.png"),
-                          // fit: BoxFit.fill
-                        )),
-                      ),
-                      Text(
-                        "Kalima".toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                InkWell(
-                  onTap: () {
-                    push(context, const DuaScreen());
-                  },
-                  child: Column(
-                    children: [
-                      Container(
-                        height: 30,
-                        width: 30,
-                        decoration: BoxDecoration(
-                            image: DecorationImage(
-                                image: AssetImage(
-                                    "assets/images/Dua${int.parse(bloc.iconNumber)}.png"),
-                                fit: BoxFit.fill)),
-                      ),
-                      Text(
-                        "DUA",
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      )
-                    ],
-                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
         ),
+      );
+    }
+
+    return Padding(
+      key: key,
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: Column(
+        children: [
+          // Row 1: Qibla, Quran, Duas, Tasbeeh
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              gridItem(
+                label: "Qibla",
+                icon: Icons.explore_rounded,
+                onTap: () => push(context, const DirectionTOQiblah()),
+              ),
+              gridItem(
+                label: "Quran",
+                icon: Icons.auto_stories_rounded,
+                onTap: () => push(context, const TabBarDemo()),
+              ),
+              gridItem(
+                label: "Duas",
+                icon: Icons.volunteer_activism_rounded,
+                onTap: () => push(context, const DuaScreen()),
+              ),
+              gridItem(
+                label: "Tasbeeh",
+                icon: Icons.blur_circular_rounded,
+                onTap: () => push(context, Tasbih()),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Row 2: Calendar, Kalima, Prayer Time, Settings
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              gridItem(
+                label: "Calendar",
+                icon: Icons.calendar_month_rounded,
+                onTap: () => push(context, const CalendarScreen()),
+              ),
+              gridItem(
+                label: "Kalima",
+                icon: Icons.brightness_5_rounded,
+                onTap: () => push(context, KhalimaScreen()),
+              ),
+              gridItem(
+                label: "Prayers",
+                icon: Icons.access_time_filled_rounded,
+                onTap: () => push(context, const PrayerTime()),
+              ),
+              gridItem(
+                label: "99 Names",
+                icon: Icons.mosque_rounded,
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
+                      title: Text(
+                        "Select Names",
+                        style: TextStyle(
+                          color: bloc.selectedTheme,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading:
+                                Icon(Icons.mosque, color: bloc.selectedTheme),
+                            title: const Text("Names of Allah",
+                                style: TextStyle(fontWeight: FontWeight.w600)),
+                            onTap: () {
+                              Navigator.pop(ctx);
+                              push(context, const NameofAllah());
+                            },
+                          ),
+                          const Divider(),
+                          ListTile(
+                            leading:
+                                Icon(Icons.star, color: bloc.selectedTheme),
+                            title: const Text("Names of Muhammad ﷺ",
+                                style: TextStyle(fontWeight: FontWeight.w600)),
+                            onTap: () {
+                              Navigator.pop(ctx);
+                              push(context, const NameofMohammad());
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -1011,105 +917,6 @@ class _HomeState extends State<Home> {
   //     ),
   //   );
   // }
-
-  // namesAllahProphet //
-  Widget namesAllahProphet(BuildContext context, Size size, ThemeProvider bloc,
-      {Key? key}) {
-    return Padding(
-      key: key,
-      padding: const EdgeInsets.only(
-        left: 8.0,
-        right: 8.0,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          InkWell(
-            onTap: () {
-              push(context, const NameofAllah());
-            },
-            child: Card(
-              elevation: 10,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(45),
-              ),
-              child: Container(
-                // height: size.height * 0.06,
-                width: size.width * 0.43,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(45),
-                ),
-                child: const Center(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      "NAME OF ALLAH",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          InkWell(
-            onTap: () {
-              push(context, const NameofMohammad());
-            },
-            child: Card(
-              elevation: 10,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(45),
-              ),
-              child: Container(
-                // height: size.height * 0.07,
-                width: size.width * 0.43,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(45),
-                ),
-                child: const FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      // ignore: prefer_const_literals_to_create_immutables
-                      children: <Widget>[
-                        Text(
-                          "NAME OF MUHAMMAD",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          "(PBUH)",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 8,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class SearchInQuaran extends StatefulWidget {
@@ -1180,212 +987,296 @@ class _SearchInQuaranState extends State<SearchInQuaran> {
           }
         }
 
-        return Container(
-          width: size.width,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [bloc.selectedTheme, bloc.selectedTheme],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: bloc.selectedTheme.withOpacity(0.3),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
+        final topPad = MediaQuery.of(context).padding.top;
+
+        return ClipRRect(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(36),
+            bottomRight: Radius.circular(36),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(30),
-            child: Stack(
-              children: [
-                Positioned(
-                  right: -30,
-                  bottom: -20,
-                  child: Icon(
-                    Icons.mosque_rounded,
-                    size: 180,
-                    color: Colors.white.withOpacity(0.1),
+          child: Stack(
+            children: [
+              // ── Mosque background image ──────────────────────────────
+              SizedBox(
+                width: size.width,
+                height: topPad + 250,
+                child: Image.asset(
+                  "assets/images/Rectangle 3.png",
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
+                ),
+              ),
+              // ── Theme gradient overlay ───────────────────────────────
+              Container(
+                width: size.width,
+                height: topPad + 250,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      bloc.selectedTheme.withOpacity(0.55),
+                      bloc.selectedTheme.withOpacity(0.92),
+                    ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      // --- Search Bar (Top) ---
-                      IntroStepBuilder(
-                        order: 3,
-                        overlayBuilder: (params) => buildIntroOverlay(params,
-                            "Instantly search for any Surah, Verse, or topic in the Holy Quran."),
-                        builder: (context, key) => InkWell(
-                          key: key,
-                          onTap: () => push(context, const SearchScreen()),
-                          child: Container(
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(
-                                  color: Colors.white.withOpacity(0.2)),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 15),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.search_rounded,
-                                    color: Colors.white, size: 20),
-                                const SizedBox(width: 12),
-                                Text(
-                                  "Search Quran...",
-                                  style: TextStyle(
-                                      color: Colors.white.withOpacity(0.8),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                                const Spacer(),
-                                Icon(Icons.mic_none_rounded,
-                                    color: Colors.white.withOpacity(0.9),
-                                    size: 18),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 25),
-                      // --- Info Header Row ---
-                      IntroStepBuilder(
-                        order: 4,
-                        overlayBuilder: (params) => buildIntroOverlay(params,
-                            "Check the current Islamic date and how much time is left for the next prayer."),
-                        builder: (context, key) => IntrinsicHeight(
-                          key: key,
-                          child: Row(
-                            children: [
-                              // Left: Date
-                              Expanded(
-                                flex: 11,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(Icons.calendar_today_rounded,
-                                            size: 14,
-                                            color:
-                                                Colors.white.withOpacity(0.7)),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          DateFormat('EEEE, d MMM')
-                                              .format(_now)
-                                              .toUpperCase(),
-                                          style: TextStyle(
-                                              color:
-                                                  Colors.white.withOpacity(0.7),
-                                              fontSize: 10,
-                                              letterSpacing: 1.2,
-                                              fontWeight: FontWeight.w700),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Text(
-                                      "${today.hDay} ${today.longMonthName} ${today.hYear} AH",
-                                      style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: -0.5),
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.location_on_rounded,
-                                            size: 12,
-                                            color:
-                                                Colors.white.withOpacity(0.6)),
-                                        const SizedBox(width: 4),
-                                        Expanded(
-                                          child: Text(
-                                            data != null
-                                                ? data["location"].toUpperCase()
-                                                : "DETECTING...",
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                                color: Colors.white
-                                                    .withOpacity(0.6),
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.w600,
-                                                letterSpacing: 1),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              VerticalDivider(
-                                  color: Colors.white.withOpacity(0.2),
-                                  thickness: 1,
-                                  indent: 5,
-                                  endIndent: 5),
-                              // Right: Prayer
-                              Expanded(
-                                flex: 9,
-                                child: InkWell(
-                                  onTap: () =>
-                                      push(context, const PrayerTime()),
-                                  child: Column(
+              ),
+              // ── Mosque icon watermark ────────────────────────────────
+              Positioned(
+                right: -25,
+                bottom: -10,
+                child: Icon(
+                  Icons.mosque_rounded,
+                  size: 160,
+                  color: Colors.white.withOpacity(0.08),
+                ),
+              ),
+              // ── Foreground content ───────────────────────────────────
+              Padding(
+                padding: EdgeInsets.fromLTRB(18, topPad + 10, 18, 22),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // --- Search Bar ---
+                    // const SizedBox(height: 20),
+                    // --- Date + Prayer Row ---
+                    IntroStepBuilder(
+                      order: 4,
+                      overlayBuilder: (params) => buildIntroOverlay(params,
+                          "Check the current Islamic date and how much time is left for the next prayer."),
+                      builder: (context, key) => IntrinsicHeight(
+                        key: key,
+                        child: Row(
+                          children: [
+                            // Left: Hijri date + location
+                            Expanded(
+                              flex: 11,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
                                     children: [
+                                      Icon(Icons.calendar_today_rounded,
+                                          size: 13,
+                                          color:
+                                              Colors.white.withOpacity(0.75)),
+                                      const SizedBox(width: 6),
                                       Text(
-                                        nextPrayerName.toUpperCase(),
+                                        DateFormat('EEEE, d MMM')
+                                            .format(_now)
+                                            .toUpperCase(),
                                         style: TextStyle(
                                             color:
-                                                Colors.white.withOpacity(0.7),
+                                                Colors.white.withOpacity(0.75),
                                             fontSize: 10,
                                             letterSpacing: 1.2,
                                             fontWeight: FontWeight.w700),
                                       ),
-                                      const SizedBox(height: 5),
-                                      Text(
-                                        countdown,
-                                        style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 22,
-                                            fontFamily: 'Poppins',
-                                            fontWeight: FontWeight.w900),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "${today.hDay} ${today.longMonthName} ${today.hYear} AH",
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: -0.4),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.location_on_rounded,
+                                          size: 11,
+                                          color:
+                                              Colors.white.withOpacity(0.65)),
+                                      const SizedBox(width: 3),
+                                      Expanded(
                                         child: Text(
-                                          "NAMAZ TIMES",
+                                          data != null
+                                              ? data["location"].toUpperCase()
+                                              : "DETECTING...",
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
-                                              color: bloc.selectedTheme,
-                                              fontSize: 8,
-                                              fontWeight: FontWeight.w900,
-                                              letterSpacing: 0.5),
+                                              color: Colors.white
+                                                  .withOpacity(0.65),
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w600,
+                                              letterSpacing: 1),
                                         ),
                                       ),
                                     ],
                                   ),
+                                ],
+                              ),
+                            ),
+                            // Divider
+                            VerticalDivider(
+                                color: Colors.white.withOpacity(0.25),
+                                thickness: 1,
+                                indent: 4,
+                                endIndent: 4),
+                            // Right: Next prayer countdown
+                            Expanded(
+                              flex: 9,
+                              child: InkWell(
+                                onTap: () => push(context, const PrayerTime()),
+                                borderRadius: BorderRadius.circular(12),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      nextPrayerName.toUpperCase(),
+                                      style: TextStyle(
+                                          color: Colors.white.withOpacity(0.75),
+                                          fontSize: 10,
+                                          letterSpacing: 1.5,
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      countdown,
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.w900),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        "NAMAZ TIMES",
+                                        style: TextStyle(
+                                            color: bloc.selectedTheme,
+                                            fontSize: 8,
+                                            fontWeight: FontWeight.w900,
+                                            letterSpacing: 0.6),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 20),
+                    // --- Horizontal Prayer Row ---
+                    if (data != null && data["fardList"] != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: (data["fardList"] as List).map((prayer) {
+                            final String name = prayer["name"].toString();
+                            final bool isNext = name.toUpperCase() ==
+                                nextPrayerName.toUpperCase();
+                            String formattedTime = prayer["time"].toString();
+                            try {
+                              final dt =
+                                  DateFormat("h:mm a").parse(formattedTime);
+                              formattedTime = DateFormat("HH:mm").format(dt);
+                            } catch (_) {}
+
+                            IconData icon;
+                            switch (name.toLowerCase()) {
+                              case 'fajr':
+                                icon = Icons.wb_twilight_rounded;
+                                break;
+                              case 'zuhr':
+                              case 'dhuhr':
+                                icon = Icons.wb_sunny_rounded;
+                                break;
+                              case 'asr':
+                                icon = Icons.wb_cloudy_rounded;
+                                break;
+                              case 'maghrib':
+                                icon = Icons.nights_stay_rounded;
+                                break;
+                              case 'isha':
+                                icon = Icons.mode_night_rounded;
+                                break;
+                              default:
+                                icon = Icons.access_time_rounded;
+                            }
+
+                            return Expanded(
+                              child: Container(
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 4),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10),
+                                decoration: isNext
+                                    ? BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(16),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.1),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          )
+                                        ],
+                                      )
+                                    : null,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      icon,
+                                      color: isNext
+                                          ? bloc.selectedTheme
+                                          : Colors.white,
+                                      size: 22,
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      name,
+                                      style: TextStyle(
+                                        color: isNext
+                                            ? bloc.selectedTheme
+                                            : Colors.white,
+                                        fontSize: 11,
+                                        fontWeight: isNext
+                                            ? FontWeight.bold
+                                            : FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      formattedTime,
+                                      style: TextStyle(
+                                        color: isNext
+                                            ? bloc.selectedTheme
+                                                .withOpacity(0.8)
+                                            : Colors.white.withOpacity(0.8),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },

@@ -114,6 +114,7 @@ flutter:
     - assets/extraction/sajda.json
     - assets/json_data/about_us.json
     - assets/json_data/tasbeeh.json
+    - assets/json_data/hajj.json
     - assets/sound/
   #   - images/a_dot_ham.jpeg
 

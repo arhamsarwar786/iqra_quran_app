@@ -47,7 +47,7 @@ class HajjStreamModel {
   factory HajjStreamModel.fromJson(Map<String, dynamic> json) {
     final data = json['hajj_live'] ?? json; // allow top-level or nested
     
-    bool isLive = data['isLive'] ?? false;
+    bool isLive = data['isLive'] ?? (data['status'] == 'live');
     String streamUrl = data['streamUrl'] ?? '';
     String startTime = data['startTime'] ?? '';
 

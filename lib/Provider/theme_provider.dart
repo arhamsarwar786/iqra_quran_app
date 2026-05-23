@@ -165,13 +165,9 @@ class ThemeProvider extends ChangeNotifier {
       if (lastCountry != null) {
         _applyRegionalOffset(lastCountry);
       } else {
-        // Timezone heuristic for first-time use OR when location is unavailable
-        final hours = DateTime.now().timeZoneOffset.inHours;
-        if (hours >= 5) {
-          hijriOffset = -1; // Best guess for Pakistan/India/Bangladesh
-        } else {
-          hijriOffset = 0;
-        }
+        // Default to 0, letting the standard Umm al-Qura algorithm be the baseline
+        // Users can manually adjust this in Settings if their local sighting differs.
+        hijriOffset = 0;
       }
     } else {
       hijriOffset = savedOffset;
@@ -195,16 +191,10 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   void _applyRegionalOffset(String country) {
+    // We no longer hardcode -1 for these regions as it can often conflict
+    // with actual local sightings or the user's expectations.
+    // The default Umm al-Qura is the baseline, and users can manually adjust.
     int newOffset = 0;
-    final c = country.toLowerCase();
-
-    // Pakistan, India, Bangladesh are usually 1 day behind Saudi (Umm al-Qura)
-    if (c.contains('pakistan') ||
-        c.contains('india') ||
-        c.contains('bangladesh')) {
-      newOffset = -1;
-    }
-    // Add more regions here if known patterns exist
 
     if (hijriOffset != newOffset) {
       hijriOffset = newOffset;

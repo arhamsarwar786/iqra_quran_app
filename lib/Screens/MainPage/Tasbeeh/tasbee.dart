@@ -138,19 +138,21 @@ class _MyWidgetState extends State<Tasbih> {
                             child: Padding(
                               padding: const EdgeInsets.all(20.0),
                               child: Center(
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
+                                child: SingleChildScrollView(
+                                  physics: const BouncingScrollPhysics(),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
                                         selectedTasbeeh.arabic ?? '',
                                         textAlign: TextAlign.center,
+                                        textDirection: TextDirection.rtl,
                                         style: TextStyle(
                                           color: Theme.of(context).primaryColor,
                                           fontFamily:
                                               themeProvider.arabicFontFamily,
-                                          fontSize: 34,
+                                          fontSize:
+                                              24, // slightly smaller to fit better
                                           fontWeight: FontWeight.bold,
                                           shadows: const [
                                             Shadow(
@@ -160,33 +162,40 @@ class _MyWidgetState extends State<Tasbih> {
                                           ],
                                         ),
                                       ),
-                                      const SizedBox(height: 10),
-                                      Text(
-                                        selectedTasbeeh.transliteration ?? '',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontFamily:
-                                              themeProvider.urduFontFamily,
-                                          color: Theme.of(context)
-                                              .primaryColor
-                                              .withOpacity(0.8),
-                                          fontSize: 20,
-                                          fontStyle: FontStyle.italic,
+                                      const SizedBox(height: 12),
+                                      if (selectedTasbeeh.transliteration !=
+                                              null &&
+                                          selectedTasbeeh
+                                              .transliteration!.isNotEmpty)
+                                        Text(
+                                          selectedTasbeeh.transliteration!,
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontFamily:
+                                                themeProvider.urduFontFamily,
+                                            color: Theme.of(context)
+                                                .primaryColor
+                                                .withOpacity(0.8),
+                                            fontSize: 14,
+                                            fontStyle: FontStyle.italic,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 5),
-                                      Text(
-                                        selectedTasbeeh.urduMeaning ?? '',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontFamily:
-                                              themeProvider.urduFontFamily,
-                                          color: Theme.of(context)
-                                              .primaryColor
-                                              .withOpacity(0.9),
-                                          fontSize: 20,
+                                      const SizedBox(height: 8),
+                                      if (selectedTasbeeh.urduMeaning != null &&
+                                          selectedTasbeeh
+                                              .urduMeaning!.isNotEmpty)
+                                        Text(
+                                          selectedTasbeeh.urduMeaning!,
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontFamily:
+                                                themeProvider.urduFontFamily,
+                                            color: Theme.of(context)
+                                                .primaryColor
+                                                .withOpacity(0.9),
+                                            fontSize: 14,
+                                          ),
                                         ),
-                                      ),
                                     ],
                                   ),
                                 ),

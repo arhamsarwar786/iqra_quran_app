@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/hajj_live_provider.dart';
-import '../services/hajj_share_service.dart';
 import '../services/hajj_time_service.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import '../models/hajj_stream_model.dart';
@@ -50,292 +49,258 @@ class _HajjLiveCardState extends State<HajjLiveCard>
         }
 
         final isLive = provider.isLive;
-        final config = provider.config;
+        final themeColor = Provider.of<ThemeProvider>(context).selectedTheme;
 
-        return Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: AnimatedBuilder(
-                animation: _glowAnimation,
-                builder: (context, child) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: isLive
-                          ? [
-                              BoxShadow(
-                                color: Colors.red.withOpacity(0.3),
-                                blurRadius: _glowAnimation.value,
-                                spreadRadius: _glowAnimation.value / 2,
-                              )
-                            ]
-                          : [
-                              BoxShadow(
-                                color: const Color(0xFF1A4D2E).withOpacity(0.2),
-                                blurRadius: _glowAnimation.value,
-                                spreadRadius: _glowAnimation.value / 4,
-                              )
-                            ],
-                    ),
-                    child: child,
-                  );
-                },
-                child: Card(
-                  elevation: 0,
-                  color: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(28)),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(28),
-                    onTap: () => _handleTap(context, provider),
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 800),
-                      transitionBuilder:
-                          (Widget child, Animation<double> animation) {
-                        return FadeTransition(opacity: animation, child: child);
-                      },
-                      child: isLive
-                          ? _buildLiveContent(provider)
-                          : _buildCountdownContent(provider),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildCountdownContent(HajjLiveProvider provider) {
-    final timeService = HajjTimeService();
-    final countdownStr = timeService.formatCountdown(provider.remainingTime);
-    final themeColor = Provider.of<ThemeProvider>(context).selectedTheme;
-
-    return Container(
-      key: const ValueKey("countdown"),
-      height: 180,
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        gradient: LinearGradient(
-          colors: [
-            themeColor,
-            themeColor.withOpacity(0.8),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: themeColor.withOpacity(0.4),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-        image: const DecorationImage(
-          image: AssetImage("assets/images/BgImage.png"),
-          fit: BoxFit.cover,
-          opacity: 0.15,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            children: [
-              _buildIconBox("🕋", false, themeColor),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      provider.config?.title ?? "Hajj will be live in",
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
-                        fontSize: 16,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        countdownStr,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                    ),
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: AnimatedBuilder(
+            animation: _glowAnimation,
+            builder: (context, child) {
+              return Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: themeColor.withOpacity(isLive ? 0.35 : 0.2),
+                      blurRadius: _glowAnimation.value * (isLive ? 1.3 : 1.0),
+                      spreadRadius: _glowAnimation.value / (isLive ? 2.5 : 4.0),
+                    )
                   ],
                 ),
+                child: child,
+              );
+            },
+            child: Material(
+              borderRadius: BorderRadius.circular(24),
+              elevation: 4,
+              shadowColor: themeColor.withOpacity(0.3),
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(24),
+                onTap: () => _handleTap(context, provider),
+                child: _buildHajjCardContent(provider,
+                    isLive: isLive, themeColor: themeColor),
               ),
-              _buildShareButton(context, provider),
-            ],
-          ),
-          const Spacer(),
-          Row(
-            children: [
-              _buildSimpleTag("COMING SOON", themeColor),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  provider.config?.comingSoonMessage ?? "Get ready for the spiritual journey",
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.85),
-                    fontSize: 13,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLiveContent(HajjLiveProvider provider) {
-    return Container(
-      key: const ValueKey("live"),
-      height: 180,
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        gradient: LinearGradient(
-          colors: [Colors.red.shade700, Colors.red.shade900],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.red.withOpacity(0.5),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-        image: const DecorationImage(
-          image: AssetImage("assets/images/BgImage.png"),
-          fit: BoxFit.cover,
-          opacity: 0.15,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildLiveBadge(),
-              _buildShareButton(context, provider),
-            ],
-          ),
-          const Spacer(),
-          Text(
-            provider.config?.title ?? "Watch Hajj Live",
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Poppins',
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            provider.config?.subtitle ?? "Experience the holy stream from Makkah",
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildIconBox(String emoji, bool isLive, Color themeColor) {
-    return Container(
-      width: 55,
-      height: 55,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))
-        ]
-      ),
-      child: Center(
-        child: isLive 
-          ? const Icon(Icons.mosque, color: Colors.red, size: 30)
-          : Text(emoji, style: const TextStyle(fontSize: 28)),
-      ),
-    );
-  }
-
-  Widget _buildLiveBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
-        ]
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          Icon(Icons.fiber_manual_record, color: Colors.red, size: 12),
-          SizedBox(width: 6),
-          Text(
-            "LIVE NOW",
-            style: TextStyle(
-                color: Colors.red, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSimpleTag(String text, Color themeColor) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
-        ]
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-            color: themeColor, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-      ),
-    );
-  }
-
-  Widget _buildShareButton(BuildContext context, HajjLiveProvider provider) {
-    return IconButton(
-      icon: const Icon(Icons.share, color: Colors.white70, size: 20),
-      onPressed: () {
-        HajjShareService.shareHajjCard(
-          context: context,
-          bloc: Provider.of<ThemeProvider>(context, listen: false),
-          provider: provider,
         );
       },
+    );
+  }
+
+  Widget _buildHajjCardContent(HajjLiveProvider provider,
+      {required bool isLive, required Color themeColor}) {
+    final timeService = HajjTimeService();
+    final countdownStr = timeService.formatCountdown(provider.remainingTime);
+
+    final title = provider.config?.title ??
+        (isLive ? "Watch Hajj Live" : "Hajj will be live in");
+    final subtitle = isLive
+        ? (provider.config?.subtitle ??
+            "Experience the holy stream from Makkah")
+        : countdownStr;
+
+    final comingSoonMsg = provider.config?.comingSoonMessage ?? "COMING SOON";
+
+    final gradientStart = themeColor;
+    final gradientEnd = themeColor.withOpacity(0.75);
+
+    return Container(
+      key: ValueKey(isLive ? "live" : "countdown"),
+      height: 95, // slightly taller to accommodate top badges
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [gradientStart, gradientEnd],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Stack(
+        children: [
+          // Decorative Arabic text watermark (Hajj)
+          Positioned(
+            right: 16,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: Text(
+                "حج",
+                style: TextStyle(
+                  fontSize: 42,
+                  color: Colors.white.withOpacity(0.12),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          // Decorative circle
+          Positioned(
+            right: -20,
+            top: -20,
+            child: Container(
+              width: 110,
+              height: 110,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.07),
+              ),
+            ),
+          ),
+          // NEW Badge (Top Left)
+          Positioned(
+            left: 0,
+            top: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(12),
+                ),
+              ),
+              child: const Text(
+                "NEW",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ),
+          // Coming Soon / Live Badge (Top Right)
+          Positioned(
+            right: 16,
+            top: 10,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: isLive ? Colors.black.withOpacity(0.35) : Colors.red.shade700,
+                borderRadius: BorderRadius.circular(6),
+                border: isLive
+                    ? Border.all(color: Colors.white.withOpacity(0.15), width: 0.8)
+                    : null,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isLive) ...[
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Transform.scale(
+                          scale: 1.0 + (_glowController.value * 0.5),
+                          child: Opacity(
+                            opacity: 1.0 - _glowController.value,
+                            child: Container(
+                              width: 10,
+                              height: 10,
+                              decoration: const BoxDecoration(
+                                color: Colors.redAccent,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 6),
+                  ] else ...[
+                    const Icon(Icons.fiber_manual_record,
+                        color: Colors.white, size: 8),
+                    const SizedBox(width: 4),
+                  ],
+                  Text(
+                    isLive ? "LIVE NOW" : "COMING SOON",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Content
+          Padding(
+            padding:
+                const EdgeInsets.only(left: 20, right: 20, top: 22, bottom: 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.18),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Center(
+                    child: Image.asset(
+                      'assets/images/kaaba.png',
+                      width: 32,
+                      height: 32,
+                      fit: BoxFit.contain,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(isLive ? 0.75 : 0.9),
+                          fontSize: isLive ? 11 : 13,
+                          fontWeight:
+                              isLive ? FontWeight.w500 : FontWeight.w700,
+                          letterSpacing: isLive ? 0 : 0.5,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: Colors.white.withOpacity(0.7),
+                  size: 16,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -363,10 +328,10 @@ class _HajjLiveCardState extends State<HajjLiveCard>
         baseColor: Colors.grey[300]!,
         highlightColor: Colors.grey[100]!,
         child: Container(
-          height: 180,
+          height: 90,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(24),
           ),
         ),
       ),

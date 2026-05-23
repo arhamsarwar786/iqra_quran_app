@@ -31,30 +31,40 @@ class _HajjPlayerState extends State<HajjPlayer> {
   @override
   void initState() {
     super.initState();
-    _isHls = widget.streamUrl.toLowerCase().endsWith('.m3u8') || widget.platform == 'hls';
+    _isHls = widget.streamUrl.toLowerCase().endsWith('.m3u8') ||
+        widget.platform == 'hls';
     if (_isHls) {
-      _initializeHlsPlayer();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _initializeHlsPlayer();
+        }
+      });
     } else {
-      widget.onStateChanged?.call(StreamPlaybackState.live);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          widget.onStateChanged?.call(StreamPlaybackState.live);
+        }
+      });
     }
   }
 
   Future<void> _initializeHlsPlayer() async {
     widget.onStateChanged?.call(StreamPlaybackState.loading);
-    
-    _videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(widget.streamUrl));
-    
+
+    _videoPlayerController =
+        VideoPlayerController.networkUrl(Uri.parse(widget.streamUrl));
+
     try {
       await _videoPlayerController!.initialize();
       _videoPlayerController!.addListener(_videoListener);
-      
+
       _chewieController = ChewieController(
         videoPlayerController: _videoPlayerController!,
         autoPlay: true,
         isLive: true,
         aspectRatio: _videoPlayerController!.value.aspectRatio,
         allowFullScreen: true,
-        showControls: true,
+        showControls: false,
         placeholder: Container(color: Colors.black),
         errorBuilder: (context, errorMessage) {
           return Center(
@@ -63,17 +73,19 @@ class _HajjPlayerState extends State<HajjPlayer> {
               children: [
                 const Icon(Icons.error_outline, color: Colors.white, size: 42),
                 const SizedBox(height: 16),
-                const Text("Playback Error", style: TextStyle(color: Colors.white)),
+                const Text("Playback Error",
+                    style: TextStyle(color: Colors.white)),
                 TextButton(
                   onPressed: _initializeHlsPlayer,
-                  child: const Text("Retry", style: TextStyle(color: Colors.amber)),
+                  child: const Text("Retry",
+                      style: TextStyle(color: Colors.amber)),
                 ),
               ],
             ),
           );
         },
       );
-      
+
       if (mounted) {
         setState(() {});
         widget.onStateChanged?.call(StreamPlaybackState.live);
@@ -117,21 +129,77 @@ class _HajjPlayerState extends State<HajjPlayer> {
   @override
   Widget build(BuildContext context) {
     if (_isHls) {
-      if (_chewieController != null && _chewieController!.videoPlayerController.value.isInitialized) {
+      if (_chewieController != null &&
+          _chewieController!.videoPlayerController.value.isInitialized) {
         return Chewie(controller: _chewieController!);
       } else {
         return Container(color: Colors.black);
       }
     } else {
       // YouTube Fallback
-      final String embedUrl = "https://www.youtube.com/embed/${widget.streamId}?autoplay=1&mute=0&rel=0&playsinline=1";
+      final String embedUrl =
+          "https://www.youtube-nocookie.com/embed/${widget.streamId}?autoplay=1&mute=0&rel=0&playsinline=1&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3&fs=0&disablekb=1";
       return InAppWebView(
-        initialUrlRequest: URLRequest(url: WebUri(embedUrl)),
+        initialUrlRequest: URLRequest(
+          url: WebUri(embedUrl),
+          headers: {
+            'Referer': 'https://www.youtube-nocookie.com',
+          },
+        ),
         initialSettings: InAppWebViewSettings(
           javaScriptEnabled: true,
           mediaPlaybackRequiresUserGesture: false,
           allowsInlineMediaPlayback: true,
         ),
+        onLoadStop: (controller, url) async {
+          // Trusted Types safe CSS injection
+          await controller.evaluateJavascript(source: """
+            (function() {
+              var style = document.createElement('style');
+              style.type = 'text/css';
+              style.appendChild(document.createTextNode(`
+                .ytp-chrome-top, 
+                .ytp-chrome-bottom, 
+                .ytp-gradient-top, 
+                .ytp-gradient-bottom, 
+                .ytp-watermark, 
+                .ytp-youtube-button, 
+                .ytp-pause-overlay, 
+                .ytp-pause-overlay-container,
+                .ytp-large-play-button-red,
+                .ytp-large-play-button {
+                  display: none !important;
+                }
+              `));
+              document.head.appendChild(style);
+            })();
+          """);
+        },
+        onProgressChanged: (controller, progress) async {
+          if (progress == 100) {
+            await controller.evaluateJavascript(source: """
+              (function() {
+                var style = document.createElement('style');
+                style.type = 'text/css';
+                style.appendChild(document.createTextNode(`
+                  .ytp-chrome-top, 
+                  .ytp-chrome-bottom, 
+                  .ytp-gradient-top, 
+                  .ytp-gradient-bottom, 
+                  .ytp-watermark, 
+                  .ytp-youtube-button, 
+                  .ytp-pause-overlay, 
+                  .ytp-pause-overlay-container,
+                  .ytp-large-play-button-red,
+                  .ytp-large-play-button {
+                    display: none !important;
+                  }
+                `));
+                document.head.appendChild(style);
+              })();
+            """);
+          }
+        },
       );
     }
   }
