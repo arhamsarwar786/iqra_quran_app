@@ -83,7 +83,7 @@ class HajjStreamModel {
       streamUrl: streamUrl,
       streamId: data['stream_id'] ?? '',
       streamPlatform: data['stream_platform'] ?? 'youtube',
-      title: data['title'] ?? 'Watch Hajj Live',
+      title: data['title'] ?? 'Watch Makkah Live',
       subtitle: data['subtitle'] ?? 'Live from Makkah',
       description: data['description'] ?? 'Join millions of Muslims in performing the holy pilgrimage of Hajj.',
       thumbnailUrl: data['thumbnail_url'] ?? '',

@@ -94,7 +94,7 @@ class _HajjLiveCardState extends State<HajjLiveCard>
     final countdownStr = timeService.formatCountdown(provider.remainingTime);
 
     final title = provider.config?.title ??
-        (isLive ? "Watch Hajj Live" : "Hajj will be live in");
+        (isLive ? "Watch Makkah Live" : "Makkah Live");
     final subtitle = isLive
         ? (provider.config?.subtitle ??
             "Experience the holy stream from Makkah")

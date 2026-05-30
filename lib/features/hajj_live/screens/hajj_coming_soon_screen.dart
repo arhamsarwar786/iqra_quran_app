@@ -186,7 +186,7 @@ class _HajjComingSoonScreenState extends State<HajjComingSoonScreen>
           ),
           const Expanded(
             child: Text(
-              "HAJJ 1447 AH",
+              "MAKKAH LIVE",
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white70,
@@ -235,7 +235,7 @@ class _HajjComingSoonScreenState extends State<HajjComingSoonScreen>
         ),
         const SizedBox(height: 16),
         const Text(
-          "Hajj Live 2026",
+          "Makkah Live",
           style: TextStyle(
             color: Colors.white,
             fontSize: 36,

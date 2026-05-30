@@ -20,7 +20,7 @@ class ThemeProvider extends ChangeNotifier {
   String arabicFontFamily = "AlQalamQuranMajeed";
   var arabicFontSize = 30.0;
   // Urdu
-  String urduFontFamily = "nastaleeq";
+  String urduFontFamily = "jamel";
   var urduFontSize = 25.0;
 
   Future<void> _init() async {

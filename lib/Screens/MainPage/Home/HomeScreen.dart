@@ -127,7 +127,9 @@ class _HomeState extends State<Home> {
           drawer: const Darwerr(),
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
-            backgroundColor: _isScrolled ? bloc.selectedTheme.withOpacity(0.95) : Colors.transparent,
+            backgroundColor: _isScrolled
+                ? bloc.selectedTheme.withOpacity(0.95)
+                : Colors.transparent,
             elevation: _isScrolled ? 2 : 0,
             leading: IntroStepBuilder(
               order: 1,
@@ -143,25 +145,12 @@ class _HomeState extends State<Home> {
                 order: 3,
                 overlayBuilder: (params) => buildIntroOverlay(params,
                     "Instantly search for any Surah, Verse, or topic in the Holy Quran."),
-                builder: (context, key) => InkWell(
-                  key: key,
+                builder: (context, key) => AnimatedSearchIcon(
+                  actionKey: key,
                   onTap: () => push(context, const SearchScreen()),
-                  child: Container(
-                    height: 40,
-                    width: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.18),
-                      borderRadius: BorderRadius.circular(25),
-                      border: Border.all(
-                          color: Colors.white.withOpacity(0.25), width: 1),
-                    ),
-                    // padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Icon(Icons.search_rounded,
-                        color: Colors.white, size: 22),
-                  ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 10,
               ),
               IntroStepBuilder(
@@ -919,6 +908,88 @@ class _HomeState extends State<Home> {
   // }
 }
 
+class AnimatedSearchIcon extends StatefulWidget {
+  final Key? actionKey;
+  final VoidCallback onTap;
+
+  const AnimatedSearchIcon({Key? key, this.actionKey, required this.onTap})
+      : super(key: key);
+
+  @override
+  State<AnimatedSearchIcon> createState() => _AnimatedSearchIconState();
+}
+
+class _AnimatedSearchIconState extends State<AnimatedSearchIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _borderOpacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    _borderOpacityAnimation = Tween<double>(begin: 0.25, end: 0.75).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return InkWell(
+          key: widget.actionKey,
+          onTap: widget.onTap,
+          borderRadius: BorderRadius.circular(25),
+          child: Container(
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.22),
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(
+                color: Colors.white.withOpacity(_borderOpacityAnimation.value),
+                width: 2.0, // Bold border
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.15 * _controller.value),
+                  blurRadius: 10 * _controller.value,
+                  spreadRadius: 2 * _controller.value,
+                )
+              ],
+            ),
+            child: Transform.scale(
+              scale: _scaleAnimation.value,
+              child: const Icon(
+                Icons.search_rounded,
+                color: Colors.white,
+                size: 24, // Bold/larger size
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class SearchInQuaran extends StatefulWidget {
   const SearchInQuaran({Key? key, this.size, this.bloc}) : super(key: key);
   final Size? size;
@@ -1127,7 +1198,8 @@ class _SearchInQuaranState extends State<SearchInQuaran> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      nextPrayerName.toUpperCase(),
+                                      "Upcoming " +
+                                          nextPrayerName.toUpperCase(),
                                       style: TextStyle(
                                           color: Colors.white.withOpacity(0.75),
                                           fontSize: 10,
@@ -1170,108 +1242,152 @@ class _SearchInQuaranState extends State<SearchInQuaran> {
                     const SizedBox(height: 20),
                     // --- Horizontal Prayer Row ---
                     if (data != null && data["fardList"] != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: (data["fardList"] as List).map((prayer) {
-                            final String name = prayer["name"].toString();
-                            final bool isNext = name.toUpperCase() ==
-                                nextPrayerName.toUpperCase();
-                            String formattedTime = prayer["time"].toString();
-                            try {
-                              final dt =
-                                  DateFormat("h:mm a").parse(formattedTime);
-                              formattedTime = DateFormat("HH:mm").format(dt);
-                            } catch (_) {}
+                      Builder(
+                        builder: (context) {
+                          final List<Map<String, dynamic>> fardList =
+                              data["fardList"];
+                          final DateTime sunrise =
+                              data["sunrise"] ?? DateTime.now();
+                          final DateTime nextFajr =
+                              data["nextFajr"] ?? DateTime.now();
 
-                            IconData icon;
-                            switch (name.toLowerCase()) {
-                              case 'fajr':
-                                icon = Icons.wb_twilight_rounded;
-                                break;
-                              case 'zuhr':
-                              case 'dhuhr':
-                                icon = Icons.wb_sunny_rounded;
-                                break;
-                              case 'asr':
-                                icon = Icons.wb_cloudy_rounded;
-                                break;
-                              case 'maghrib':
-                                icon = Icons.nights_stay_rounded;
-                                break;
-                              case 'isha':
-                                icon = Icons.mode_night_rounded;
-                                break;
-                              default:
-                                icon = Icons.access_time_rounded;
+                          String currentFarz = "";
+                          DateTime? currentFarzEnd;
+
+                          for (var i = 0; i < fardList.length; i++) {
+                            final DateTime time = fardList[i]["dateTime"];
+                            if (time.isAfter(_now)) {
+                              if (i > 0) {
+                                currentFarz = fardList[i - 1]["name"];
+                                currentFarzEnd =
+                                    (currentFarz == "Fajr") ? sunrise : time;
+                              } else {
+                                currentFarz = "Isha";
+                                currentFarzEnd = fardList[0]["dateTime"];
+                              }
+                              break;
                             }
+                          }
 
-                            return Expanded(
-                              child: Container(
-                                margin:
-                                    const EdgeInsets.symmetric(horizontal: 4),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 10),
-                                decoration: isNext
-                                    ? BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(16),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color:
-                                                Colors.black.withOpacity(0.1),
-                                            blurRadius: 4,
-                                            offset: const Offset(0, 2),
+                          if (currentFarz.isEmpty) {
+                            currentFarz = "Isha";
+                            currentFarzEnd = nextFajr;
+                          }
+
+                          return Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: fardList.map((prayer) {
+                                final String name = prayer["name"].toString();
+
+                                // Active check matching current prayer time
+                                bool isCurrent = (name == currentFarz);
+                                if (name == "Fajr" &&
+                                    _now.isAfter(prayer["dateTime"]) &&
+                                    _now.isBefore(sunrise)) {
+                                  isCurrent = true;
+                                }
+
+                                String formattedTime =
+                                    prayer["time"].toString();
+                                try {
+                                  final dt =
+                                      DateFormat("h:mm a").parse(formattedTime);
+                                  formattedTime =
+                                      DateFormat("HH:mm").format(dt);
+                                } catch (_) {}
+
+                                IconData icon;
+                                switch (name.toLowerCase()) {
+                                  case 'fajr':
+                                    icon = Icons.wb_twilight_rounded;
+                                    break;
+                                  case 'zuhr':
+                                  case 'dhuhr':
+                                    icon = Icons.wb_sunny_rounded;
+                                    break;
+                                  case 'asr':
+                                    icon = Icons.wb_cloudy_rounded;
+                                    break;
+                                  case 'maghrib':
+                                    icon = Icons.nights_stay_rounded;
+                                    break;
+                                  case 'isha':
+                                    icon = Icons.mode_night_rounded;
+                                    break;
+                                  default:
+                                    icon = Icons.access_time_rounded;
+                                }
+
+                                return Expanded(
+                                  child: Container(
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10),
+                                    decoration: isCurrent
+                                        ? BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(16),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black
+                                                    .withOpacity(0.1),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2),
+                                              )
+                                            ],
                                           )
-                                        ],
-                                      )
-                                    : null,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      icon,
-                                      color: isNext
-                                          ? bloc.selectedTheme
-                                          : Colors.white,
-                                      size: 22,
+                                        : null,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          icon,
+                                          color: isCurrent
+                                              ? bloc.selectedTheme
+                                              : Colors.white,
+                                          size: 22,
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          name,
+                                          style: TextStyle(
+                                            color: isCurrent
+                                                ? bloc.selectedTheme
+                                                : Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: isCurrent
+                                                ? FontWeight.bold
+                                                : FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          formattedTime,
+                                          style: TextStyle(
+                                            color: isCurrent
+                                                ? bloc.selectedTheme
+                                                    .withOpacity(0.8)
+                                                : Colors.white.withOpacity(0.8),
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      name,
-                                      style: TextStyle(
-                                        color: isNext
-                                            ? bloc.selectedTheme
-                                            : Colors.white,
-                                        fontSize: 11,
-                                        fontWeight: isNext
-                                            ? FontWeight.bold
-                                            : FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      formattedTime,
-                                      style: TextStyle(
-                                        color: isNext
-                                            ? bloc.selectedTheme
-                                                .withOpacity(0.8)
-                                            : Colors.white.withOpacity(0.8),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          );
+                        },
                       ),
                   ],
                 ),

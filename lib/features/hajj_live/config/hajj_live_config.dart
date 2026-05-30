@@ -20,9 +20,9 @@ class HajjLiveConfig {
   static const Duration autoRefreshInterval = Duration(minutes: 5);
 
   // Localization strings
-  static const String comingSoonTitle = "Hajj Live 1447";
+  static const String comingSoonTitle = "Makkah Live";
   static const String comingSoonBody =
-      "Hajj Live streaming will begin soon. Stay tuned for this blessed event. In sha Allah.";
+      "Makkah Live streaming will begin soon. Stay tuned for this blessed event. In sha Allah.";
 
   static const String streamConnecting = "Connecting to live stream...";
   static const String streamRetrying = "Reconnecting... (Attempt {n} of {max})";
@@ -38,7 +38,7 @@ class HajjLiveConfig {
 
   static const String streamEndedTitle = "JazakAllah Khair";
   static const String streamEndedBody =
-      "The Hajj Live 1446 stream has concluded. May Allah accept the Hajj of all pilgrims.";
+      "The Makkah Live stream has concluded. May Allah accept the Hajj of all pilgrims.";
 
   static const String patienceMsg = "JazakAllah for your patience";
 }

@@ -31,7 +31,20 @@ class HajjLiveScreen extends StatefulWidget {
 class _HajjLiveScreenState extends State<HajjLiveScreen> {
   StreamPlaybackState _playbackState = StreamPlaybackState.loading;
   int _playerRetryKey = 0;
-  // share key removed
+
+  // ── Tap-to-show / auto-hide controls ──
+  bool _controlsVisible = true;
+  Timer? _hideTimer;
+
+  void _toggleControls() {
+    _hideTimer?.cancel();
+    setState(() => _controlsVisible = !_controlsVisible);
+    if (_controlsVisible) {
+      _hideTimer = Timer(const Duration(seconds: 2), () {
+        if (mounted) setState(() => _controlsVisible = false);
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -43,10 +56,15 @@ class _HajjLiveScreenState extends State<HajjLiveScreen> {
         setState(() => _playbackState = StreamPlaybackState.live);
       }
     });
+    // Auto-hide controls after initial 2 seconds
+    _hideTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _controlsVisible = false);
+    });
   }
 
   @override
   void dispose() {
+    _hideTimer?.cancel();
     // Restore portrait orientation and show system UI when leaving the screen
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -65,44 +83,61 @@ class _HajjLiveScreenState extends State<HajjLiveScreen> {
 
         return Scaffold(
           backgroundColor: Colors.black,
-          body: Stack(
-            children: [
-              // The Video Player
-              Center(
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: HajjPlayer(
-                    key: ValueKey("hajj_player_$_playerRetryKey"),
-                    streamUrl: config.streamUrl,
-                    streamId: config.streamId.isNotEmpty ? config.streamId : widget.streamId,
-                    platform: config.streamPlatform,
-                    onStateChanged: (state) {
-                      if (mounted) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (mounted) {
-                            setState(() => _playbackState = state);
-                          }
-                        });
-                      }
-                    },
+          body: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _toggleControls,
+            child: Stack(
+              children: [
+                // The Video Player
+                Center(
+                  child: AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: HajjPlayer(
+                      key: ValueKey("hajj_player_$_playerRetryKey"),
+                      streamUrl: config.streamUrl,
+                      streamId: config.streamId.isNotEmpty
+                          ? config.streamId
+                          : widget.streamId,
+                      platform: config.streamPlatform,
+                      onStateChanged: (state) {
+                        if (mounted) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) {
+                              setState(() => _playbackState = state);
+                            }
+                          });
+                        }
+                      },
+                    ),
                   ),
                 ),
-              ),
 
-              // Overlay UI
-              _buildTopBar(context, provider),
-              _buildBottomStatus(),
+                // Overlay UI — fades in/out on tap
+                AnimatedOpacity(
+                  opacity: _controlsVisible ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: IgnorePointer(
+                    ignoring: !_controlsVisible,
+                    child: Stack(
+                      children: [
+                        _buildTopBar(context, provider),
+                        _buildBottomStatus(),
+                      ],
+                    ),
+                  ),
+                ),
 
-              // Loading/Buffering/Error Overlays
-              if (_playbackState == StreamPlaybackState.loading)
-                _buildLoadingOverlay(),
-              if (_playbackState == StreamPlaybackState.buffering)
-                _buildBufferingIndicator(),
-              if (_playbackState == StreamPlaybackState.reconnecting)
-                _buildReconnectingOverlay(),
-              if (_playbackState == StreamPlaybackState.failed)
-                _buildFailedOverlay(context, provider),
-            ],
+                // Loading/Buffering/Error Overlays (always visible)
+                if (_playbackState == StreamPlaybackState.loading)
+                  _buildLoadingOverlay(),
+                if (_playbackState == StreamPlaybackState.buffering)
+                  _buildBufferingIndicator(),
+                if (_playbackState == StreamPlaybackState.reconnecting)
+                  _buildReconnectingOverlay(),
+                if (_playbackState == StreamPlaybackState.failed)
+                  _buildFailedOverlay(context, provider),
+              ],
+            ),
           ),
         );
       },
@@ -138,7 +173,7 @@ class _HajjLiveScreenState extends State<HajjLiveScreen> {
             Column(
               children: [
                 const Text(
-                  "Hajj Live Stream",
+                  "Makkah Live",
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -199,14 +234,16 @@ class _HajjLiveScreenState extends State<HajjLiveScreen> {
                 DeviceOrientation.landscapeLeft,
                 DeviceOrientation.landscapeRight,
               ]);
-              await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+              await SystemChrome.setEnabledSystemUIMode(
+                  SystemUiMode.immersiveSticky);
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+                border:
+                    Border.all(color: Colors.white.withOpacity(0.2), width: 1),
               ),
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
@@ -290,7 +327,7 @@ class _HajjLiveScreenState extends State<HajjLiveScreen> {
                 color: Colors.white, strokeWidth: 2),
             const SizedBox(height: 24),
             const Text(
-              "Connecting to Hajj live stream...",
+              "Connecting to Makkah live stream...",
               style: TextStyle(color: Colors.white70, fontFamily: 'Poppins'),
             ),
           ],
@@ -330,7 +367,8 @@ class _HajjLiveScreenState extends State<HajjLiveScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline, color: Colors.redAccent, size: 64),
+              const Icon(Icons.error_outline,
+                  color: Colors.redAccent, size: 64),
               const SizedBox(height: 16),
               const Text(
                 "Playback failed",
@@ -366,11 +404,15 @@ class _HajjLiveScreenState extends State<HajjLiveScreen> {
                 icon: const Icon(Icons.refresh, color: Colors.white),
                 label: const Text(
                   "RETRY CONNECTION",
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Provider.of<ThemeProvider>(context, listen: false).selectedTheme,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  backgroundColor:
+                      Provider.of<ThemeProvider>(context, listen: false)
+                          .selectedTheme,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),

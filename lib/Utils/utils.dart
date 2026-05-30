@@ -59,7 +59,7 @@ var arabicFontFamily = [
   "AlQalamQuranMajeed"
 ];
 
-var urduFontFamily = ["Jameel Noori", "nastaleeq", "pdmsSaleem"];
+var urduFontFamily = ["jamel", "nastaleeq", "pdmsSaleem"];
 
 const bismillaArabic = "بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِیْمِ";
 
@@ -77,7 +77,8 @@ Widget buildIntroOverlay(StepWidgetParams params, String text) {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(text,
-            style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+                color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center),
         const SizedBox(height: 12),
         Wrap(
@@ -88,8 +89,8 @@ Widget buildIntroOverlay(StepWidgetParams params, String text) {
             if (!isLast)
               TextButton(
                 onPressed: params.onFinish,
-                child: const Text('Skip',
-                    style: TextStyle(color: Colors.white70)),
+                child:
+                    const Text('Skip', style: TextStyle(color: Colors.white70)),
               ),
             ElevatedButton(
               onPressed: isLast ? params.onFinish : params.onNext,

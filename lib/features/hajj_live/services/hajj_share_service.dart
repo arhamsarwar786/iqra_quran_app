@@ -15,7 +15,7 @@ class HajjShareService {
       "https://play.google.com/store/apps/details?id=com.devsinntechnologies.iqraquran";
 
   static Future<void> shareLiveText(BuildContext context) async {
-    const String shareText = "🔴 Hajj is LIVE on IQRA QURAN App\n\n"
+    const String shareText = "🔴 Makkah Live is LIVE on IQRA QURAN App\n\n"
         "Watch the holy live stream now and stay spiritually connected.\n\n"
         "Check it out now.\n\n"
         "📲 Download App:\n$appDownloadLink";
@@ -97,7 +97,7 @@ class HajjShareService {
         center: true);
 
     // y=268: Main title
-    _drawText(canvas, "Hajj Live 2026",
+    _drawText(canvas, "Makkah Live",
         offset: const Offset(width / 2, 268),
         fontSize: 84,
         weight: FontWeight.bold,
@@ -159,7 +159,7 @@ class HajjShareService {
           ui.RRect.fromRectAndRadius(cardRect, const Radius.circular(30)),
           activeBorder);
 
-      _drawText(canvas, "HAJJ IS LIVE",
+      _drawText(canvas, "MAKKAH IS LIVE",
           offset: const Offset(width / 2, headerHeight + 110),
           fontSize: 60,
           weight: FontWeight.bold,
@@ -168,7 +168,7 @@ class HajjShareService {
 
       final String liveText = provider.config?.description?.isNotEmpty == true
           ? provider.config!.description
-          : "Download the app now and check the live hajj stream anytime.";
+          : "Download the app now and check the live Makkah stream anytime.";
 
       _drawText(canvas, liveText,
           offset: const Offset(width / 2, headerHeight + 200),
@@ -338,8 +338,8 @@ class HajjShareService {
                       onPressed: () {
                         Navigator.pop(context);
                         final fallback = provider.isLive
-                            ? "🔴 Hajj is LIVE on IQRA QURAN App! Download now: $appDownloadLink"
-                            : "🕋 Hajj starts in ${HajjTimeService().formatCountdown(provider.remainingTime)} on IQRA QURAN App!\n\nDownload now: $appDownloadLink";
+                            ? "🔴 Makkah Live is LIVE on IQRA QURAN App! Download now: $appDownloadLink"
+                            : "🕋 Makkah Live: ${HajjTimeService().formatCountdown(provider.remainingTime)} on IQRA QURAN App!\n\nDownload now: $appDownloadLink";
                         Share.shareXFiles([XFile(file.path)], text: fallback);
                       },
                       icon: const Icon(Icons.share, size: 18),
