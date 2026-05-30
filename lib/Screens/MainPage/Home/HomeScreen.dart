@@ -369,19 +369,19 @@ class _HomeState extends State<Home> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               gridItem(
-                label: "Qibla",
-                icon: Icons.explore_rounded,
-                onTap: () => push(context, const DirectionTOQiblah()),
-              ),
-              gridItem(
                 label: "Quran",
                 icon: Icons.auto_stories_rounded,
                 onTap: () => push(context, const TabBarDemo()),
               ),
               gridItem(
-                label: "Duas",
-                icon: Icons.volunteer_activism_rounded,
-                onTap: () => push(context, const DuaScreen()),
+                label: "Prayers",
+                icon: Icons.access_time_filled_rounded,
+                onTap: () => push(context, const PrayerTime()),
+              ),
+              gridItem(
+                label: "Qibla",
+                icon: Icons.explore_rounded,
+                onTap: () => push(context, const DirectionTOQiblah()),
               ),
               gridItem(
                 label: "Tasbeeh",
@@ -406,9 +406,9 @@ class _HomeState extends State<Home> {
                 onTap: () => push(context, KhalimaScreen()),
               ),
               gridItem(
-                label: "Prayers",
-                icon: Icons.access_time_filled_rounded,
-                onTap: () => push(context, const PrayerTime()),
+                label: "Duas",
+                icon: Icons.volunteer_activism_rounded,
+                onTap: () => push(context, const DuaScreen()),
               ),
               gridItem(
                 label: "99 Names",

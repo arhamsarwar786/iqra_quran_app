@@ -60,6 +60,7 @@ class _QuranViewState extends State<QuranView> {
   double? _lastFontSize;
   String? _lastFontFamily;
   Color? _lastThemeColor;
+  double _baseArabicFontSize = 30.0;
 
   viewMaker() async {
     final bloc = context.read<ThemeProvider>();
@@ -150,6 +151,7 @@ class _QuranViewState extends State<QuranView> {
 
       String text = aya.arabicText.trim();
       text = text.replaceAll(RegExp(r'\s*\(\d+\)\s*$'), '');
+      text = text.replaceAll(RegExp(r'[\u06D6-\u06ED\s]+$'), '');
 
       textSpanChildren.add(
         TextSpan(
@@ -184,11 +186,10 @@ class _QuranViewState extends State<QuranView> {
               ),
             ),
             child: Text(
-              arabicNumber.convert(aya.ayatNumberInt),
+              aya.ayatNumberInt.toString(),
               style: TextStyle(
                 fontSize: (bloc.arabicFontSize * 0.45).clamp(10, 16),
                 fontWeight: FontWeight.bold,
-                fontFamily: bloc.arabicFontFamily,
                 color: isTargetAyat ? bloc.selectedTheme : Colors.black54,
               ),
             ),
@@ -643,6 +644,16 @@ class _QuranViewState extends State<QuranView> {
               setState(() {
                 isScrollingDown = !isScrollingDown;
               });
+            },
+            onScaleStart: (details) {
+              _baseArabicFontSize = bloc.arabicFontSize;
+            },
+            onScaleUpdate: (details) {
+              if (details.scale != 1.0) {
+                double newSize =
+                    (_baseArabicFontSize * details.scale).clamp(20.0, 60.0);
+                bloc.changeArabicFont(newSize);
+              }
             },
             child: Stack(
               children: [
