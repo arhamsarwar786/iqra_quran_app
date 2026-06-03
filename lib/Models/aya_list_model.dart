@@ -58,22 +58,24 @@ class Aya {
     this.manzil,
   });
 
-  factory Aya.fromJson(Map<String, dynamic> json) => Aya(
-        ayatId: json["ayatId"]?.toString(),
-        ayatNumber: json["ayatNumber"]?.toString(),
-        groupId: json["groupId"]?.toString(),
-        surahId: json["surahId"]?.toString(),
-        paraId: json["paraId"]?.toString(),
-        tafseerId: json["tafseerId"]?.toString(),
-        arabicText: json["arabicText"] ?? "",
-        tarjumaIrfan: json["tarjumaIrfan"],
-        tarjumaHind: json["tarjumaHind"],
-        tarjumaPak: json["tarjumaPak"],
-        withoutArab: json["withoutArab"],
-        withoutHtmlTafseer: json["withoutHtmlTafseer"],
-        sajda: json["sajda"],
-        manzil: json["manzil"],
-      );
+  factory Aya.fromJson(Map<String, dynamic> json) {
+    return Aya(
+      ayatId: json["ayatId"]?.toString(),
+      ayatNumber: json["ayatNumber"]?.toString(),
+      groupId: json["groupId"]?.toString(),
+      surahId: json["surahId"]?.toString(),
+      paraId: json["paraId"]?.toString(),
+      tafseerId: json["tafseerId"]?.toString(),
+      arabicText: json["arabicText"] ?? "",
+      tarjumaIrfan: json["tarjumaIrfan"],
+      tarjumaHind: json["tarjumaHind"],
+      tarjumaPak: json["tarjumaPak"],
+      withoutArab: json["withoutArab"],
+      withoutHtmlTafseer: json["withoutHtmlTafseer"],
+      sajda: json["sajda"],
+      manzil: json["manzil"],
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         "ayatId": ayatId,

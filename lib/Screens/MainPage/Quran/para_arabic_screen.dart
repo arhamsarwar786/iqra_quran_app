@@ -260,21 +260,23 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
           alignment: PlaceholderAlignment.middle,
           child: Container(
             key: _ayahKeys["${aya.surahId}_${aya.ayatNumber}"] ??= GlobalKey(),
-            margin: const EdgeInsets.symmetric(horizontal: 6),
-            padding: const EdgeInsets.all(4),
+            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            width: (bloc.arabicFontSize * 0.95).clamp(24.0, 36.0),
+            height: (bloc.arabicFontSize * 0.95).clamp(24.0, 36.0),
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
                 color: isTargetAya
                     ? bloc.selectedTheme.withOpacity(0.5)
                     : Colors.grey.withOpacity(0.35),
-                width: 1.2,
+                width: 1.5,
               ),
             ),
             child: Text(
-              aya.ayatNumberInt.toString(),
+              aya.ayatNumber ?? '',
               style: TextStyle(
-                fontSize: (bloc.arabicFontSize * 0.45).clamp(10, 16),
+                fontSize: (bloc.arabicFontSize * 0.42).clamp(11.0, 17.0),
                 fontWeight: FontWeight.bold,
                 color: isTargetAya ? bloc.selectedTheme : Colors.black54,
               ),
