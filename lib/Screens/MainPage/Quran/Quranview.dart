@@ -67,8 +67,9 @@ class _QuranViewState extends State<QuranView> {
     final quranProvider = context.read<QuranDataProvider>();
     final audioProvider = context.read<AudioProvider>();
 
+    _ayahKeys.clear();
     quranViewWidget.clear();
-    List<InlineSpan> textSpanChildren = [];
+    List<Widget> textSpanChildren = [];
     List<int> currentBatchAyatNumbers = [];
     bool isFirstAyat = true;
 
@@ -82,23 +83,23 @@ class _QuranViewState extends State<QuranView> {
         _targetKey = key;
       }
 
-      Widget rtWidget = RichText(
+      Widget rtWidget = Container(
         key: key,
-        textAlign: TextAlign.center,
-        text: TextSpan(
-          children: List<InlineSpan>.from(textSpanChildren),
-          style: TextStyle(
-            fontSize: bloc.arabicFontSize,
-            fontFamily: bloc.arabicFontFamily,
-            color: Colors.black,
-            height: 1.8,
-          ),
+        width: double.infinity,
+        alignment: Alignment.center,
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          textDirection: TextDirection.rtl,
+          spacing: (bloc.arabicFontSize * 0.18).clamp(5.0, 9.0),
+          runSpacing: (bloc.arabicFontSize * 0.45).clamp(12.0, 22.0),
+          children: List<Widget>.from(textSpanChildren),
         ),
       );
 
       if (isFirstAyat) {
         quranViewWidget.add(Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0.0),
           child: IntroStepBuilder(
             group: 'quran_view',
             order: 4,
@@ -122,7 +123,7 @@ class _QuranViewState extends State<QuranView> {
         isFirstAyat = false;
       } else {
         quranViewWidget.add(Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0.0),
           child: rtWidget,
         ));
       }
@@ -153,28 +154,41 @@ class _QuranViewState extends State<QuranView> {
       text = text.replaceAll(RegExp(r'\s*\(\d+\)\s*$'), '');
       text = text.replaceAll(RegExp(r'[\u06D6-\u06ED\s]+$'), '');
 
-      textSpanChildren.add(
-        TextSpan(
-          text: "$text ",
-          style: TextStyle(
-            color: isTargetAyat ? bloc.selectedTheme : Colors.black,
-            fontWeight: isTargetAyat ? FontWeight.w700 : FontWeight.normal,
-          ),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () {
+      // Split the verse text into words to wrap them beautifully and maintain RTL order
+      List<String> words = text.split(RegExp(r'\s+'));
+      for (var word in words) {
+        if (word.trim().isEmpty) continue;
+        textSpanChildren.add(
+          GestureDetector(
+            onTap: () {
               SHEET.bottomSheetPreview(
                   context, listAyat, listAyat.indexOf(aya), bloc,
                   showPlayButton: true);
             },
-        ),
-      );
+            child: Text(
+              word,
+              style: TextStyle(
+                fontSize: bloc.arabicFontSize,
+                fontFamily: bloc.arabicFontFamily,
+                color: isTargetAyat ? bloc.selectedTheme : Colors.black,
+                fontWeight: isTargetAyat ? FontWeight.w700 : FontWeight.normal,
+              ),
+            ),
+          ),
+        );
+      }
 
+      // Add the verse number circle
       textSpanChildren.add(
-        WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
+        GestureDetector(
+          onTap: () {
+            SHEET.bottomSheetPreview(
+                context, listAyat, listAyat.indexOf(aya), bloc,
+                showPlayButton: true);
+          },
           child: Container(
             key: _ayahKeys[aya.ayatNumberInt] ??= GlobalKey(),
-            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
             width: (bloc.arabicFontSize * 0.95).clamp(24.0, 36.0),
             height: (bloc.arabicFontSize * 0.95).clamp(24.0, 36.0),
             alignment: Alignment.center,
@@ -711,7 +725,7 @@ class _QuranViewState extends State<QuranView> {
                               physics: const AlwaysScrollableScrollPhysics(),
                               child: Container(
                                 padding: const EdgeInsets.only(
-                                    left: 12, right: 12, top: 10, bottom: 10),
+                                    left: 20, right: 20, top: 10, bottom: 10),
                                 child: Column(
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,

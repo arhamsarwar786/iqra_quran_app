@@ -145,6 +145,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     if (listAyat.isEmpty) return;
 
     paraArabicScreenWidget.clear();
+    _ayahKeys.clear();
     // surahHeaderKeys.clear(); // Removed to allow persistence across build/highlight cycles
     firstSurahMetadata = null;
 
@@ -240,48 +241,49 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
       currentSpans.add(
         TextSpan(
-          text: "$text ",
-          style: TextStyle(
-            color: isTargetAya ? bloc.selectedTheme : Colors.black,
-            fontWeight: isTargetAya ? FontWeight.w700 : FontWeight.normal,
-          ),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () {
-              SHEET.bottomSheetPreview(
-                  context, listAyat, listAyat.indexOf(aya), bloc,
-                  showPlayButton: false);
-            },
-        ),
-      );
-
-      // Append decorative Verse Marker
-      currentSpans.add(
-        WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
-          child: Container(
-            key: _ayahKeys["${aya.surahId}_${aya.ayatNumber}"] ??= GlobalKey(),
-            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            width: (bloc.arabicFontSize * 0.95).clamp(24.0, 36.0),
-            height: (bloc.arabicFontSize * 0.95).clamp(24.0, 36.0),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isTargetAya
-                    ? bloc.selectedTheme.withOpacity(0.5)
-                    : Colors.grey.withOpacity(0.35),
-                width: 1.5,
-              ),
-            ),
-            child: Text(
-              aya.ayatNumber ?? '',
+          children: [
+            TextSpan(
+              text: "$text ",
               style: TextStyle(
-                fontSize: (bloc.arabicFontSize * 0.42).clamp(11.0, 17.0),
-                fontWeight: FontWeight.bold,
-                color: isTargetAya ? bloc.selectedTheme : Colors.black54,
+                color: isTargetAya ? bloc.selectedTheme : Colors.black,
+                fontWeight: isTargetAya ? FontWeight.w700 : FontWeight.normal,
+              ),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  SHEET.bottomSheetPreview(
+                      context, listAyat, listAyat.indexOf(aya), bloc,
+                      showPlayButton: false);
+                },
+            ),
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Container(
+                key: _ayahKeys["${aya.surahId}_${aya.ayatNumber}"] ??=
+                    GlobalKey(),
+                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                width: (bloc.arabicFontSize * 0.95).clamp(24.0, 36.0),
+                height: (bloc.arabicFontSize * 0.95).clamp(24.0, 36.0),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isTargetAya
+                        ? bloc.selectedTheme.withOpacity(0.5)
+                        : Colors.grey.withOpacity(0.35),
+                    width: 1.5,
+                  ),
+                ),
+                child: Text(
+                  aya.ayatNumber ?? '',
+                  style: TextStyle(
+                    fontSize: (bloc.arabicFontSize * 0.42).clamp(11.0, 17.0),
+                    fontWeight: FontWeight.bold,
+                    color: isTargetAya ? bloc.selectedTheme : Colors.black54,
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
         ),
       );
 
@@ -632,7 +634,8 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
             },
             onScaleUpdate: (details) {
               if (details.scale != 1.0) {
-                double newSize = (_baseArabicFontSize * details.scale).clamp(20.0, 60.0);
+                double newSize =
+                    (_baseArabicFontSize * details.scale).clamp(20.0, 60.0);
                 bloc.changeArabicFont(newSize);
               }
             },
@@ -675,15 +678,15 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                         child: Directionality(
                           textDirection: TextDirection.rtl,
                           child: NotificationListener<ScrollNotification>(
-                          onNotification: (notification) {
-                            if (notification is ScrollEndNotification) {
-                              if (widget.saveLastRead) {
-                                _updateLastRead(notification.metrics.pixels);
+                            onNotification: (notification) {
+                              if (notification is ScrollEndNotification) {
+                                if (widget.saveLastRead) {
+                                  _updateLastRead(notification.metrics.pixels);
+                                }
                               }
-                            }
-                            return false;
-                          },
-                          child: CustomScrollView(
+                              return false;
+                            },
+                            child: CustomScrollView(
                               controller: _scrollViewController,
                               physics: const AlwaysScrollableScrollPhysics(),
                               cacheExtent: 5000,
