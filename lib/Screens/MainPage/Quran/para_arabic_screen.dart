@@ -1,9 +1,8 @@
 // ignore_for_file: file_names
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:arabic_numbers/arabic_numbers.dart';
 import 'package:flutter/rendering.dart';
+import 'package:arabic_numbers/arabic_numbers.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/widgets.dart';
@@ -16,6 +15,7 @@ import '../../../Widgets/quran_sign_widget.dart';
 import '../../../Utils/bottom_sheet_preview.dart';
 import '../../../Widgets/auto_scroll_speed_dialog.dart';
 import '../../../Helper/preference/saved_preferences.dart';
+import 'package:iqra/Helper/favourite.dart';
 import '../Drawer/setting_screen.dart';
 import 'translation/parah_translation_screen.dart';
 import '../../../Provider/audio_provider.dart';
@@ -70,6 +70,40 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   SurahMetadata? firstSurahMetadata;
   SurahMetadata? currentSurahMetadata;
 
+  Set<String> bookmarkedAyats = {};
+
+  Future<void> _loadAyatBookmarks() async {
+    final data = await SavedPreferences.getBookmarkedAyats();
+    if (data != null && mounted) {
+      setState(() {
+        bookmarkedAyats = Set<String>.from(data);
+      });
+    }
+  }
+
+  Future<void> _toggleAyatBookmark(String key) async {
+    if (bookmarkedAyats.contains(key)) {
+      bookmarkedAyats.remove(key);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ayat removed from bookmarks', textAlign: TextAlign.center),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    } else {
+      bookmarkedAyats.add(key);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ayat added to bookmarks', textAlign: TextAlign.center),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
+    setState(() {});
+    await SavedPreferences.setBookmarkedAyats(bookmarkedAyats.toList());
+    viewMaker();
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -92,17 +126,19 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
     loadParaView().then((val) {
       listAyat = List<Aya>.from(val);
-      viewMaker().then((_) {
-        // Jump to saved offset after content is loaded
-        if (widget.initialScrollOffset != null &&
-            widget.initialScrollOffset! > 0) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (_scrollViewController != null &&
-                _scrollViewController!.hasClients) {
-              _scrollViewController!.jumpTo(widget.initialScrollOffset!);
-            }
-          });
-        }
+      _loadAyatBookmarks().then((_) {
+        viewMaker().then((_) {
+          // Jump to saved offset after content is loaded
+          if (widget.initialScrollOffset != null &&
+              widget.initialScrollOffset! > 0) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_scrollViewController != null &&
+                  _scrollViewController!.hasClients) {
+                _scrollViewController!.jumpTo(widget.initialScrollOffset!);
+              }
+            });
+          }
+        });
       });
     });
 
@@ -149,7 +185,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     // surahHeaderKeys.clear(); // Removed to allow persistence across build/highlight cycles
     firstSurahMetadata = null;
 
-    List<InlineSpan> currentSpans = [];
+    List<Widget> currentSpans = [];
     String? currentSurahId;
 
     // Helper to flush blocks and assign the target key precisely
@@ -163,19 +199,18 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       }
 
       paraArabicScreenWidget.add(Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
-        child: RichText(
+        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0.0),
+        child: Container(
           key: key,
-          textAlign: TextAlign
-              .center, // Center alignment looks much better for Quranic text in Flutter
-          text: TextSpan(
-            children: List<InlineSpan>.from(currentSpans),
-            style: TextStyle(
-              fontSize: bloc.arabicFontSize,
-              fontFamily: bloc.arabicFontFamily,
-              color: Colors.black,
-              height: 1.8,
-            ),
+          width: double.infinity,
+          alignment: Alignment.center,
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            textDirection: TextDirection.rtl,
+            spacing: (bloc.arabicFontSize * 0.18).clamp(5.0, 9.0),
+            runSpacing: (bloc.arabicFontSize * 0.45).clamp(12.0, 22.0),
+            children: List<Widget>.from(currentSpans),
           ),
         ),
       ));
@@ -239,51 +274,68 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       text = text.replaceAll(RegExp(r'\s*\(\d+\)\s*$'), '');
       text = text.replaceAll(RegExp(r'[\u06D6-\u06ED\s]+$'), '');
 
-      currentSpans.add(
-        TextSpan(
-          children: [
-            TextSpan(
-              text: "$text ",
+      // Split verse text into words for Wrap layout
+      final List<String> words = text.split(RegExp(r'\s+'));
+      for (final word in words) {
+        if (word.trim().isEmpty) continue;
+        currentSpans.add(
+          GestureDetector(
+            onTap: () {
+              SHEET.bottomSheetPreview(
+                  context, listAyat, listAyat.indexOf(aya), bloc,
+                  showPlayButton: false);
+            },
+            child: Text(
+              word,
               style: TextStyle(
+                fontSize: bloc.arabicFontSize,
+                fontFamily: bloc.arabicFontFamily,
                 color: isTargetAya ? bloc.selectedTheme : Colors.black,
-                fontWeight: isTargetAya ? FontWeight.w700 : FontWeight.normal,
+                fontWeight:
+                    isTargetAya ? FontWeight.w700 : FontWeight.normal,
               ),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  SHEET.bottomSheetPreview(
-                      context, listAyat, listAyat.indexOf(aya), bloc,
-                      showPlayButton: false);
-                },
             ),
-            WidgetSpan(
-              alignment: PlaceholderAlignment.middle,
-              child: Container(
-                key: _ayahKeys["${aya.surahId}_${aya.ayatNumber}"] ??=
-                    GlobalKey(),
-                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                width: (bloc.arabicFontSize * 0.95).clamp(24.0, 36.0),
-                height: (bloc.arabicFontSize * 0.95).clamp(24.0, 36.0),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isTargetAya
+          ),
+        );
+      }
+
+      // Bookmark-able verse number circle
+      final String bookmarkKey = "${aya.surahId}_${aya.ayatNumber}";
+      final bool isBookmarked = bookmarkedAyats.contains(bookmarkKey);
+      currentSpans.add(
+        GestureDetector(
+          onTap: () => _toggleAyatBookmark(bookmarkKey),
+          child: Container(
+            key: _ayahKeys["${aya.surahId}_${aya.ayatNumber}"] ??= GlobalKey(),
+            margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            width: (bloc.arabicFontSize * 0.95).clamp(24.0, 36.0),
+            height: (bloc.arabicFontSize * 0.95).clamp(24.0, 36.0),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isBookmarked
+                  ? bloc.selectedTheme.withOpacity(0.12)
+                  : Colors.transparent,
+              border: Border.all(
+                color: isBookmarked
+                    ? bloc.selectedTheme
+                    : (isTargetAya
                         ? bloc.selectedTheme.withOpacity(0.5)
-                        : Colors.grey.withOpacity(0.35),
-                    width: 1.5,
-                  ),
-                ),
-                child: Text(
-                  aya.ayatNumber ?? '',
-                  style: TextStyle(
-                    fontSize: (bloc.arabicFontSize * 0.42).clamp(11.0, 17.0),
-                    fontWeight: FontWeight.bold,
-                    color: isTargetAya ? bloc.selectedTheme : Colors.black54,
-                  ),
-                ),
+                        : Colors.grey.withOpacity(0.35)),
+                width: 1.5,
               ),
             ),
-          ],
+            child: Text(
+              aya.ayatNumber ?? '',
+              style: TextStyle(
+                fontSize: (bloc.arabicFontSize * 0.42).clamp(11.0, 17.0),
+                fontWeight: FontWeight.bold,
+                color: isBookmarked
+                    ? bloc.selectedTheme
+                    : (isTargetAya ? bloc.selectedTheme : Colors.black54),
+              ),
+            ),
+          ),
         ),
       );
 
@@ -692,8 +744,8 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                               cacheExtent: 5000,
                               slivers: [
                                 SliverPadding(
-                                  padding: const EdgeInsets.only(
-                                      left: 12, right: 12, top: 10, bottom: 10),
+                                   padding: const EdgeInsets.only(
+                                      left: 20, right: 20, top: 10, bottom: 10),
                                   sliver: SliverList(
                                     delegate: SliverChildListDelegate(
                                       paraArabicScreenWidget,

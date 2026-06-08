@@ -18,6 +18,7 @@ import '../../../Provider/audio_provider.dart';
 import '../../../Widgets/audio_controller_overlay.dart';
 import 'package:flutter_intro/flutter_intro.dart';
 import '../../../Utils/utils.dart';
+import 'package:iqra/Helper/favourite.dart';
 
 class QuranView extends StatefulWidget {
   final String? ayatCount;
@@ -178,13 +179,14 @@ class _QuranViewState extends State<QuranView> {
         );
       }
 
+      final String bookmarkKey = "${aya.surahId}_${aya.ayatNumber}";
+      final bool isBookmarked = bookmarkedAyats.contains(bookmarkKey);
+
       // Add the verse number circle
       textSpanChildren.add(
         GestureDetector(
           onTap: () {
-            SHEET.bottomSheetPreview(
-                context, listAyat, listAyat.indexOf(aya), bloc,
-                showPlayButton: true);
+            _toggleAyatBookmark(bookmarkKey);
           },
           child: Container(
             key: _ayahKeys[aya.ayatNumberInt] ??= GlobalKey(),
@@ -194,10 +196,15 @@ class _QuranViewState extends State<QuranView> {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
+              color: isBookmarked
+                  ? bloc.selectedTheme.withOpacity(0.12)
+                  : Colors.transparent,
               border: Border.all(
-                color: isTargetAyat
-                    ? bloc.selectedTheme.withOpacity(0.5)
-                    : Colors.grey.withOpacity(0.35),
+                color: isBookmarked
+                    ? bloc.selectedTheme
+                    : (isTargetAyat
+                        ? bloc.selectedTheme.withOpacity(0.5)
+                        : Colors.grey.withOpacity(0.35)),
                 width: 1.5,
               ),
             ),
@@ -206,7 +213,9 @@ class _QuranViewState extends State<QuranView> {
               style: TextStyle(
                 fontSize: (bloc.arabicFontSize * 0.42).clamp(11.0, 17.0),
                 fontWeight: FontWeight.bold,
-                color: isTargetAyat ? bloc.selectedTheme : Colors.black54,
+                color: isBookmarked
+                    ? bloc.selectedTheme
+                    : (isTargetAyat ? bloc.selectedTheme : Colors.black54),
               ),
             ),
           ),
@@ -301,6 +310,40 @@ class _QuranViewState extends State<QuranView> {
     }
   }
 
+  Set<String> bookmarkedAyats = {};
+
+  Future<void> _loadAyatBookmarks() async {
+    final data = await SavedPreferences.getBookmarkedAyats();
+    if (data != null && mounted) {
+      setState(() {
+        bookmarkedAyats = Set<String>.from(data);
+      });
+    }
+  }
+
+  Future<void> _toggleAyatBookmark(String key) async {
+    if (bookmarkedAyats.contains(key)) {
+      bookmarkedAyats.remove(key);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ayat removed from bookmarks', textAlign: TextAlign.center),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    } else {
+      bookmarkedAyats.add(key);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ayat added to bookmarks', textAlign: TextAlign.center),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
+    setState(() {});
+    await SavedPreferences.setBookmarkedAyats(bookmarkedAyats.toList());
+    viewMaker(); // Re-render to update the circle UI
+  }
+
   int? _highlightedAyah;
 
   @override
@@ -332,18 +375,21 @@ class _QuranViewState extends State<QuranView> {
       });
     }
 
-    viewMaker().then((_) {
-      // Jump to saved offset after content is loaded
-      if (widget.initialScrollOffset != null &&
-          widget.initialScrollOffset! > 0) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_scrollViewController != null &&
-              _scrollViewController!.hasClients) {
-            _scrollViewController!.jumpTo(widget.initialScrollOffset!);
-          }
-        });
-      }
+    _loadAyatBookmarks().then((_) {
+      viewMaker().then((_) {
+        // Jump to saved offset after content is loaded
+        if (widget.initialScrollOffset != null &&
+            widget.initialScrollOffset! > 0) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_scrollViewController != null &&
+                _scrollViewController!.hasClients) {
+              _scrollViewController!.jumpTo(widget.initialScrollOffset!);
+            }
+          });
+        }
+      });
     });
+
     _scrollViewController = ScrollController(
       initialScrollOffset: widget.initialScrollOffset ?? 0.0,
     );

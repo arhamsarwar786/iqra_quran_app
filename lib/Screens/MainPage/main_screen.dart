@@ -301,12 +301,12 @@ class BottomBarApp extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.favorite_rounded,
+                          Icons.turned_in_rounded,
                           color: Theme.of(context).primaryColor,
                           size: 24,
                         ),
                         Text(
-                          "Favorite",
+                          "Saved",
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
