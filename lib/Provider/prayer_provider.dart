@@ -101,6 +101,9 @@ class PrayerProvider extends ChangeNotifier {
           Placemark place = placemarks[0];
           locationName =
               "${place.locality ?? place.subAdministrativeArea}, ${place.country}";
+          if (place.country != null && place.country!.isNotEmpty) {
+            await SavedPrefernces.setLastCountry(place.country!);
+          }
         }
       } catch (e) {
         // Fallback for geocoding error

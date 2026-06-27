@@ -1,5 +1,6 @@
 // ignore_for_file: file_names
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:arabic_numbers/arabic_numbers.dart';
@@ -62,10 +63,13 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   final Map<String, GlobalKey> _ayahKeys = {};
 
   // Tracking for theme/font changes to trigger real-time re-renders
-  double? _lastFontSize;
-  String? _lastFontFamily;
-  Color? _lastThemeColor;
-  double _baseArabicFontSize = 30.0;
+  double _pinchStartFontSize = 30.0;
+  double? _pinchStartDistance;
+  bool _isPinching = false;
+  final Map<int, Offset> _activePointers = {};
+  ThemeProvider? _themeProvider;
+  DateTime? _lastPinchRebuild;
+  int _viewMakerGeneration = 0;
   List<Aya> listAyat = [];
   SurahMetadata? firstSurahMetadata;
   SurahMetadata? currentSurahMetadata;
@@ -107,7 +111,95 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _audioProvider = Provider.of<AudioProvider>(context, listen: false);
+    _audioProvider ??= Provider.of<AudioProvider>(context, listen: false);
+
+    final theme = context.read<ThemeProvider>();
+    if (_themeProvider != theme) {
+      _themeProvider?.removeListener(_onThemeChanged);
+      _themeProvider = theme;
+      _themeProvider!.addListener(_onThemeChanged);
+    }
+  }
+
+  void _onThemeChanged() {
+    if (!mounted || listAyat.isEmpty) return;
+
+    if (_isPinching) {
+      final now = DateTime.now();
+      if (_lastPinchRebuild != null &&
+          now.difference(_lastPinchRebuild!) <
+              const Duration(milliseconds: 120)) {
+        return;
+      }
+      _lastPinchRebuild = now;
+    }
+
+    _rebuildParaContent();
+  }
+
+  Future<void> _rebuildParaContent() async {
+    final controller = _scrollViewController;
+    final offset = controller != null && controller.hasClients
+        ? controller.offset
+        : 0.0;
+    await viewMaker();
+    if (!mounted) return;
+    if (controller != null && controller.hasClients) {
+      final max = controller.position.maxScrollExtent;
+      controller.jumpTo(offset.clamp(0.0, max));
+    }
+  }
+
+  Future<void> _openSettings() async {
+    await push(context, const SettingScreen());
+    if (!mounted) return;
+    await _rebuildParaContent();
+  }
+
+  double _pointerDistance() {
+    final positions = _activePointers.values.toList();
+    if (positions.length < 2) return 0;
+    return (positions[0] - positions[1]).distance;
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    _activePointers[event.pointer] = event.position;
+    _pauseAutoScrollForTouch();
+
+    if (_activePointers.length == 2) {
+      _pinchStartDistance = _pointerDistance();
+      _pinchStartFontSize = context.read<ThemeProvider>().arabicFontSize;
+      setState(() => _isPinching = true);
+    }
+  }
+
+  void _handlePointerMove(PointerMoveEvent event) {
+    _activePointers[event.pointer] = event.position;
+
+    if (_activePointers.length >= 2 &&
+        _pinchStartDistance != null &&
+        _pinchStartDistance! > 0) {
+      final scale = _pointerDistance() / _pinchStartDistance!;
+      final newSize = (_pinchStartFontSize * scale).clamp(20.0, 60.0);
+      context.read<ThemeProvider>().changeArabicFont(newSize);
+    }
+  }
+
+  void _handlePointerUp(PointerEvent event) {
+    _activePointers.remove(event.pointer);
+
+    if (_activePointers.length < 2) {
+      _pinchStartDistance = null;
+      if (_isPinching) {
+        setState(() => _isPinching = false);
+        _lastPinchRebuild = null;
+        _rebuildParaContent();
+      }
+    }
+
+    if (_activePointers.isEmpty) {
+      _resumeAutoScrollAfterTouch();
+    }
   }
 
   @override
@@ -176,17 +268,19 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   }
 
   Future<void> viewMaker() async {
+    final generation = ++_viewMakerGeneration;
     final bloc = context.read<ThemeProvider>();
     final quranProvider = context.read<QuranDataProvider>();
     if (listAyat.isEmpty) return;
 
-    paraArabicScreenWidget.clear();
+    final builtWidgets = <Widget>[];
     _ayahKeys.clear();
-    // surahHeaderKeys.clear(); // Removed to allow persistence across build/highlight cycles
-    firstSurahMetadata = null;
+    final savedFirstSurahMetadata = firstSurahMetadata;
 
     List<Widget> currentSpans = [];
     String? currentSurahId;
+
+    var isFirstSurahHeaderPending = savedFirstSurahMetadata == null;
 
     // Helper to flush blocks and assign the target key precisely
     void flush(bool hasTarget) {
@@ -198,7 +292,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
         _targetKey = key;
       }
 
-      paraArabicScreenWidget.add(Padding(
+      builtWidgets.add(Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0.0),
         child: Container(
           key: key,
@@ -243,15 +337,16 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
           final key = surahHeaderKeys[aya.surahId!] ?? GlobalKey();
           surahHeaderKeys[aya.surahId!] = key;
 
-          if (firstSurahMetadata == null) {
+          if (isFirstSurahHeaderPending) {
             firstSurahMetadata = metadata;
             currentSurahMetadata = metadata;
+            isFirstSurahHeaderPending = false;
             // Invisible tracker for the first surah of the Juz
-            paraArabicScreenWidget.add(_KeepAliveWrapper(
+            builtWidgets.add(_KeepAliveWrapper(
               child: SizedBox(key: key, height: 0),
             ));
           } else {
-            paraArabicScreenWidget.add(_KeepAliveWrapper(
+            builtWidgets.add(_KeepAliveWrapper(
               child: SurahHeaderCard(
                 key: key,
                 metadata: metadata,
@@ -352,20 +447,19 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
         // Add sign widgets
         if (hasSplitSign) {
-          _addSignWidget(aya, quranProvider);
+          _addSignWidget(aya, quranProvider, builtWidgets);
         }
       }
     }
 
     flush(false); // Flush final block
-    paraArabicScreenWidget.add(const SizedBox(height: 150));
-    if (mounted) {
-      setState(() {
-        _lastFontSize = bloc.arabicFontSize;
-        _lastFontFamily = bloc.arabicFontFamily;
-        _lastThemeColor = bloc.selectedTheme;
-      });
-    }
+    builtWidgets.add(const SizedBox(height: 150));
+
+    if (!mounted || generation != _viewMakerGeneration) return;
+
+    setState(() {
+      paraArabicScreenWidget = builtWidgets;
+    });
 
     // After the list is built and rendered, ensure the header shows the correct Surah
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -386,7 +480,8 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     });
   }
 
-  void _addSignWidget(Aya aya, QuranDataProvider quranProvider) {
+  void _addSignWidget(
+      Aya aya, QuranDataProvider quranProvider, List<Widget> target) {
     String mainSign = "";
     String? displayLabel;
     String? topNum, midNum, botNum;
@@ -418,7 +513,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     }
 
     if (mainSign.isNotEmpty) {
-      paraArabicScreenWidget.add(QuranSignWidget(
+      target.add(QuranSignWidget(
         sign: mainSign,
         label: displayLabel,
         topNumber: topNum,
@@ -548,6 +643,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
   @override
   void dispose() {
+    _themeProvider?.removeListener(_onThemeChanged);
     // Stop audio when moving back from the screen
     _audioProvider?.stopPlayback();
     _scrollViewController?.dispose();
@@ -559,14 +655,6 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     final bloc = context.watch<ThemeProvider>();
     final audioProvider = context.watch<AudioProvider>();
 
-    // Detect theme/font changes and trigger re-render in real-time
-    if (bloc.arabicFontSize != _lastFontSize ||
-        bloc.arabicFontFamily != _lastFontFamily ||
-        bloc.selectedTheme != _lastThemeColor) {
-      Future.microtask(() => viewMaker());
-    }
-
-    // Sync highlighting with audio
     // Sync highlighting with audio using global ayatId
     if (audioProvider.currentAyahId != _lastRecitedId) {
       _lastRecitedId = audioProvider.currentAyahId;
@@ -637,7 +725,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                           );
                         }
                       } else if (index == 2) {
-                        push(context, const SettingScreen());
+                        _openSettings();
                       }
                     },
                     items: [
@@ -681,22 +769,13 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                 isScrollingDown = !isScrollingDown;
               });
             },
-            onScaleStart: (details) {
-              _baseArabicFontSize = bloc.arabicFontSize;
-            },
-            onScaleUpdate: (details) {
-              if (details.scale != 1.0) {
-                double newSize =
-                    (_baseArabicFontSize * details.scale).clamp(20.0, 60.0);
-                bloc.changeArabicFont(newSize);
-              }
-            },
             child: Stack(
               children: [
                 Listener(
-                  onPointerDown: (_) => _pauseAutoScrollForTouch(),
-                  onPointerUp: (_) => _resumeAutoScrollAfterTouch(),
-                  onPointerCancel: (_) => _resumeAutoScrollAfterTouch(),
+                  onPointerDown: _handlePointerDown,
+                  onPointerMove: _handlePointerMove,
+                  onPointerUp: _handlePointerUp,
+                  onPointerCancel: _handlePointerUp,
                   child: NestedScrollView(
                     headerSliverBuilder:
                         (BuildContext context, bool innerBoxIsScrolled) {
@@ -739,8 +818,14 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                               return false;
                             },
                             child: CustomScrollView(
+                              key: ValueKey(
+                                'para_${bloc.arabicFontSize}_'
+                                '${bloc.arabicFontFamily}',
+                              ),
                               controller: _scrollViewController,
-                              physics: const AlwaysScrollableScrollPhysics(),
+                              physics: _isPinching
+                                  ? const NeverScrollableScrollPhysics()
+                                  : const AlwaysScrollableScrollPhysics(),
                               cacheExtent: 5000,
                               slivers: [
                                 SliverPadding(
@@ -749,6 +834,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                                   sliver: SliverList(
                                     delegate: SliverChildListDelegate(
                                       paraArabicScreenWidget,
+                                      addAutomaticKeepAlives: false,
                                     ),
                                   ),
                                 ),

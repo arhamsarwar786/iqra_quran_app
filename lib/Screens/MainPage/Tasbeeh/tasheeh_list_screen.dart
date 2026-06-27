@@ -79,7 +79,8 @@ class _TasheehListScreenState extends State<TasheehListScreen> {
       });
 
       setState(() {
-        tasbeehList = [...hajjItems, ...recentItems, ...restItems];
+        // Hajj-specific tasbeehs appear last after the season
+        tasbeehList = [...recentItems, ...restItems, ...hajjItems];
         isLoading = false;
       });
     } catch (e) {
@@ -184,7 +185,6 @@ class _TasbeehCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final baseColor = bloc.selectedTheme;
-    final isHajjSpecial = tasbeeh.no == "1" || tasbeeh.no == "2";
 
     return Container(
       margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
@@ -193,7 +193,6 @@ class _TasbeehCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: isActive ? baseColor.withOpacity(0.75) : baseColor,
-        // Highlight the active tasbeeh with a gold border
         border: isActive
             ? Border.all(color: const Color(0xFFFFD700), width: 2.5)
             : null,
@@ -207,60 +206,41 @@ class _TasbeehCard extends StatelessWidget {
               ]
             : null,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          if (isHajjSpecial)
-            Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.redAccent,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: const Text(
-                "Best to read nowadays",
-                style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-              ),
-            ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // "Currently active" badge on the left
-              isActive
-                  ? const Icon(Icons.check_circle_rounded,
-                      size: 28, color: Color(0xFFFFD700))
-                  : Icon(Icons.chevron_left_outlined,
-                      size: 30, color: MyColors.whiteColor),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      tasbeeh.arabic ?? '',
-                      textDirection: TextDirection.rtl,
-                      style: TextStyle(
-                        fontFamily: bloc.arabicFontFamily,
-                        fontSize: 32,
-                        color: MyColors.whiteColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    Text(
-                      tasbeeh.urduMeaning ?? '',
-                      textDirection: TextDirection.rtl,
-                      style: TextStyle(
-                        fontFamily: bloc.urduFontFamily,
-                        fontSize: 20,
-                        color: MyColors.whiteColor.withOpacity(0.9),
-                      ),
-                    ),
-                  ],
+          isActive
+              ? const Icon(Icons.check_circle_rounded,
+                  size: 28, color: Color(0xFFFFD700))
+              : Icon(Icons.chevron_left_outlined,
+                  size: 30, color: MyColors.whiteColor),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  tasbeeh.arabic ?? '',
+                  textDirection: TextDirection.rtl,
+                  style: TextStyle(
+                    fontFamily: bloc.arabicFontFamily,
+                    fontSize: 32,
+                    color: MyColors.whiteColor,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 15),
+                Text(
+                  tasbeeh.urduMeaning ?? '',
+                  textDirection: TextDirection.rtl,
+                  style: TextStyle(
+                    fontFamily: bloc.urduFontFamily,
+                    fontSize: 20,
+                    color: MyColors.whiteColor.withOpacity(0.9),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

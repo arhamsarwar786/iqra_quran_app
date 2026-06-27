@@ -3,6 +3,7 @@ import 'package:iqra/Helper/preference/saved_preferences.dart';
 import 'package:iqra/Models/theme_model.dart';
 import 'package:iqra/controller/methods.dart';
 import 'package:iqra/Services/analytics_service.dart';
+import 'package:iqra/Services/hijri_service.dart';
 
 class ThemeProvider extends ChangeNotifier {
   // Color selectedTheme = Color(0xff227C9E);0E323F
@@ -84,9 +85,12 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   changeArabicFont(data) {
-    AnalyticsService.trackSettingChange('arabic_font_size', data);
-    SavedPrefernces.setArabicFontSize(data);
-    getSelectedArabicFont();
+    final size = (data as num).toDouble();
+    if (arabicFontSize == size) return;
+    AnalyticsService.trackSettingChange('arabic_font_size', size);
+    arabicFontSize = size;
+    notifyListeners();
+    SavedPrefernces.setArabicFontSize(size);
   }
 
   /// Arabic Font Family
@@ -99,8 +103,10 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   changeArabicFamily(data) {
+    if (arabicFontFamily == data) return;
+    arabicFontFamily = data;
+    notifyListeners();
     SavedPrefernces.setArabicFontFamily(data);
-    getSelectedArabicFamily();
   }
 
   /// Urdu Font
@@ -152,27 +158,96 @@ class ThemeProvider extends ChangeNotifier {
     getSelectedTranslation();
   }
 
-  /// Hijri Offset
-  int hijriOffset = 0;
+  /// Hijri Offset — default −1 matches Karachi / Pakistan prayer method.
+  int hijriOffset = -1;
   bool isHijriManual = false;
 
   getHijriOffset() async {
     isHijriManual = await SavedPrefernces.getHijriManual();
-    int savedOffset = await SavedPrefernces.getHijriOffset();
+    final savedOffset = await SavedPrefernces.getHijriOffset();
+    final calcMethod = await SavedPrefernces.getCalculationMethod();
+    final country = await SavedPrefernces.getLastCountry();
+
+    // Stale manual flag with 0 offset blocks regional auto-adjust (common bug).
+    if (isHijriManual && savedOffset == 0) {
+      isHijriManual = false;
+      await SavedPrefernces.setHijriManual(false);
+    }
 
     if (!isHijriManual) {
-      String? lastCountry = await SavedPrefernces.getLastCountry();
-      if (lastCountry != null) {
-        _applyRegionalOffset(lastCountry);
-      } else {
-        // Default to 0, letting the standard Umm al-Qura algorithm be the baseline
-        // Users can manually adjust this in Settings if their local sighting differs.
-        hijriOffset = 0;
-      }
+      hijriOffset = HijriService.resolveAutoOffset(
+        country: country,
+        calculationMethod: calcMethod,
+      );
+      await SavedPrefernces.setHijriOffset(hijriOffset);
     } else {
       hijriOffset = savedOffset;
     }
     notifyListeners();
+  }
+
+  /// Re-apply auto offset — call when opening the calendar screen.
+  Future<void> refreshHijriOffset() async {
+    isHijriManual = await SavedPrefernces.getHijriManual();
+    final savedOffset = await SavedPrefernces.getHijriOffset();
+
+    if (isHijriManual && savedOffset == 0) {
+      isHijriManual = false;
+      await SavedPrefernces.setHijriManual(false);
+    }
+
+    if (isHijriManual) return;
+
+    final lat = await SavedPrefernces.getLat();
+    final lng = await SavedPrefernces.getLng();
+    if (lat != 0.0 && lng != 0.0) {
+      await syncHijriFromLocation(lat, lng);
+      return;
+    }
+
+    await getHijriOffset();
+  }
+
+  Future<void> syncHijriFromLocation(double latitude, double longitude) async {
+    if (isHijriManual) return;
+
+    final country = await HijriService.countryFromCoordinates(
+      latitude,
+      longitude,
+    );
+
+    if (country != null) {
+      await SavedPrefernces.setLastCountry(country);
+    }
+
+    await _applyAutoOffset(country);
+  }
+
+  Future<void> _applyAutoOffset(String? country) async {
+    final calcMethod = await SavedPrefernces.getCalculationMethod();
+    final savedCountry = country ?? await SavedPrefernces.getLastCountry();
+    final newOffset = HijriService.resolveAutoOffset(
+      country: savedCountry,
+      calculationMethod: calcMethod,
+    );
+
+    hijriOffset = newOffset;
+    await SavedPrefernces.setHijriOffset(newOffset);
+    notifyListeners();
+  }
+
+  Future<void> resetHijriToAuto() async {
+    isHijriManual = false;
+    await SavedPrefernces.setHijriManual(false);
+
+    final lat = await SavedPrefernces.getLat();
+    final lng = await SavedPrefernces.getLng();
+    if (lat != 0.0 && lng != 0.0) {
+      await syncHijriFromLocation(lat, lng);
+      return;
+    }
+
+    await getHijriOffset();
   }
 
   changeHijriOffset(int data) async {
@@ -187,19 +262,6 @@ class ThemeProvider extends ChangeNotifier {
   void updateHijriAutoAdjust(String country) {
     if (isHijriManual) return;
     SavedPrefernces.setLastCountry(country);
-    _applyRegionalOffset(country);
-  }
-
-  void _applyRegionalOffset(String country) {
-    // We no longer hardcode -1 for these regions as it can often conflict
-    // with actual local sightings or the user's expectations.
-    // The default Umm al-Qura is the baseline, and users can manually adjust.
-    int newOffset = 0;
-
-    if (hijriOffset != newOffset) {
-      hijriOffset = newOffset;
-      SavedPrefernces.setHijriOffset(newOffset);
-      notifyListeners();
-    }
+    _applyAutoOffset(country);
   }
 }

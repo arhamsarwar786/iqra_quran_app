@@ -193,7 +193,7 @@ class _SplashScreenState extends State<SplashScreen>
                             ),
                             FittedBox(
                               child: TypewriterText(
-                                text: "Dev'sinn Technologies",
+                                text: "Devsinn Technologies",
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 13,

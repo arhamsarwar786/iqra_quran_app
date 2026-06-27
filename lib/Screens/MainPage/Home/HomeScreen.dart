@@ -16,7 +16,7 @@ import 'package:iqra/Utils/share_verse.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:hijri/hijri_calendar.dart';
+import 'package:iqra/Services/hijri_service.dart';
 import '../../../widgets.dart';
 import '../Drawer/Drawerr Screen.dart';
 import '../Drawer/About Us.dart';
@@ -57,10 +57,22 @@ class _HomeState extends State<Home> {
     tz.initializeTimeZones();
     super.initState();
 
-    // Pre-load prayer data for instant access
-    Future.microtask(() {
-      if (mounted) {
-        context.read<PrayerProvider>().fetchPrayerData();
+    // Pre-load prayer data and sync Hijri date for the user's region.
+    Future.microtask(() async {
+      if (!mounted) return;
+      await context.read<PrayerProvider>().fetchPrayerData();
+      if (!mounted) return;
+
+      final theme = context.read<ThemeProvider>();
+      final lat = await SavedPrefernces.getLat();
+      final lng = await SavedPrefernces.getLng();
+      if (lat != 0.0 && lng != 0.0) {
+        await theme.syncHijriFromLocation(lat, lng);
+      } else {
+        final country = await SavedPrefernces.getLastCountry();
+        if (country != null) {
+          theme.updateHijriAutoAdjust(country);
+        }
       }
     });
 
@@ -187,8 +199,8 @@ class _HomeState extends State<Home> {
                       screensList(context, size, bloc, key: key),
                 ),
                 const SizedBox(height: 10),
-                const HajjLiveCard(),
-                const SizedBox(height: 10),
+                // const HajjLiveCard(),
+                // const SizedBox(height: 10),
                 IntroStepBuilder(
                   order: 7,
                   getOverlayPosition: (
@@ -1024,8 +1036,7 @@ class _SearchInQuaranState extends State<SearchInQuaran> {
   Widget build(BuildContext context) {
     final bloc = widget.bloc!;
     final size = widget.size!;
-    final today =
-        HijriCalendar.fromDate(_now.add(Duration(days: bloc.hijriOffset)));
+    final today = HijriService.toHijri(_now, bloc.hijriOffset);
 
     return Consumer<PrayerProvider>(
       builder: (context, provider, child) {
