@@ -9,7 +9,7 @@ class SurahHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<ThemeProvider>();
+    final theme = context.read<ThemeProvider>();
 
     return Container(
       margin: EdgeInsets.zero,
@@ -204,7 +204,7 @@ class CompleteQuranHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<ThemeProvider>();
+    final theme = context.read<ThemeProvider>();
 
     return Stack(
       children: [

@@ -40,10 +40,16 @@ class _SurahTranslationScreenState extends State<SurahTranslationScreen> {
     super.dispose();
   }
 
-  void _scrollToIndex(int index) {
+  List<Aya> get _displayAyats =>
+      widget.ayatList?.where((a) => a.ayatNumber != "0").toList() ?? [];
+
+  double _estimatedCardHeight(ThemeProvider bloc) =>
+      bloc.arabicFontSize + bloc.urduFontSize + 160;
+
+  void _scrollToIndex(int index, ThemeProvider bloc) {
     if (!_scrollController.hasClients) return;
     _scrollController.animateTo(
-      index * 220.0, // rough estimate of card height
+      index * _estimatedCardHeight(bloc),
       duration: const Duration(milliseconds: 600),
       curve: Curves.easeInOut,
     );
@@ -51,14 +57,15 @@ class _SurahTranslationScreenState extends State<SurahTranslationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<ThemeProvider>();
+    final bloc = context.watch<ThemeProvider>();
     final audioProvider = context.watch<AudioProvider>();
+    final ayats = _displayAyats;
 
     if (audioProvider.currentAyahIndex != null &&
         audioProvider.currentAyahIndex != _lastIndex) {
       _lastIndex = audioProvider.currentAyahIndex;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToIndex(_lastIndex!);
+        _scrollToIndex(_lastIndex!, bloc);
       });
     }
 
@@ -78,17 +85,19 @@ class _SurahTranslationScreenState extends State<SurahTranslationScreen> {
         child: Stack(
           children: [
             ListView.builder(
+              key: ValueKey(
+                'surah_tr_${bloc.arabicFontSize}_${bloc.urduFontSize}_'
+                '${bloc.arabicFontFamily}_${bloc.urduFontFamily}',
+              ),
               controller: _scrollController,
               padding: const EdgeInsets.fromLTRB(0, 10, 0, 100),
-              itemCount: widget.ayatList?.length ?? 0,
+              itemCount: ayats.length,
               itemBuilder: (context, i) {
                 return TranlationCardSection(
                   provider: bloc,
-                  ayats: widget.ayatList!,
+                  ayats: ayats,
                   index: i,
-                  isHighlighted: audioProvider.currentAyahIndex != null &&
-                      audioProvider.currentAyahIndex ==
-                          i - (widget.ayatList![0].ayatNumber == "0" ? 1 : 0),
+                  isHighlighted: audioProvider.currentAyahIndex == i,
                 );
               },
             ),

@@ -174,7 +174,7 @@ class TranlationCardSection extends StatelessWidget {
               aya.arabicText,
               textAlign: TextAlign.right,
               style: TextStyle(
-                fontSize: 28,
+                fontSize: provider.arabicFontSize,
                 fontFamily: provider.arabicFontFamily,
                 color: Colors.black,
                 fontWeight: FontWeight.w500,
@@ -187,7 +187,7 @@ class TranlationCardSection extends StatelessWidget {
               translationText,
               textAlign: TextAlign.right,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: provider.urduFontSize,
                 fontFamily: provider.urduFontFamily,
                 color: Colors.black87,
               ),

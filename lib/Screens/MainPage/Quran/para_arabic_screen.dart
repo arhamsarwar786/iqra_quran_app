@@ -771,39 +771,39 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
             },
             child: Stack(
               children: [
-                Listener(
-                  onPointerDown: _handlePointerDown,
-                  onPointerMove: _handlePointerMove,
-                  onPointerUp: _handlePointerUp,
-                  onPointerCancel: _handlePointerUp,
-                  child: NestedScrollView(
-                    headerSliverBuilder:
-                        (BuildContext context, bool innerBoxIsScrolled) {
-                      return [
-                        SliverAppBar(
-                          automaticallyImplyLeading: false,
-                          backgroundColor: currentSurahMetadata != null
-                              ? bloc.selectedTheme
-                              : Colors.white,
-                          elevation: 0,
-                          expandedHeight: isScrollingDown
-                              ? (currentSurahMetadata != null ? 100.0 : 0.0)
-                              : (currentSurahMetadata != null ? 156.0 : 56.0),
-                          toolbarHeight: currentSurahMetadata != null
-                              ? 100.0
-                              : (isScrollingDown ? 0.0 : 56.0),
-                          floating: false,
-                          pinned: true,
-                          flexibleSpace: CompleteQuranHeader(
-                            title:
-                                widget.parahname ?? 'Para ${widget.parahCount}',
-                            metadata: currentSurahMetadata,
-                            isScrollingDown: isScrollingDown,
-                          ),
+                NestedScrollView(
+                  headerSliverBuilder:
+                      (BuildContext context, bool innerBoxIsScrolled) {
+                    return [
+                      SliverAppBar(
+                        automaticallyImplyLeading: false,
+                        backgroundColor: currentSurahMetadata != null
+                            ? bloc.selectedTheme
+                            : Colors.white,
+                        elevation: 0,
+                        expandedHeight: isScrollingDown
+                            ? (currentSurahMetadata != null ? 100.0 : 0.0)
+                            : (currentSurahMetadata != null ? 156.0 : 0.0),
+                        toolbarHeight: currentSurahMetadata != null
+                            ? 100.0
+                            : (isScrollingDown ? 0.0 : 56.0),
+                        floating: false,
+                        pinned: true,
+                        flexibleSpace: CompleteQuranHeader(
+                          title:
+                              widget.parahname ?? 'Para ${widget.parahCount}',
+                          metadata: currentSurahMetadata,
+                          isScrollingDown: isScrollingDown,
                         ),
-                      ];
-                    },
-                    body: SizedBox.expand(
+                      ),
+                    ];
+                  },
+                  body: Listener(
+                    onPointerDown: _handlePointerDown,
+                    onPointerMove: _handlePointerMove,
+                    onPointerUp: _handlePointerUp,
+                    onPointerCancel: _handlePointerUp,
+                    child: SizedBox.expand(
                       child: Container(
                         color: Colors.white,
                         child: Directionality(

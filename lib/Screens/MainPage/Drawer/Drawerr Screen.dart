@@ -28,38 +28,38 @@ class Darwerr extends StatefulWidget {
 
 class _DarwerrState extends State<Darwerr> with SingleTickerProviderStateMixin {
   static const _menuTitles = [
-    'Favourite',
+    'Setting',
     'Quran',
     'Kalima',
     'Dua',
     'Tasbeeh',
     // 'Contact Us',
     'About Us',
-    'Setting',
+    'Favourite',
     'Donate 🤍',
     'Share',
   ];
   static const _icons = [
-    Icons.favorite,
+    Icons.settings,
     Icons.menu_book,
     Icons.list,
     Icons.handshake,
     Icons.ads_click,
     // Icons.contacts_sharp,
     Icons.info_outline_rounded,
-    Icons.settings,
+    Icons.favorite,
     Icons.volunteer_activism_rounded,
     Icons.share,
   ];
   final List _navigationSc = [
-    const Favorite(),
+    const SettingScreen(),
     TabBarDemo(),
     KhalimaScreen(),
     const DuaScreen(),
     const Tasbih(),
     // const Contactus(),
     const Aboutus(),
-    const SettingScreen(),
+    const Favorite(),
   ];
   static const _initialDelayTime = Duration(milliseconds: 50);
   static const _itemSlideTime = Duration(milliseconds: 600);

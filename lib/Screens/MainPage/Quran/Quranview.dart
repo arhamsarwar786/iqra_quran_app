@@ -61,7 +61,10 @@ class _QuranViewState extends State<QuranView> {
   double? _lastFontSize;
   String? _lastFontFamily;
   Color? _lastThemeColor;
-  double _baseArabicFontSize = 30.0;
+  double _pinchStartFontSize = 30.0;
+  double? _pinchStartDistance;
+  bool _isPinching = false;
+  final Map<int, Offset> _activePointers = {};
 
   viewMaker() async {
     final bloc = context.read<ThemeProvider>();
@@ -469,6 +472,51 @@ class _QuranViewState extends State<QuranView> {
     _startAutoScroll();
   }
 
+  double _pointerDistance() {
+    final positions = _activePointers.values.toList();
+    if (positions.length < 2) return 0;
+    return (positions[0] - positions[1]).distance;
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    _activePointers[event.pointer] = event.position;
+    _pauseAutoScrollForTouch();
+
+    if (_activePointers.length == 2) {
+      _pinchStartDistance = _pointerDistance();
+      _pinchStartFontSize = context.read<ThemeProvider>().arabicFontSize;
+      setState(() => _isPinching = true);
+    }
+  }
+
+  void _handlePointerMove(PointerMoveEvent event) {
+    _activePointers[event.pointer] = event.position;
+
+    if (_activePointers.length >= 2 &&
+        _pinchStartDistance != null &&
+        _pinchStartDistance! > 0) {
+      final scale = _pointerDistance() / _pinchStartDistance!;
+      final newSize = (_pinchStartFontSize * scale).clamp(20.0, 60.0);
+      context.read<ThemeProvider>().changeArabicFont(newSize);
+    }
+  }
+
+  void _handlePointerUp(PointerEvent event) {
+    _activePointers.remove(event.pointer);
+
+    if (_activePointers.length < 2) {
+      _pinchStartDistance = null;
+      if (_isPinching) {
+        setState(() => _isPinching = false);
+        viewMaker();
+      }
+    }
+
+    if (_activePointers.isEmpty) {
+      _resumeAutoScrollAfterTouch();
+    }
+  }
+
   /// Only called by the Stop button — fully cancels auto-scroll.
   void _stopAutoScroll() {
     _scrollViewController!.jumpTo(_scrollViewController!.position.pixels);
@@ -477,6 +525,20 @@ class _QuranViewState extends State<QuranView> {
       _isScrollPaused = false;
       isScrollingDown = false;
     });
+  }
+
+  Future<void> _openSettings() async {
+    final controller = _scrollViewController;
+    final offset =
+        controller != null && controller.hasClients ? controller.offset : 0.0;
+    await push(context, const SettingScreen());
+    if (!mounted) return;
+    await viewMaker();
+    if (!mounted) return;
+    if (controller != null && controller.hasClients) {
+      final max = controller.position.maxScrollExtent;
+      controller.jumpTo(offset.clamp(0.0, max));
+    }
   }
 
   @override
@@ -602,7 +664,7 @@ class _QuranViewState extends State<QuranView> {
                           );
                         }
                       } else if (index == 2) {
-                        push(context, const SettingScreen());
+                        _openSettings();
                       }
                     },
                     items: [
@@ -707,58 +769,49 @@ class _QuranViewState extends State<QuranView> {
                 isScrollingDown = !isScrollingDown;
               });
             },
-            onScaleStart: (details) {
-              _baseArabicFontSize = bloc.arabicFontSize;
-            },
-            onScaleUpdate: (details) {
-              if (details.scale != 1.0) {
-                double newSize =
-                    (_baseArabicFontSize * details.scale).clamp(20.0, 60.0);
-                bloc.changeArabicFont(newSize);
-              }
-            },
             child: Stack(
               children: [
-                Listener(
-                  onPointerDown: (_) => _pauseAutoScrollForTouch(),
-                  onPointerUp: (_) => _resumeAutoScrollAfterTouch(),
-                  onPointerCancel: (_) => _resumeAutoScrollAfterTouch(),
-                  child: NotificationListener<ScrollNotification>(
-                    onNotification: (notification) {
-                      if (notification is ScrollEndNotification) {
-                        if (widget.saveLastRead) {
-                          _updateLastRead(notification.metrics.pixels);
+                NestedScrollView(
+                  headerSliverBuilder:
+                      (BuildContext context, bool innerBoxIsScrolled) {
+                    return [
+                      SliverAppBar(
+                        automaticallyImplyLeading: false,
+                        backgroundColor: metadata != null
+                            ? bloc.selectedTheme
+                            : Colors.white,
+                        elevation: 0,
+                        expandedHeight: isScrollingDown
+                            ? (metadata != null ? 100.0 : 0.0)
+                            : (metadata != null ? 156.0 : 56.0),
+                        toolbarHeight: metadata != null
+                            ? 100.0
+                            : (isScrollingDown ? 0.0 : 56.0),
+                        floating: false,
+                        pinned: true,
+                        flexibleSpace: CompleteQuranHeader(
+                          title: widget.surahName ?? '',
+                          metadata: metadata,
+                          isScrollingDown: isScrollingDown,
+                        ),
+                      ),
+                    ];
+                  },
+                  body: Listener(
+                    onPointerDown: _handlePointerDown,
+                    onPointerMove: _handlePointerMove,
+                    onPointerUp: _handlePointerUp,
+                    onPointerCancel: _handlePointerUp,
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (notification) {
+                        if (notification is ScrollEndNotification) {
+                          if (widget.saveLastRead) {
+                            _updateLastRead(notification.metrics.pixels);
+                          }
                         }
-                      }
-                      return false;
-                    },
-                    child: NestedScrollView(
-                      headerSliverBuilder:
-                          (BuildContext context, bool innerBoxIsScrolled) {
-                        return [
-                          SliverAppBar(
-                            automaticallyImplyLeading: false,
-                            backgroundColor: metadata != null
-                                ? bloc.selectedTheme
-                                : Colors.white,
-                            elevation: 0,
-                            expandedHeight: isScrollingDown
-                                ? (metadata != null ? 100.0 : 0.0)
-                                : (metadata != null ? 156.0 : 56.0),
-                            toolbarHeight: metadata != null
-                                ? 100.0
-                                : (isScrollingDown ? 0.0 : 56.0),
-                            floating: false,
-                            pinned: true,
-                            flexibleSpace: CompleteQuranHeader(
-                              title: widget.surahName ?? '',
-                              metadata: metadata,
-                              isScrollingDown: isScrollingDown,
-                            ),
-                          ),
-                        ];
+                        return false;
                       },
-                      body: SizedBox.expand(
+                      child: SizedBox.expand(
                         child: Container(
                           decoration: const BoxDecoration(
                             color: Colors.white,
@@ -768,7 +821,9 @@ class _QuranViewState extends State<QuranView> {
                             textDirection: TextDirection.rtl,
                             child: SingleChildScrollView(
                               controller: _scrollViewController,
-                              physics: const AlwaysScrollableScrollPhysics(),
+                              physics: _isPinching
+                                  ? const NeverScrollableScrollPhysics()
+                                  : const AlwaysScrollableScrollPhysics(),
                               child: Container(
                                 padding: const EdgeInsets.only(
                                     left: 20, right: 20, top: 10, bottom: 10),
