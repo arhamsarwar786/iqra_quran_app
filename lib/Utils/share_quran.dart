@@ -308,12 +308,8 @@ class QuranShare {
                     ElevatedButton.icon(
                       onPressed: () {
                         Navigator.pop(context);
-                        String reference = "";
-                        if (surahNumber != null && surahNumber != "null") {
-                          reference = " (Surah: $title, Verse: $ayatNumber)";
-                        }
-                        String shareText =
-                            '${title.toUpperCase()}$reference\n\n$arabicText\n\n$translationText\n\nDownload IQRA QURAN: https://play.google.com/store/apps/details?id=com.devsinntechnologies.iqraquran';
+                        const shareText =
+                            'Download IQRA QURAN: https://play.google.com/store/apps/details?id=com.devsinntechnologies.iqraquran';
                         Share.shareXFiles([XFile(file.path)], text: shareText);
                       },
                       icon: const Icon(Icons.share_rounded, size: 18),
@@ -357,12 +353,8 @@ class QuranShare {
     String? surahNumber,
     String? ayatNumber,
   }) {
-    String reference = "";
-    if (surahNumber != null && surahNumber != "null") {
-      reference = " (Surah: $title, Verse: $ayatNumber)";
-    }
-    String shareText =
-        '${title.toUpperCase()}$reference\n\n$arabicText\n\n$translationText\n\nDownload IQRA QURAN: https://play.google.com/store/apps/details?id=com.devsinntechnologies.iqraquran';
+    const shareText =
+        'Download IQRA QURAN: https://play.google.com/store/apps/details?id=com.devsinntechnologies.iqraquran';
     Share.share(shareText);
   }
 }

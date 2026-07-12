@@ -281,8 +281,8 @@ class KalmaDuaShare {
                     ElevatedButton.icon(
                       onPressed: () {
                         Navigator.pop(context);
-                        String shareText =
-                            '${title.toUpperCase()}\n\n$arabicText\n\n$translationText\n\nDownload IQRA QURAN: https://play.google.com/store/apps/details?id=com.devsinntechnologies.iqraquran';
+                        const shareText =
+                            'Download IQRA QURAN: https://play.google.com/store/apps/details?id=com.devsinntechnologies.iqraquran';
                         Share.shareXFiles([XFile(file.path)], text: shareText);
                       },
                       icon: const Icon(Icons.share_rounded, size: 18),
@@ -324,8 +324,8 @@ class KalmaDuaShare {
     required String arabicText,
     required String translationText,
   }) {
-    String shareText =
-        '${title.toUpperCase()}\n\n$arabicText\n\n$translationText\n\nDownload IQRA QURAN: https://play.google.com/store/apps/details?id=com.devsinntechnologies.iqraquran';
+    const shareText =
+        'Download IQRA QURAN: https://play.google.com/store/apps/details?id=com.devsinntechnologies.iqraquran';
     Share.share(shareText);
   }
 }
