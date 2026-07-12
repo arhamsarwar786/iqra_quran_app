@@ -238,20 +238,18 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       initialScrollOffset: widget.initialScrollOffset ?? 0.0,
     );
     _scrollViewController!.addListener(() {
-      if (_scrollViewController!.position.userScrollDirection ==
-          ScrollDirection.reverse) {
-        if (!isScrollingDown) {
-          setState(() {
-            isScrollingDown = true;
-          });
-        }
-      }
-      if (_scrollViewController!.position.userScrollDirection ==
-          ScrollDirection.forward) {
+      final position = _scrollViewController!.position;
+      if (position.pixels <= 8) {
         if (isScrollingDown) {
-          setState(() {
-            isScrollingDown = false;
-          });
+          setState(() => isScrollingDown = false);
+        }
+      } else if (position.userScrollDirection == ScrollDirection.reverse) {
+        if (!isScrollingDown) {
+          setState(() => isScrollingDown = true);
+        }
+      } else if (position.userScrollDirection == ScrollDirection.forward) {
+        if (isScrollingDown) {
+          setState(() => isScrollingDown = false);
         }
       }
       _updateCurrentSurah();
@@ -471,8 +469,9 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
         if (ctx != null) {
           Scrollable.ensureVisible(
             ctx,
-            duration: const Duration(milliseconds: 300),
-            alignment: 0.4, // Keep verse clearly below the header
+            duration: const Duration(milliseconds: 350),
+            alignment: 0.12,
+            alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
             curve: Curves.easeInOut,
           );
         }
@@ -771,80 +770,66 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
             },
             child: Stack(
               children: [
-                NestedScrollView(
-                  headerSliverBuilder:
-                      (BuildContext context, bool innerBoxIsScrolled) {
-                    return [
-                      SliverAppBar(
-                        automaticallyImplyLeading: false,
-                        backgroundColor: currentSurahMetadata != null
-                            ? bloc.selectedTheme
-                            : Colors.white,
-                        elevation: 0,
-                        expandedHeight: isScrollingDown
-                            ? (currentSurahMetadata != null ? 100.0 : 0.0)
-                            : (currentSurahMetadata != null ? 156.0 : 0.0),
-                        toolbarHeight: currentSurahMetadata != null
-                            ? 100.0
-                            : (isScrollingDown ? 0.0 : 56.0),
-                        floating: false,
-                        pinned: true,
-                        flexibleSpace: CompleteQuranHeader(
-                          title:
-                              widget.parahname ?? 'Para ${widget.parahCount}',
-                          metadata: currentSurahMetadata,
-                          isScrollingDown: isScrollingDown,
-                        ),
-                      ),
-                    ];
-                  },
-                  body: Listener(
-                    onPointerDown: _handlePointerDown,
-                    onPointerMove: _handlePointerMove,
-                    onPointerUp: _handlePointerUp,
-                    onPointerCancel: _handlePointerUp,
-                    child: SizedBox.expand(
-                      child: Container(
-                        color: Colors.white,
-                        child: Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: NotificationListener<ScrollNotification>(
-                            onNotification: (notification) {
-                              if (notification is ScrollEndNotification) {
-                                if (widget.saveLastRead) {
-                                  _updateLastRead(notification.metrics.pixels);
-                                }
+                Column(
+                  children: [
+                    CompleteQuranHeader(
+                      title:
+                          widget.parahname ?? 'Para ${widget.parahCount}',
+                      metadata: currentSurahMetadata,
+                      isScrollingDown: isScrollingDown,
+                    ),
+                    Expanded(
+                      child: Listener(
+                        onPointerDown: _handlePointerDown,
+                        onPointerMove: _handlePointerMove,
+                        onPointerUp: _handlePointerUp,
+                        onPointerCancel: _handlePointerUp,
+                        child: NotificationListener<ScrollNotification>(
+                          onNotification: (notification) {
+                            if (notification is ScrollEndNotification) {
+                              if (widget.saveLastRead) {
+                                _updateLastRead(notification.metrics.pixels);
                               }
-                              return false;
-                            },
-                            child: CustomScrollView(
-                              key: ValueKey(
-                                'para_${bloc.arabicFontSize}_'
-                                '${bloc.arabicFontFamily}',
-                              ),
-                              controller: _scrollViewController,
-                              physics: _isPinching
-                                  ? const NeverScrollableScrollPhysics()
-                                  : const AlwaysScrollableScrollPhysics(),
-                              cacheExtent: 5000,
-                              slivers: [
-                                SliverPadding(
-                                   padding: const EdgeInsets.only(
-                                      left: 20, right: 20, top: 10, bottom: 10),
-                                  sliver: SliverList(
-                                    delegate: SliverChildListDelegate(
-                                      paraArabicScreenWidget,
-                                      addAutomaticKeepAlives: false,
+                            }
+                            return false;
+                          },
+                          child: Container(
+                            color: Colors.white,
+                            child: Directionality(
+                              textDirection: TextDirection.rtl,
+                              child: CustomScrollView(
+                                key: ValueKey(
+                                  'para_${bloc.arabicFontSize}_'
+                                  '${bloc.arabicFontFamily}',
+                                ),
+                                controller: _scrollViewController,
+                                physics: _isPinching
+                                    ? const NeverScrollableScrollPhysics()
+                                    : const AlwaysScrollableScrollPhysics(),
+                                cacheExtent: 5000,
+                                slivers: [
+                                  SliverPadding(
+                                    padding: const EdgeInsets.only(
+                                      left: 20,
+                                      right: 20,
+                                      top: 20,
+                                      bottom: 24,
+                                    ),
+                                    sliver: SliverList(
+                                      delegate: SliverChildListDelegate(
+                                        paraArabicScreenWidget,
+                                        addAutomaticKeepAlives: false,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),

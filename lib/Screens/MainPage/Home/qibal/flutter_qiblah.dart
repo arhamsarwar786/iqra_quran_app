@@ -1,127 +1,204 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/services.dart';
+import 'dart:math' as math;
+
 import 'package:flutter_compass/flutter_compass.dart';
-import 'utils.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:stream_transform/stream_transform.dart' show CombineLatest;
+
+import 'utils.dart';
 import '../../../../Helper/preference/saved_preferences.dart';
 
-/// [FlutterQiblah] is a singleton class that provides access to compass events,
-/// check for sensor support, get current location, and calculate Qiblah direction.
+enum CompassSupportStatus {
+  checking,
+  supported,
+  unsupported,
+  needsCalibration,
+  unknownError,
+}
+
+class LocationStatus {
+  final bool enabled;
+  final LocationPermission status;
+
+  const LocationStatus(this.enabled, this.status);
+}
+
+class QiblahDirection {
+  final double qiblah;
+  final double direction;
+  final double offset;
+  final double? accuracy;
+  final double? latitude;
+  final double? longitude;
+
+  const QiblahDirection({
+    required this.qiblah,
+    required this.direction,
+    required this.offset,
+    this.accuracy,
+    this.latitude,
+    this.longitude,
+  });
+
+  /// Degrees to turn (shortest path). 0 = facing Qibla.
+  double get degreesToQibla {
+    var diff = offset - direction;
+    while (diff > 180) {
+      diff -= 360;
+    }
+    while (diff < -180) {
+      diff += 360;
+    }
+    return diff;
+  }
+
+  bool get isFacingQibla => degreesToQibla.abs() < 8;
+
+  bool get needsCalibration {
+    final a = accuracy;
+    if (a == null) return false;
+    if (a <= 1) return true;
+    if (!Platform.isAndroid && a >= 25) return true;
+    return false;
+  }
+}
+
+enum QiblahErrorType {
+  compassUnsupported,
+  compassError,
+  locationError,
+}
+
+class QiblahError implements Exception {
+  final QiblahErrorType type;
+  final String message;
+
+  const QiblahError(this.type, this.message);
+
+  @override
+  String toString() => message;
+}
+
+/// Helpers for Qibla (no long-lived singleton stream — UI listens to sensors directly).
 class FlutterQiblah {
-  static const MethodChannel _channel = MethodChannel('ml.medyas.flutter_qiblah');
-  static final FlutterQiblah _instance = FlutterQiblah._();
-
-  Stream<QiblahDirection>? _qiblahStream;
-
   FlutterQiblah._();
 
-  factory FlutterQiblah() {
-    return _instance;
-  }
-
-  /// Check device sensor support
-  static Future<bool> androidDeviceSensorSupport() async {
-    if (Platform.isAndroid) {
-      try {
-        // If the custom plugin was intended to be used, try it
-        final support = await _channel.invokeMethod("androidSupportSensor");
-        return support ?? true;
-      } catch (e) {
-        // If plugin is missing or error, fallback to assuming true 
-        // and handle specific sensor status in the compass stream check.
-        return true; 
+  /// Lightweight check — does not keep a long subscription that can break the EventChannel.
+  static Future<CompassSupportStatus> checkCompassSupport() async {
+    try {
+      if (FlutterCompass.events == null) {
+        return CompassSupportStatus.unsupported;
       }
+
+      // Peek one event with a short timeout, then cancel immediately.
+      final completer = Completer<CompassSupportStatus>();
+      StreamSubscription<CompassEvent>? sub;
+      Timer? timer;
+
+      timer = Timer(const Duration(seconds: 3), () {
+        sub?.cancel();
+        if (!completer.isCompleted) {
+          completer.complete(CompassSupportStatus.unsupported);
+        }
+      });
+
+      sub = FlutterCompass.events!.listen(
+        (event) {
+          if (event.heading == null) return;
+          timer?.cancel();
+          sub?.cancel();
+          if (completer.isCompleted) return;
+
+          final accuracy = event.accuracy;
+          if (accuracy != null && Platform.isAndroid && accuracy <= 0) {
+            completer.complete(CompassSupportStatus.needsCalibration);
+          } else {
+            completer.complete(CompassSupportStatus.supported);
+          }
+        },
+        onError: (_) {
+          timer?.cancel();
+          sub?.cancel();
+          if (!completer.isCompleted) {
+            completer.complete(CompassSupportStatus.unknownError);
+          }
+        },
+        cancelOnError: true,
+      );
+
+      return completer.future;
+    } catch (_) {
+      return CompassSupportStatus.unknownError;
     }
-    // iOS usually has better compass support out of the box
-    return true; 
   }
 
-  /// Request Location permission
-  static Future<LocationPermission> requestPermissions() async {
-    return await Geolocator.requestPermission();
-  }
+  static Future<LocationPermission> requestPermissions() =>
+      Geolocator.requestPermission();
 
-  /// get location status: GPS enabled and permission status
   static Future<LocationStatus> checkLocationStatus() async {
     final status = await Geolocator.checkPermission();
     final enabled = await Geolocator.isLocationServiceEnabled();
     return LocationStatus(enabled, status);
   }
 
-  /// Provides a stream of Qiblah direction, merging compass and location updates.
-  static Stream<QiblahDirection> get qiblahStream {
-    if (FlutterCompass.events == null) {
-      return Stream.error("Compass not supported on this device");
-    }
+  static Future<bool> openLocationSettings() =>
+      Geolocator.openLocationSettings();
 
-    // Reuse stream if exists, or build a new one
-    _instance._qiblahStream ??= _buildQiblahStream();
-    return _instance._qiblahStream!;
-  }
+  static Future<bool> openAppSettings() => Geolocator.openAppSettings();
 
-  static Stream<QiblahDirection> _buildQiblahStream() {
-    final compassStream = FlutterCompass.events;
-    if (compassStream == null) {
-      return Stream.error("Compass not supported on this device");
-    }
-
-    // Use a more reliable position source that provides immediate value if possible
-    final positionStream = _getReliablePositionStream();
-
-    return compassStream.combineLatest<Position, QiblahDirection>(
-      positionStream,
-      (event, position) {
-        // Calculate the Qiblah offset to North
-        final offSet = Utils.getOffsetFromNorth(position.latitude, position.longitude);
-
-        // Adjust Qiblah direction based on North direction (heading)
-        // If event.heading is null, it means sensor data is temporarily unavailable
-        final qiblah = (event.heading ?? 0.0) + (360 - offSet);
-
-        return QiblahDirection(qiblah, event.heading ?? 0.0, offSet);
-      },
-    );
-  }
-
-  /// Creates a position stream that emits cached/last known position first
-  static Stream<Position> _getReliablePositionStream() async* {
-    // 1. Try our saved preferences first (fastest)
+  static Future<Position?> resolvePosition() async {
     final savedLat = await SavedPrefernces.getLat();
     final savedLng = await SavedPrefernces.getLng();
+    Position? best;
+
     if (savedLat != 0.0 && savedLng != 0.0) {
-      yield _createPosition(savedLat, savedLng);
+      best = _createPosition(savedLat, savedLng);
     }
 
-    // 2. Try last known position for quick update
     try {
       final lastKnown = await Geolocator.getLastKnownPosition();
-      if (lastKnown != null) {
-        yield lastKnown;
-      }
+      if (lastKnown != null) best = lastKnown;
     } catch (_) {}
 
-    // 3. Get current position once for accuracy
     try {
       final current = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.medium,
-        timeLimit: const Duration(seconds: 15),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+          timeLimit: Duration(seconds: 10),
+        ),
       );
-      yield current;
-      
-      // Update saved preferences with latest accurate position
+      best = current;
       await SavedPrefernces.setLat(current.latitude);
       await SavedPrefernces.setLng(current.longitude);
     } catch (_) {}
 
-    // 4. Then follow the stream for any significant changes
-    yield* Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.medium,
-        distanceFilter: 200, // Update only if user moves 200 meters
-      ),
+    return best;
+  }
+
+  static QiblahDirection buildDirection({
+    required double heading,
+    required Position position,
+    double? accuracy,
+  }) {
+    final h = _normalize(heading);
+    final offset =
+        Utils.getOffsetFromNorth(position.latitude, position.longitude);
+    // Same formula as classic flutter_qiblah: needle rotation uses -qiblah.
+    final qiblah = _normalize(h + (360 - offset));
+    return QiblahDirection(
+      qiblah: qiblah,
+      direction: h,
+      offset: offset,
+      accuracy: accuracy,
+      latitude: position.latitude,
+      longitude: position.longitude,
     );
+  }
+
+  static double _normalize(double value) {
+    var v = value % 360;
+    if (v < 0) v += 360;
+    return v;
   }
 
   static Position _createPosition(double lat, double lng) {
@@ -139,25 +216,15 @@ class FlutterQiblah {
     );
   }
 
-  Future<void> dispose() async {
-    _qiblahStream = null;
-  }
+  /// No-op kept for old call sites.
+  Future<void> dispose() async {}
 }
 
-/// Location Status class
-class LocationStatus {
-  final bool enabled;
-  final LocationPermission status;
-
-  const LocationStatus(this.enabled, this.status);
+double shortestAngleDelta(double fromDeg, double toDeg) {
+  var delta = (toDeg - fromDeg) % 360;
+  if (delta > 180) delta -= 360;
+  if (delta < -180) delta += 360;
+  return delta;
 }
 
-/// Containing Qiblah, Direction and offset
-class QiblahDirection {
-  final double qiblah;
-  final double direction;
-  final double offset;
-
-  const QiblahDirection(this.qiblah, this.direction, this.offset);
-}
-
+double degToRad(double deg) => deg * math.pi / 180;

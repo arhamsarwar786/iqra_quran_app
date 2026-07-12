@@ -297,18 +297,18 @@ class _QuranViewState extends State<QuranView> {
     }
 
     if (_targetKey != null) {
-      // Trigger scroll precisely after build
+      // Scroll after layout so the verse sits below the fixed header.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         final ctx = _targetKey!.currentContext;
-        if (ctx != null) {
-          Scrollable.ensureVisible(
-            ctx,
-            duration: const Duration(milliseconds: 300),
-            alignment: 0.4, // Keep verse clearly below the header
-            curve: Curves.easeInOut,
-          );
-        }
+        if (ctx == null) return;
+        Scrollable.ensureVisible(
+          ctx,
+          duration: const Duration(milliseconds: 350),
+          alignment: 0.12,
+          alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
+          curve: Curves.easeInOut,
+        );
       });
     }
   }
@@ -397,19 +397,22 @@ class _QuranViewState extends State<QuranView> {
       initialScrollOffset: widget.initialScrollOffset ?? 0.0,
     );
     _scrollViewController!.addListener(() {
-      if (_scrollViewController!.position.userScrollDirection ==
-          ScrollDirection.reverse) {
-        if (!isScrollingDown) {
-          isScrollingDown = true;
-          setState(() {});
+      final position = _scrollViewController!.position;
+      // Near the top: keep chrome visible; never expand header over text.
+      if (position.pixels <= 8) {
+        if (isScrollingDown) {
+          setState(() => isScrollingDown = false);
         }
+        return;
       }
 
-      if (_scrollViewController!.position.userScrollDirection ==
-          ScrollDirection.forward) {
+      if (position.userScrollDirection == ScrollDirection.reverse) {
+        if (!isScrollingDown) {
+          setState(() => isScrollingDown = true);
+        }
+      } else if (position.userScrollDirection == ScrollDirection.forward) {
         if (isScrollingDown) {
-          isScrollingDown = false;
-          setState(() {});
+          setState(() => isScrollingDown = false);
         }
       }
     });
@@ -771,62 +774,43 @@ class _QuranViewState extends State<QuranView> {
             },
             child: Stack(
               children: [
-                NestedScrollView(
-                  headerSliverBuilder:
-                      (BuildContext context, bool innerBoxIsScrolled) {
-                    return [
-                      SliverAppBar(
-                        automaticallyImplyLeading: false,
-                        backgroundColor: metadata != null
-                            ? bloc.selectedTheme
-                            : Colors.white,
-                        elevation: 0,
-                        expandedHeight: isScrollingDown
-                            ? (metadata != null ? 100.0 : 0.0)
-                            : (metadata != null ? 156.0 : 56.0),
-                        toolbarHeight: metadata != null
-                            ? 100.0
-                            : (isScrollingDown ? 0.0 : 56.0),
-                        floating: false,
-                        pinned: true,
-                        flexibleSpace: CompleteQuranHeader(
-                          title: widget.surahName ?? '',
-                          metadata: metadata,
-                          isScrollingDown: isScrollingDown,
-                        ),
-                      ),
-                    ];
-                  },
-                  body: Listener(
-                    onPointerDown: _handlePointerDown,
-                    onPointerMove: _handlePointerMove,
-                    onPointerUp: _handlePointerUp,
-                    onPointerCancel: _handlePointerUp,
-                    child: NotificationListener<ScrollNotification>(
-                      onNotification: (notification) {
-                        if (notification is ScrollEndNotification) {
-                          if (widget.saveLastRead) {
-                            _updateLastRead(notification.metrics.pixels);
-                          }
-                        }
-                        return false;
-                      },
-                      child: SizedBox.expand(
-                        child: Container(
-                          decoration: const BoxDecoration(
+                Column(
+                  children: [
+                    CompleteQuranHeader(
+                      title: widget.surahName ?? '',
+                      metadata: metadata,
+                      isScrollingDown: isScrollingDown,
+                    ),
+                    Expanded(
+                      child: Listener(
+                        onPointerDown: _handlePointerDown,
+                        onPointerMove: _handlePointerMove,
+                        onPointerUp: _handlePointerUp,
+                        onPointerCancel: _handlePointerUp,
+                        child: NotificationListener<ScrollNotification>(
+                          onNotification: (notification) {
+                            if (notification is ScrollEndNotification) {
+                              if (widget.saveLastRead) {
+                                _updateLastRead(notification.metrics.pixels);
+                              }
+                            }
+                            return false;
+                          },
+                          child: Container(
                             color: Colors.white,
-                          ),
-                          padding: const EdgeInsets.only(top: 4, bottom: 0),
-                          child: Directionality(
-                            textDirection: TextDirection.rtl,
-                            child: SingleChildScrollView(
-                              controller: _scrollViewController,
-                              physics: _isPinching
-                                  ? const NeverScrollableScrollPhysics()
-                                  : const AlwaysScrollableScrollPhysics(),
-                              child: Container(
+                            child: Directionality(
+                              textDirection: TextDirection.rtl,
+                              child: SingleChildScrollView(
+                                controller: _scrollViewController,
+                                physics: _isPinching
+                                    ? const NeverScrollableScrollPhysics()
+                                    : const AlwaysScrollableScrollPhysics(),
                                 padding: const EdgeInsets.only(
-                                    left: 20, right: 20, top: 10, bottom: 10),
+                                  left: 20,
+                                  right: 20,
+                                  top: 20,
+                                  bottom: 24,
+                                ),
                                 child: Column(
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,
@@ -838,7 +822,7 @@ class _QuranViewState extends State<QuranView> {
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
                 const QuranAudioOverlay(),
               ],

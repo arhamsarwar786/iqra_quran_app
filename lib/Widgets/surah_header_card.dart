@@ -189,7 +189,7 @@ class SurahHeaderCard extends StatelessWidget {
   }
 }
 
-/// A unified header widget that handles both the white title bar and the red surah card.
+/// Pinned teal surah header with back button (no separate white title bar).
 class CompleteQuranHeader extends StatelessWidget {
   final String title;
   final SurahMetadata? metadata;
@@ -202,69 +202,70 @@ class CompleteQuranHeader extends StatelessWidget {
     required this.isScrollingDown,
   });
 
+  static const double headerHeight = 100.0;
+
   @override
   Widget build(BuildContext context) {
     final theme = context.read<ThemeProvider>();
 
-    return Stack(
-      children: [
-        // 1. The Pinned Red Surah Header Card (Pinned at the bottom of the SliverAppBar)
-        if (metadata != null)
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: 100,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: SurahHeaderCard(
-                key: ValueKey(metadata!.index),
-                metadata: metadata!,
+    if (metadata != null) {
+      return SizedBox(
+        height: headerHeight,
+        width: double.infinity,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: SurahHeaderCard(
+                  key: ValueKey(metadata!.index),
+                  metadata: metadata!,
+                ),
               ),
             ),
-          ),
-
-        // 2. The Collapsible White Bar (Title, Background, and Back Button)
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 56,
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 200),
-            opacity: isScrollingDown ? 0.0 : 1.0,
-            child: Container(
-              color: Colors.white,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Centered Title
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: theme.arabicFontFamily,
-                    ),
-                  ),
-                  // Back Button (aligned left)
-                  Positioned(
-                    left: 0,
-                    child: IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ],
+            // LTR back button over the teal header
+            Positioned(
+              top: 0,
+              left: 0,
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  tooltip: 'Back',
+                ),
               ),
             ),
-          ),
+          ],
         ),
-      ],
+      );
+    }
+
+    // Fallback when metadata is not ready yet
+    return Container(
+      height: 56,
+      color: Colors.white,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              fontFamily: theme.arabicFontFamily,
+            ),
+          ),
+          Positioned(
+            left: 0,
+            child: IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
