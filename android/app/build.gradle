@@ -104,3 +104,10 @@ configurations.all {
         force 'androidx.core:core-ktx:1.15.0'
     }
 }
+
+// Families Policy: do not collect Android Advertising ID (AAID).
+// AppMetrica pulls this in by default via analytics-identifiers.
+configurations.configureEach {
+    exclude group: 'io.appmetrica.analytics', module: 'analytics-identifiers'
+    exclude group: 'com.google.android.gms', module: 'play-services-ads-identifier'
+}

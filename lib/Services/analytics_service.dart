@@ -6,8 +6,16 @@ class AnalyticsService {
 
   static Future<void> initialize() async {
     try {
-      await AppMetrica.activate(AppMetricaConfig(_apiKey));
-      debugPrint('AppMetrica initialized successfully');
+      // Families Policy: never collect/transmit Android Advertising ID (AAID).
+      await AppMetrica.activate(
+        const AppMetricaConfig(
+          _apiKey,
+          advIdentifiersTracking: false,
+          locationTracking: false,
+        ),
+      );
+      await AppMetrica.setAdvIdentifiersTracking(false);
+      debugPrint('AppMetrica initialized successfully (AAID disabled)');
     } catch (e) {
       debugPrint('Failed to initialize AppMetrica: $e');
     }
