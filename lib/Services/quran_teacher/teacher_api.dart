@@ -89,6 +89,8 @@ class TeacherApi {
   /// Checks [recording] (16 kHz mono WAV) of the learner reciting word
   /// [token] of [surah]:[ayah], written [expected]. [pace] is how long the
   /// learner usually takes against the reciter, 1 for the same.
+  /// [ayahWords] is the whole ayah as shown, so saying another of its words
+  /// instead (a skipped or swapped word) is caught.
   static Future<WordCheck> check({
     required File recording,
     required String expected,
@@ -96,6 +98,7 @@ class TeacherApi {
     required int ayah,
     required int token,
     double pace = 1,
+    String ayahWords = '',
   }) async {
     final request = http.MultipartRequest(
         'POST', Uri.parse('$teacherApiBase/v1/teacher/check'))
@@ -105,6 +108,7 @@ class TeacherApi {
         'ayah': '$ayah',
         'token': '$token',
         'pace': pace.toStringAsFixed(2),
+        'ayah_words': ayahWords,
       })
       ..files.add(await http.MultipartFile.fromPath('audio', recording.path));
     final response = await _send(() async => http.Response.fromStream(

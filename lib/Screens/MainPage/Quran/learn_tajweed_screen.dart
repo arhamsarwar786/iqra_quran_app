@@ -173,6 +173,7 @@ class _LearnTajweedScreenState extends State<LearnTajweedScreen> {
           ayah: _aya.ayatNumberInt,
           token: word.token,
           pace: _pace,
+          ayahWords: _tokens.join(' '),
         );
       } on TeacherException catch (e) {
         if (!_stale(run)) setState(() => _fail(e.message));
