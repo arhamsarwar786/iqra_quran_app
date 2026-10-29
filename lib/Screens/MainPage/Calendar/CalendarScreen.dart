@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Services/hijri_service.dart';
-import 'package:iqra/widgets/hijri_adjustment_dialog.dart';
+import 'package:iqra/Widgets/hijri_adjustment_dialog.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
