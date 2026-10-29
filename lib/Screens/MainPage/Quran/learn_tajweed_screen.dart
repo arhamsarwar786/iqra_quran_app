@@ -158,6 +158,16 @@ class _LearnTajweedScreenState extends State<LearnTajweedScreen> {
       final recording =
           await _recorder.recordWord(cancel: _stopRecording.future);
       if (_stale(run) || recording == null) return;
+      if (!recording.spoke) {
+        setState(() {
+          _phase = _Phase.wrong;
+          _message =
+              "I couldn't hear you. Recite the word again, a little louder.";
+          _attempts++;
+        });
+        await Future<void>.delayed(const Duration(milliseconds: 1800));
+        continue;
+      }
 
       // 3. The teacher checks it.
       setState(() {
@@ -167,7 +177,7 @@ class _LearnTajweedScreenState extends State<LearnTajweedScreen> {
       final WordCheck result;
       try {
         result = await TeacherApi.check(
-          recording: recording,
+          recording: recording.file,
           expected: _tokens[word.token],
           surah: _surahId,
           ayah: _aya.ayatNumberInt,

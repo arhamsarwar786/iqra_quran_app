@@ -4,6 +4,16 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 
+class WordRecording {
+  final File file;
+
+  /// False when nothing louder than the room was heard. Such a recording is
+  /// not sent: the recognizer can mistake noise for a word.
+  final bool spoke;
+
+  const WordRecording(this.file, {required this.spoke});
+}
+
 /// Records the learner saying one word, and stops by itself once they have
 /// spoken and gone quiet, so they never need to press stop.
 class WordRecorder {
@@ -23,9 +33,9 @@ class WordRecorder {
 
   Future<bool> hasPermission() => _recorder.hasPermission();
 
-  /// Records until the learner finishes the word. Returns the WAV file, or
+  /// Records until the learner finishes the word. Returns the recording, or
   /// null if [cancel] completes first.
-  Future<File?> recordWord({Future<void>? cancel}) async {
+  Future<WordRecording?> recordWord({Future<void>? cancel}) async {
     final dir = await getTemporaryDirectory();
     final path = '${dir.path}/teacher_word.wav';
     await _recorder.start(
@@ -74,7 +84,8 @@ class WordRecorder {
     _levels = null;
     _level.add(0);
     final file = await _recorder.stop();
-    return keep && file != null ? File(file) : null;
+    if (!keep || file == null) return null;
+    return WordRecording(File(file), spoke: spokeAt != null);
   }
 
   Future<void> dispose() async {
