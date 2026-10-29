@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:provider/provider.dart';
+import 'package:iqra/Provider/audio_provider.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Models/aya_list_model.dart';
@@ -218,14 +219,12 @@ class _SearchScreenState extends State<SearchScreen> {
 
       if (mounted) setState(() => _playingIndex = index);
 
-      // Calculate correct global index for audio (1-6236)
-      final quranProvider =
-          Provider.of<QuranDataProvider>(context, listen: false);
-      final int trackIndex =
-          quranProvider.getGlobalAyatIndex(aya.surahId, aya.ayatNumber);
+      // Pause the main recitation so the preview is not heard over it.
+      final recitation = context.read<AudioProvider>();
+      if (recitation.isPlaying) await recitation.pausePlayback();
 
       final String audioUrl =
-          "https://cdn.islamic.network/quran/audio/128/ar.alafasy/$trackIndex.mp3";
+          QuranDataProvider.recitationUrl(aya.surahId, aya.ayatNumber);
 
       dev.log("Loading URL: $audioUrl");
       await _audioPlayer.setUrl(audioUrl);

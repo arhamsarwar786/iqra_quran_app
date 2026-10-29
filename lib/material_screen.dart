@@ -1,9 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iqra/splash_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'Provider/theme_provider.dart';
+import 'Provider/audio_provider.dart';
+import 'Provider/quran_data_provider.dart';
+import 'Services/floating_player_bridge.dart';
+import 'Services/recitation_downloads.dart';
+import 'Widgets/audio_controller_overlay.dart';
 
 class MaterialScreen extends StatefulWidget {
   const MaterialScreen({super.key});
@@ -13,6 +20,52 @@ class MaterialScreen extends StatefulWidget {
 }
 
 class _MaterialScreenState extends State<MaterialScreen> {
+  final GlobalKey<ScaffoldMessengerState> _messengerKey =
+      GlobalKey<ScaffoldMessengerState>();
+  StreamSubscription<String>? _downloadMessages;
+
+  @override
+  void initState() {
+    super.initState();
+    // Download progress also shows in the notification; this tells listeners
+    // already in the app when a download finishes or pauses.
+    _downloadMessages = RecitationDownloads.instance.messages.listen((message) {
+      _messengerKey.currentState
+        ?..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ));
+    });
+    FloatingPlayerBridge.attach(
+      audio: context.read<AudioProvider>(),
+      quran: context.read<QuranDataProvider>(),
+      theme: context.read<ThemeProvider>(),
+      onSuggest: _suggestFloatingLogo,
+    );
+  }
+
+  // Offered once, the first time a recitation starts.
+  void _suggestFloatingLogo() {
+    _messengerKey.currentState?.showSnackBar(SnackBar(
+      content: const Text(
+          'Keep the IQRA logo floating over other apps when you leave IQRA?'),
+      behavior: SnackBarBehavior.floating,
+      duration: const Duration(seconds: 8),
+      action: SnackBarAction(
+        label: 'Allow',
+        onPressed: FloatingPlayerBridge.openPermissionSettings,
+      ),
+    ));
+  }
+
+  @override
+  void dispose() {
+    _downloadMessages?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -27,6 +80,9 @@ class _MaterialScreenState extends State<MaterialScreen> {
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
       child: MaterialApp(
+        navigatorKey: appNavigatorKey,
+        scaffoldMessengerKey: _messengerKey,
+        navigatorObservers: [MiniPlayerRouteObserver.instance],
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3:
@@ -64,7 +120,7 @@ class _MaterialScreenState extends State<MaterialScreen> {
             data: MediaQuery.of(context).copyWith(
               textScaler: TextScaler.noScaling,
             ),
-            child: child!,
+            child: QuranMiniPlayerHost(child: child!),
           );
         },
         home: const SplashScreen(),

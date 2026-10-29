@@ -5,6 +5,8 @@ import 'package:iqra/Models/quaran_favorate.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Services/analytics_service.dart';
+import 'package:iqra/Services/recitation_downloads.dart';
+import 'package:iqra/Widgets/recitation_download_button.dart';
 import 'package:provider/provider.dart';
 import 'Quranview.dart';
 
@@ -215,6 +217,9 @@ class _SurahState extends State<Surah> {
                                       size: 24,
                                     ),
                                   ),
+                                ),
+                                RecitationDownloadButton(
+                                  target: DownloadTarget.surah(surahNumber),
                                 ),
                               ],
                             ),

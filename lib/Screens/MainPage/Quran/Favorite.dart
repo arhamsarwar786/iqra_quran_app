@@ -8,6 +8,8 @@ import 'package:iqra/Models/surah_metadata_model.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Screens/MainPage/Quran/Quranview.dart';
+import 'package:iqra/Services/recitation_downloads.dart';
+import 'package:iqra/Widgets/recitation_download_button.dart';
 import 'package:provider/provider.dart';
 
 import 'package:iqra/Screens/MainPage/Quran/para_arabic_screen.dart';
@@ -276,6 +278,15 @@ class _FavoriteState extends State<Favorite> with SingleTickerProviderStateMixin
                           ),
                           const SizedBox(width: 8),
                         ],
+                        RecitationDownloadButton(
+                          target: data.isPara == true
+                              ? DownloadTarget.para(
+                                  int.tryParse(data.surahCount.toString()) ?? 0)
+                              : DownloadTarget.surah(
+                                  int.tryParse(data.surahCount.toString()) ??
+                                      0),
+                        ),
+                        const SizedBox(width: 4),
                         IconButton(
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),

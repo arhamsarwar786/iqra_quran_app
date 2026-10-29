@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:iqra/Provider/audio_provider.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Helper/preference/saved_preferences.dart';
@@ -7,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../Models/aya_list_model.dart';
 import '../Models/surah_metadata_model.dart';
 import 'share_quran.dart';
+import '../Screens/MainPage/Quran/learn_tajweed_screen.dart';
 import '../Screens/MainPage/Quran/verse_detail_screen.dart';
 import '../widgets.dart';
 import 'package:flutter_intro/flutter_intro.dart';
@@ -65,6 +67,29 @@ class SHEET {
         ],
       ),
     );
+  }
+
+  static void _playAyaRecitation({
+    required BuildContext context,
+    required List<Aya> ayats,
+    required Aya aya,
+  }) {
+    final audio = context.read<AudioProvider>();
+    final surahTitle = context.read<QuranDataProvider>().recitationTitle;
+
+    audio.canPlay(ayats).then((hasConn) {
+      if (!context.mounted) return;
+      final int surahId = int.tryParse(aya.surahId ?? "1") ?? 1;
+      if (hasConn) Navigator.pop(context);
+      // Replaces any recitation already playing.
+      audio.startSurahPlayback(
+        ayats,
+        surahTitle(surahId),
+        context: hasConn ? null : context,
+        startAyatId: aya.ayatId,
+        surahTitle: surahTitle,
+      );
+    });
   }
 }
 
@@ -436,62 +461,78 @@ class _BottomSheetContentState extends State<_BottomSheetContent> {
                                       },
                                       color: bloc.selectedTheme,
                                     ),
-                              // if (widget.showPlayButton)
-                              //   isInitialPageAndTutorialTarget
-                              //       ? IntroStepBuilder(
-                              //           group: 'bottom_sheet',
-                              //           order: 3,
-                              //           getOverlayPosition: ({required offset, required screenSize, required size}) {
-                              //             return OverlayPosition(
-                              //               width: screenSize.width * 0.8,
-                              //               crossAxisAlignment: CrossAxisAlignment.center,
-                              //               bottom: screenSize.height - offset.dy + 10,
-                              //               left: screenSize.width * 0.1,
-                              //             );
-                              //           },
-                              //           overlayBuilder: (params) => buildIntroOverlay(params, 'Listen to the audio recitation of this Ayat.'),
-                              //           builder: (context, key) => Container(
-                              //             key: key,
-                              //             child: SHEET._actionButton(
-                              //               context,
-                              //               icon: Icons.play_arrow_rounded,
-                              //               label: "Play",
-                              //               onTap: () {
-                              //                 final audio =
-                              //                     context.read<AudioProvider>();
-                              //                 Navigator.pop(context); // Close sheet
-                              //                 audio.stopPlayback().then((_) {
-                              //                   audio.startSurahPlayback(
-                              //                     context,
-                              //                     widget.ayats,
-                              //                     surah?.name ?? "Surah",
-                              //                     startAyatId: aya.ayatId,
-                              //                   );
-                              //                 });
-                              //               },
-                              //               color: bloc.selectedTheme,
-                              //             ),
-                              //           ),
-                              //         )
-                              //       : SHEET._actionButton(
-                              //           context,
-                              //           icon: Icons.play_arrow_rounded,
-                              //           label: "Play",
-                              //           onTap: () {
-                              //             final audio =
-                              //                 context.read<AudioProvider>();
-                              //             Navigator.pop(context); // Close sheet
-                              //             audio.stopPlayback().then((_) {
-                              //               audio.startSurahPlayback(
-                              //                 context,
-                              //                 widget.ayats,
-                              //                 surah?.name ?? "Surah",
-                              //                 startAyatId: aya.ayatId,
-                              //               );
-                              //             });
-                              //           },
-                              //           color: bloc.selectedTheme,
-                              //         ),
+                              if (widget.showPlayButton) ...[
+                                const SizedBox(width: 15),
+                                isInitialPageAndTutorialTarget
+                                    ? IntroStepBuilder(
+                                        group: 'bottom_sheet',
+                                        order: 3,
+                                        getOverlayPosition: (
+                                            {required offset,
+                                            required screenSize,
+                                            required size}) {
+                                          return OverlayPosition(
+                                            width: screenSize.width * 0.8,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            bottom: screenSize.height -
+                                                offset.dy +
+                                                10,
+                                            left: screenSize.width * 0.1,
+                                          );
+                                        },
+                                        overlayBuilder: (params) =>
+                                            buildIntroOverlay(params,
+                                                'Listen to the audio recitation of this Ayat.'),
+                                        builder: (context, key) => Container(
+                                          key: key,
+                                          child: SHEET._actionButton(
+                                            context,
+                                            icon: Icons.play_arrow_rounded,
+                                            label: "Play",
+                                            onTap: () {
+                                              SHEET._playAyaRecitation(
+                                                context: context,
+                                                ayats: widget.ayats,
+                                                aya: aya,
+                                              );
+                                            },
+                                            color: bloc.selectedTheme,
+                                          ),
+                                        ),
+                                      )
+                                    : SHEET._actionButton(
+                                        context,
+                                        icon: Icons.play_arrow_rounded,
+                                        label: "Play",
+                                        onTap: () {
+                                          SHEET._playAyaRecitation(
+                                            context: context,
+                                            ayats: widget.ayats,
+                                            aya: aya,
+                                          );
+                                        },
+                                        color: bloc.selectedTheme,
+                                      ),
+                                const SizedBox(width: 15),
+                                // Word-by-word tajweed lessons from this ayah.
+                                SHEET._actionButton(
+                                  context,
+                                  icon: Icons.school_rounded,
+                                  label: "Learn",
+                                  onTap: () {
+                                    final navigator = Navigator.of(context);
+                                    navigator.pop();
+                                    navigator.push(MaterialPageRoute(
+                                      builder: (_) => LearnTajweedScreen(
+                                        ayats: widget.ayats,
+                                        initialIndex: index,
+                                      ),
+                                    ));
+                                  },
+                                  color: bloc.selectedTheme,
+                                ),
+                              ],
                             ],
                           ),
                           const SizedBox(height: 80),

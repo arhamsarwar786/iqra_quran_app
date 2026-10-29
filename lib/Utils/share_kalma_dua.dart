@@ -8,6 +8,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../Provider/theme_provider.dart';
+import '../Services/verse_video.dart';
+import 'share_card.dart';
+import 'share_preview.dart';
 
 class KalmaDuaShare {
   static Future<File> _generateImage({
@@ -242,8 +245,8 @@ class KalmaDuaShare {
     required String translationText,
     String? englishText,
     String? translatorName,
-  }) async {
-    try {
+  }) {
+    Future<File> makeImage(bool watermark) async {
       final file = await _generateImage(
         context: context,
         bloc: bloc,
@@ -254,69 +257,21 @@ class KalmaDuaShare {
         englishText: englishText,
         translatorName: translatorName,
       );
-
-      if (!context.mounted) return;
-
-      await showDialog(
-        context: context,
-        useSafeArea: true,
-        barrierColor: Colors.black.withOpacity(0.9),
-        builder: (context) => Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton.icon(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close, color: Colors.white),
-                      label: const Text('Close',
-                          style: TextStyle(color: Colors.white)),
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        const shareText =
-                            'Download IQRA QURAN: https://play.google.com/store/apps/details?id=com.devsinntechnologies.iqraquran';
-                        Share.shareXFiles([XFile(file.path)], text: shareText);
-                      },
-                      icon: const Icon(Icons.share_rounded, size: 18),
-                      label: const Text('Share Now'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: bloc.selectedTheme,
-                        foregroundColor: Colors.white,
-                        shape: const StadiumBorder(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.file(file),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-            ],
-          ),
-        ),
-      );
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
+      if (!watermark) return file;
+      return ShareWatermark.apply(file, iconNumber: bloc.iconNumber);
     }
+
+    return SharePreview.show(
+      context,
+      theme: bloc.selectedTheme,
+      makeImage: makeImage,
+      makeVideo: (watermark, onProgress) async => VerseVideo.fromImage(
+        await makeImage(watermark),
+        background: Color.lerp(bloc.selectedTheme, Colors.black, 0.35)!,
+        onProgress: onProgress,
+      ),
+      videoDescription: 'The video shows this card as a short clip.',
+    );
   }
 
   static void text({

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:iqra/Provider/quran_data_provider.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import 'package:iqra/Screens/MainPage/Quran/para_arabic_screen.dart';
+import 'package:iqra/Services/recitation_downloads.dart';
+import 'package:iqra/Widgets/recitation_download_button.dart';
 import 'package:iqra/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:iqra/Helper/favourite.dart';
@@ -186,7 +188,33 @@ class _ParahState extends State<Parah> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [],
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    _toggleFavorite(QuranFavorite(
+                                      suratName: paraName,
+                                      urduSuratName: "",
+                                      suraVerses: ayatCount.toString(),
+                                      surahCount: paraNumber.toString(),
+                                      isPara: true,
+                                    ));
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        right: 4, bottom: 4),
+                                    child: Icon(
+                                      _isFavorite(paraNumber.toString())
+                                          ? Icons.favorite
+                                          : Icons.favorite_border,
+                                      color: bloc.selectedTheme,
+                                      size: 24,
+                                    ),
+                                  ),
+                                ),
+                                RecitationDownloadButton(
+                                  target: DownloadTarget.para(paraNumber),
+                                ),
+                              ],
                             ),
                           ],
                         ),

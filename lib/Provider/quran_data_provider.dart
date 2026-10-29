@@ -9,6 +9,8 @@ import '../Models/ruko_model.dart';
 import '../Models/sajda_model.dart';
 import '../Models/surah_metadata_model.dart';
 import '../Services/analytics_service.dart';
+import '../Services/recitation_downloads.dart';
+import '../Services/recitation_playlist.dart';
 
 // ─── Top-level compute functions (must be top-level for isolate use) ──────────
 
@@ -340,6 +342,13 @@ class QuranDataProvider extends ChangeNotifier {
     }
   }
 
+  /// Surah name for the recitation notification and mini player.
+  String recitationTitle(int surahId) {
+    final metadata = getSurahMetadata(surahId);
+    if (metadata == null) return "Surah $surahId";
+    return metadata.ename.isNotEmpty ? metadata.ename : metadata.name;
+  }
+
   List<Aya> getAyatsByPara(int paraId) => _quranData
       .where((a) => (int.tryParse(a.paraId ?? '0') ?? 0) == paraId)
       .toList();
@@ -368,6 +377,17 @@ class QuranDataProvider extends ChangeNotifier {
           effectiveAyah.clamp(1, _surahMetadata[surahId - 1].surahTotalAyaat);
     }
     return globalIndex + effectiveAyah;
+  }
+
+  /// Verse-accurate Alafasy recitation URL for a verse as numbered in the
+  /// app's data. See [RecitationPlaylist] for the Al-Fatiha mapping.
+  static String recitationUrl(String? surahIdStr, String? ayatNumberStr) {
+    final int surahId = (int.tryParse(surahIdStr ?? '1') ?? 1).clamp(1, 114);
+    int ayah = int.tryParse(ayatNumberStr ?? '1') ?? 1;
+    if (ayah < 1) ayah = 1;
+    // A downloaded recording plays from the device.
+    return RecitationDownloads.instance
+        .resolve(RecitationPlaylist.urlForAyah(surahId, ayah));
   }
 
   Future<List<Aya>> searchQuran(

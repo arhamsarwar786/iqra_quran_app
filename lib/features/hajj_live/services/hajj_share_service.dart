@@ -9,6 +9,9 @@ import 'package:share_plus/share_plus.dart';
 import 'package:iqra/Provider/theme_provider.dart';
 import '../providers/hajj_live_provider.dart';
 import '../services/hajj_time_service.dart';
+import '../../../Services/verse_video.dart';
+import '../../../Utils/share_card.dart';
+import '../../../Utils/share_preview.dart';
 
 class HajjShareService {
   static const String appDownloadLink =
@@ -303,73 +306,32 @@ class HajjShareService {
     required BuildContext context,
     required ThemeProvider bloc,
     required HajjLiveProvider provider,
-  }) async {
-    try {
+  }) {
+    Future<File> makeImage(bool watermark) async {
       final file = await _generateHajjImage(
         context: context,
         bloc: bloc,
         provider: provider,
       );
-
-      if (!context.mounted) return;
-
-      await showDialog(
-        context: context,
-        useSafeArea: true,
-        barrierColor: Colors.black.withOpacity(0.9),
-        builder: (context) => Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton.icon(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close, color: Colors.white),
-                      label: const Text("Close",
-                          style: TextStyle(color: Colors.white)),
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        final fallback = provider.isLive
-                            ? "🔴 Makkah Live is LIVE on IQRA QURAN App! Download now: $appDownloadLink"
-                            : "🕋 Makkah Live: ${HajjTimeService().formatCountdown(provider.remainingTime)} on IQRA QURAN App!\n\nDownload now: $appDownloadLink";
-                        Share.shareXFiles([XFile(file.path)], text: fallback);
-                      },
-                      icon: const Icon(Icons.share, size: 18),
-                      label: const Text("Share Now"),
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: bloc.selectedTheme,
-                          foregroundColor: Colors.white,
-                          shape: const StadiumBorder()),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.file(file),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
+      if (!watermark) return file;
+      return ShareWatermark.apply(file,
+          iconNumber: bloc.iconNumber, headerHeight: 560, footerHeight: 200);
     }
+
+    final text = provider.isLive
+        ? "🔴 Makkah Live is LIVE on IQRA QURAN App! Download now: $appDownloadLink"
+        : "🕋 Makkah Live: ${HajjTimeService().formatCountdown(provider.remainingTime)} on IQRA QURAN App!\n\nDownload now: $appDownloadLink";
+    return SharePreview.show(
+      context,
+      theme: bloc.selectedTheme,
+      makeImage: makeImage,
+      makeVideo: (watermark, onProgress) async => VerseVideo.fromImage(
+        await makeImage(watermark),
+        background: Color.lerp(bloc.selectedTheme, Colors.black, 0.35)!,
+        onProgress: onProgress,
+      ),
+      videoDescription: 'The video shows this card as a short clip.',
+      text: text,
+    );
   }
 }

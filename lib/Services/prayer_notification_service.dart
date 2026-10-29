@@ -5,6 +5,7 @@ import 'package:adhan_dart/adhan_dart.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:lat_lng_to_timezone/lat_lng_to_timezone.dart' as tz_lookup;
 import '../Helper/preference/saved_preferences.dart';
+import 'recitation_downloads.dart';
 
 /// ─────────────────────────────────────────────────────────────────────────────
 /// Prayer key → display name helper
@@ -64,7 +65,12 @@ class PrayerNotificationService {
     _initialized = true;
   }
 
+  // The app has one notification plugin, so taps on every notification,
+  // including the download progress one, arrive here.
   static void _onTapped(NotificationResponse r) {
+    if (r.actionId == RecitationDownloads.cancelActionId) {
+      RecitationDownloads.instance.cancelAll();
+    }
     // Could navigate to PrayerTime screen
   }
 

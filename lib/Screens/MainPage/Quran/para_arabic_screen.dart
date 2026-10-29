@@ -20,6 +20,11 @@ import 'package:iqra/Helper/favourite.dart';
 import '../Drawer/setting_screen.dart';
 import 'translation/parah_translation_screen.dart';
 import '../../../Provider/audio_provider.dart';
+import '../../../Widgets/audio_controller_overlay.dart';
+import '../../../Widgets/reader_bottom_bar.dart';
+import '../../../Widgets/recitation_download_button.dart';
+import '../../../Services/recitation_downloads.dart';
+import '../../../Utils/recitation_reveal.dart';
 
 class ParaArabicScreen extends StatefulWidget {
   final String? parahCount;
@@ -47,7 +52,8 @@ class ParaArabicScreen extends StatefulWidget {
   State<ParaArabicScreen> createState() => _ParaArabicScreenState();
 }
 
-class _ParaArabicScreenState extends State<ParaArabicScreen> {
+class _ParaArabicScreenState extends State<ParaArabicScreen>
+    with RecitationReaderScreen {
   ArabicNumbers arabicNumber = ArabicNumbers();
   ScrollController? _scrollViewController;
   bool isScrollingDown = false;
@@ -56,11 +62,15 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   double autoScrollSpeed = 1.0;
   Map<String, GlobalKey> surahHeaderKeys = {};
   GlobalKey? _targetKey;
+  // Position of the target block in the lazily built list.
+  int _targetIndex = 0;
   int? _highlightedAyah;
   String? _lastRecitedId;
-  AudioProvider? _audioProvider;
   List<Widget> paraArabicScreenWidget = [];
   final Map<String, GlobalKey> _ayahKeys = {};
+  String? _recitationKey;
+  bool _startingRecitation = false;
+  final GlobalKey _scrollAreaKey = GlobalKey();
 
   // Tracking for theme/font changes to trigger real-time re-renders
   double _pinchStartFontSize = 30.0;
@@ -90,7 +100,8 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       bookmarkedAyats.remove(key);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Ayat removed from bookmarks', textAlign: TextAlign.center),
+          content:
+              Text('Ayat removed from bookmarks', textAlign: TextAlign.center),
           duration: Duration(seconds: 1),
         ),
       );
@@ -111,8 +122,6 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _audioProvider ??= Provider.of<AudioProvider>(context, listen: false);
-
     final theme = context.read<ThemeProvider>();
     if (_themeProvider != theme) {
       _themeProvider?.removeListener(_onThemeChanged);
@@ -139,9 +148,8 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
   Future<void> _rebuildParaContent() async {
     final controller = _scrollViewController;
-    final offset = controller != null && controller.hasClients
-        ? controller.offset
-        : 0.0;
+    final offset =
+        controller != null && controller.hasClients ? controller.offset : 0.0;
     await viewMaker();
     if (!mounted) return;
     if (controller != null && controller.hasClients) {
@@ -218,6 +226,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
     loadParaView().then((val) {
       listAyat = List<Aya>.from(val);
+      _recitationKey = AudioProvider.queueKeyFor(listAyat);
       _loadAyatBookmarks().then((_) {
         viewMaker().then((_) {
           // Jump to saved offset after content is loaded
@@ -273,6 +282,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
 
     final builtWidgets = <Widget>[];
     _ayahKeys.clear();
+    _targetKey = null;
     final savedFirstSurahMetadata = firstSurahMetadata;
 
     List<Widget> currentSpans = [];
@@ -288,6 +298,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       if (hasTarget) {
         key = GlobalKey();
         _targetKey = key;
+        _targetIndex = builtWidgets.length;
       }
 
       builtWidgets.add(Padding(
@@ -317,8 +328,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       final int ayaSurahId = int.tryParse(aya.surahId ?? "0") ?? 0;
 
       // Check if this ayah is actually the one currently reciting
-      bool isReciting = audioProvider.currentAyahId != null &&
-          audioProvider.currentAyahId == aya.ayatId;
+      bool isReciting = audioProvider.isReciting(aya.ayatId);
 
       final bool isTargetAya = isReciting ||
           (_highlightedAyah != null &&
@@ -376,7 +386,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
             onTap: () {
               SHEET.bottomSheetPreview(
                   context, listAyat, listAyat.indexOf(aya), bloc,
-                  showPlayButton: false);
+                  showPlayButton: true);
             },
             child: Text(
               word,
@@ -384,8 +394,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                 fontSize: bloc.arabicFontSize,
                 fontFamily: bloc.arabicFontFamily,
                 color: isTargetAya ? bloc.selectedTheme : Colors.black,
-                fontWeight:
-                    isTargetAya ? FontWeight.w700 : FontWeight.normal,
+                fontWeight: isTargetAya ? FontWeight.w700 : FontWeight.normal,
               ),
             ),
           ),
@@ -464,17 +473,14 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
       if (!mounted) return;
       _updateCurrentSurah();
 
-      if (_targetKey != null) {
-        final ctx = _targetKey!.currentContext;
-        if (ctx != null) {
-          Scrollable.ensureVisible(
-            ctx,
-            duration: const Duration(milliseconds: 350),
-            alignment: 0.12,
-            alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
-            curve: Curves.easeInOut,
-          );
-        }
+      final controller = _scrollViewController;
+      if (_targetKey != null && controller != null) {
+        revealLazyRecitation(
+          controller: controller,
+          keys: {_targetIndex: _targetKey!},
+          index: _targetIndex,
+          count: builtWidgets.length,
+        );
       }
     });
   }
@@ -640,11 +646,159 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
     });
   }
 
+  /// Plays this para from the first verse on screen, or pauses and resumes
+  /// it once it is the recitation playing.
+  Future<void> _onRecitationPressed(AudioProvider audio) async {
+    if (listAyat.isEmpty) return;
+    if (audio.queueKey == _recitationKey) {
+      audio.togglePlayback();
+      return;
+    }
+    final quran = context.read<QuranDataProvider>();
+    final first = int.tryParse(listAyat.first.surahId ?? '') ?? 0;
+    // Shows the loading wave until the player takes over, which can take a
+    // moment while the connection is checked and the first verse loads.
+    setState(() => _startingRecitation = true);
+    await audio.startSurahPlayback(
+      listAyat,
+      quran.recitationTitle(first),
+      context: context,
+      startAyatId: _firstVisibleAyatId(),
+      surahTitle: quran.recitationTitle,
+    );
+    if (mounted) setState(() => _startingRecitation = false);
+  }
+
+  /// First verse at least partly in view, or null at the top of the para.
+  String? _firstVisibleAyatId() {
+    final controller = _scrollViewController;
+    final area = _scrollAreaKey.currentContext?.findRenderObject();
+    if (controller == null ||
+        !controller.hasClients ||
+        controller.offset < 40 ||
+        area is! RenderBox) {
+      return null;
+    }
+    final top = area.localToGlobal(Offset.zero).dy;
+    final visible = <String>{};
+    for (final entry in _ayahKeys.entries) {
+      final box = entry.value.currentContext?.findRenderObject();
+      if (box is! RenderBox || !box.attached) continue;
+      // Keys mark the end of each verse: a verse is in view once its end is.
+      if (box.localToGlobal(Offset.zero).dy >= top) visible.add(entry.key);
+    }
+    // listAyat is in reading order, so the first match is the topmost.
+    for (final aya in listAyat) {
+      if (visible.contains('${aya.surahId}_${aya.ayatNumber}')) {
+        return aya.ayatId;
+      }
+    }
+    return null;
+  }
+
+  Widget _buildBottomBar(ThemeProvider bloc, AudioProvider audio) {
+    final isOurs = _recitationKey != null && audio.queueKey == _recitationKey;
+    final playing = isOurs && audio.isPlaying;
+    final target =
+        DownloadTarget.para(int.tryParse(widget.parahCount ?? '') ?? 0);
+    return ReaderBottomBar(
+      color: bloc.selectedTheme,
+      centerLabel:
+          _startingRecitation ? 'Loading' : (playing ? 'Pause' : 'Listen'),
+      centerButton: RecitationPlayButton(
+        color: bloc.selectedTheme,
+        isPlaying: playing,
+        isLoading: _startingRecitation ||
+            (isOurs && audio.isBuffering) ||
+            (isOurs && audio.isReconnecting),
+        onPressed: () => _onRecitationPressed(audio),
+      ),
+      onPrevious: isOurs ? audio.skipPrevious : null,
+      onNext: isOurs && audio.hasNext ? audio.skipNext : null,
+      leading: [
+        ReaderBarItem(
+          icon: const Icon(Icons.menu_book_rounded,
+              color: Colors.white, size: 26),
+          label: bloc.selectedTranslation == "irfan"
+              ? "Kanz-ul-Irfan"
+              : "Kanz-ul-Iman",
+          onTap: () => push(
+              context,
+              ParahTranslationScreen(
+                parahCount: widget.parahCount,
+                parahname: widget.parahname,
+                ayatInPara: widget.ayatInPara,
+                para: widget.para,
+                ayatList: listAyat,
+              )),
+        ),
+        ReaderBarItem(
+          icon: Icon(
+              isAutoScrolling
+                  ? Icons.stop_circle_rounded
+                  : Icons.fit_screen_rounded,
+              color: Colors.white,
+              size: 26),
+          label: isAutoScrolling ? "Stop" : "Auto Scroll",
+          onTap: _onAutoScrollPressed,
+        ),
+      ],
+      trailing: [
+        Builder(builder: (context) {
+          final status = context
+              .watch<RecitationDownloads>()
+              .statusOf(target, context.read<QuranDataProvider>());
+          return ReaderBarItem(
+            icon: RecitationDownloadIcon(
+              status: status,
+              size: 24,
+              color: Colors.white,
+              onColor: bloc.selectedTheme,
+            ),
+            label: RecitationDownloadActions.labelFor(status),
+            onTap: () => RecitationDownloadActions.onTap(context, target),
+          );
+        }),
+        ReaderBarItem(
+          icon:
+              const Icon(Icons.settings_rounded, color: Colors.white, size: 26),
+          label: "Setting",
+          onTap: _openSettings,
+        ),
+      ],
+    );
+  }
+
+  void _onAutoScrollPressed() {
+    if (isAutoScrolling) {
+      _stopAutoScroll();
+      return;
+    }
+    showDialog(
+      context: context,
+      builder: (context) => AutoScrollSpeedDialog(
+        currentSpeedFactor: autoScrollSpeed,
+        isScrolling: isAutoScrolling,
+        onSpeedChanged: (val) {
+          setState(() => autoScrollSpeed = val);
+          if (isAutoScrolling) {
+            _stopAutoScroll();
+            _startAutoScroll();
+          }
+        },
+        onStart: () {
+          setState(() => isAutoScrolling = true);
+          _startAutoScroll();
+        },
+        onStop: () => _stopAutoScroll(),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _themeProvider?.removeListener(_onThemeChanged);
-    // Stop audio when moving back from the screen
-    _audioProvider?.stopPlayback();
+    // Recitation keeps playing; the global mini player controls it.
     _scrollViewController?.dispose();
     super.dispose();
   }
@@ -672,95 +826,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
           backgroundColor: Colors.white,
           bottomNavigationBar: isScrollingDown
               ? const SizedBox()
-              : Theme(
-                  data: Theme.of(context).copyWith(
-                    canvasColor: bloc.selectedTheme,
-                  ),
-                  child: BottomNavigationBar(
-                    backgroundColor: bloc.selectedTheme,
-                    elevation: 10,
-                    selectedItemColor: Colors.white,
-                    unselectedItemColor: Colors.white,
-                    selectedFontSize: 12,
-                    unselectedFontSize: 12,
-                    selectedLabelStyle: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
-                    unselectedLabelStyle: const TextStyle(color: Colors.white),
-                    currentIndex: 0,
-                    type: BottomNavigationBarType.fixed,
-                    onTap: (index) {
-                      if (index == 0) {
-                        push(
-                            context,
-                            ParahTranslationScreen(
-                              parahCount: widget.parahCount,
-                              parahname: widget.parahname,
-                              ayatInPara: widget.ayatInPara,
-                              para: widget.para,
-                              ayatList: listAyat,
-                            ));
-                      } else if (index == 1) {
-                        if (isAutoScrolling) {
-                          _stopAutoScroll();
-                        } else {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AutoScrollSpeedDialog(
-                              currentSpeedFactor: autoScrollSpeed,
-                              isScrolling: isAutoScrolling,
-                              onSpeedChanged: (val) {
-                                setState(() => autoScrollSpeed = val);
-                                if (isAutoScrolling) {
-                                  _stopAutoScroll();
-                                  _startAutoScroll();
-                                }
-                              },
-                              onStart: () {
-                                setState(() => isAutoScrolling = true);
-                                _startAutoScroll();
-                              },
-                              onStop: () => _stopAutoScroll(),
-                            ),
-                          );
-                        }
-                      } else if (index == 2) {
-                        _openSettings();
-                      }
-                    },
-                    items: [
-                      BottomNavigationBarItem(
-                        icon: const Padding(
-                          padding: EdgeInsets.only(bottom: 4.0),
-                          child: Icon(Icons.menu_book_rounded,
-                              color: Colors.white, size: 26),
-                        ),
-                        label: bloc.selectedTranslation == "irfan"
-                            ? "Kanz-ul-Irfan"
-                            : "Kanz-ul-Iman",
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Padding(
-                          padding: const EdgeInsets.only(bottom: 4.0),
-                          child: Icon(
-                              isAutoScrolling
-                                  ? Icons.stop_circle_rounded
-                                  : Icons.fit_screen_rounded,
-                              color: Colors.white,
-                              size: 26),
-                        ),
-                        label: isAutoScrolling ? "Stop" : "Auto Scroll",
-                      ),
-                      const BottomNavigationBarItem(
-                        icon: Padding(
-                          padding: EdgeInsets.only(bottom: 4.0),
-                          child: Icon(Icons.settings_rounded,
-                              color: Colors.white, size: 26),
-                        ),
-                        label: "Setting",
-                      ),
-                    ],
-                  ),
-                ),
+              : _buildBottomBar(bloc, audioProvider),
           body: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {
@@ -773,8 +839,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                 Column(
                   children: [
                     CompleteQuranHeader(
-                      title:
-                          widget.parahname ?? 'Para ${widget.parahCount}',
+                      title: widget.parahname ?? 'Para ${widget.parahCount}',
                       metadata: currentSurahMetadata,
                       isScrollingDown: isScrollingDown,
                     ),
@@ -794,6 +859,7 @@ class _ParaArabicScreenState extends State<ParaArabicScreen> {
                             return false;
                           },
                           child: Container(
+                            key: _scrollAreaKey,
                             color: Colors.white,
                             child: Directionality(
                               textDirection: TextDirection.rtl,

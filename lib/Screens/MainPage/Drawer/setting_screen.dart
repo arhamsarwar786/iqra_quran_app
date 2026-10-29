@@ -9,6 +9,9 @@ import 'package:provider/provider.dart';
 import '../../../Provider/theme_provider.dart';
 import '../../../controller/methods.dart';
 import '../../../Models/theme_model.dart';
+import '../Quran/recitation_downloads_screen.dart';
+import '../../../Services/floating_player_bridge.dart';
+import '../../../Widgets/float_over_apps_tile.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -379,6 +382,33 @@ class _SettingScreenState extends State<SettingScreen> {
                     ],
                   ),
                 ),
+
+                // ── OFFLINE RECITATION ─────────────────────────────────────
+                _sectionCard(
+                  bloc: bloc,
+                  title: 'Offline Recitation',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Download the recitation to listen without internet. '
+                        'You can also download a single surah or para from '
+                        'its card.',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                      const SizedBox(height: 12),
+                      const QuranDownloadCard(showManage: true),
+                    ],
+                  ),
+                ),
+
+                // ── RECITATION PLAYER ──────────────────────────────────────
+                if (FloatingPlayerBridge.isSupported)
+                  _sectionCard(
+                    bloc: bloc,
+                    title: 'Recitation Player',
+                    child: const FloatOverAppsTile(),
+                  ),
 
                 // ── PRAYER NOTIFICATIONS ───────────────────────────────────
                 _sectionCard(

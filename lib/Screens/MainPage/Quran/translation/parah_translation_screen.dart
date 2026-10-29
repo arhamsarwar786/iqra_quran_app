@@ -5,6 +5,7 @@ import '../../../../Models/aya_list_model.dart';
 import '../../../../Models/para_model.dart' hide Aya;
 import '../../../../components/tranlation_card_section.dart';
 import '../../../../Provider/audio_provider.dart';
+import '../../../../Utils/recitation_reveal.dart';
 import '../../../../Widgets/audio_controller_overlay.dart';
 
 class ParahTranslationScreen extends StatefulWidget {
@@ -26,20 +27,14 @@ class ParahTranslationScreen extends StatefulWidget {
   State<ParahTranslationScreen> createState() => _ParahTranslationScreenState();
 }
 
-class _ParahTranslationScreenState extends State<ParahTranslationScreen> {
+class _ParahTranslationScreenState extends State<ParahTranslationScreen>
+    with RecitationReaderScreen {
   final ScrollController _scrollController = ScrollController();
   int? _lastIndex;
-  AudioProvider? _audioProvider;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _audioProvider = Provider.of<AudioProvider>(context, listen: false);
-  }
+  final Map<int, GlobalKey> _itemKeys = {};
 
   @override
   void dispose() {
-    _audioProvider?.stopPlayback();
     _scrollController.dispose();
     super.dispose();
   }
@@ -47,17 +42,7 @@ class _ParahTranslationScreenState extends State<ParahTranslationScreen> {
   List<Aya> get _displayAyats =>
       widget.ayatList?.where((a) => a.ayatNumber != "0").toList() ?? [];
 
-  double _estimatedCardHeight(ThemeProvider bloc) =>
-      bloc.arabicFontSize + bloc.urduFontSize + 160;
-
-  void _scrollToIndex(int index, ThemeProvider bloc) {
-    if (!_scrollController.hasClients) return;
-    _scrollController.animateTo(
-      index * _estimatedCardHeight(bloc),
-      duration: const Duration(milliseconds: 600),
-      curve: Curves.easeInOut,
-    );
-  }
+  GlobalKey _keyFor(int index) => _itemKeys.putIfAbsent(index, GlobalKey.new);
 
   @override
   Widget build(BuildContext context) {
@@ -65,11 +50,21 @@ class _ParahTranslationScreenState extends State<ParahTranslationScreen> {
     final audioProvider = context.watch<AudioProvider>();
     final ayats = _displayAyats;
 
-    if (audioProvider.currentAyahIndex != null &&
-        audioProvider.currentAyahIndex != _lastIndex) {
-      _lastIndex = audioProvider.currentAyahIndex;
+    final playingId = audioProvider.currentAyahId;
+    final playingIndex =
+        playingId == null ? -1 : ayats.indexWhere((a) => a.ayatId == playingId);
+    if (playingIndex < 0) {
+      _lastIndex = null;
+    } else if (playingIndex != _lastIndex) {
+      _lastIndex = playingIndex;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToIndex(_lastIndex!, bloc);
+        if (!mounted) return;
+        revealLazyRecitation(
+          controller: _scrollController,
+          keys: _itemKeys,
+          index: playingIndex,
+          count: ayats.length,
+        );
       });
     }
 
@@ -99,15 +94,18 @@ class _ParahTranslationScreenState extends State<ParahTranslationScreen> {
                     padding: const EdgeInsets.fromLTRB(0, 10, 0, 100),
                     itemCount: ayats.length,
                     itemBuilder: (context, i) {
-                      return TranlationCardSection(
-                        provider: bloc,
-                        ayats: ayats,
-                        index: i,
-                        isHighlighted: audioProvider.currentAyahIndex == i,
+                      return KeyedSubtree(
+                        key: _keyFor(i),
+                        child: TranlationCardSection(
+                          provider: bloc,
+                          ayats: ayats,
+                          index: i,
+                          isHighlighted:
+                              audioProvider.isReciting(ayats[i].ayatId),
+                        ),
                       );
                     },
                   ),
-            const QuranAudioOverlay(),
           ],
         ),
       ),

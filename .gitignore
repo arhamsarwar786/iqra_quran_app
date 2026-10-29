@@ -8,3 +8,5 @@ android/key.properties
 android/app/upload-keystore.jks
 android/app/*.jks
 android/app/*.keystore
+# The backend is its own repository (arhamsarwar786/iqra-backend)
+backend/
