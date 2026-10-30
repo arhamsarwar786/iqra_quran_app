@@ -87,7 +87,11 @@ class _LearnTajweedScreenState extends State<LearnTajweedScreen> {
   LearnMode? _mode;
   bool _modeLoaded = false;
 
-  late int _ayahIndex = widget.initialIndex.clamp(0, widget.ayats.length - 1);
+  /// The ayahs to learn. The readers list Bismillah as ayah 0 at the top
+  /// of most surahs; it has no lesson, so it is left out.
+  late final List<Aya> _ayats =
+      widget.ayats.where((a) => a.ayatNumberInt > 0).toList();
+  late int _ayahIndex = _initialIndex();
   Lesson? _lesson;
   List<String> _tokens = const [];
   final Map<int, _WordState> _states = {};
@@ -122,7 +126,15 @@ class _LearnTajweedScreenState extends State<LearnTajweedScreen> {
   // recent right words, so the tajweed check follows their own pace.
   final List<double> _paceSamples = [];
 
-  Aya get _aya => widget.ayats[_ayahIndex];
+  int _initialIndex() {
+    if (widget.ayats.isEmpty) return 0;
+    final start =
+        widget.ayats[widget.initialIndex.clamp(0, widget.ayats.length - 1)];
+    final i = _ayats.indexOf(start);
+    return i < 0 ? 0 : i;
+  }
+
+  Aya get _aya => _ayats[_ayahIndex];
   int get _surahId => int.tryParse(_aya.surahId ?? '') ?? 1;
   bool get _reciting => _mode == LearnMode.ayah || _mode == LearnMode.surah;
 
@@ -515,7 +527,7 @@ class _LearnTajweedScreenState extends State<LearnTajweedScreen> {
         .length;
     _scores[_ayahIndex] = _Score(right, lesson.words.length);
     HapticFeedback.mediumImpact();
-    final last = _ayahIndex == widget.ayats.length - 1;
+    final last = _ayahIndex == _ayats.length - 1;
     setState(() {
       _phase =
           _mode == LearnMode.surah && last ? _Phase.surahDone : _Phase.ayahDone;
@@ -598,7 +610,7 @@ class _LearnTajweedScreenState extends State<LearnTajweedScreen> {
   }
 
   void _goToAyah(int index, {bool listen = false}) {
-    if (index < 0 || index >= widget.ayats.length) return;
+    if (index < 0 || index >= _ayats.length) return;
     setState(() => _ayahIndex = index);
     _loadAyah(listen: listen);
   }
@@ -659,13 +671,13 @@ class _LearnTajweedScreenState extends State<LearnTajweedScreen> {
           title: quran.recitationTitle(_surahId),
           ayah: _aya.ayatNumberInt,
           index: _ayahIndex,
-          count: widget.ayats.length,
+          count: _ayats.length,
           done: marked,
           total: total,
           scores: _scores,
           color: color,
           onPrevious: _ayahIndex > 0 ? () => _goToAyah(_ayahIndex - 1) : null,
-          onNext: _ayahIndex < widget.ayats.length - 1
+          onNext: _ayahIndex < _ayats.length - 1
               ? () => _goToAyah(_ayahIndex + 1)
               : null,
           onAyah: _goToAyah,
@@ -706,11 +718,11 @@ class _LearnTajweedScreenState extends State<LearnTajweedScreen> {
 
   Widget _panel(Color color) {
     final lesson = _lesson;
-    final hasNext = _ayahIndex < widget.ayats.length - 1;
+    final hasNext = _ayahIndex < _ayats.length - 1;
     if (_phase == _Phase.surahDone) {
       return _SurahDonePanel(
         scores: _scores,
-        ayats: widget.ayats,
+        ayats: _ayats,
         color: color,
         onRestart: _restartSurah,
       );
