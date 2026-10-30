@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -55,6 +56,30 @@ class WordCheck {
     this.durationMs,
     this.referenceMs,
   });
+}
+
+/// How the learner said one word of a phrase.
+class WordMark {
+  final int token;
+  final bool correct;
+
+  /// What was heard for the word, empty when it was skipped.
+  final String heard;
+
+  const WordMark(this.token, this.correct, this.heard);
+}
+
+/// One phrase of an ayah the learner recited, checked.
+class RecitedPhrase {
+  final String heard;
+
+  /// The words the phrase covered, in order.
+  final List<WordMark> words;
+
+  /// The first word not yet recited, or null once the ayah is done.
+  final int? nextToken;
+
+  const RecitedPhrase(this.heard, this.words, this.nextToken);
 }
 
 class TeacherException implements Exception {
@@ -123,6 +148,40 @@ class TeacherApi {
       ],
       durationMs: data['duration_ms'] as int?,
       referenceMs: data['reference_ms'] as int?,
+    );
+  }
+
+  /// Checks one phrase ([wav], 16 kHz mono WAV) of the learner reciting
+  /// [surah]:[ayah] from word [fromToken] on. [ayahWords] is the ayah as
+  /// shown.
+  static Future<RecitedPhrase> recite({
+    required Uint8List wav,
+    required int surah,
+    required int ayah,
+    required int fromToken,
+    required String ayahWords,
+  }) async {
+    final request = http.MultipartRequest(
+        'POST', Uri.parse('$teacherApiBase/v1/teacher/recite'))
+      ..fields.addAll({
+        'surah': '$surah',
+        'ayah': '$ayah',
+        'from_token': '$fromToken',
+        'ayah_words': ayahWords,
+      })
+      ..files.add(
+          http.MultipartFile.fromBytes('audio', wav, filename: 'phrase.wav'));
+    final response = await _send(() async => http.Response.fromStream(
+        await request.send().timeout(const Duration(seconds: 45))));
+    final data = _json(response);
+    return RecitedPhrase(
+      data['heard'] as String? ?? '',
+      [
+        for (final w in data['words'] as List)
+          WordMark(w['token'] as int, w['correct'] as bool,
+              w['heard'] as String? ?? ''),
+      ],
+      data['next_token'] as int?,
     );
   }
 

@@ -256,11 +256,15 @@ class ReaderBarItem extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
+  /// Shows the item on a light pill so it stands out from the others.
+  final bool highlight;
+
   const ReaderBarItem({
     super.key,
     required this.icon,
     required this.label,
     required this.onTap,
+    this.highlight = false,
   });
 
   @override
@@ -275,13 +279,30 @@ class ReaderBarItem extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: 28, child: Center(child: icon)),
+            highlight
+                ? Container(
+                    height: 30,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black26, blurRadius: 6),
+                      ],
+                    ),
+                    child: Center(child: icon),
+                  )
+                : SizedBox(height: 28, child: Center(child: icon)),
             const SizedBox(height: 3),
             Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.white, fontSize: 11.5),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 11.5,
+                fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
+              ),
             ),
           ],
         ),

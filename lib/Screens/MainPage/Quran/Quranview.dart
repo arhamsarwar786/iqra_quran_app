@@ -17,8 +17,7 @@ import '../Drawer/setting_screen.dart';
 import '../../../Provider/audio_provider.dart';
 import '../../../Widgets/audio_controller_overlay.dart';
 import '../../../Widgets/reader_bottom_bar.dart';
-import '../../../Widgets/recitation_download_button.dart';
-import '../../../Services/recitation_downloads.dart';
+import 'learn_tajweed_screen.dart';
 import 'package:flutter_intro/flutter_intro.dart';
 import '../../../Utils/utils.dart';
 import '../../../Utils/recitation_reveal.dart';
@@ -641,22 +640,12 @@ class _QuranViewState extends State<QuranView> with RecitationReaderScreen {
         ),
       ],
       trailing: [
-        Builder(builder: (context) {
-          final target = DownloadTarget.surah(widget.suratNumber ?? 0);
-          final status = context
-              .watch<RecitationDownloads>()
-              .statusOf(target, context.read<QuranDataProvider>());
-          return ReaderBarItem(
-            icon: RecitationDownloadIcon(
-              status: status,
-              size: 24,
-              color: Colors.white,
-              onColor: bloc.selectedTheme,
-            ),
-            label: RecitationDownloadActions.labelFor(status),
-            onTap: () => RecitationDownloadActions.onTap(context, target),
-          );
-        }),
+        ReaderBarItem(
+          highlight: true,
+          icon: Icon(Icons.school_rounded, color: bloc.selectedTheme, size: 22),
+          label: 'Learn',
+          onTap: _openLearn,
+        ),
         ReaderBarItem(
           icon: _introStep(
             order: 3,
@@ -668,6 +657,18 @@ class _QuranViewState extends State<QuranView> with RecitationReaderScreen {
         ),
       ],
     );
+  }
+
+  /// The Quran teacher, from the first ayah in view.
+  void _openLearn() {
+    if (listAyat.isEmpty) return;
+    final top = _firstVisibleAyah();
+    final index =
+        top == null ? 0 : listAyat.indexWhere((a) => a.ayatNumberInt == top);
+    push(
+        context,
+        LearnTajweedScreen(
+            ayats: listAyat, initialIndex: index < 0 ? 0 : index));
   }
 
   Widget _introStep(

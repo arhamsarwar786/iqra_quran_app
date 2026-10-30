@@ -22,8 +22,7 @@ import 'translation/parah_translation_screen.dart';
 import '../../../Provider/audio_provider.dart';
 import '../../../Widgets/audio_controller_overlay.dart';
 import '../../../Widgets/reader_bottom_bar.dart';
-import '../../../Widgets/recitation_download_button.dart';
-import '../../../Services/recitation_downloads.dart';
+import 'learn_tajweed_screen.dart';
 import '../../../Utils/recitation_reveal.dart';
 
 class ParaArabicScreen extends StatefulWidget {
@@ -699,8 +698,6 @@ class _ParaArabicScreenState extends State<ParaArabicScreen>
   Widget _buildBottomBar(ThemeProvider bloc, AudioProvider audio) {
     final isOurs = _recitationKey != null && audio.queueKey == _recitationKey;
     final playing = isOurs && audio.isPlaying;
-    final target =
-        DownloadTarget.para(int.tryParse(widget.parahCount ?? '') ?? 0);
     return ReaderBottomBar(
       color: bloc.selectedTheme,
       centerLabel:
@@ -744,21 +741,12 @@ class _ParaArabicScreenState extends State<ParaArabicScreen>
         ),
       ],
       trailing: [
-        Builder(builder: (context) {
-          final status = context
-              .watch<RecitationDownloads>()
-              .statusOf(target, context.read<QuranDataProvider>());
-          return ReaderBarItem(
-            icon: RecitationDownloadIcon(
-              status: status,
-              size: 24,
-              color: Colors.white,
-              onColor: bloc.selectedTheme,
-            ),
-            label: RecitationDownloadActions.labelFor(status),
-            onTap: () => RecitationDownloadActions.onTap(context, target),
-          );
-        }),
+        ReaderBarItem(
+          highlight: true,
+          icon: Icon(Icons.school_rounded, color: bloc.selectedTheme, size: 22),
+          label: 'Learn',
+          onTap: _openLearn,
+        ),
         ReaderBarItem(
           icon:
               const Icon(Icons.settings_rounded, color: Colors.white, size: 26),
@@ -767,6 +755,17 @@ class _ParaArabicScreenState extends State<ParaArabicScreen>
         ),
       ],
     );
+  }
+
+  /// The Quran teacher, from the first ayah in view.
+  void _openLearn() {
+    if (listAyat.isEmpty) return;
+    final top = _firstVisibleAyatId();
+    final index = top == null ? 0 : listAyat.indexWhere((a) => a.ayatId == top);
+    push(
+        context,
+        LearnTajweedScreen(
+            ayats: listAyat, initialIndex: index < 0 ? 0 : index));
   }
 
   void _onAutoScrollPressed() {
